@@ -52,7 +52,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
         if (result.error) setError(result.error.message); else setVehicles((result.data || []) as Vehicle[])
       } else {
         const result = await supabase.from('rental_requests').select('id,title,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at,rental_offers(id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,organizations(id,name))').order('created_at',{ascending:false})
-        if (result.error) setError(result.error.message); else setRequests((result.data || []) as RentalRequest[])
+        if (result.error) setError(result.error.message); else setRequests((result.data || []) as unknown as RentalRequest[])
       }
     } else if (!isRequestForm && !isRequestList) {
       const result = await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('organization_id',member.organization_id).order('created_at',{ascending:false})
