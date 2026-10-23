@@ -49,6 +49,23 @@ create policy "conversation participants can send messages"
     sender_id=auth.uid()
     and exists (select 1 from public.conversations c join public.organization_memberships m on m.organization_id=messages.sender_organization_id and m.user_id=auth.uid() where c.id=messages.conversation_id and messages.sender_organization_id in (c.company_organization_id,c.provider_organization_id) and c.status='open')
   );
+create policy "members can see related organization names"
+  on public.organizations for select to authenticated
+  using (
+    exists (select 1 from public.organization_memberships m where m.organization_id = organizations.id and m.user_id = auth.uid())
+    or exists (
+      select 1 from public.rental_offers o
+      join public.rental_requests r on r.id = o.request_id
+      join public.organization_memberships m on m.organization_id = r.organization_id
+      where o.organization_id = organizations.id and m.user_id = auth.uid()
+    )
+    or exists (
+      select 1 from public.conversations c
+      join public.organization_memberships m on m.organization_id in (c.company_organization_id,c.provider_organization_id)
+      where organizations.id in (c.company_organization_id,c.provider_organization_id) and m.user_id = auth.uid()
+    )
+  );
+
 create index if not exists conversations_company_idx on public.conversations(company_organization_id,updated_at desc);
 create index if not exists conversations_provider_idx on public.conversations(provider_organization_id,updated_at desc);
 create index if not exists messages_conversation_idx on public.messages(conversation_id,created_at);
