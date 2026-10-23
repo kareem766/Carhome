@@ -32,7 +32,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     setBusy(true)
     try {
       const displayName = isCompany ? values.authorizedName.trim() : values.fullName.trim()
-      const organizationName = isCompany ? values.companyName.trim() : displayName
+      const organizationName = isCompany ? values.companyName.trim() : role === 'fleet_supplier' && values.companyName.trim() ? values.companyName.trim() : displayName
       const metadata = {
         display_name: displayName,
         organization_name: organizationName,
@@ -85,7 +85,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         </div>
         <form onSubmit={submit} className="space-y-6 p-6 sm:p-9">
           <div className="grid gap-4 sm:grid-cols-2">
-            {isCompany ? <>{field('authorizedName','اسم المفوض',true)}{field('companyName','اسم الشركة',true)}</> : field('fullName','الاسم بالكامل',true)}
+            {isCompany ? <>{field('authorizedName','اسم المفوض',true)}{field('companyName','اسم الشركة',true)}</> : <>{field('fullName','الاسم بالكامل',true)}{role === 'fleet_supplier' && field('companyName','اسم المكتب / الشركة',false)}</>}
             {field('phone','رقم الموبايل',true,'tel','01xxxxxxxxx')}
             {field('email','البريد الإلكتروني',isCompany,'email','name@example.com')}
             {isCompany && <label className="block text-sm font-bold text-slate-700">نوع الشركة *<span className="relative block"><select required className={fieldClass} value={values.companyType} onChange={(e) => update('companyType',e.target.value)}><option value="">اختر نشاط الشركة</option>{companyTypes.map((item) => <option key={item}>{item}</option>}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>}
