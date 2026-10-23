@@ -23,6 +23,7 @@ create policy "company members can start conversations with offer providers"
     and exists (select 1 from public.organizations o where o.id=conversations.provider_organization_id and o.organization_type in ('individual_owner','fleet_supplier'))
     and status = 'open'
     and exists (select 1 from public.rental_requests r where r.id=conversations.request_id and r.organization_id=conversations.company_organization_id)
+    and exists (select 1 from public.rental_offers o where o.request_id=conversations.request_id and o.organization_id=conversations.provider_organization_id)
   );
 create policy "conversation participants can update status"
   on public.conversations for update to authenticated
