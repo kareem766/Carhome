@@ -12,7 +12,7 @@ const features = [
 ]
 
 export default function App() {
-  const [authOpen, setAuthOpen] = useState(false)
+  const [authOpen, setAuthOpen] = useState(() => window.location.search.includes('login=1'))
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
 
   function openAuth(mode: 'signin' | 'signup') {
@@ -21,7 +21,7 @@ export default function App() {
   }
 
   const path = window.location.pathname
-  if (path === '/register') return <RoleChooserPage onChoose={(role) => { window.location.href = '/register/' + (role === 'individual_owner' ? 'owner' : role === 'fleet_supplier' ? 'supplier' : 'company') }} onLogin={() => openAuth('signin')} />
+  if (path === '/register') return <RoleChooserPage onChoose={(role) => { window.location.href = '/register/' + (role === 'individual_owner' ? 'owner' : role === 'fleet_supplier' ? 'supplier' : 'company') }} onLogin={() => { window.location.href = '/?login=1' }} />
   if (path === '/register/owner') return <RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} />
   if (path === '/register/company') return <RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} />
   if (path === '/register/supplier') return <RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} />
