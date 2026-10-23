@@ -27,14 +27,14 @@ create policy "vehicle owners can read their organization vehicles"
   using (exists (select 1 from public.organization_memberships m where m.organization_id = vehicles.organization_id and m.user_id = auth.uid()));
 create policy "vehicle owners can insert their own organization vehicles"
   on public.vehicles for insert to authenticated
-  with check (created_by = auth.uid() and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.organization_id = vehicles.organization_id and m.user_id = auth.uid() and o.organization_type in ('individual_owner','fleet_supplier')));
+  with check (created_by = auth.uid() and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.organization_id = vehicles.organization_id and m.user_id = auth.uid() and o.organization_type in ('individual_owner','fleet_supplier') and vehicles.review_status = 'pending_review' and vehicles.payment_status = 'pending'));
 create policy "vehicle owners can update their pending vehicles"
   on public.vehicles for update to authenticated
   using (created_by = auth.uid() and review_status in ('pending_review','rejected') and exists (select 1 from public.organization_memberships m where m.organization_id = vehicles.organization_id and m.user_id = auth.uid()))
   with check (created_by = auth.uid() and review_status in ('pending_review','rejected') and exists (select 1 from public.organization_memberships m where m.organization_id = vehicles.organization_id and m.user_id = auth.uid()));
 create policy "companies can view approved vehicles"
   on public.vehicles for select to authenticated
-  using (review_status = 'approved' and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.user_id = auth.uid() and o.organization_type = 'company'));
+  using (review_status = 'approved' and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.user_id = auth.uid() and o.organization_type = 'company' and rental_requests.status = 'open'));
 
 create table if not exists public.rental_requests (
   id uuid primary key default gen_random_uuid(),
@@ -90,7 +90,7 @@ create policy "fleet suppliers can offer on open requests"
   with check (
     created_by = auth.uid()
     and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.organization_id = rental_offers.organization_id and m.user_id = auth.uid() and o.organization_type in ('individual_owner','fleet_supplier'))
-    and exists (select 1 from public.rental_requests r where r.id = rental_offers.request_id and r.status = 'open')
+    and rental_offers.status = 'submitted'\n    and exists (select 1 from public.rental_requests r where r.id = rental_offers.request_id and r.status = 'open')
   );
 create policy "offer creators can update their offers"
   on public.rental_offers for update to authenticated
