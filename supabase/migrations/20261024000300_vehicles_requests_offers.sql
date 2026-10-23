@@ -34,7 +34,15 @@ create policy "vehicle owners can update their pending vehicles"
   with check (created_by = auth.uid() and review_status in ('pending_review','rejected') and exists (select 1 from public.organization_memberships m where m.organization_id = vehicles.organization_id and m.user_id = auth.uid()));
 create policy "companies can view approved vehicles"
   on public.vehicles for select to authenticated
-  using (review_status = 'approved' and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.user_id = auth.uid() and o.organization_type = 'company' and rental_requests.status = 'open'));
+  using (
+    review_status = 'approved'
+    and exists (
+      select 1 from public.organizations vehicle_org
+      where vehicle_org.id = vehicles.organization_id
+        and (vehicle_org.organization_type = 'fleet_supplier' or vehicles.payment_status in ('verified','waived'))
+    )
+    and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.user_id = auth.uid() and o.organization_type = 'company')
+  );
 
 create table if not exists public.rental_requests (
   id uuid primary key default gen_random_uuid(),
@@ -58,7 +66,7 @@ create policy "company members can read their own rental requests"
   using (exists (select 1 from public.organization_memberships m where m.organization_id = rental_requests.organization_id and m.user_id = auth.uid()));
 create policy "company members can create rental requests"
   on public.rental_requests for insert to authenticated
-  with check (created_by = auth.uid() and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.organization_id = rental_requests.organization_id and m.user_id = auth.uid() and o.organization_type = 'company'));
+  with check (created_by = auth.uid() and rental_requests.status = 'open' and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.organization_id = rental_requests.organization_id and m.user_id = auth.uid() and o.organization_type = 'company'));
 create policy "company members can update own requests"
   on public.rental_requests for update to authenticated
   using (created_by = auth.uid() and exists (select 1 from public.organization_memberships m where m.organization_id = rental_requests.organization_id and m.user_id = auth.uid()))
