@@ -47,7 +47,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
       const credentials = values.email.trim()
         ? { email: values.email.trim().toLowerCase(), password: values.password, options: { data: metadata } }
         : { phone: values.phone.trim(), password: values.password, options: { data: metadata } }
-      const { data, error: signUpError } = await supabase.auth.signUp(credentials as Parameters<typeof supabase.auth.signUp>[0])
+      const { data, error: signUpError } = await supabase.auth.signUp({ ...(credentials as Parameters<typeof supabase.auth.signUp>[0]), options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       if (signUpError) throw signUpError
       if (data.session && data.user) {
         const profile = await supabase.from('profiles').upsert({ id: data.user.id, display_name: displayName, locale: 'ar', phone: values.phone.trim(), contact_email: values.email.trim() || null, address: values.address.trim() }, { onConflict: 'id' })
