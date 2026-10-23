@@ -4,7 +4,7 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
 type AccountType = 'individual_owner' | 'fleet_supplier' | 'company'
-type Props = { onClose: () => void }
+type Props = { onClose: () => void; initialMode?: 'signin' | 'signup' }
 
 const accountTypes: { value: AccountType; label: string; detail: string }[] = [
   { value: 'individual_owner', label: 'مالك سيارة', detail: 'إدارة سياراتك واستقبال طلبات الشركات' },
@@ -62,8 +62,8 @@ async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: 
   if (membershipInsert.error && membershipInsert.error.code !== '23505') throw membershipInsert.error
 }
 
-export default function AuthPanel({ onClose }: Props) {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
+  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
