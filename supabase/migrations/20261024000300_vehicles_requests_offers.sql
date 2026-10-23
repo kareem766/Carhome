@@ -64,6 +64,18 @@ alter table public.rental_requests enable row level security;
 create policy "company members can read their own rental requests"
   on public.rental_requests for select to authenticated
   using (exists (select 1 from public.organization_memberships m where m.organization_id = rental_requests.organization_id and m.user_id = auth.uid()));
+create policy "providers can view open rental requests"
+  on public.rental_requests for select to authenticated
+  using (
+    rental_requests.status = 'open'
+    and exists (
+      select 1 from public.organization_memberships m
+      join public.organizations o on o.id = m.organization_id
+      where m.user_id = auth.uid()
+        and o.organization_type in ('individual_owner','fleet_supplier')
+    )
+  );
+
 create policy "company members can create rental requests"
   on public.rental_requests for insert to authenticated
   with check (created_by = auth.uid() and rental_requests.status = 'open' and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.organization_id = rental_requests.organization_id and m.user_id = auth.uid() and o.organization_type = 'company'));
