@@ -61,7 +61,7 @@ export default function App() {
             Carhome منصة وسيطة تجمع ملاك السيارات وموردي الأساطيل مع الشركات التي تحتاج إلى تأجير شهري أو سنوي طويل الأجل، من خلال تجربة عربية منظمة.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <button onClick={() => openAuth('signup')} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-carblue px-6 py-3 font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700">
+            <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-carblue px-6 py-3 font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700">
               ابدأ بإنشاء حساب <ArrowLeft size={18} />
             </button>
             <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 font-bold text-navy">
