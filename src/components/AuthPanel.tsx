@@ -24,7 +24,10 @@ async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: 
   const profileResult = await supabase.from('profiles').upsert({
     id: user.id,
     display_name: displayName,
-    locale: 'ar'
+    locale: 'ar',
+    phone: String(metadata.phone || user.phone || '').trim() || null,
+    contact_email: String(metadata.email_contact || user.email || '').trim() || null,
+    address: String(metadata.address || '').trim() || null
   }, { onConflict: 'id' })
   if (profileResult.error) throw profileResult.error
 
@@ -49,7 +52,12 @@ async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: 
       name: orgName,
       organization_type: orgType,
       created_by: user.id,
-      city: String(metadata.governorate || '').trim() || null
+      city: String(metadata.governorate || '').trim() || null,
+      contact_name: displayName,
+      phone: String(metadata.phone || user.phone || '').trim() || null,
+      contact_email: String(metadata.email_contact || user.email || '').trim() || null,
+      address: String(metadata.address || '').trim() || null,
+      company_type: String(metadata.company_type || '').trim() || null
     }).select('id').single()
     if (organizationResult.error) throw organizationResult.error
     organizationId = organizationResult.data.id
