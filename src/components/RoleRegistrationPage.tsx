@@ -29,11 +29,6 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     setError('')
     setNotice('')
     if (!supabase) { setError('خدمة الحسابات غير مضبوطة حاليًا.'); return }
-    if (!values.email.trim() && !isCompany) {
-      // Phone-based registration requires Supabase phone authentication and an SMS provider to be enabled.
-      setError('التسجيل بدون بريد يعتمد على تفعيل تسجيل الدخول برقم الهاتف ورسائل SMS في Supabase. أضف البريد مؤقتًا أو فعّل خدمة الهاتف قبل إكمال التسجيل.')
-      return
-    }
     setBusy(true)
     try {
       const displayName = isCompany ? values.authorizedName.trim() : values.fullName.trim()
@@ -65,7 +60,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         }
         window.location.href = isCompany ? '/workspace/company' : isOwner ? '/workspace/owner/vehicles' : '/workspace/supplier/vehicles'
       } else {
-        setNotice('تم إرسال طلب التسجيل. أكّد البريد الإلكتروني من الرسالة، ثم سجّل الدخول لإكمال إعداد الحساب. بياناتك الإضافية محفوظة ضمن بيانات التسجيل.')
+        setNotice(values.email.trim() ? 'تم إرسال طلب التسجيل. أكّد البريد الإلكتروني من الرسالة، ثم سجّل الدخول لإكمال إعداد الحساب.' : 'تم إرسال طلب التسجيل برقم الهاتف. أكّد رمز SMS إذا كانت خدمة الهاتف مفعّلة في Supabase، ثم سجّل الدخول لإكمال إعداد الحساب.')
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'تعذر إكمال التسجيل. حاول مرة أخرى.'
