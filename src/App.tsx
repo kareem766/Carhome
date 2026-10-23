@@ -100,7 +100,7 @@ export default function App() {
           <div className="mt-9 grid gap-4 md:grid-cols-3">
             {features.map(({ icon: Icon, title, description }) => <article key={title} className="rounded-2xl border border-slate-100 bg-white p-6 transition hover:-translate-y-1 hover:shadow-soft"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-carblue"><Icon size={24} /></span><h3 className="mt-5 text-lg font-extrabold text-navy">{title}</h3><p className="mt-2 leading-7 text-slate-600">{description}</p></article>)}
           </div>
-          <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-navy p-6 text-white sm:flex-row sm:p-8"><div><h3 className="text-xl font-extrabold">جاهز للبدء؟</h3><p className="mt-2 text-sm leading-6 text-blue-100">اختر نوع حسابك وسجّل بياناتك الأساسية.</p></div><button onClick={() => openAuth('signup')} className="min-h-12 rounded-xl bg-white px-6 font-extrabold text-navy transition hover:bg-blue-50">إنشاء حساب جديد</button></div>
+          <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-navy p-6 text-white sm:flex-row sm:p-8"><div><h3 className="text-xl font-extrabold">جاهز للبدء؟</h3><p className="mt-2 text-sm leading-6 text-blue-100">اختر نوع حسابك وسجّل بياناتك الأساسية.</p></div><button onClick={() => { window.location.href = '/register' }} className="min-h-12 rounded-xl bg-white px-6 font-extrabold text-navy transition hover:bg-blue-50">إنشاء حساب جديد</button></div>
         </div>
       </section>
 
