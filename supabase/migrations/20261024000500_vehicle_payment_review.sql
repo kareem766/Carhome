@@ -30,7 +30,7 @@ create policy "vehicle owners can submit transfer references"
   on public.vehicle_payment_submissions for insert to authenticated
   with check (
     submitted_by = auth.uid()
-    and exists (select 1 from public.vehicles v join public.organization_memberships m on m.organization_id = v.organization_id where v.id = vehicle_payment_submissions.vehicle_id and v.organization_id = vehicle_payment_submissions.organization_id and m.user_id = auth.uid() and v.created_by = auth.uid())
+    and exists (select 1 from public.vehicles v join public.organization_memberships m on m.organization_id = v.organization_id where v.id = vehicle_payment_submissions.vehicle_id and v.organization_id = vehicle_payment_submissions.organization_id and m.user_id = auth.uid() and v.created_by = auth.uid())\n    and review_status = 'pending' and reviewed_by is null and reviewed_at is null
   );
 create policy "submitters and admins can read payment submissions"
   on public.vehicle_payment_submissions for select to authenticated
