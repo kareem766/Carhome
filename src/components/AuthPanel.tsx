@@ -126,13 +126,17 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           setMode('signin')
         }
       } else {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email: email.trim().toLowerCase(),
-          password
-        })
+        const identifier = email.trim()
+        const { data, error: signInError } = await supabase.auth.signInWithPassword(
+          identifier.includes('@') ? { email: identifier.toLowerCase(), password } : { phone: identifier, password }
+        )
         if (signInError) throw signInError
         if (data.user) await prepareAccount(data.user, String(data.user.user_metadata?.display_name || ''))
         setSession(data.session)
+        const role = data.user?.user_metadata?.organization_type
+        if (role === 'company') window.location.href = '/workspace/company'
+        else if (role === 'fleet_supplier') window.location.href = '/workspace/supplier/vehicles'
+        else if (role === 'individual_owner') window.location.href = '/workspace/owner/vehicles'
         setNotice('تم تسجيل الدخول وتجهيز حسابك.')
       }
     } catch (caught) {
@@ -216,7 +220,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                   </>
                 )}
                 <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني
-                  <input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="name@example.com" dir="ltr" />
+                  <input type="text" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني أو رقم الهاتف" dir="ltr" />
                 </label>
                 <label className="block text-sm font-bold text-slate-700">كلمة المرور
                   <span className="relative mt-2 block">
