@@ -29,7 +29,12 @@ async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: 
     contact_email: String(metadata.email_contact || user.email || '').trim() || null,
     address: String(metadata.address || '').trim() || null
   }, { onConflict: 'id' })
-  if (profileResult.error) throw profileResult.error
+  if (profileResult.error) {
+    const missingNewColumns = /column|schema cache|could not find/i.test(profileResult.error.message)
+    if (!missingNewColumns) throw profileResult.error
+    const legacyProfile = await supabase.from('profiles').upsert({ id: user.id, display_name: displayName, locale: 'ar' }, { onConflict: 'id' })
+    if (legacyProfile.error) throw legacyProfile.error
+  }
 
   const membershipResult = await supabase.from('organization_memberships')
     .select('organization_id')
@@ -59,8 +64,14 @@ async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: 
       address: String(metadata.address || '').trim() || null,
       company_type: String(metadata.company_type || '').trim() || null
     }).select('id').single()
-    if (organizationResult.error) throw organizationResult.error
-    organizationId = organizationResult.data.id
+    if (organizationResult.error && /column|schema cache|could not find/i.test(organizationResult.error.message)) {
+      const legacyOrganization = await supabase.from('organizations').insert({ name: orgName, organization_type: orgType, created_by: user.id, city: String(metadata.governorate || '').trim() || null }).select('id').single()
+      if (legacyOrganization.error) throw legacyOrganization.error
+      organizationId = legacyOrganization.data.id
+    } else {
+      if (organizationResult.error) throw organizationResult.error
+      organizationId = organizationResult.data.id
+    }
   }
 
   const membershipInsert = await supabase.from('organization_memberships').insert({
