@@ -3,6 +3,7 @@ import { ArrowLeft, Building2, CarFront, CheckCircle2, ShieldCheck, Users } from
 import AuthPanel from './components/AuthPanel'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import WorkspacePage from './components/WorkspacePage'
+import AdminReviewPage from './components/AdminReviewPage'
 import { isSupabaseConfigured } from './lib/supabase'
 
 const features = [
@@ -25,6 +26,7 @@ export default function App() {
   if (path === '/register/owner') return <RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} />
   if (path === '/register/company') return <RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} />
   if (path === '/register/supplier') return <RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} />
+  if (path === '/workspace/admin/vehicle-reviews') return <AdminReviewPage />
   if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <WorkspacePage role="company" />
   if (path.startsWith('/workspace/owner')) return <WorkspacePage role="owner" />
   if (path.startsWith('/workspace/supplier')) return <WorkspacePage role="supplier" />
