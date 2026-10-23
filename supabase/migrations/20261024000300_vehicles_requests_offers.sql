@@ -98,7 +98,8 @@ create policy "fleet suppliers can offer on open requests"
   with check (
     created_by = auth.uid()
     and exists (select 1 from public.organization_memberships m join public.organizations o on o.id = m.organization_id where m.organization_id = rental_offers.organization_id and m.user_id = auth.uid() and o.organization_type in ('individual_owner','fleet_supplier'))
-    and rental_offers.status = 'submitted'\n    and exists (select 1 from public.rental_requests r where r.id = rental_offers.request_id and r.status = 'open')
+    and rental_offers.status = 'submitted'
+    and exists (select 1 from public.rental_requests r where r.id = rental_offers.request_id and r.status = 'open')
   );
 create policy "offer creators can update their offers"
   on public.rental_offers for update to authenticated
