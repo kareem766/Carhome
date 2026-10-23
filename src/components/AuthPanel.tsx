@@ -48,7 +48,8 @@ async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: 
     const organizationResult = await supabase.from('organizations').insert({
       name: orgName,
       organization_type: orgType,
-      created_by: user.id
+      created_by: user.id,
+      city: String(metadata.governorate || '').trim() || null
     }).select('id').single()
     if (organizationResult.error) throw organizationResult.error
     organizationId = organizationResult.data.id
