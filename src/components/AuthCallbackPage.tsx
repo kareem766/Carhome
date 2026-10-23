@@ -1,0 +1,115 @@
+import { useEffect, useRef, useState } from 'react'
+import { CheckCircle2, LoaderCircle, ShieldAlert } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+
+type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company'
+
+function workspaceFor(role: unknown) {
+  if (role === 'company') return '/workspace/company'
+  if (role === 'fleet_supplier') return '/workspace/supplier/vehicles'
+  return '/workspace/owner/vehicles'
+}
+
+async function finishAccount(user: NonNullable<Awaited<ReturnType<NonNullable<typeof supabase>['auth']['getUser']>>['data']['user']>) {
+  if (!supabase) throw new Error('خدمة الحسابات غير متاحة حاليًا.')
+  const metadata = user.user_metadata ?? {}
+  const displayName = String(metadata.display_name || user.email || user.phone || 'مستخدم Carhome').trim()
+  const role = (['individual_owner', 'fleet_supplier', 'company'].includes(String(metadata.organization_type))
+    ? metadata.organization_type
+    : 'individual_owner') as AccountRole
+  const organizationName = String(metadata.organization_name || displayName).trim()
+  const profile = await supabase.from('profiles').upsert({
+    id: user.id,
+    display_name: displayName,
+    locale: 'ar',
+    phone: String(metadata.phone || user.phone || '').trim() || null,
+    contact_email: String(metadata.email_contact || user.email || '').trim() || null,
+    address: String(metadata.address || '').trim() || null
+  }, { onConflict: 'id' })
+  if (profile.error) {
+    if (!/column|schema cache|could not find/i.test(profile.error.message)) throw profile.error
+    const legacy = await supabase.from('profiles').upsert({ id: user.id, display_name: displayName, locale: 'ar' }, { onConflict: 'id' })
+    if (legacy.error) throw legacy.error
+  }
+
+  const membership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
+  if (membership.error) throw membership.error
+  if (membership.data) return role
+
+  const existing = await supabase.from('organizations').select('id').eq('created_by', user.id).limit(1).maybeSingle()
+  if (existing.error) throw existing.error
+  let organizationId = existing.data?.id as string | undefined
+  if (!organizationId) {
+    let organization = await supabase.from('organizations').insert({
+      name: organizationName,
+      organization_type: role,
+      created_by: user.id,
+      city: String(metadata.governorate || '').trim() || null,
+      contact_name: displayName,
+      phone: String(metadata.phone || user.phone || '').trim() || null,
+      contact_email: String(metadata.email_contact || user.email || '').trim() || null,
+      address: String(metadata.address || '').trim() || null,
+      company_type: String(metadata.company_type || '').trim() || null
+    }).select('id').single()
+    if (organization.error && /column|schema cache|could not find/i.test(organization.error.message)) {
+      organization = await supabase.from('organizations').insert({
+        name: organizationName, organization_type: role, created_by: user.id,
+        city: String(metadata.governorate || '').trim() || null
+      }).select('id').single()
+    }
+    if (organization.error) throw organization.error
+    organizationId = organization.data.id
+  }
+  const inserted = await supabase.from('organization_memberships').insert({
+    organization_id: organizationId, user_id: user.id, role: 'owner'
+  })
+  if (inserted.error && inserted.error.code !== '23505') throw inserted.error
+  return role
+}
+
+export default function AuthCallbackPage() {
+  const started = useRef(false)
+  const [message, setMessage] = useState('جارٍ تأكيد البريد الإلكتروني وتجهيز حسابك...')
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (started.current) return
+    started.current = true
+    let active = true
+
+    async function complete() {
+      try {
+        if (!supabase) throw new Error('إعدادات الاتصال بخدمة الحسابات غير مكتملة.')
+        const params = new URLSearchParams(window.location.search)
+        const authError = params.get('error_description') || params.get('error')
+        if (authError) throw new Error(authError)
+        const code = params.get('code')
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+          if (exchangeError) throw exchangeError
+        }
+        const { data, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) throw sessionError
+        if (!data.session?.user) {
+          throw new Error('لم نتمكن من استلام جلسة التحقق. افتح أحدث رسالة تأكيد، أو اطلب رسالة جديدة ثم جرّب مرة أخرى.')
+        }
+        const role = await finishAccount(data.session.user)
+        if (!active) return
+        setMessage('تم تأكيد البريد وتجهيز حسابك. جارٍ تحويلك إلى مساحة العمل...')
+        window.location.replace(workspaceFor(role))
+      } catch (caught) {
+        if (!active) return
+        setError(caught instanceof Error ? caught.message : 'تعذر تأكيد البريد الإلكتروني. جرّب إرسال رابط جديد.')
+        setMessage('')
+      }
+    }
+    void complete()
+    return () => { active = false }
+  }, [])
+
+  return <main dir="rtl" className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
+    <section className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-7 text-center shadow-sm sm:p-10">
+      {error ? <><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><ShieldAlert size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تعذر تأكيد البريد</h1><p role="alert" className="mt-4 break-words text-sm leading-7 text-red-700">{error}</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="/register" className="rounded-xl bg-blue-700 px-5 py-3 font-bold text-white">العودة للتسجيل</a><a href="/?login=1" className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700">تسجيل الدخول</a></div></> : <><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-blue-50 text-blue-700"><LoaderCircle className="animate-spin" size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تأكيد حساب Carhome</h1><p role="status" className="mt-4 text-sm leading-7 text-slate-600">{message}</p><CheckCircle2 className="mx-auto mt-5 text-emerald-600" size={22}/></>}
+    </section>
+  </main>
+}
