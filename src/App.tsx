@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Building2, CarFront, CheckCircle2, ShieldCheck, Users, X } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, CheckCircle2, ShieldCheck, Users } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import { isSupabaseConfigured } from './lib/supabase'
 
@@ -94,7 +94,7 @@ export default function App() {
         <span className="inline-flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${isSupabaseConfigured ? 'bg-cargreen' : 'bg-amber-500'}`} />{isSupabaseConfigured ? 'إعدادات الاتصال موجودة' : 'إعدادات الاتصال تحتاج إلى ضبط'}</span>
       </footer>
 
-      {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} />}
+      {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} />}
     </main>
   )
 }
