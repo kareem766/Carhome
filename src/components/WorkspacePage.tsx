@@ -45,6 +45,12 @@ export default function WorkspacePage({ role }: { role: Role }) {
     const member = memberships?.[0] as unknown as { organization_id: string; organizations: Organization | Organization[] | null } | undefined
     const org = Array.isArray(member?.organizations) ? member?.organizations[0] : member?.organizations
     if (!member?.organization_id || !org) { setError('لم يتم ربط حسابك بمؤسسة بعد. سجّل الخروج ثم ادخل مجددًا، أو أعد إكمال التسجيل.'); setLoading(false); return }
+    const expectedType = role === 'owner' ? 'individual_owner' : role === 'supplier' ? 'fleet_supplier' : 'company'
+    if (org.organization_type !== expectedType) {
+      const correctPath = org.organization_type === 'company' ? '/workspace/company' : org.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
+      window.location.replace(correctPath)
+      return
+    }
     setOrganization({ ...org, id: member.organization_id })
     if (role === 'company') {
       if (isCompanyVehicles) {
