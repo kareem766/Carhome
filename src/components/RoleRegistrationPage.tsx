@@ -50,9 +50,9 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
       const { data, error: signUpError } = await supabase.auth.signUp(credentials as Parameters<typeof supabase.auth.signUp>[0])
       if (signUpError) throw signUpError
       if (data.session && data.user) {
-        const profile = await supabase.from('profiles').upsert({ id: data.user.id, display_name: displayName, locale: 'ar' }, { onConflict: 'id' })
+        const profile = await supabase.from('profiles').upsert({ id: data.user.id, display_name: displayName, locale: 'ar', phone: values.phone.trim(), contact_email: values.email.trim() || null, address: values.address.trim() }, { onConflict: 'id' })
         if (profile.error) throw profile.error
-        const organization = await supabase.from('organizations').insert({ name: organizationName, organization_type: role, created_by: data.user.id, city: values.governorate }).select('id').single()
+        const organization = await supabase.from('organizations').insert({ name: organizationName, organization_type: role, created_by: data.user.id, city: values.governorate, contact_name: displayName, phone: values.phone.trim(), contact_email: values.email.trim() || null, address: values.address.trim(), company_type: isCompany ? values.companyType : null }).select('id').single()
         if (organization.error && organization.error.code !== '23505') throw organization.error
         if (organization.data?.id) {
           const membership = await supabase.from('organization_memberships').insert({ organization_id: organization.data.id, user_id: data.user.id, role: 'owner' })
