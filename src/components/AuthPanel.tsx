@@ -215,7 +215,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
             <>
               <div className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
                 <button type="button" onClick={() => { setMode('signin'); setError(''); setNotice('') }} className={`rounded-lg px-3 py-2.5 text-sm font-bold transition ${mode === 'signin' ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>تسجيل الدخول</button>
-                <button type="button" onClick={() => { setMode('signup'); setError(''); setNotice('') }} className={`rounded-lg px-3 py-2.5 text-sm font-bold transition ${mode === 'signup' ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>حساب جديد</button>
+                <button type="button" onClick={() => { window.location.href = '/register' }} className="rounded-lg px-3 py-2.5 text-sm font-bold text-slate-500 transition">حساب جديد</button>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === 'signup' && (
