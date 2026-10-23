@@ -16,6 +16,7 @@ create table if not exists public.vehicle_payment_submissions (
   submitted_by uuid not null references auth.users(id) on delete cascade,
   amount_egp numeric(12,2) not null default 300 check (amount_egp > 0),
   period_months integer not null default 1 check (period_months between 1 and 24),
+  check (amount_egp = 300 * period_months),
   transfer_method text not null check (transfer_method in ('instapay','vodafone_cash','bank_transfer')),
   transfer_reference text not null check (char_length(btrim(transfer_reference)) between 3 and 160),
   proof_path text check (proof_path is null or char_length(proof_path) <= 500),
