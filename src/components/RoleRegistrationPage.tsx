@@ -51,8 +51,16 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
       if (signUpError) throw signUpError
       if (data.session && data.user) {
         const profile = await supabase.from('profiles').upsert({ id: data.user.id, display_name: displayName, locale: 'ar', phone: values.phone.trim(), contact_email: values.email.trim() || null, address: values.address.trim() }, { onConflict: 'id' })
-        if (profile.error) throw profile.error
-        const organization = await supabase.from('organizations').insert({ name: organizationName, organization_type: role, created_by: data.user.id, city: values.governorate, contact_name: displayName, phone: values.phone.trim(), contact_email: values.email.trim() || null, address: values.address.trim(), company_type: isCompany ? values.companyType : null }).select('id').single()
+        if (profile.error) {
+          const missingNewColumns = /column|schema cache|could not find/i.test(profile.error.message)
+          if (!missingNewColumns) throw profile.error
+          const legacyProfile = await supabase.from('profiles').upsert({ id: data.user.id, display_name: displayName, locale: 'ar' }, { onConflict: 'id' })
+          if (legacyProfile.error) throw legacyProfile.error
+        }
+        let organization = await supabase.from('organizations').insert({ name: organizationName, organization_type: role, created_by: data.user.id, city: values.governorate, contact_name: displayName, phone: values.phone.trim(), contact_email: values.email.trim() || null, address: values.address.trim(), company_type: isCompany ? values.companyType : null }).select('id').single()
+        if (organization.error && /column|schema cache|could not find/i.test(organization.error.message)) {
+          organization = await supabase.from('organizations').insert({ name: organizationName, organization_type: role, created_by: data.user.id, city: values.governorate }).select('id').single()
+        }
         if (organization.error && organization.error.code !== '23505') throw organization.error
         if (organization.data?.id) {
           const membership = await supabase.from('organization_memberships').insert({ organization_id: organization.data.id, user_id: data.user.id, role: 'owner' })
