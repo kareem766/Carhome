@@ -45,6 +45,10 @@ create policy "platform admins can review transfer submissions"
   using (exists (select 1 from public.platform_admins a where a.user_id = auth.uid()))
   with check (exists (select 1 from public.platform_admins a where a.user_id = auth.uid()));
 
+create policy "platform admins can read organizations"
+  on public.organizations for select to authenticated
+  using (exists (select 1 from public.platform_admins a where a.user_id = auth.uid()));
+
 create policy "platform admins can manage vehicles"
   on public.vehicles for all to authenticated
   using (exists (select 1 from public.platform_admins a where a.user_id = auth.uid()))
