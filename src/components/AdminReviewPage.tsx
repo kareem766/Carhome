@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle2, LogOut, RefreshCw, ShieldCheck, XCircle } from 'lucide-react'
+import { CheckCircle2, LogOut, RefreshCw, XCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type VehicleRow = { id: string; make: string; model: string; model_year: number; vehicle_type: string; governorate: string; monthly_price_egp: number; review_status: string; payment_status: string; organizations: { name: string } | null }
