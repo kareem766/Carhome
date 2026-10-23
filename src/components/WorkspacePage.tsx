@@ -22,6 +22,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [offerRequest, setOfferRequest] = useState<string | null>(null)
   const path = window.location.pathname
   const isVehicleForm = path.endsWith('/vehicles/new')
   const isRequestForm = path.endsWith('/requests/new')
@@ -69,7 +70,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
     event.preventDefault()
     if (!supabase || !user || !organization) return
     setSaving(true); setError(''); setNotice('')
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     const payload = {
       organization_id: organization.id, created_by: user.id,
       make: String(form.get('make') || '').trim(), model: String(form.get('model') || '').trim(),
@@ -84,7 +86,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     setSaving(false)
     if (saveError) { setError(saveError.message.includes('Could not find the table') ? 'قاعدة بيانات السيارات لم تُفعّل بعد. يلزم تطبيق Migration السيارات والطلبات أولًا.' : saveError.message); return }
     setNotice('تم حفظ بيانات السيارة وإرسالها للمراجعة. حالة الدفع معلّقة؛ لم يتم تحصيل أي مبلغ من خلال المنصة.')
-    event.currentTarget.reset()
+    formElement.reset()
     await loadWorkspace()
   }
 
@@ -92,7 +94,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
     event.preventDefault()
     if (!supabase || !user || !organization) return
     setSaving(true); setError(''); setNotice('')
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     const durationType = String(form.get('duration_type') || 'monthly')
     const payload = {
       organization_id: organization.id, created_by: user.id,
@@ -106,8 +109,27 @@ export default function WorkspacePage({ role }: { role: Role }) {
     setSaving(false)
     if (saveError) { setError(saveError.message.includes('Could not find the table') ? 'قاعدة بيانات الطلبات لم تُفعّل بعد. يلزم تطبيق Migration السيارات والطلبات أولًا.' : saveError.message); return }
     setNotice('تم نشر طلب التأجير بنجاح، ويمكن لملاك السيارات وموردي الأساطيل الاطلاع عليه وتقديم عروض.')
-    event.currentTarget.reset()
+    formElement.reset()
     await loadWorkspace()
+  }
+
+  async function saveOffer(event: FormEvent<HTMLFormElement>, requestId: string) {
+    event.preventDefault()
+    if (!supabase || !user || !organization) return
+    setSaving(true); setError(''); setNotice('')
+    const form = new FormData(event.currentTarget)
+    const payload = {
+      request_id: requestId, organization_id: organization.id, created_by: user.id,
+      monthly_price_egp: Number(form.get('monthly_price_egp')),
+      yearly_price_egp: form.get('yearly_price_egp') ? Number(form.get('yearly_price_egp')) : null,
+      vehicle_count: Number(form.get('vehicle_count')),
+      message: String(form.get('message') || '').trim() || null, status: 'submitted'
+    }
+    const { error: saveError } = await supabase.from('rental_offers').insert(payload)
+    setSaving(false)
+    if (saveError) { setError(saveError.code === '23505' ? 'سبق أن قدمت عرضًا لهذا الطلب.' : saveError.message.includes('Could not find the table') ? 'قاعدة بيانات العروض لم تُفعّل بعد. يلزم تطبيق Migration السيارات والطلبات أولًا.' : saveError.message); return }
+    setOfferRequest(null)
+    setNotice('تم إرسال عرضك للشركة. يمكنك متابعة الاتفاق والتواصل في الخطوات التالية من المنصة.')
   }
 
   if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
