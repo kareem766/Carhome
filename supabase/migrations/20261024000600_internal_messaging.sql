@@ -25,11 +25,6 @@ create policy "company members can start conversations with offer providers"
     and exists (select 1 from public.rental_requests r where r.id=conversations.request_id and r.organization_id=conversations.company_organization_id)
     and exists (select 1 from public.rental_offers o where o.request_id=conversations.request_id and o.organization_id=conversations.provider_organization_id)
   );
-create policy "conversation participants can update status"
-  on public.conversations for update to authenticated
-  using (exists (select 1 from public.organization_memberships m where m.user_id=auth.uid() and m.organization_id in (conversations.company_organization_id, conversations.provider_organization_id)))
-  with check (exists (select 1 from public.organization_memberships m where m.user_id=auth.uid() and m.organization_id in (conversations.company_organization_id, conversations.provider_organization_id)));
-
 create table if not exists public.messages (
   id uuid primary key default gen_random_uuid(),
   conversation_id uuid not null references public.conversations(id) on delete cascade,
