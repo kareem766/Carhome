@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { ArrowLeft, Building2, CarFront, CheckCircle2, ShieldCheck, Users } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
+import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
+import WorkspacePage from './components/WorkspacePage'
 import { isSupabaseConfigured } from './lib/supabase'
 
 const features = [
@@ -18,6 +20,15 @@ export default function App() {
     setAuthOpen(true)
   }
 
+  const path = window.location.pathname
+  if (path === '/register') return <RoleChooserPage onChoose={(role) => { window.location.href = '/register/' + (role === 'individual_owner' ? 'owner' : role === 'fleet_supplier' ? 'supplier' : 'company') }} onLogin={() => openAuth('signin')} />
+  if (path === '/register/owner') return <RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} />
+  if (path === '/register/company') return <RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} />
+  if (path === '/register/supplier') return <RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} />
+  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <WorkspacePage role="company" />
+  if (path.startsWith('/workspace/owner')) return <WorkspacePage role="owner" />
+  if (path.startsWith('/workspace/supplier')) return <WorkspacePage role="supplier" />
+
   return (
     <main className="min-h-screen overflow-hidden bg-canvas text-slate-800" dir="rtl">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
@@ -30,7 +41,7 @@ export default function App() {
         </a>
         <div className="flex items-center gap-2">
           <button onClick={() => openAuth('signin')} className="min-h-10 rounded-xl px-3 text-sm font-bold text-navy hover:bg-white sm:px-4">دخول</button>
-          <button onClick={() => openAuth('signup')} className="min-h-10 rounded-xl bg-carblue px-4 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 sm:px-5">إنشاء حساب</button>
+          <button onClick={() => { window.location.href = '/register' }} className="min-h-10 rounded-xl bg-carblue px-4 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 sm:px-5">إنشاء حساب</button>
         </div>
       </header>
 
