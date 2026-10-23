@@ -5,6 +5,7 @@ import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistra
 import WorkspacePage from './components/WorkspacePage'
 import AdminReviewPage from './components/AdminReviewPage'
 import MessagingPage from './components/MessagingPage'
+import AuthCallbackPage from './components/AuthCallbackPage'
 import { isSupabaseConfigured } from './lib/supabase'
 
 const features = [
@@ -23,6 +24,7 @@ export default function App() {
   }
 
   const path = window.location.pathname
+  if (path === '/auth/callback') return <AuthCallbackPage />
   if (path === '/register') return <RoleChooserPage onChoose={(role) => { window.location.href = '/register/' + (role === 'individual_owner' ? 'owner' : role === 'fleet_supplier' ? 'supplier' : 'company') }} onLogin={() => { window.location.href = '/?login=1' }} />
   if (path === '/register/owner') return <RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} />
   if (path === '/register/company') return <RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} />
