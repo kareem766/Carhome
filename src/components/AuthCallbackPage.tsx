@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, LoaderCircle, ShieldAlert } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import type { User } from '@supabase/supabase-js'
 
 type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company'
 
@@ -10,7 +11,7 @@ function workspaceFor(role: unknown) {
   return '/workspace/owner/vehicles'
 }
 
-async function finishAccount(user: NonNullable<Awaited<ReturnType<NonNullable<typeof supabase>['auth']['getUser']>>['data']['user']>) {
+async function finishAccount(user: User) {
   if (!supabase) throw new Error('خدمة الحسابات غير متاحة حاليًا.')
   const metadata = user.user_metadata ?? {}
   const displayName = String(metadata.display_name || user.email || user.phone || 'مستخدم Carhome').trim()
