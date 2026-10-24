@@ -3,6 +3,9 @@ alter table public.conversations alter column request_id drop not null;
 alter table public.conversations add column if not exists vehicle_id uuid references public.vehicles(id) on delete cascade;
 create index if not exists conversations_vehicle_participants_idx
   on public.conversations(vehicle_id, company_organization_id, provider_organization_id);
+create unique index if not exists conversations_vehicle_participants_unique_idx
+  on public.conversations(vehicle_id, company_organization_id, provider_organization_id)
+  where vehicle_id is not null;
 
 alter table public.conversations drop constraint if exists conversations_request_or_vehicle_required;
 alter table public.conversations add constraint conversations_request_or_vehicle_required
@@ -13,9 +16,19 @@ create policy "organization members can view approved vehicles"
 on public.vehicles for select to authenticated
 using (
   review_status = 'approved'
-  and exists (
-    select 1 from public.organization_memberships m
-    where m.organization_id = vehicles.organization_id and m.user_id = auth.uid()
+  and (
+    exists (
+      select 1 from public.organization_memberships owner_membership
+      where owner_membership.organization_id = vehicles.organization_id
+        and owner_membership.user_id = auth.uid()
+    )
+    or exists (
+      select 1 from public.organization_memberships viewer_membership
+      join public.organizations viewer_org on viewer_org.id = viewer_membership.organization_id
+      where viewer_membership.user_id = auth.uid()
+        and viewer_org.organization_type = 'company'
+    )
+    or exists (select 1 from public.platform_admins a where a.user_id = auth.uid())
   )
   and exists (
     select 1 from public.organizations provider
@@ -41,7 +54,9 @@ using (
     select 1 from public.vehicles v
     join public.organizations provider on provider.id = v.organization_id
     join public.organization_memberships viewer on viewer.user_id = auth.uid()
-    where v.id = vehicle_images.vehicle_id
+    join public.organizations viewer_org on viewer_org.id = viewer.organization_id
+    where viewer_org.organization_type = 'company'
+      and v.id = vehicle_images.vehicle_id
       and v.organization_id = vehicle_images.organization_id
       and v.review_status = 'approved'
       and (provider.organization_type = 'fleet_supplier' or v.payment_status in ('verified','waived'))
@@ -182,7 +197,9 @@ using (
       join public.vehicles v on v.id = vi.vehicle_id
       join public.organizations provider on provider.id = v.organization_id
       join public.organization_memberships viewer on viewer.user_id = auth.uid()
-      where vi.storage_path = objects.name
+      join public.organizations viewer_org on viewer_org.id = viewer.organization_id
+      where viewer_org.organization_type = 'company'
+        and vi.storage_path = objects.name
         and v.organization_id::text = (storage.foldername(objects.name))[1]
         and v.id::text = (storage.foldername(objects.name))[2]
         and v.review_status = 'approved'
