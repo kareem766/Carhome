@@ -71,7 +71,7 @@ export default function AdminReviewPage() {
       const paymentRows = (paymentResult.data || []) as unknown as PaymentRow[]
       setPayments(paymentRows)
       const proofEntries = await Promise.all(paymentRows.filter(p => p.proof_path).map(async p => {
-        const { data, error: proofError } = await supabase.storage.from('payment-proofs').createSignedUrl(p.proof_path!, 300)
+        const { data, error: proofError } = await client.storage.from('payment-proofs').createSignedUrl(p.proof_path!, 300)
         return !proofError && data?.signedUrl ? [p.id, data.signedUrl] as const : null
       }))
       setPaymentProofUrls(Object.fromEntries(proofEntries.filter((entry): entry is readonly [string, string] => entry !== null)))
