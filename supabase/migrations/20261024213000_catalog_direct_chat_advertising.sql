@@ -1,6 +1,6 @@
 -- Carhome customer experience: direct vehicle conversations and configurable advertising promotions.
 alter table public.conversations alter column request_id drop not null;
-alter table public.conversations add column if not exists vehicle_id uuid references public.vehicles(id) on delete set null;
+alter table public.conversations add column if not exists vehicle_id uuid references public.vehicles(id) on delete cascade;
 create index if not exists conversations_vehicle_participants_idx
   on public.conversations(vehicle_id, company_organization_id, provider_organization_id);
 
