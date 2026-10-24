@@ -154,3 +154,13 @@ using (exists (select 1 from public.platform_admins a where a.user_id = auth.uid
 with check (exists (select 1 from public.platform_admins a where a.user_id = auth.uid()));
 grant select, insert on public.vehicle_promotions to authenticated;
 grant update, delete on public.vehicle_promotions to authenticated;
+
+drop policy if exists "users can view active vehicle promotions" on public.vehicle_promotions;
+create policy "users can view active vehicle promotions"
+on public.vehicle_promotions for select to authenticated
+using (
+  status = 'approved'
+  and payment_status in ('verified','waived')
+  and (starts_at is null or starts_at <= now())
+  and (ends_at is null or ends_at > now())
+);
