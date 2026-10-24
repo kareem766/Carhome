@@ -27,12 +27,12 @@ async function finishAccount(user: User) {
   const organizationName = String(metadata.organization_name || displayName).trim()
   let logoPath: string | null = null
   const pendingLogo = localStorage.getItem('carhome_pending_company_logo')
-  if (role === 'company' && pendingLogo) {
+  if ((role === 'company' || role === 'fleet_supplier') && pendingLogo) {
     try {
       const response = await fetch(pendingLogo)
       const logoBlob = await response.blob()
       if (!['image/png', 'image/jpeg', 'image/webp'].includes(logoBlob.type) || logoBlob.size > 2 * 1024 * 1024) {
-        throw new Error('صيغة لوجو الشركة غير مدعومة أو حجم الملف أكبر من 2 ميجابايت.')
+        throw new Error('صيغة اللوجو غير مدعومة أو حجم الملف أكبر من 2 ميجابايت.')
       }
       const extension = logoBlob.type === 'image/png' ? 'png' : logoBlob.type === 'image/webp' ? 'webp' : 'jpg'
       logoPath = `${user.id}/logo-${Date.now()}.${extension}`
@@ -81,12 +81,14 @@ async function finishAccount(user: User) {
       contact_email: String(metadata.email_contact || user.email || '').trim() || null,
       address: String(metadata.address || '').trim() || null,
       company_type: String(metadata.company_type || '').trim() || null,
+      fleet_vehicle_count: Number.isInteger(metadata.fleet_vehicle_count) ? metadata.fleet_vehicle_count : null,
       logo_path: logoPath
     }).select('id').single()
     if (organization.error && /column|schema cache|could not find/i.test(organization.error.message)) {
       organization = await supabase.from('organizations').insert({
         name: organizationName, organization_type: role, created_by: user.id,
         city: String(metadata.governorate || '').trim() || null,
+        fleet_vehicle_count: Number.isInteger(metadata.fleet_vehicle_count) ? metadata.fleet_vehicle_count : null,
         logo_path: logoPath
       }).select('id').single()
     }
