@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ChangeEvent } from 'react'
 import { ArrowRight, Building2, CarFront, CheckCircle2, ChevronDown, ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -18,11 +18,30 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [companyLogo, setCompanyLogo] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState('')
   const isCompany = role === 'company'
   const isOwner = role === 'individual_owner'
   const info = roleInfo[role]
   const Icon = info.icon
   const update = (key: FieldKey, value: string) => setValues((current) => ({ ...current, [key]: value }))
+  function chooseLogo(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      setError('صيغة اللوجو يجب أن تكون PNG أو JPG أو WEBP.')
+      event.target.value = ''
+      return
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setError('حجم لوجو الشركة يجب ألا يتجاوز 2 ميجابايت.')
+      event.target.value = ''
+      return
+    }
+    setError('')
+    setCompanyLogo(file)
+    setLogoPreview(URL.createObjectURL(file))
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -50,12 +69,28 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
       const { data, error: signUpError } = await supabase.auth.signUp({ ...(credentials as Parameters<typeof supabase.auth.signUp>[0]), options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       if (signUpError) throw signUpError
       if (data.session && data.user) {
-        // Let the single callback flow provision the profile, organization, and membership.
-        // This avoids duplicate client-side provisioning paths during sign-up.
+        if (isCompany && companyLogo) {
+          const reader = new FileReader()
+          const dataUrl: string = await new Promise((resolve, reject) => {
+            reader.onload = () => resolve(String(reader.result || ''))
+            reader.onerror = () => reject(new Error('تعذر قراءة ملف اللوجو. حاول اختيار الصورة مرة أخرى.'))
+            reader.readAsDataURL(companyLogo)
+          })
+          localStorage.setItem('carhome_pending_company_logo', dataUrl)
+        }
         window.location.replace('/auth/callback')
         return
       } else {
-        setNotice(values.email.trim() ? 'تم إرسال طلب التسجيل. أكّد البريد الإلكتروني من الرسالة، ثم سجّل الدخول لإكمال إعداد الحساب.' : 'تم إرسال طلب التسجيل برقم الهاتف. أكّد رمز SMS إذا كانت خدمة الهاتف مفعّلة في Supabase، ثم سجّل الدخول لإكمال إعداد الحساب.')
+        if (isCompany && companyLogo) {
+          const reader = new FileReader()
+          const dataUrl: string = await new Promise((resolve, reject) => {
+            reader.onload = () => resolve(String(reader.result || ''))
+            reader.onerror = () => reject(new Error('تعذر قراءة ملف اللوجو.'))
+            reader.readAsDataURL(companyLogo)
+          })
+          localStorage.setItem('carhome_pending_company_logo', dataUrl)
+        }
+        setNotice(values.email.trim() ? 'تم إرسال طلب التسجيل. أكّد البريد الإلكتروني من الرسالة. احتفظ بنفس المتصفح لإكمال إعداد الحساب وحفظ لوجو الشركة.' : 'تم إرسال طلب التسجيل برقم الهاتف. أكّد رمز SMS إذا كانت الخدمة مفعّلة، ثم سجّل الدخول لإكمال إعداد الحساب.')
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'تعذر إكمال التسجيل. حاول مرة أخرى.'
@@ -83,6 +118,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
             {isCompany ? <>{field('authorizedName','اسم المفوض',true)}{field('companyName','اسم الشركة',true)}</> : <>{field('fullName','الاسم بالكامل',true)}{role === 'fleet_supplier' && field('companyName','اسم المكتب / الشركة',false)}</>}
             {field('phone','رقم الموبايل',true,'tel','01xxxxxxxxx')}
             {field('email','البريد الإلكتروني',isCompany,'email','name@example.com')}
+            {isCompany && <div className="sm:col-span-2"><label className="block text-sm font-bold text-slate-700">لوجو الشركة (اختياري)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={chooseLogo} className={fieldClass + ' file:ml-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:font-bold file:text-blue-700'} /></label><p className="mt-1 text-xs text-slate-500">PNG أو JPG أو WEBP، بحد أقصى 2 ميجابايت.</p>{logoPreview && <img src={logoPreview} alt="معاينة لوجو الشركة" className="mt-3 h-24 w-24 rounded-2xl border border-slate-200 bg-white object-contain p-2" />}</div>}
             {isCompany && <label className="block text-sm font-bold text-slate-700">نوع الشركة *<span className="relative block"><select required className={fieldClass} value={values.companyType} onChange={(e) => update('companyType',e.target.value)}><option value="">اختر نشاط الشركة</option>{companyTypes.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>}
             <label className="block text-sm font-bold text-slate-700">المحافظة *<span className="relative block"><select required className={fieldClass} value={values.governorate} onChange={(e) => update('governorate',e.target.value)}><option value="">اختر المحافظة</option>{governorates.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>
             {field('address',isCompany ? 'عنوان الشركة' : 'العنوان',true,'text','المركز / الشارع / رقم العقار')}
