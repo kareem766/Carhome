@@ -15,6 +15,7 @@ export default function AdminReviewPage() {
   const [busyId, setBusyId] = useState('')
   async function load() {
     if (!supabase) { window.location.replace('/'); return }
+    const client = supabase
     setLoading(true); setError('')
     const { data: auth, error: authError } = await supabase.auth.getUser()
     if (authError || !auth.user) { window.location.replace('/?login=1'); return }
@@ -32,7 +33,7 @@ export default function AdminReviewPage() {
         const imageResult = await supabase.from('vehicle_images').select('vehicle_id,storage_path,alt_text,sort_order').in('vehicle_id', vehicleRows.map(vehicle => vehicle.id)).order('sort_order', { ascending: true })
         if (imageResult.error) setError('تم تحميل بيانات السيارات، لكن تعذر تحميل الصور: ' + imageResult.error.message)
         const signedImages = await Promise.all((imageResult.data || []).map(async image => {
-          const signed = await supabase.storage.from('vehicle-images').createSignedUrl(image.storage_path, 900)
+          const signed = await client.storage.from('vehicle-images').createSignedUrl(image.storage_path, 900)
           return signed.error || !signed.data?.signedUrl ? null : { vehicle_id: image.vehicle_id, url: signed.data.signedUrl, alt_text: image.alt_text || 'صورة السيارة' }
         }))
         setVehicles(vehicleRows.map(vehicle => ({ ...vehicle, images: signedImages.filter((image): image is { vehicle_id: string; url: string; alt_text: string } => Boolean(image && image.vehicle_id === vehicle.id)).map(image => ({ url: image.url, alt_text: image.alt_text })) })))
