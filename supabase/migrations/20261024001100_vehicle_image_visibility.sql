@@ -14,17 +14,26 @@ using (
     select 1 from public.platform_admins a
     where a.user_id = (select auth.uid())
   )
-  or exists (
-    select 1
-    from public.vehicles v
-    join public.organizations o on o.id = v.organization_id
-    where v.id = vehicle_images.vehicle_id
-      and v.organization_id = vehicle_images.organization_id
-      and v.review_status = 'approved'
-      and (
-        o.organization_type = 'fleet_supplier'
-        or v.payment_status in ('verified', 'waived')
-      )
+  or (
+    exists (
+      select 1
+      from public.organization_memberships viewer_membership
+      join public.organizations viewer_org on viewer_org.id = viewer_membership.organization_id
+      where viewer_membership.user_id = (select auth.uid())
+        and viewer_org.organization_type = 'company'
+    )
+    and exists (
+      select 1
+      from public.vehicles v
+      join public.organizations vehicle_org on vehicle_org.id = v.organization_id
+      where v.id = vehicle_images.vehicle_id
+        and v.organization_id = vehicle_images.organization_id
+        and v.review_status = 'approved'
+        and (
+          vehicle_org.organization_type = 'fleet_supplier'
+          or v.payment_status in ('verified', 'waived')
+        )
+    )
   )
 );
 
@@ -77,19 +86,28 @@ using (
       select 1 from public.platform_admins a
       where a.user_id = (select auth.uid())
     )
-    or exists (
-      select 1
-      from public.vehicle_images vi
-      join public.vehicles v on v.id = vi.vehicle_id
-      join public.organizations o on o.id = v.organization_id
-      where vi.storage_path = objects.name
-        and v.organization_id::text = (storage.foldername(objects.name))[1]
-        and v.id::text = (storage.foldername(objects.name))[2]
-        and v.review_status = 'approved'
-        and (
-          o.organization_type = 'fleet_supplier'
-          or v.payment_status in ('verified', 'waived')
-        )
+    or (
+      exists (
+        select 1
+        from public.organization_memberships viewer_membership
+        join public.organizations viewer_org on viewer_org.id = viewer_membership.organization_id
+        where viewer_membership.user_id = (select auth.uid())
+          and viewer_org.organization_type = 'company'
+      )
+      and exists (
+        select 1
+        from public.vehicle_images vi
+        join public.vehicles v on v.id = vi.vehicle_id
+        join public.organizations vehicle_org on vehicle_org.id = v.organization_id
+        where vi.storage_path = objects.name
+          and v.organization_id::text = (storage.foldername(objects.name))[1]
+          and v.id::text = (storage.foldername(objects.name))[2]
+          and v.review_status = 'approved'
+          and (
+            vehicle_org.organization_type = 'fleet_supplier'
+            or v.payment_status in ('verified', 'waived')
+          )
+      )
     )
   )
 );
