@@ -53,9 +53,9 @@ export default function VehicleCatalogPage() {
       if (!supabase) { window.location.replace('/'); return }
       const { data: auth } = await supabase.auth.getUser()
       if (!auth.user) { window.location.replace('/?login=1'); return }
-      const { data: membership, error: memberError } = await supabase.from('organization_memberships').select('organization_id, organizations:organizations!organization_memberships_organization_id_fkey(organization_type)').eq('user_id', auth.user.id).limit(1).maybeSingle()
+      const { data: membership, error: memberError } = await supabase.from('organization_memberships').select('organization_id').eq('user_id', auth.user.id).limit(1).maybeSingle()
       if (memberError || !membership?.organization_id) { if (active) { setError('أكمل إعداد حسابك وربطه بمؤسسة حتى تتمكن من استخدام الكتالوج.'); setLoading(false) } return }
-      const org = Array.isArray(membership.organizations) ? membership.organizations[0] : membership.organizations
+      const { data: org } = await supabase.from('organizations').select('organization_type').eq('id',membership.organization_id).maybeSingle()
       if (!active) return
       setUserId(auth.user.id); setOrgId(membership.organization_id); setOrgType(String(org?.organization_type || ''))
       const { data, error: listError } = await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,monthly_price_egp,yearly_price_egp,with_driver,notes,organization_id').eq('review_status','approved').in('payment_status',['verified','waived']).order('created_at',{ascending:false})
