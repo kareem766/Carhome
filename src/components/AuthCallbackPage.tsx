@@ -13,6 +13,12 @@ function workspaceFor(role: unknown) {
 
 async function finishAccount(user: User) {
   if (!supabase) throw new Error('خدمة الحسابات غير متاحة حاليًا.')
+  // Refresh the authenticated session before writing protected profile/organization rows.
+  const refreshed = await supabase.auth.refreshSession()
+  if (refreshed.error) throw new Error('تم إنشاء الحساب، لكن تعذر تحديث جلسة الدخول. سجّل الدخول مرة أخرى لإكمال إعداد الحساب.')
+  if (!refreshed.data.session?.user || refreshed.data.session.user.id !== user.id) {
+    throw new Error('تم إنشاء الحساب، لكن جلسة الدخول غير متطابقة. سجّل الدخول مرة أخرى لإكمال إعداد الحساب.')
+  }
   const metadata = user.user_metadata ?? {}
   const displayName = String(metadata.display_name || user.email || user.phone || 'مستخدم Carhome').trim()
   const role = (['individual_owner', 'fleet_supplier', 'company'].includes(String(metadata.organization_type))
@@ -58,7 +64,10 @@ async function finishAccount(user: User) {
         city: String(metadata.governorate || '').trim() || null
       }).select('id').single()
     }
-    if (organization.error) throw organization.error
+    if (organization.error) {
+      if (organization.error.code === '42501') throw new Error('تم إنشاء الحساب، لكن إعداد المؤسسة لم يكتمل بسبب صلاحيات قاعدة البيانات. سجّل الدخول مرة أخرى، وإذا استمرت المشكلة تواصل مع الدعم.')
+      throw organization.error
+    }
     organizationId = organization.data.id
   }
   const inserted = await supabase.from('organization_memberships').insert({
