@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Building2, CheckCircle2, LogOut, Pencil, Plus, RefreshCw, UserRound, XCircle } from 'lucide-react'
+import { Building2, CheckCircle2, LogOut, Pencil, Plus, RefreshCw, Settings, UserRound, XCircle } from 'lucide-react'
+import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
 type ProfileRow = { id: string; display_name: string; phone: string | null; contact_email: string | null; address: string | null; created_at: string }
@@ -193,7 +194,7 @@ export default function AdminReviewPage() {
   async function signOut() { if (supabase) await supabase.auth.signOut(); window.location.replace('/') }
   const methodName: Record<string,string> = { instapay:'InstaPay', vodafone_cash:'Vodafone Cash', bank_transfer:'تحويل بنكي' }
   return <main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6"><div className="mx-auto max-w-6xl">
-    <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-5"><div><p className="text-sm font-bold text-blue-700">Carhome · الإدارة</p><h1 className="mt-1 text-2xl font-extrabold">مراجعة السيارات والتحويلات</h1><p className="mt-2 text-sm text-slate-500">لا يتم اعتماد السيارة أو تأكيد الدفع إلا بمراجعة المسؤول.</p></div><div className="flex gap-2"><button onClick={() => void load()} className="rounded-xl border p-3" aria-label="تحديث"><RefreshCw size={17}/></button><button onClick={signOut} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold"><LogOut size={16}/> خروج</button></div></header>
+    <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-5"><div><div className="flex items-center gap-2"><PlatformBrand compact /><span className="text-sm font-bold text-slate-500">· الإدارة</span></div><h1 className="mt-1 text-2xl font-extrabold">مراجعة السيارات والتحويلات</h1><p className="mt-2 text-sm text-slate-500">لا يتم اعتماد السيارة أو تأكيد الدفع إلا بمراجعة المسؤول.</p></div><div className="flex flex-wrap gap-2"><a href="/workspace/admin/platform-settings" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> إعدادات المنصة</a><button onClick={() => void load()} className="rounded-xl border p-3" aria-label="تحديث"><RefreshCw size={17}/></button><button onClick={signOut} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold"><LogOut size={16}/> خروج</button></div></header>
     {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}{notice && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">{notice}</p>}
     {loading ? <p className="py-12 text-center text-slate-500">جارٍ تحميل المراجعات...</p> : authorized && <>
 
