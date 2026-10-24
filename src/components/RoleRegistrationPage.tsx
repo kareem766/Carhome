@@ -50,23 +50,10 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
       const { data, error: signUpError } = await supabase.auth.signUp({ ...(credentials as Parameters<typeof supabase.auth.signUp>[0]), options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       if (signUpError) throw signUpError
       if (data.session && data.user) {
-        const profile = await supabase.from('profiles').upsert({ id: data.user.id, display_name: displayName, locale: 'ar', phone: values.phone.trim(), contact_email: values.email.trim() || null, address: values.address.trim() }, { onConflict: 'id' })
-        if (profile.error) {
-          const missingNewColumns = /column|schema cache|could not find/i.test(profile.error.message)
-          if (!missingNewColumns) throw profile.error
-          const legacyProfile = await supabase.from('profiles').upsert({ id: data.user.id, display_name: displayName, locale: 'ar' }, { onConflict: 'id' })
-          if (legacyProfile.error) throw legacyProfile.error
-        }
-        let organization = await supabase.from('organizations').insert({ name: organizationName, organization_type: role, created_by: data.user.id, city: values.governorate, contact_name: displayName, phone: values.phone.trim(), contact_email: values.email.trim() || null, address: values.address.trim(), company_type: isCompany ? values.companyType : null }).select('id').single()
-        if (organization.error && /column|schema cache|could not find/i.test(organization.error.message)) {
-          organization = await supabase.from('organizations').insert({ name: organizationName, organization_type: role, created_by: data.user.id, city: values.governorate }).select('id').single()
-        }
-        if (organization.error && organization.error.code !== '23505') throw organization.error
-        if (organization.data?.id) {
-          const membership = await supabase.from('organization_memberships').insert({ organization_id: organization.data.id, user_id: data.user.id, role: 'owner' })
-          if (membership.error && membership.error.code !== '23505') throw membership.error
-        }
-        window.location.href = isCompany ? '/workspace/company' : isOwner ? '/workspace/owner/vehicles' : '/workspace/supplier/vehicles'
+        // Let the single callback flow provision the profile, organization, and membership.
+        // This avoids duplicate client-side provisioning paths during sign-up.
+        window.location.replace('/auth/callback')
+        return
       } else {
         setNotice(values.email.trim() ? 'تم إرسال طلب التسجيل. أكّد البريد الإلكتروني من الرسالة، ثم سجّل الدخول لإكمال إعداد الحساب.' : 'تم إرسال طلب التسجيل برقم الهاتف. أكّد رمز SMS إذا كانت خدمة الهاتف مفعّلة في Supabase، ثم سجّل الدخول لإكمال إعداد الحساب.')
       }
