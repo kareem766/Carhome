@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, Check, LoaderCircle, Plus, Save, Star, Trash2, X } from 'lucide-react'
+import { ArrowRight, Check, LoaderCircle, Plus, Save, Star, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type Plan = {
