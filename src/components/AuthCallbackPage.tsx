@@ -137,8 +137,11 @@ export default function AuthCallbackPage() {
         }
         const role = await finishAccount(data.session.user)
         if (!active) return
-        setMessage('تم تأكيد البريد وتجهيز حسابك. جارٍ تحويلك إلى مساحة العمل...')
-        window.location.replace(workspaceFor(role))
+        // Platform-owner accounts must land in the admin console instead of a regular workspace.
+        const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
+        if (!active) return
+        setMessage(adminRecord ? 'تم التحقق من صلاحية صاحب المنصة. جارٍ فتح لوحة الإدارة...' : 'تم تأكيد البريد وتجهيز حسابك. جارٍ تحويلك إلى مساحة العمل...')
+        window.location.replace(adminRecord ? '/workspace/admin' : workspaceFor(role))
       } catch (caught) {
         if (!active) return
         setError(caught instanceof Error ? caught.message : 'تعذر تأكيد البريد الإلكتروني. جرّب إرسال رابط جديد.')
