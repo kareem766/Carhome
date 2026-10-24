@@ -154,7 +154,7 @@ export default function App() {
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-xl motion-safe:animate-fade-up">
+        <div className="relative mx-auto w-full max-w-xl animate-fade-up">
           <div className="absolute -right-7 -top-7 h-40 w-40 rounded-full bg-blue-300/30 blur-3xl" />
           <div className="absolute -bottom-8 -left-8 h-44 w-44 rounded-full bg-emerald-300/20 blur-3xl" />
           <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-slate-900 p-2 shadow-2xl">
