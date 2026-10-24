@@ -35,13 +35,14 @@ export default function WorkspacePage({ role }: { role: Role }) {
 
   async function loadWorkspace() {
     if (!supabase) { window.location.replace('/'); return }
+    const client = supabase
     setLoading(true)
     setError('')
-    const { data: authData, error: authError } = await supabase.auth.getUser()
+    const { data: authData, error: authError } = await client.auth.getUser()
     if (authError || !authData.user) { window.location.replace('/?login=1'); return }
     const authUser = authData.user
     setUser({ id: authUser.id, name: String(authUser.user_metadata?.display_name || authUser.user_metadata?.organization_name || 'مستخدم Carhome'), email: authUser.email || authUser.phone || '' })
-    const { data: memberships, error: membershipError } = await supabase.from('organization_memberships').select('organization_id, organizations(id,name,organization_type)').eq('user_id', authUser.id).limit(1)
+    const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations(id,name,organization_type)').eq('user_id', authUser.id).limit(1)
     if (membershipError) { setError(membershipError.message); setLoading(false); return }
     const member = memberships?.[0] as unknown as { organization_id: string; organizations: Organization | Organization[] | null } | undefined
     const org = Array.isArray(member?.organizations) ? member?.organizations[0] : member?.organizations
@@ -55,30 +56,30 @@ export default function WorkspacePage({ role }: { role: Role }) {
     setOrganization({ ...org, id: member.organization_id })
     if (role === 'company') {
       if (isCompanyVehicles) {
-        const result = await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('review_status','approved').order('created_at',{ascending:false})
+        const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('review_status','approved').order('created_at',{ascending:false})
         if (result.error) setError(result.error.message); else setVehicles((result.data || []) as Vehicle[])
       } else {
-        const result = await supabase.from('rental_requests').select('id,title,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at,rental_offers(id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,organizations(id,name))').order('created_at',{ascending:false})
+        const result = await client.from('rental_requests').select('id,title,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at,rental_offers(id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,organizations(id,name))').order('created_at',{ascending:false})
         if (result.error) setError(result.error.message); else setRequests((result.data || []) as unknown as RentalRequest[])
       }
     } else if (!isRequestForm && !isRequestList) {
-      const result = await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('organization_id',member.organization_id).order('created_at',{ascending:false})
+      const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('organization_id',member.organization_id).order('created_at',{ascending:false})
       if (result.error) setError(result.error.message)
       else {
         const vehicleRows = (result.data || []) as Vehicle[]
         if (vehicleRows.length) {
-          const imageResult = await supabase.from('vehicle_images').select('vehicle_id,storage_path,alt_text,sort_order').in('vehicle_id', vehicleRows.map(vehicle => vehicle.id)).order('sort_order', { ascending: true })
+          const imageResult = await client.from('vehicle_images').select('vehicle_id,storage_path,alt_text,sort_order').in('vehicle_id', vehicleRows.map(vehicle => vehicle.id)).order('sort_order', { ascending: true })
           if (imageResult.error) setError('تم تحميل السيارات، لكن تعذر تحميل صورها: ' + imageResult.error.message)
           const imageRows = imageResult.data || []
           const signedImages = await Promise.all(imageRows.map(async image => {
-            const signed = await supabase.storage.from('vehicle-images').createSignedUrl(image.storage_path, 3600)
+            const signed = await client.storage.from('vehicle-images').createSignedUrl(image.storage_path, 3600)
             return signed.error || !signed.data?.signedUrl ? null : { vehicle_id: image.vehicle_id, url: signed.data.signedUrl, alt_text: image.alt_text || 'صورة السيارة' }
           }))
           setVehicles(vehicleRows.map(vehicle => ({ ...vehicle, images: signedImages.filter((image): image is { vehicle_id: string; url: string; alt_text: string } => Boolean(image && image.vehicle_id === vehicle.id)).map(image => ({ url: image.url, alt_text: image.alt_text })) })))
         } else setVehicles([])
       }
     } else {
-      const result = await supabase.from('rental_requests').select('id,title,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at').eq('status','open').order('created_at',{ascending:false})
+      const result = await client.from('rental_requests').select('id,title,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at').eq('status','open').order('created_at',{ascending:false})
       if (result.error) setError(result.error.message); else setRequests((result.data || []) as RentalRequest[])
     }
     setLoading(false)
@@ -111,7 +112,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     if (saveError || !savedVehicle) { setSaving(false); setError(saveError?.message.includes('Could not find the table') ? 'قاعدة بيانات السيارات لم تُفعّل بعد. يلزم تطبيق Migration السيارات والطلبات أولًا.' : saveError?.message || 'تعذر حفظ السيارة.'); return }
     const uploadedPaths: string[] = []
     let photoError = ''
-    for (const [index, photo] of photos.entries()) {
+    for (const photo of photos) {
       const safeName = photo.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-100) || 'vehicle-photo'
       const storagePath = organization.id + '/' + savedVehicle.id + '/' + crypto.randomUUID() + '-' + safeName
       const upload = await supabase.storage.from('vehicle-images').upload(storagePath, photo, { contentType: photo.type, upsert: false })
