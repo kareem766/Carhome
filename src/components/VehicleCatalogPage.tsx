@@ -109,6 +109,19 @@ export default function VehicleCatalogPage() {
     window.location.href = '/messages?conversation='+conversationId
   }
 
+  async function requestPromotion() {
+    if (!supabase || !selectedPlanId || !selectedPromotionVehicle || !userId || !orgId) return
+    setSubmittingPromotion(true); setError('')
+    const { error: insertError } = await supabase.from('vehicle_promotions').insert({
+      vehicle_id: selectedPromotionVehicle, organization_id: orgId, advertising_plan_id: selectedPlanId,
+      created_by: userId, status: 'pending_review', payment_status: 'pending'
+    })
+    setSubmittingPromotion(false)
+    if (insertError) { setError('تعذر إرسال طلب الترويج: ' + insertError.message); return }
+    setNotice('تم إرسال طلب الترويج للمراجعة. لن يظهر الإعلان قبل اعتماد الإدارة والتحقق من حالة الدفع.')
+    setSelectedPlanId(''); setSelectedPromotionVehicle(''); setShowPlans(false)
+  }
+
   function askBot(question: string) {
     const match = questions.find(q => q.title === question)
     setBotQuestion(question)
