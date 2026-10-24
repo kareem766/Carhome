@@ -73,9 +73,12 @@ export default function VehicleCatalogPage() {
         const { data: owned } = await supabase.from('vehicles').select('id,make,model,model_year,review_status').eq('organization_id',membership.organization_id).eq('review_status','approved').order('created_at',{ascending:false})
         if (active) setMyVehicles((owned || []) as OwnedVehicle[])
       }
-      const { data: promotions } = await supabase.from('vehicle_promotions').select('vehicle_id').eq('status','approved').in('payment_status',['verified','waived'])
+      const { data: promotions } = await supabase.from('vehicle_promotions').select('vehicle_id,starts_at,ends_at').eq('status','approved').in('payment_status',['verified','waived'])
       if (active) {
-        const promoted = (promotions || []).map(p => p.vehicle_id)
+        const now = Date.now()
+        const promoted = (promotions || [])
+          .filter(p => (!p.starts_at || new Date(p.starts_at).getTime() <= now) && (!p.ends_at || new Date(p.ends_at).getTime() > now))
+          .map(p => p.vehicle_id)
         setPromotedIds(promoted)
         setVehicles(current => [...current].sort((a,b) => Number(promoted.includes(b.id))-Number(promoted.includes(a.id))))
       }
