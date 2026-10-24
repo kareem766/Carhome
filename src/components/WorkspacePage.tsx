@@ -100,7 +100,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     const form = new FormData(formElement)
     const payload = {
       organization_id: organization.id, created_by: user.id,
-      make: String(form.get('make') === 'أخرى / ماركة غير موجودة' ? form.get('custom_make') : form.get('make') || '').trim(), model: String(form.get('model') === 'أخرى / موديل غير موجود' ? form.get('custom_model') : form.get('model') || '').trim(),
+      make: String(form.get('make') === 'أخرى / ماركة غير موجودة' ? form.get('custom_make') : form.get('make') || '').trim(), model: String(form.get('make') === 'أخرى / ماركة غير موجودة' || form.get('model') === 'أخرى / موديل غير موجود' ? form.get('custom_model') : form.get('model') || '').trim(),
       model_year: Number(form.get('model_year')), vehicle_type: String(form.get('vehicle_type') || ''),
       transmission: String(form.get('transmission') || 'automatic'), seats: Number(form.get('seats')),
       governorate: String(form.get('governorate') || ''), address: String(form.get('address') || '').trim(),
