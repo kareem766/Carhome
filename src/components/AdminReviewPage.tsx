@@ -226,7 +226,8 @@ export default function AdminReviewPage() {
             <input required value={organizationForm.name} onChange={e=>setOrganizationForm({...organizationForm,name:e.target.value})} className="mt-1 w-full rounded-lg border bg-white px-3 py-2 font-normal" maxLength={160}/>
           </label>
           <label className="text-sm font-bold">نوع الحساب
-            <select value={organizationForm.organization_type} onChange={e=>setOrganizationForm({...organizationForm,organization_type:e.target.value as OrganizationForm['organization_type']})} className="mt-1 w-full rounded-lg border bg-white px-3 py-2 font-normal">
+            {editingOrganizationId && <span className="mr-2 text-xs font-normal text-slate-500">لا يمكن تغيير نوع حساب مؤسسة قائمة لتجنب تعطيل وصول أعضائها.</span>}
+            <select value={organizationForm.organization_type} disabled={Boolean(editingOrganizationId)} onChange={e=>setOrganizationForm({...organizationForm,organization_type:e.target.value as OrganizationForm['organization_type']})} className="mt-1 w-full rounded-lg border bg-white px-3 py-2 font-normal disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500">
               <option value="individual_owner">مالك سيارة</option><option value="company">شركة طالبة</option><option value="fleet_supplier">مورد أسطول</option>
             </select>
           </label>
