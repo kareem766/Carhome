@@ -38,6 +38,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const [requests, setRequests] = useState<RentalRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingStage, setSavingStage] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [offerRequest, setOfferRequest] = useState<string | null>(null)
@@ -113,8 +114,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
 
   async function saveVehicle(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!supabase || !user || !organization) return
-    setSaving(true); setError(''); setNotice('')
+    if (!supabase || !user || !organization) { setError('انتهت جلسة الدخول أو لم يتم تحميل بيانات الحساب. حدّث الصفحة وسجّل الدخول مرة أخرى.'); return }
+    setSaving(true); setSavingStage('جارٍ التحقق من البيانات...'); setError(''); setNotice('')
     const formElement = event.currentTarget
     const form = new FormData(formElement)
     const payload = {
@@ -128,39 +129,63 @@ export default function WorkspacePage({ role }: { role: Role }) {
       review_status: 'pending_review', payment_status: 'pending'
     }
     const photos = photoPreviews.map(photo => photo.file)
-    if (photos.length < 1 || photos.length > 8) { setError('أضف صورة واحدة على الأقل، وبحد أقصى 8 صور للسيارة.'); setSaving(false); return }
-    if (photos.some(photo => !['image/jpeg','image/png','image/webp'].includes(photo.type) || photo.size > 8 * 1024 * 1024)) { setError('الصور المقبولة JPG أو PNG أو WEBP، وبحد أقصى 8 ميجابايت للصورة الواحدة.'); setSaving(false); return }
-    const { data: savedVehicle, error: saveError } = await supabase.from('vehicles').insert(payload).select('id').single()
-    if (saveError || !savedVehicle) { setSaving(false); setError(saveError?.message.includes('Could not find the table') ? 'قاعدة بيانات السيارات لم تُفعّل بعد. يلزم تطبيق Migration السيارات والطلبات أولًا.' : saveError?.message || 'تعذر حفظ السيارة.'); return }
+    if (photos.length < 1 || photos.length > 8) { setError('أضف صورة واحدة على الأقل، وبحد أقصى 8 صور للسيارة.'); setSaving(false); setSavingStage(''); return }
+    if (photos.some(photo => !['image/jpeg','image/png','image/webp'].includes(photo.type) || photo.size > 8 * 1024 * 1024)) { setError('الصور المقبولة JPG أو PNG أو WEBP، وبحد أقصى 8 ميجابايت للصورة الواحدة.'); setSaving(false); setSavingStage(''); return }
+    let savedVehicleId = ''
     const uploadedPaths: string[] = []
-    let photoError = ''
-    for (const photo of photos) {
-      const safeName = photo.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-100) || 'vehicle-photo'
-      const storagePath = organization.id + '/' + savedVehicle.id + '/' + crypto.randomUUID() + '-' + safeName
-      const upload = await supabase.storage.from('vehicle-images').upload(storagePath, photo, { contentType: photo.type, upsert: false })
-      if (upload.error) { photoError = upload.error.message; break }
-      uploadedPaths.push(storagePath)
-    }
-    if (!photoError) {
-      const imageRows = uploadedPaths.map((storage_path, index) => ({ vehicle_id: savedVehicle.id, organization_id: organization.id, storage_path, alt_text: payload.make + ' ' + payload.model, sort_order: index, created_by: user.id }))
-      const { error: imageInsertError } = await supabase.from('vehicle_images').insert(imageRows)
-      if (imageInsertError) photoError = imageInsertError.message
-    }
-    if (photoError && uploadedPaths.length) await supabase.storage.from('vehicle-images').remove(uploadedPaths)
-    setSaving(false)
-    if (photoError) {
-      setError('تم حفظ بيانات السيارة، لكن تعذر حفظ الصور. جرّب رفعها مرة أخرى أو تواصل مع الدعم. التفاصيل: ' + photoError)
+    try {
+      setSavingStage('جارٍ حفظ بيانات السيارة...')
+      const insertPromise = supabase.from('vehicles').insert(payload).select('id').single()
+      const insertResult = await Promise.race([
+        insertPromise,
+        new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('انتهت مهلة حفظ البيانات. تحقق من اتصال الإنترنت ثم حدّث الصفحة قبل إعادة المحاولة.')), 30000))
+      ])
+      if (insertResult.error || !insertResult.data) {
+        const message = insertResult.error?.message || 'تعذر حفظ بيانات السيارة.'
+        setError(message.includes('Could not find the table') ? 'قاعدة بيانات السيارات لم تُفعّل بعد. يلزم تطبيق Migration السيارات والطلبات أولًا.' : 'تعذر حفظ بيانات السيارة: ' + message)
+        return
+      }
+      savedVehicleId = insertResult.data.id
+      setSavingStage('تم حفظ بيانات السيارة. جارٍ رفع الصور (قد يستغرق ذلك بعض الوقت)...')
+      for (let index = 0; index < photos.length; index++) {
+        const photo = photos[index]
+        const safeName = photo.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-100) || 'vehicle-photo'
+        const storagePath = organization.id + '/' + savedVehicleId + '/' + crypto.randomUUID() + '-' + safeName
+        const uploadPromise = supabase.storage.from('vehicle-images').upload(storagePath, photo, { contentType: photo.type, upsert: false })
+        const upload = await Promise.race([
+          uploadPromise,
+          new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('تأخر رفع الصورة رقم ' + (index + 1) + '. بيانات السيارة محفوظة بالفعل؛ يمكنك إعادة فتح الصفحة والتواصل مع الدعم لإكمال الصور.')), 45000))
+        ])
+        if (upload.error) throw new Error('تم حفظ بيانات السيارة، لكن تعذر رفع الصورة رقم ' + (index + 1) + ': ' + upload.error.message)
+        uploadedPaths.push(storagePath)
+        setSavingStage('تم رفع ' + uploadedPaths.length + ' من ' + photos.length + ' صور...')
+      }
+      setSavingStage('جارٍ إنهاء حفظ صور السيارة...')
+      const imageRows = uploadedPaths.map((storage_path, index) => ({ vehicle_id: savedVehicleId, organization_id: organization.id, storage_path, alt_text: payload.make + ' ' + payload.model, sort_order: index, created_by: user.id }))
+      const imageInsertPromise = supabase.from('vehicle_images').insert(imageRows)
+      const imageInsert = await Promise.race([
+        imageInsertPromise,
+        new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('تم حفظ بيانات السيارة ورفع الصور، لكن تأخر ربط الصور بالسجل. حدّث الصفحة قبل أي محاولة جديدة.')), 30000))
+      ])
+      if (imageInsert.error) throw new Error('تم حفظ بيانات السيارة، لكن تعذر ربط الصور بها: ' + imageInsert.error.message)
+      setNotice('تم حفظ السيارة ورفع ' + photos.length + ' صور بنجاح. السيارة قيد مراجعة الإدارة وحالة الدفع معلّقة؛ لم يتم تحصيل أي مبلغ من خلال المنصة.')
       formElement.reset()
       photoPreviews.forEach(photo => URL.revokeObjectURL(photo.url))
       setPhotoPreviews([])
+      setSelectedMake(''); setSelectedModel(''); setInferredType(''); setInferredSeats(5); setProfileConfidence('low')
       await loadWorkspace()
-      return
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع أثناء حفظ السيارة.'
+      if (savedVehicleId) {
+        setError(message + ' رقم سجل السيارة: ' + savedVehicleId + '. لا تعِد إرسال النموذج قبل تحديث الصفحة والتحقق من ظهور السيارة.')
+        await loadWorkspace()
+      } else {
+        setError(message)
+      }
+    } finally {
+      setSaving(false)
+      setSavingStage('')
     }
-    setNotice('تم حفظ السيارة ورفع ' + photos.length + ' صور بنجاح. السيارة قيد مراجعة الإدارة وحالة الدفع معلّقة؛ لم يتم تحصيل أي مبلغ من خلال المنصة.')
-    formElement.reset()
-    photoPreviews.forEach(photo => URL.revokeObjectURL(photo.url))
-    setPhotoPreviews([])
-    await loadWorkspace()
   }
 
   async function saveRequest(event: FormEvent<HTMLFormElement>) {
@@ -258,7 +283,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     {photoPreviews.length > 0 && <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:col-span-2">{photoPreviews.map((photo,index)=><div key={photo.url} className="relative overflow-hidden rounded-xl border bg-slate-50"><img src={photo.url} alt={'معاينة صورة السيارة '+(index+1)} className="h-32 w-full object-cover"/><button type="button" onClick={() => { URL.revokeObjectURL(photo.url); setPhotoPreviews(current => current.filter(item => item.url !== photo.url)); }} className="absolute left-2 top-2 rounded-full bg-white/95 p-1 text-slate-700 shadow" aria-label="حذف الصورة من الاختيار"><X size={16}/></button><p className="truncate px-2 py-1 text-xs text-slate-600">{photo.file.name}</p></div>)}</div>}
     <label className="text-sm font-bold sm:col-span-2">ملاحظات إضافية<textarea name="notes" maxLength={2000} rows={3} className={fieldClass} placeholder="حالة السيارة أو شروط التأجير"/></label>
     {role === 'owner' && <div className="rounded-xl bg-amber-50 p-4 text-sm leading-7 text-amber-900 sm:col-span-2"><strong>رسوم التسجيل:</strong> 300 جنيه لكل سيارة شهريًا. بعد حفظ البيانات، ستظل حالة السيارة «قيد المراجعة» وحالة الدفع «معلّق» إلى أن يتم التحويل والتحقق الإداري. لا يوجد دفع إلكتروني داخل المنصة حاليًا.</div>}
-    <button disabled={saving} className={primaryClass+' sm:col-span-2'}>{saving ? 'جارٍ الحفظ...' : 'حفظ وإرسال للمراجعة'} <CarFront size={18}/></button>
+    <button disabled={saving} className={primaryClass+' sm:col-span-2'}>{saving ? (savingStage || 'جارٍ الحفظ...') : 'حفظ وإرسال للمراجعة'} <CarFront size={18}/></button>
   </form></section>
   const requestForm = <section className="mt-6 rounded-3xl border bg-white p-6 sm:p-8"><button onClick={() => { window.location.href='/workspace/company/requests' }} className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-blue-700"><ArrowLeft size={17}/> رجوع لطلبات الشركة</button><h2 className="text-2xl font-extrabold">إنشاء طلب تأجير سيارات</h2><p className="mt-2 text-sm leading-7 text-slate-600">وضّح احتياج شركتك ليتمكن الملاك وموردو الأساطيل من تقديم عروض مناسبة.</p><form onSubmit={saveRequest} className="mt-6 grid gap-4 sm:grid-cols-2">
     <label className="text-sm font-bold">عنوان الطلب *<input name="title" required minLength={3} maxLength={140} className={fieldClass} placeholder="مثال: سيارات لفريق المبيعات"/></label>
