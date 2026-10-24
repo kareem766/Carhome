@@ -107,6 +107,7 @@ export default function VehicleCatalogPage() {
       .eq('vehicle_id', selected.id)
       .eq('company_organization_id', orgId)
       .eq('provider_organization_id', selected.organization_id)
+      .eq('status', 'open')
       .maybeSingle()
     if (lookupError) {
       setError('تعذر التحقق من المحادثة الحالية. تأكد من تحديث قاعدة البيانات ثم حاول مجددًا.')
@@ -133,6 +134,7 @@ export default function VehicleCatalogPage() {
             .eq('vehicle_id', selected.id)
             .eq('company_organization_id', orgId)
             .eq('provider_organization_id', selected.organization_id)
+      .eq('status', 'open')
             .maybeSingle()
           conversationId = raced?.id
         }
