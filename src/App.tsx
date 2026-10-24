@@ -6,6 +6,7 @@ import WorkspacePage from './components/WorkspacePage'
 import AdminReviewPage from './components/AdminReviewPage'
 import PlatformSettingsPage from './components/PlatformSettingsPage'
 import SubscriptionPlansPage from './components/SubscriptionPlansPage'
+import VehicleCatalogPage from './components/VehicleCatalogPage'
 import MessagingPage from './components/MessagingPage'
 import AuthCallbackPage from './components/AuthCallbackPage'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
@@ -85,6 +86,7 @@ export default function App() {
   if (path === '/auth/callback') return <AuthCallbackPage />
   if (path === '/workspace/admin/platform-settings') return <PlatformSettingsPage />
   if (path === '/workspace/admin/subscription-plans') return <SubscriptionPlansPage />
+  if (path === '/workspace/catalog') return <VehicleCatalogPage />
   if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <AdminReviewPage />
   if (path.includes('/messages')) return <MessagingPage />
   if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <WorkspacePage role="company" />
@@ -150,22 +152,23 @@ export default function App() {
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-xl">
-          <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-blue-200/50 blur-3xl" />
-          <div className="absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-emerald-100 blur-3xl" />
-          <div className="relative rounded-[2rem] border border-white bg-white p-5 shadow-soft sm:p-7">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-5">
-              <div><p className="text-sm font-semibold text-slate-500">مساحة عمل واحدة</p><h2 className="mt-1 text-xl font-extrabold text-navy">من الطلب إلى العرض</h2></div>
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50" style={{ color: settings.primary_color }}><CarFront size={26} /></span>
-            </div>
-            <div className="mt-5 space-y-3">
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-100" style={{ color: settings.primary_color }}><Building2 size={22} /></span><div className="flex-1"><p className="font-bold text-navy">الشركة الطالبة</p><p className="mt-1 text-sm text-slate-500">تحدد نوع السيارة والمدة والمنطقة المطلوبة</p></div><span className="text-xs font-bold" style={{ color: settings.primary_color }}>١</span></div></div>
-              <div className="me-8 h-5 border-r-2 border-dashed border-blue-200" />
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-100 text-emerald-700"><CarFront size={22} /></span><div className="flex-1"><p className="font-bold text-navy">المالك أو مورد الأسطول</p><p className="mt-1 text-sm text-slate-500">يراجع الطلب ويقدم عرضه من خلال المنصة</p></div><span className="text-xs font-bold text-emerald-700">٢</span></div></div>
-              <div className="me-8 h-5 border-r-2 border-dashed border-blue-200" />
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-white" style={{ color: settings.primary_color }}><CheckCircle2 size={22} /></span><div className="flex-1"><p className="font-bold text-navy">تواصل منظم</p><p className="mt-1 text-sm text-slate-500">يتفق الطرفان مباشرة خارج أي تحصيل مالي عبر المنصة</p></div><span className="text-xs font-bold" style={{ color: settings.primary_color }}>٣</span></div></div>
+        <div className="relative mx-auto w-full max-w-xl motion-safe:animate-fade-up">
+          <div className="absolute -right-7 -top-7 h-40 w-40 rounded-full bg-blue-300/30 blur-3xl" />
+          <div className="absolute -bottom-8 -left-8 h-44 w-44 rounded-full bg-emerald-300/20 blur-3xl" />
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-slate-900 p-2 shadow-2xl">
+            <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] sm:min-h-[440px]">
+              <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1400&q=90" alt="سيارة حديثة مناسبة للتنقلات والأعمال" className="absolute inset-0 h-full w-full object-cover motion-safe:animate-[catalogFloat_9s_ease-in-out_infinite]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/10 to-slate-900/10" />
+              <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-slate-950/75 p-5 text-white backdrop-blur-md sm:inset-x-6 sm:bottom-6">
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-200"><ShieldCheck size={15}/> تجربة منظمة وآمنة</div>
+                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">من البحث عن السيارة إلى التواصل</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-200">كتالوج معتمد، عروض واضحة، ومحادثات داخل المنصة.</p>
+                <div className="mt-4 flex flex-wrap gap-2"><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">سيارات معتمدة</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">بيانات المالك محمية</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">للشركات والأساطيل</span></div>
+              </div>
             </div>
           </div>
+          <div className="absolute -right-3 top-8 hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:block motion-safe:animate-[catalogFloat_6s_ease-in-out_infinite]"><span className="flex items-center gap-2 text-sm font-extrabold text-slate-800"><CarFront size={18} className="text-blue-700"/> كتالوج موحّد</span><p className="mt-1 text-xs text-slate-500">اختيارات واضحة في مكان واحد</p></div>
+          <div className="absolute -left-3 bottom-24 hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:block motion-safe:animate-[catalogFloat_7s_ease-in-out_infinite]"><span className="flex items-center gap-2 text-sm font-extrabold text-slate-800"><CheckCircle2 size={18} className="text-emerald-600"/> مراجعة واعتماد</span><p className="mt-1 text-xs text-slate-500">عرض السيارات المستوفية للشروط</p></div>
         </div>
       </section>
 
