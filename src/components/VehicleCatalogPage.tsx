@@ -9,6 +9,7 @@ type Vehicle = {
   with_driver: boolean; notes: string | null; organization_id: string; images: { url: string; alt_text: string }[]
 }
 type AdPlan = { id: string; name: string; description: string; duration_days: number; price_egp: number; features: string[] }
+type OwnedVehicle = { id: string; make: string; model: string; model_year: number; review_status: string }
 
 const money = (value: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(value)
 const questions = [
@@ -22,6 +23,11 @@ const questions = [
 export default function VehicleCatalogPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [plans, setPlans] = useState<AdPlan[]>([])
+  const [myVehicles, setMyVehicles] = useState<OwnedVehicle[]>([])
+  const [promotedIds, setPromotedIds] = useState<string[]>([])
+  const [selectedPlanId, setSelectedPlanId] = useState('')
+  const [selectedPromotionVehicle, setSelectedPromotionVehicle] = useState('')
+  const [submittingPromotion, setSubmittingPromotion] = useState(false)
   const [userId, setUserId] = useState('')
   const [orgId, setOrgId] = useState('')
   const [orgType, setOrgType] = useState('')
