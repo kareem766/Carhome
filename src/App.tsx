@@ -7,6 +7,7 @@ import AdminReviewPage from './components/AdminReviewPage'
 import PlatformSettingsPage from './components/PlatformSettingsPage'
 import SubscriptionPlansPage from './components/SubscriptionPlansPage'
 import VehicleCatalogPage from './components/VehicleCatalogPage'
+import AdvertisingPlansAdminPage from './components/AdvertisingPlansAdminPage'
 import MessagingPage from './components/MessagingPage'
 import AuthCallbackPage from './components/AuthCallbackPage'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
@@ -86,6 +87,7 @@ export default function App() {
   if (path === '/auth/callback') return <AuthCallbackPage />
   if (path === '/workspace/admin/platform-settings') return <PlatformSettingsPage />
   if (path === '/workspace/admin/subscription-plans') return <SubscriptionPlansPage />
+  if (path === '/workspace/admin/advertising-plans') return <AdvertisingPlansAdminPage />
   if (path === '/workspace/catalog') return <VehicleCatalogPage />
   if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <AdminReviewPage />
   if (path.includes('/messages')) return <MessagingPage />
