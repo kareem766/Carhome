@@ -163,7 +163,7 @@ export default function PlatformSettingsPage() {
               ['supplier_registration_enabled','تسجيل موردي الأساطيل'],
               ['maintenance_mode','وضع الصيانة (إيقاف الواجهة العامة)']
             ] as const).map(([key,label])=><label key={key} className="flex items-center gap-3 rounded-xl border p-4 text-sm font-bold"><input type="checkbox" checked={settings[key]} onChange={e=>update(key,e.target.checked)} className="h-4 w-4"/>{label}</label>)}
-            <p className="sm:col-span-2 rounded-xl bg-amber-50 p-3 text-xs leading-6 text-amber-900"><ShieldCheck className="ml-1 inline" size={15}/> إعدادات التسجيل والصيانة تُحفظ هنا، ويجب أن تعتمد مسارات التسجيل والواجهة عليها قبل تفعيل الإيقاف الفعلي حتى لا يُحجب وصول المستخدمين أو لوحة الإدارة.</p>
+            <p className="sm:col-span-2 rounded-xl bg-amber-50 p-3 text-xs leading-6 text-amber-900"><ShieldCheck className="ml-1 inline" size={15}/> تؤثر هذه الخيارات على مسارات التسجيل والواجهة العامة فقط؛ وتظل لوحة صاحب المنصة متاحة لإعادة تشغيل الخدمة، ولا تُحذف الحسابات القائمة.</p>
           </div>
         </section>
         <div className="sticky bottom-3 flex justify-end rounded-2xl border bg-white/95 p-3 shadow-lg backdrop-blur"><button disabled={saving || Boolean(uploading)} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-700 px-6 font-extrabold text-white disabled:opacity-50"><Save size={18}/>{saving ? 'جارٍ الحفظ...' : 'حفظ كل التعديلات'}</button></div>
