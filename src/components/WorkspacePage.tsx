@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { ArrowLeft, Building2, CarFront, ClipboardList, FileText, ImagePlus, LogOut, MessageCircle, Plus, RefreshCw, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { vehicleCatalog } from '../data/vehicleCatalog'
 
 type Role = 'company' | 'owner' | 'supplier'
 type Organization = { id: string; name: string; organization_type: string }
@@ -26,6 +27,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const [offerRequest, setOfferRequest] = useState<string | null>(null)
   const [paymentVehicle, setPaymentVehicle] = useState<string | null>(null)
   const [photoPreviews, setPhotoPreviews] = useState<{ file: File; url: string }[]>([])
+  const [selectedMake, setSelectedMake] = useState('')
+  const [selectedModel, setSelectedModel] = useState('')
   const path = window.location.pathname
   const isVehicleForm = path.endsWith('/vehicles/new')
   const isRequestForm = path.endsWith('/requests/new')
@@ -97,7 +100,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     const form = new FormData(formElement)
     const payload = {
       organization_id: organization.id, created_by: user.id,
-      make: String(form.get('make') || '').trim(), model: String(form.get('model') || '').trim(),
+      make: String(form.get('make') === 'أخرى / ماركة غير موجودة' ? form.get('custom_make') : form.get('make') || '').trim(), model: String(form.get('model') === 'أخرى / موديل غير موجود' ? form.get('custom_model') : form.get('model') || '').trim(),
       model_year: Number(form.get('model_year')), vehicle_type: String(form.get('vehicle_type') || ''),
       transmission: String(form.get('transmission') || 'automatic'), seats: Number(form.get('seats')),
       governorate: String(form.get('governorate') || ''), address: String(form.get('address') || '').trim(),
@@ -219,9 +222,11 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const header = <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-5"><div><p className="text-sm font-bold text-blue-700">Carhome</p><h1 className="mt-1 text-2xl font-extrabold text-slate-950">{names[role]}</h1><p className="mt-2 text-sm text-slate-500">{user.name} · {user.email} · {organization?.name}</p></div><div className="flex gap-2"><button onClick={() => void loadWorkspace()} className="rounded-xl border px-3 py-2 text-sm font-bold"><RefreshCw size={16}/></button><button onClick={signOut} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold"><LogOut size={16}/> تسجيل الخروج</button></div></header>
   const feedback = <>{error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}{notice && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">{notice}</p>}</>
   const vehicleForm = <section className="mt-6 rounded-3xl border border-slate-100 bg-white p-6 sm:p-8"><button onClick={() => { window.location.href = role === 'owner' ? '/workspace/owner/vehicles' : '/workspace/supplier/vehicles' }} className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-blue-700"><ArrowLeft size={17}/> رجوع لمساحة العمل</button><h2 className="text-2xl font-extrabold text-slate-950">تسجيل سيارة جديدة</h2><p className="mt-2 text-sm leading-7 text-slate-600">أدخل البيانات بدقة. ستظهر السيارة للشركات بعد اعتماد الإدارة واستيفاء متطلبات الدفع خارج المنصة.</p><form onSubmit={saveVehicle} className="mt-6 grid gap-4 sm:grid-cols-2">
-    <label className="text-sm font-bold">الماركة *<input name="make" required maxLength={80} className={fieldClass} placeholder="مثال: Toyota"/></label>
-    <label className="text-sm font-bold">الموديل *<input name="model" required maxLength={100} className={fieldClass} placeholder="مثال: Corolla"/></label>
-    <label className="text-sm font-bold">سنة الصنع *<input name="model_year" type="number" required min={1990} max={2100} defaultValue={new Date().getFullYear()} className={fieldClass}/></label>
+    <label className="text-sm font-bold">ماركة السيارة *<select name="make" required value={selectedMake} onChange={event => { setSelectedMake(event.target.value); setSelectedModel('') }} className={fieldClass}><option value="">اختر الماركة</option>{Object.keys(vehicleCatalog).map(make => <option key={make} value={make}>{make}</option>)}</select></label>
+    {selectedMake === 'أخرى / ماركة غير موجودة' && <label className="text-sm font-bold">اكتب اسم الماركة *<input name="custom_make" required maxLength={80} className={fieldClass} placeholder="اكتب اسم الماركة"/></label>}
+    <label className="text-sm font-bold">موديل السيارة *<select name="model" required value={selectedModel} onChange={event => setSelectedModel(event.target.value)} disabled={!selectedMake || selectedMake === 'أخرى / ماركة غير موجودة'} className={fieldClass}><option value="">اختر الموديل</option>{(vehicleCatalog[selectedMake] || []).map(model => <option key={model} value={model}>{model}</option>)}{selectedMake && <option value="أخرى / موديل غير موجود">موديل غير موجود بالقائمة</option>}</select></label>
+    {(selectedMake === 'أخرى / ماركة غير موجودة' || selectedModel === 'أخرى / موديل غير موجود') && <label className="text-sm font-bold">اكتب اسم الموديل *<input name="custom_model" required maxLength={100} className={fieldClass} placeholder="اكتب اسم الموديل"/></label>}
+    <label className="text-sm font-bold">سنة الصنع *<select name="model_year" required defaultValue={String(new Date().getFullYear())} className={fieldClass}><option value="">اختر سنة الصنع</option>{Array.from({length: new Date().getFullYear() - 1949 + 1}, (_, index) => new Date().getFullYear() + 1 - index).map(year => <option key={year} value={year}>{year}</option>)}</select></label>
     <label className="text-sm font-bold">نوع السيارة *<select name="vehicle_type" required className={fieldClass}><option value="">اختر النوع</option>{vehicleTypes.map(v=><option key={v}>{v}</option>)}</select></label>
     <label className="text-sm font-bold">ناقل الحركة *<select name="transmission" className={fieldClass}><option value="automatic">أوتوماتيك</option><option value="manual">مانيوال</option></select></label>
     <label className="text-sm font-bold">عدد المقاعد *<input name="seats" type="number" required min={2} max={60} defaultValue={5} className={fieldClass}/></label>
