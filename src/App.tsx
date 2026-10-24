@@ -62,6 +62,10 @@ export default function App() {
 
   useEffect(() => {
     document.title = settings.platform_name || defaults.platform_name
+    const descriptionMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]')
+    if (descriptionMeta) descriptionMeta.content = settings.description || defaults.description
+    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    if (themeMeta) themeMeta.content = settings.primary_color || defaults.primary_color
     document.documentElement.style.setProperty('--platform-primary', settings.primary_color || defaults.primary_color)
     document.documentElement.style.setProperty('--platform-secondary', settings.secondary_color || defaults.secondary_color)
     if (settings.favicon_url) {
