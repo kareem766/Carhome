@@ -101,21 +101,69 @@ export default function VehicleCatalogPage() {
     if (orgType !== 'company') { setError('بدء محادثة مباشرة مع مالك السيارة متاح لحسابات الشركات.'); return }
     if (selected.organization_id === orgId) { setError('لا يمكنك بدء محادثة مع مؤسستك نفسها.'); return }
     setSending(true); setError('')
-    const { data: existing } = await supabase.from('conversations').select('id').eq('vehicle_id',selected.id).eq('company_organization_id',orgId).eq('provider_organization_id',selected.organization_id).maybeSingle()
+    const { data: existing, error: lookupError } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('vehicle_id', selected.id)
+      .eq('company_organization_id', orgId)
+      .eq('provider_organization_id', selected.organization_id)
+      .maybeSingle()
+    if (lookupError) {
+      setError('تعذر التحقق من المحادثة الحالية. تأكد من تحديث قاعدة البيانات ثم حاول مجددًا.')
+      setSending(false)
+      return
+    }
     let conversationId = existing?.id
+    let isNewConversation = false
     if (!conversationId) {
       const { data, error: createError } = await supabase.from('conversations').insert({
-        request_id:null, vehicle_id:selected.id, company_organization_id:orgId, provider_organization_id:selected.organization_id,
-        created_by:userId, status:'open'
+        request_id: null,
+        vehicle_id: selected.id,
+        company_organization_id: orgId,
+        provider_organization_id: selected.organization_id,
+        created_by: userId,
+        status: 'open'
       }).select('id').single()
-      if (createError) { setError('تعذر بدء المحادثة. تأكد من تحديث قاعدة البيانات ثم حاول مجددًا.'); setSending(false); return }
-      conversationId = data.id
+      if (createError) {
+        // A second company member may have created this conversation at the same time.
+        if (createError.code === '23505') {
+          const { data: raced } = await supabase
+            .from('conversations')
+            .select('id')
+            .eq('vehicle_id', selected.id)
+            .eq('company_organization_id', orgId)
+            .eq('provider_organization_id', selected.organization_id)
+            .maybeSingle()
+          conversationId = raced?.id
+        }
+        if (!conversationId) {
+          setError('تعذر بدء المحادثة. تأكد من تحديث قاعدة البيانات ثم حاول مجددًا.')
+          setSending(false)
+          return
+        }
+      } else {
+        conversationId = data.id
+        isNewConversation = true
+      }
     }
-    const initial = offerText.trim() || `مرحبًا، أود الاستفسار عن السيارة ${selected.make} ${selected.model} ${selected.model_year}.`
-    const { error: messageError } = await supabase.from('messages').insert({ conversation_id:conversationId,sender_organization_id:orgId,sender_id:userId,body:initial })
+    const initial = offerText.trim() || (isNewConversation
+      ? `مرحبًا، أود الاستفسار عن السيارة ${selected.make} ${selected.model} ${selected.model_year}.`
+      : '')
+    if (initial) {
+      const { error: messageError } = await supabase.from('messages').insert({
+        conversation_id: conversationId,
+        sender_organization_id: orgId,
+        sender_id: userId,
+        body: initial
+      })
+      if (messageError) {
+        setSending(false)
+        setError('تم فتح المحادثة لكن تعذر إرسال الرسالة الأولى: ' + messageError.message)
+        return
+      }
+    }
     setSending(false)
-    if (messageError) { setError('تم فتح المحادثة لكن تعذر إرسال الرسالة الأولى: '+messageError.message); return }
-    window.location.href = '/messages?conversation='+conversationId
+    window.location.href = '/messages?conversation=' + conversationId
   }
 
   async function requestPromotion() {
