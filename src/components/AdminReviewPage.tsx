@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Building2, CheckCircle2, LogOut, Pencil, Plus, RefreshCw, Trash2, UserRound, XCircle } from 'lucide-react'
+import { Building2, CheckCircle2, LogOut, Pencil, Plus, RefreshCw, UserRound, XCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type ProfileRow = { id: string; display_name: string; phone: string | null; contact_email: string | null; address: string | null; created_at: string }
@@ -190,16 +190,6 @@ export default function AdminReviewPage() {
     resetOrganizationForm()
     await load()
   }
-  async function deleteOrganization(row: OrganizationRow) {
-    if (!supabase || !window.confirm('هل تريد حذف مؤسسة "' + row.name + '"؟ قد يمنع وجود طلبات أو سيارات مرتبطة حذفها.')) return
-    setBusyId(row.id); setError(''); setNotice('')
-    const { error: deleteError } = await supabase.from('organizations').delete().eq('id', row.id)
-    setBusyId('')
-    if (deleteError) { setError('تعذر حذف المؤسسة. قد تكون مرتبطة بسيارات أو طلبات أو محادثات. التفاصيل: ' + deleteError.message); return }
-    setNotice('تم حذف المؤسسة.')
-    if (editingOrganizationId === row.id) resetOrganizationForm()
-    await load()
-  }
   async function signOut() { if (supabase) await supabase.auth.signOut(); window.location.replace('/') }
   const methodName: Record<string,string> = { instapay:'InstaPay', vodafone_cash:'Vodafone Cash', bank_transfer:'تحويل بنكي' }
   return <main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6"><div className="mx-auto max-w-6xl">
@@ -228,7 +218,7 @@ export default function AdminReviewPage() {
       </section>
       <section className="mt-7 rounded-2xl border bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><h2 className="flex items-center gap-2 text-xl font-extrabold"><Building2 size={21}/> إدارة المؤسسات ({organizations.length})</h2><p className="mt-1 text-sm text-slate-500">إضافة وتعديل بيانات المؤسسة. الحذف متاح فقط عندما تسمح علاقات قاعدة البيانات بذلك.</p></div>
+          <div><h2 className="flex items-center gap-2 text-xl font-extrabold"><Building2 size={21}/> إدارة المؤسسات ({organizations.length})</h2><p className="mt-1 text-sm text-slate-500">إضافة وتعديل بيانات المؤسسة. تم إيقاف الحذف المباشر لحماية السيارات والطلبات والعروض والمحادثات المرتبطة بها.</p></div>
           <button onClick={() => { resetOrganizationForm(); setNotice(''); setError('') }} className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white"><Plus size={16}/> مؤسسة جديدة</button>
         </div>
         <form onSubmit={saveOrganization} className="mt-4 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
@@ -251,7 +241,7 @@ export default function AdminReviewPage() {
         <div className="mt-4 space-y-2">
           {organizations.map(org=><article key={org.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
             <div><h3 className="font-extrabold">{org.name}</h3><p className="mt-1 text-sm text-slate-600">{org.organization_type === 'individual_owner' ? 'مالك سيارة' : org.organization_type === 'fleet_supplier' ? 'مورد أسطول' : 'شركة طالبة'} · {org.city || 'المدينة غير محددة'}</p><p className="mt-1 text-xs text-slate-500">{org.contact_name || 'بدون مسؤول تواصل'} · {org.contact_email || 'بدون بريد مسجل'}{org.fleet_vehicle_count == null ? '' : ' · أسطول: ' + org.fleet_vehicle_count + ' سيارة'}</p></div>
-            <div className="flex gap-2"><button onClick={()=>startOrganizationEdit(org)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-bold"><Pencil size={15}/> تعديل</button><button disabled={busyId===org.id} onClick={()=>void deleteOrganization(org)} className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-700 disabled:opacity-50"><Trash2 size={15}/> حذف</button></div>
+            <div className="flex gap-2"><button onClick={()=>startOrganizationEdit(org)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-bold"><Pencil size={15}/> تعديل</button></div>
           </article>)}
           {organizations.length===0 && <p className="rounded-xl border border-dashed p-5 text-sm text-slate-500">لا توجد مؤسسات مسجلة.</p>}
         </div>
