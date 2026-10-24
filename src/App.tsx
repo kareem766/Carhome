@@ -5,6 +5,7 @@ import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistra
 import WorkspacePage from './components/WorkspacePage'
 import AdminReviewPage from './components/AdminReviewPage'
 import PlatformSettingsPage from './components/PlatformSettingsPage'
+import SubscriptionPlansPage from './components/SubscriptionPlansPage'
 import MessagingPage from './components/MessagingPage'
 import AuthCallbackPage from './components/AuthCallbackPage'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
@@ -83,6 +84,7 @@ export default function App() {
   const path = window.location.pathname
   if (path === '/auth/callback') return <AuthCallbackPage />
   if (path === '/workspace/admin/platform-settings') return <PlatformSettingsPage />
+  if (path === '/workspace/admin/subscription-plans') return <SubscriptionPlansPage />
   if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <AdminReviewPage />
   if (path.includes('/messages')) return <MessagingPage />
   if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <WorkspacePage role="company" />
