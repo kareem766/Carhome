@@ -29,7 +29,7 @@ export default function App() {
   if (path === '/register/owner') return <RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} />
   if (path === '/register/company') return <RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} />
   if (path === '/register/supplier') return <RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} />
-  if (path === '/workspace/admin/vehicle-reviews') return <AdminReviewPage />
+  if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <AdminReviewPage />
   if (path.includes('/messages')) return <MessagingPage />
   if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <WorkspacePage role="company" />
   if (path.startsWith('/workspace/owner')) return <WorkspacePage role="owner" />
