@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { ArrowLeft, Building2, CarFront, CheckCircle2, ShieldCheck, Users } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
-import WorkspacePage from './components/WorkspacePage'
-import AdminReviewPage from './components/AdminReviewPage'
-import PlatformSettingsPage from './components/PlatformSettingsPage'
-import SubscriptionPlansPage from './components/SubscriptionPlansPage'
-import VehicleCatalogPage from './components/VehicleCatalogPage'
-import AdvertisingPlansAdminPage from './components/AdvertisingPlansAdminPage'
-import MessagingPage from './components/MessagingPage'
-import AuthCallbackPage from './components/AuthCallbackPage'
+const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
+const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
+const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
+const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
+const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
+const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPlansAdminPage'))
+const MessagingPage = lazy(() => import('./components/MessagingPage'))
+const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 
 type PlatformSettings = {
@@ -32,6 +32,12 @@ const features = [
   { icon: Building2, title: 'تواصل بين الشركات والموردين', description: 'مساحة منظمة لطلبات التأجير واستقبال العروض.' },
   { icon: ShieldCheck, title: 'خصوصية وأمان', description: 'صلاحيات وصول مبنية على الحساب وعضوية المؤسسة.' }
 ]
+
+function RouteLoading() {
+  return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5 text-slate-600">
+    <div className="rounded-2xl border bg-white px-6 py-5 text-sm font-bold shadow-sm" role="status">جارٍ تحميل الصفحة...</div>
+  </main>
+}
 
 function ServiceNotice({ title, message, settings }: { title: string; message: string; settings: PlatformSettings }) {
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5">
@@ -84,16 +90,16 @@ export default function App() {
   }
 
   const path = window.location.pathname
-  if (path === '/auth/callback') return <AuthCallbackPage />
-  if (path === '/workspace/admin/platform-settings') return <PlatformSettingsPage />
-  if (path === '/workspace/admin/subscription-plans') return <SubscriptionPlansPage />
-  if (path === '/workspace/admin/advertising-plans') return <AdvertisingPlansAdminPage />
-  if (path === '/workspace/catalog') return <VehicleCatalogPage />
-  if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <AdminReviewPage />
-  if (path.includes('/messages')) return <MessagingPage />
-  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <WorkspacePage role="company" />
-  if (path.startsWith('/workspace/owner')) return <WorkspacePage role="owner" />
-  if (path.startsWith('/workspace/supplier')) return <WorkspacePage role="supplier" />
+  if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
+  if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading />}><PlatformSettingsPage /></Suspense>
+  if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense>
+  if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense>
+  if (path === '/workspace/catalog') return <Suspense fallback={<RouteLoading />}><VehicleCatalogPage /></Suspense>
+  if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<RouteLoading />}><AdminReviewPage /></Suspense>
+  if (path.includes('/messages')) return <Suspense fallback={<RouteLoading />}><MessagingPage /></Suspense>
+  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<RouteLoading />}><WorkspacePage role="company" /></Suspense>
+  if (path.startsWith('/workspace/owner')) return <Suspense fallback={<RouteLoading />}><WorkspacePage role="owner" /></Suspense>
+  if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<RouteLoading />}><WorkspacePage role="supplier" /></Suspense>
 
   if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
   if (settings.maintenance_mode && (path === '/' || path === '/register' || path.startsWith('/register/'))) {
