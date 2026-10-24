@@ -5,7 +5,7 @@ create index if not exists conversations_vehicle_participants_idx
   on public.conversations(vehicle_id, company_organization_id, provider_organization_id);
 create unique index if not exists conversations_vehicle_participants_unique_idx
   on public.conversations(vehicle_id, company_organization_id, provider_organization_id)
-  where vehicle_id is not null;
+  where vehicle_id is not null and status = 'open';
 
 alter table public.conversations drop constraint if exists conversations_request_or_vehicle_required;
 alter table public.conversations add constraint conversations_request_or_vehicle_required
