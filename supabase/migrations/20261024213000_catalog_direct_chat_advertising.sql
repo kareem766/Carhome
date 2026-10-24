@@ -164,3 +164,29 @@ using (
   and (starts_at is null or starts_at <= now())
   and (ends_at is null or ends_at > now())
 );
+
+drop policy if exists "vehicle_images_storage_select_authorized" on storage.objects;
+create policy "vehicle_images_storage_select_authorized"
+on storage.objects for select to authenticated
+using (
+  bucket_id = 'vehicle-images'
+  and (
+    exists (
+      select 1 from public.organization_memberships m
+      where m.user_id = auth.uid()
+        and m.organization_id::text = (storage.foldername(objects.name))[1]
+    )
+    or exists (select 1 from public.platform_admins a where a.user_id = auth.uid())
+    or exists (
+      select 1 from public.vehicle_images vi
+      join public.vehicles v on v.id = vi.vehicle_id
+      join public.organizations provider on provider.id = v.organization_id
+      join public.organization_memberships viewer on viewer.user_id = auth.uid()
+      where vi.storage_path = objects.name
+        and v.organization_id::text = (storage.foldername(objects.name))[1]
+        and v.id::text = (storage.foldername(objects.name))[2]
+        and v.review_status = 'approved'
+        and (provider.organization_type = 'fleet_supplier' or v.payment_status in ('verified','waived'))
+    )
+  )
+);
