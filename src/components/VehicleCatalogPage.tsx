@@ -63,6 +63,16 @@ export default function VehicleCatalogPage() {
       if (active) setVehicles(rows.map(v=>({...v,images:signed.filter((img):img is {vehicle_id:string;url:string;alt_text:string}=>Boolean(img&&img.vehicle_id===v.id)).map(img=>({url:img.url,alt_text:img.alt_text}))})))
       const { data: adPlans } = await supabase.from('advertising_plans').select('id,name,description,duration_days,price_egp,features').eq('is_active',true).order('display_order')
       if (active) setPlans((adPlans || []) as AdPlan[])
+      if (['individual_owner','fleet_supplier'].includes(String(org?.organization_type || ''))) {
+        const { data: owned } = await supabase.from('vehicles').select('id,make,model,model_year,review_status').eq('organization_id',membership.organization_id).eq('review_status','approved').order('created_at',{ascending:false})
+        if (active) setMyVehicles((owned || []) as OwnedVehicle[])
+      }
+      const { data: promotions } = await supabase.from('vehicle_promotions').select('vehicle_id').eq('status','approved').in('payment_status',['verified','waived'])
+      if (active) {
+        const promoted = (promotions || []).map(p => p.vehicle_id)
+        setPromotedIds(promoted)
+        setVehicles(current => [...current].sort((a,b) => Number(promoted.includes(b.id))-Number(promoted.includes(a.id))))
+      }
       if (active) setLoading(false)
     }
     void load()
