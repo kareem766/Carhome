@@ -151,13 +151,10 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           identifier.includes('@') ? { email: identifier.toLowerCase(), password } : { phone: identifier, password }
         )
         if (signInError) throw signInError
-        if (data.user) await prepareAccount(data.user, String(data.user.user_metadata?.display_name || ''))
-        setSession(data.session)
-        const role = data.user?.user_metadata?.organization_type
-        if (role === 'company') window.location.href = '/workspace/company'
-        else if (role === 'fleet_supplier') window.location.href = '/workspace/supplier/vehicles'
-        else if (role === 'individual_owner') window.location.href = '/workspace/owner/vehicles'
-        setNotice('تم تسجيل الدخول وتجهيز حسابك.')
+        if (!data.user || !data.session) throw new Error('تم تسجيل الدخول لكن لم يتم إنشاء جلسة صالحة. حاول مرة أخرى.')
+        // Use the shared callback to recover incomplete accounts and route every role consistently.
+        window.location.replace('/auth/callback')
+        return
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع. حاول مرة أخرى.'
@@ -207,7 +204,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                 <p className="mt-2 break-all text-sm text-slate-600">{session.user.email}</p>
                 <p className="mt-2 text-sm text-slate-600">{String(session.user.user_metadata?.display_name || 'مستخدم Carhome')}</p>
               </div>
-              <button onClick={handleSignOut} disabled={loading} className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 font-bold text-navy hover:bg-slate-50 disabled:opacity-60">
+              <button onClick={() => { window.location.href = '/auth/callback' }} className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white hover:bg-blue-700">متابعة إلى مساحة العمل</button>
+              <button onClick={handleSignOut} disabled={loading} className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 font-bold text-navy hover:bg-slate-50 disabled:opacity-60">
                 {loading ? <LoaderCircle className="animate-spin" size={18} /> : <LogOut size={18} />} تسجيل الخروج
               </button>
             </div>
