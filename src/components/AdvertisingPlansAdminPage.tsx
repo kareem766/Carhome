@@ -4,7 +4,8 @@ import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 
 type Plan = { id: string; name: string; description: string; duration_days: number; price_egp: number; features: string[]; display_order: number; is_active: boolean }
-type Draft = Omit<Plan,'id'> & { id?: string }\ntype Promotion = { id:string; vehicle_id:string; organization_id:string; advertising_plan_id:string; status:string; payment_status:string; created_at:string; starts_at:string|null; ends_at:string|null; admin_notes:string|null; vehicles:{make:string;model:string;model_year:number}|null; organizations:{name:string}|null; advertising_plans:{name:string;duration_days:number;price_egp:number}|null }
+type Draft = Omit<Plan,'id'> & { id?: string }
+type Promotion = { id:string; vehicle_id:string; organization_id:string; advertising_plan_id:string; status:string; payment_status:string; created_at:string; starts_at:string|null; ends_at:string|null; admin_notes:string|null; vehicles:{make:string;model:string;model_year:number}|null; organizations:{name:string}|null; advertising_plans:{name:string;duration_days:number;price_egp:number}|null }
 const blank: Draft = { name:'',description:'',duration_days:7,price_egp:0,features:[],display_order:0,is_active:false }
 const field='mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-600'
 export default function AdvertisingPlansAdminPage() {
