@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Building2, CheckCircle2, LogOut, Pencil, Plus, RefreshCw, Trash2, XCircle } from 'lucide-react'
+import { Building2, CheckCircle2, LogOut, Pencil, Plus, RefreshCw, Trash2, UserRound, XCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
+type ProfileRow = { id: string; display_name: string; phone: string | null; contact_email: string | null; address: string | null; created_at: string }
+type ProfileForm = { display_name: string; phone: string; contact_email: string; address: string }
+const emptyProfile: ProfileForm = { display_name: '', phone: '', contact_email: '', address: '' }
 type OrganizationRow = { id: string; name: string; organization_type: 'individual_owner' | 'company' | 'fleet_supplier'; city: string | null; contact_name: string | null; contact_email: string | null; address: string | null; company_type: string | null; fleet_vehicle_count: number | null; created_at: string }
 type OrganizationForm = { name: string; organization_type: 'individual_owner' | 'company' | 'fleet_supplier'; city: string; contact_name: string; contact_email: string; address: string; company_type: string; fleet_vehicle_count: string }
 const emptyOrganization: OrganizationForm = { name: '', organization_type: 'company', city: '', contact_name: '', contact_email: '', address: '', company_type: '', fleet_vehicle_count: '' }
@@ -13,6 +16,10 @@ export default function AdminReviewPage() {
   const [loading, setLoading] = useState(true)
   const [vehicles, setVehicles] = useState<VehicleRow[]>([])
   const [organizations, setOrganizations] = useState<OrganizationRow[]>([])
+  const [profiles, setProfiles] = useState<ProfileRow[]>([])
+  const [editingProfileId, setEditingProfileId] = useState<string | null>(null)
+  const [profileForm, setProfileForm] = useState<ProfileForm>(emptyProfile)
+  const [savingProfile, setSavingProfile] = useState(false)
   const [organizationForm, setOrganizationForm] = useState<OrganizationForm>(emptyOrganization)
   const [editingOrganizationId, setEditingOrganizationId] = useState<string | null>(null)
   const [savingOrganization, setSavingOrganization] = useState(false)
@@ -30,10 +37,11 @@ export default function AdminReviewPage() {
     if (adminError) { setError('تعذر التحقق من صلاحية الإدارة. تأكد من تطبيق Migration صلاحيات المراجعة.'); setLoading(false); return }
     if (!admin) { setError('هذا الحساب غير مفعّل كمسؤول للمنصة. لا يمكن فتح لوحة المراجعة.'); setAuthorized(false); setLoading(false); return }
     setAuthorized(true)
-    const [vehicleResult,paymentResult,organizationResult] = await Promise.all([
+    const [vehicleResult,paymentResult,organizationResult,profileResult] = await Promise.all([
       supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,address,monthly_price_egp,yearly_price_egp,with_driver,notes,review_status,payment_status,organizations(name)').in('review_status',['pending_review','rejected']).order('created_at',{ascending:false}),
       supabase.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,period_months,transfer_method,transfer_reference,review_status,created_at,vehicles(make,model),organizations(name,organization_type)').eq('review_status','pending').order('created_at',{ascending:false}),
-      supabase.from('organizations').select('id,name,organization_type,city,contact_name,contact_email,address,company_type,fleet_vehicle_count,created_at').order('created_at',{ascending:false})
+      supabase.from('organizations').select('id,name,organization_type,city,contact_name,contact_email,address,company_type,fleet_vehicle_count,created_at').order('created_at',{ascending:false}),
+      supabase.from('profiles').select('id,display_name,phone,contact_email,address,created_at').order('created_at',{ascending:false})
     ])
     if (vehicleResult.error) setError(vehicleResult.error.message); else {
       const vehicleRows = (vehicleResult.data || []) as unknown as VehicleRow[]
@@ -49,9 +57,27 @@ export default function AdminReviewPage() {
     }
     if (paymentResult.error) setError(paymentResult.error.message); else setPayments((paymentResult.data || []) as unknown as PaymentRow[])
     if (organizationResult.error) setError('تعذر تحميل المؤسسات: ' + organizationResult.error.message); else setOrganizations((organizationResult.data || []) as OrganizationRow[])
+    if (profileResult.error) setError('تعذر تحميل الحسابات: ' + profileResult.error.message); else setProfiles((profileResult.data || []) as ProfileRow[])
     setLoading(false)
   }
   useEffect(() => { void load() }, [])
+  function startProfileEdit(row: ProfileRow) {
+    setEditingProfileId(row.id)
+    setProfileForm({ display_name: row.display_name || '', phone: row.phone || '', contact_email: row.contact_email || '', address: row.address || '' })
+    setError(''); setNotice('')
+  }
+  async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!supabase || !editingProfileId || !profileForm.display_name.trim()) return
+    setSavingProfile(true); setError(''); setNotice('')
+    const { error: updateError } = await supabase.from('profiles').update({ display_name: profileForm.display_name.trim(), phone: profileForm.phone.trim() || null, contact_email: profileForm.contact_email.trim() || null, address: profileForm.address.trim() || null }).eq('id', editingProfileId)
+    setSavingProfile(false)
+    if (updateError) { setError('تعذر تحديث بيانات الحساب: ' + updateError.message); return }
+    setNotice('تم تحديث بيانات الحساب. لم يتم تغيير البريد الأساسي أو كلمة المرور.')
+    setEditingProfileId(null); setProfileForm(emptyProfile)
+    await load()
+  }
+
   async function reviewVehicle(id: string, status: 'approved' | 'rejected') {
     if (!supabase) return
     setBusyId(id); setError(''); setNotice('')
@@ -128,6 +154,25 @@ export default function AdminReviewPage() {
     {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}{notice && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">{notice}</p>}
     {loading ? <p className="py-12 text-center text-slate-500">جارٍ تحميل المراجعات...</p> : authorized && <>
 
+      <section className="mt-7 rounded-2xl border bg-white p-5">
+        <div className="flex items-center gap-2"><UserRound size={21}/><h2 className="text-xl font-extrabold">إدارة بيانات الحسابات ({profiles.length})</h2></div>
+        <p className="mt-1 text-sm text-slate-500">عرض وتعديل الاسم وبيانات التواصل فقط. تغيير البريد الأساسي أو كلمة المرور أو حذف حساب الدخول يحتاج إجراءً إداريًا آمنًا منفصلًا.</p>
+        <div className="mt-4 space-y-3">
+          {profiles.map(profile=><article key={profile.id} className="rounded-xl border p-4">
+            {editingProfileId === profile.id ? <form onSubmit={saveProfile} className="grid gap-3 sm:grid-cols-2">
+              <label className="text-sm font-bold">الاسم الظاهر *<input required maxLength={160} value={profileForm.display_name} onChange={e=>setProfileForm({...profileForm,display_name:e.target.value})} className="mt-1 w-full rounded-lg border px-3 py-2 font-normal"/></label>
+              <label className="text-sm font-bold">هاتف التواصل<input maxLength={40} value={profileForm.phone} onChange={e=>setProfileForm({...profileForm,phone:e.target.value})} className="mt-1 w-full rounded-lg border px-3 py-2 font-normal"/></label>
+              <label className="text-sm font-bold">بريد التواصل<input type="email" maxLength={254} value={profileForm.contact_email} onChange={e=>setProfileForm({...profileForm,contact_email:e.target.value})} className="mt-1 w-full rounded-lg border px-3 py-2 font-normal"/></label>
+              <label className="text-sm font-bold">العنوان<input maxLength={300} value={profileForm.address} onChange={e=>setProfileForm({...profileForm,address:e.target.value})} className="mt-1 w-full rounded-lg border px-3 py-2 font-normal"/></label>
+              <div className="flex gap-2 sm:col-span-2"><button disabled={savingProfile} className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{savingProfile ? 'جارٍ الحفظ...' : 'حفظ بيانات الحساب'}</button><button type="button" onClick={()=>{setEditingProfileId(null);setProfileForm(emptyProfile)}} className="rounded-lg border px-4 py-2 text-sm font-bold">إلغاء</button></div>
+            </form> : <div className="flex flex-wrap items-center justify-between gap-3">
+              <div><h3 className="font-extrabold">{profile.display_name}</h3><p className="mt-1 text-sm text-slate-600">{profile.contact_email || 'لا يوجد بريد تواصل'} · {profile.phone || 'لا يوجد هاتف'}</p><p className="mt-1 text-xs text-slate-500">{profile.address || 'لا يوجد عنوان'} · تاريخ إنشاء الملف: {new Date(profile.created_at).toLocaleDateString('ar-EG')}</p><p className="mt-1 break-all text-[11px] text-slate-400">معرّف الحساب: {profile.id}</p></div>
+              <button onClick={()=>startProfileEdit(profile)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-bold"><Pencil size={15}/> تعديل البيانات</button>
+            </div>}
+          </article>)}
+          {profiles.length===0 && <p className="rounded-xl border border-dashed p-5 text-sm text-slate-500">لا توجد ملفات شخصية ظاهرة.</p>}
+        </div>
+      </section>
       <section className="mt-7 rounded-2xl border bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div><h2 className="flex items-center gap-2 text-xl font-extrabold"><Building2 size={21}/> إدارة المؤسسات ({organizations.length})</h2><p className="mt-1 text-sm text-slate-500">إضافة وتعديل بيانات المؤسسة. الحذف متاح فقط عندما تسمح علاقات قاعدة البيانات بذلك.</p></div>
