@@ -25,6 +25,24 @@ async function finishAccount(user: User) {
     ? metadata.organization_type
     : 'individual_owner') as AccountRole
   const organizationName = String(metadata.organization_name || displayName).trim()
+  let logoPath: string | null = null
+  const pendingLogo = localStorage.getItem('carhome_pending_company_logo')
+  if (role === 'company' && pendingLogo) {
+    try {
+      const response = await fetch(pendingLogo)
+      const logoBlob = await response.blob()
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(logoBlob.type) || logoBlob.size > 2 * 1024 * 1024) {
+        throw new Error('صيغة لوجو الشركة غير مدعومة أو حجم الملف أكبر من 2 ميجابايت.')
+      }
+      const extension = logoBlob.type === 'image/png' ? 'png' : logoBlob.type === 'image/webp' ? 'webp' : 'jpg'
+      logoPath = `${user.id}/logo-${Date.now()}.${extension}`
+      const uploaded = await supabase.storage.from('organization-logos').upload(logoPath, logoBlob, { contentType: logoBlob.type, upsert: false })
+      if (uploaded.error) throw uploaded.error
+      localStorage.removeItem('carhome_pending_company_logo')
+    } catch (logoError) {
+      throw new Error(`تعذر حفظ لوجو الشركة: ${logoError instanceof Error ? logoError.message : 'حاول تسجيل الدخول مرة أخرى من نفس المتصفح.'}`)
+    }
+  }
   const profile = await supabase.from('profiles').upsert({
     id: user.id,
     display_name: displayName,
@@ -41,7 +59,13 @@ async function finishAccount(user: User) {
 
   const membership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
   if (membership.error) throw membership.error
-  if (membership.data) return role
+  if (membership.data) {
+    if (logoPath) {
+      const updated = await supabase.from('organizations').update({ logo_path: logoPath }).eq('id', membership.data.organization_id)
+      if (updated.error) throw updated.error
+    }
+    return role
+  }
 
   const existing = await supabase.from('organizations').select('id').eq('created_by', user.id).limit(1).maybeSingle()
   if (existing.error) throw existing.error
@@ -56,12 +80,14 @@ async function finishAccount(user: User) {
       phone: String(metadata.phone || user.phone || '').trim() || null,
       contact_email: String(metadata.email_contact || user.email || '').trim() || null,
       address: String(metadata.address || '').trim() || null,
-      company_type: String(metadata.company_type || '').trim() || null
+      company_type: String(metadata.company_type || '').trim() || null,
+      logo_path: logoPath
     }).select('id').single()
     if (organization.error && /column|schema cache|could not find/i.test(organization.error.message)) {
       organization = await supabase.from('organizations').insert({
         name: organizationName, organization_type: role, created_by: user.id,
-        city: String(metadata.governorate || '').trim() || null
+        city: String(metadata.governorate || '').trim() || null,
+        logo_path: logoPath
       }).select('id').single()
     }
     if (organization.error) {
@@ -69,6 +95,10 @@ async function finishAccount(user: User) {
       throw organization.error
     }
     organizationId = organization.data.id
+  }
+  if (logoPath && existing.data?.id) {
+    const updated = await supabase.from('organizations').update({ logo_path: logoPath }).eq('id', organizationId)
+    if (updated.error) throw updated.error
   }
   const inserted = await supabase.from('organization_memberships').insert({
     organization_id: organizationId, user_id: user.id, role: 'owner'
