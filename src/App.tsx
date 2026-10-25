@@ -101,6 +101,9 @@ export default function App() {
   }
 
   const path = window.location.pathname
+  // Wait for saved platform identity to load before painting any route.
+  // This prevents a default-theme flash before persisted brand colors are applied.
+  if (!settingsLoaded) return <RouteLoading />
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
