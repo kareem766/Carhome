@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { ArrowRight, ImagePlus, LoaderCircle, Save, ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import PlatformBrand from './PlatformBrand'
 
 type PlatformSettings = {
   id: boolean
@@ -105,7 +106,8 @@ export default function PlatformSettingsPage() {
     const { error: saveError } = await supabase.from('platform_settings').update(payload).eq('id', true)
     setSaving(false)
     if (saveError) { setError('تعذر حفظ الإعدادات: ' + saveError.message); return }
-    setNotice('تم حفظ إعدادات المنصة بنجاح. ستظهر التعديلات العامة بعد تحديث الصفحة.')
+    window.dispatchEvent(new Event('platform-settings-updated'))
+    setNotice('تم حفظ إعدادات الهوية بنجاح. سيتم تحديث اسم المنصة وشعارها وألوانها في الصفحات المشتركة، مع إعادة تحميل الصفحة لتحديث بيانات العنوان والأيقونة.')
   }
 
   function update<K extends keyof PlatformSettings>(key: K, value: PlatformSettings[K]) {
@@ -115,7 +117,7 @@ export default function PlatformSettingsPage() {
   return <main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-7 sm:px-6">
     <div className="mx-auto max-w-5xl">
       <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-5">
-        <div><p className="text-sm font-bold text-blue-700">Carhome · لوحة صاحب المنصة</p><h1 className="mt-1 text-2xl font-extrabold text-slate-900">هوية المنصة وإعداداتها العامة</h1><p className="mt-2 text-sm leading-6 text-slate-500">تعديل الاسم والشعار ومعلومات التواصل ومظهر المنصة وخيارات التسجيل من مكان واحد.</p></div>
+        <div><PlatformBrand compact /><h1 className="mt-1 text-2xl font-extrabold text-slate-900">هوية المنصة وإعداداتها العامة</h1><p className="mt-2 text-sm leading-6 text-slate-500">تعديل الاسم والشعار ومعلومات التواصل ومظهر المنصة وخيارات التسجيل من مكان واحد.</p></div>
         <a href="/workspace/admin" className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold"><ArrowRight size={17}/> العودة للوحة الإدارة</a>
       </header>
       {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}
