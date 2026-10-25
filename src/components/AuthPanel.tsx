@@ -223,13 +223,13 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                 {mode === 'signup' && (
                   <>
                     <label className="block text-sm font-bold text-slate-700">الاسم الكامل
-                      <input autoComplete="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none transition focus:border-carblue" placeholder="اكتب اسمك" />
+                      <input autoComplete="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="اكتب اسمك" />
                     </label>
                     <fieldset>
                       <legend className="mb-2 text-sm font-bold text-slate-700">نوع الحساب</legend>
                       <div className="grid gap-2">
                         {accountTypes.map((type) => (
-                          <label key={type.value} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${accountType === type.value ? 'border-carblue bg-blue-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                          <label key={type.value} className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition duration-200 ${accountType === type.value ? 'border-blue-300 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-200 hover:bg-slate-50'}`}>
                             <input type="radio" name="accountType" value={type.value} checked={accountType === type.value} onChange={() => setAccountType(type.value)} className="mt-1 accent-blue-600" />
                             <span><span className="block text-sm font-bold text-navy">{type.label}</span><span className="mt-1 block text-xs leading-5 text-slate-500">{type.detail}</span></span>
                           </label>
@@ -237,7 +237,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                       </div>
                     </fieldset>
                     <label className="block text-sm font-bold text-slate-700">اسم المؤسسة أو النشاط
-                      <input required value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder={accountType === 'company' ? 'اسم الشركة' : accountType === 'fleet_supplier' ? 'اسم المورد أو الشركة' : 'اسمك أو اسم النشاط (يمكن أن يكون اسمك)'} />
+                      <input required value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder={accountType === 'company' ? 'اسم الشركة' : accountType === 'fleet_supplier' ? 'اسم المورد أو الشركة' : 'اسمك أو اسم النشاط (يمكن أن يكون اسمك)'} />
                     </label>
                   </>
                 )}
@@ -246,7 +246,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                 </label>
                 <label className="block text-sm font-bold text-slate-700">كلمة المرور
                   <span className="relative mt-2 block">
-                    <input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 px-4 pl-12 font-normal outline-none focus:border-carblue" placeholder="٦ أحرف على الأقل" dir="ltr" />
+                    <input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pl-12 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="٦ أحرف على الأقل" dir="ltr" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="absolute left-3 top-3 rounded-md p-1 text-slate-400">{showPassword ? <EyeOff size={19} /> : <Eye size={19} />}</button>
                   </span>
                 </label>

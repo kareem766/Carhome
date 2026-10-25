@@ -218,3 +218,248 @@ article:hover span.grid:has(> svg.lucide) {
     transition: none;
   }
 }
+
+
+/* Premium automotive platform refresh — shared across every route. */
+:root {
+  --surface-muted: #eaf0f8;
+  --surface: #f8fbff;
+  --platform-secondary: #102642;
+  --carhome-deep: #0b1b30;
+  --carhome-mid: #17385d;
+  --carhome-accent: #3478d4;
+  --carhome-glass: rgba(255,255,255,.82);
+}
+body {
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(67, 128, 205, .18), transparent 32rem),
+    radial-gradient(ellipse at 92% 18%, rgba(15, 61, 105, .10), transparent 30rem),
+    linear-gradient(145deg, #edf3fb 0%, #e6edf7 42%, #f4f7fc 100%);
+  background-attachment: fixed;
+}
+#root { min-height: 100vh; }
+main.min-h-screen {
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(59, 130, 246, .11), transparent 34rem),
+    radial-gradient(ellipse at 100% 10%, rgba(14, 55, 95, .09), transparent 30rem),
+    linear-gradient(145deg, #edf3fb 0%, #e7eef8 52%, #f5f8fc 100%) !important;
+}
+main.min-h-screen > header {
+  position: relative;
+  isolation: isolate;
+}
+main.min-h-screen > header::before {
+  content: "";
+  position: absolute;
+  inset: 0 1rem;
+  z-index: -1;
+  border: 1px solid rgba(255,255,255,.68);
+  border-radius: 1.5rem;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 12px 36px rgba(15, 39, 69, .06);
+  backdrop-filter: blur(18px);
+}
+main.min-h-screen > section {
+  position: relative;
+}
+main.min-h-screen > section.bg-white,
+main.min-h-screen > section.border-y.bg-white {
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(74, 126, 194, .12), transparent 34rem),
+    linear-gradient(135deg, #e4edf8 0%, #f4f7fc 56%, #e9f0f9 100%) !important;
+  border-color: rgba(148, 163, 184, .24) !important;
+}
+main.min-h-screen > section.bg-white h2,
+main.min-h-screen > section.bg-white h3,
+main.min-h-screen > section.bg-white h4 {
+  color: #102642;
+}
+main.min-h-screen article {
+  background: rgba(255,255,255,.88);
+  border-color: rgba(143, 164, 190, .28);
+  box-shadow: 0 12px 30px rgba(15, 39, 69, .075);
+  backdrop-filter: blur(10px);
+}
+main.min-h-screen article:hover {
+  box-shadow: 0 20px 44px rgba(15, 39, 69, .14);
+  transform: translateY(-3px);
+}
+main.min-h-screen footer {
+  color: #536782;
+}
+main.min-h-screen :is(input, select, textarea) {
+  background-color: rgba(255,255,255,.94);
+}
+main.min-h-screen .bg-slate-900,
+main.min-h-screen .bg-slate-950 {
+  background-image: linear-gradient(135deg, #102642, #0b1b30 75%) !important;
+}
+@media (max-width: 640px) {
+  body { background-attachment: scroll; }
+  main.min-h-screen > header::before { inset: 0 .75rem; }
+}
+
+
+/* My Car premium automotive surfaces — page-level refinement */
+:root {
+  --mc-ink: #0b1730;
+  --mc-navy: #0a1830;
+  --mc-blue: #1769d2;
+  --mc-line: rgba(113, 145, 187, .22);
+  --mc-surface: #f1f5fb;
+}
+body {
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(56, 130, 226, .11), transparent 33rem),
+    radial-gradient(ellipse at 94% 24%, rgba(14, 165, 233, .08), transparent 30rem),
+    linear-gradient(145deg, #edf3fb 0%, #f5f8fc 48%, #e9f0fa 100%);
+  color: var(--mc-ink);
+}
+main.min-h-screen.bg-slate-50,
+main.min-h-screen.bg-white {
+  background: transparent !important;
+}
+header.sticky {
+  border-color: rgba(124, 154, 193, .25) !important;
+  background: rgba(248, 251, 255, .88) !important;
+  box-shadow: 0 8px 30px rgba(10, 31, 68, .06);
+  backdrop-filter: blur(18px);
+}
+article.group,
+article.rounded-2xl,
+section#catalog > div.grid,
+form,
+[role="dialog"] > div {
+  border-color: var(--mc-line) !important;
+  box-shadow: 0 12px 36px rgba(20, 45, 84, .075);
+}
+article.group {
+  border-radius: 1.35rem !important;
+  overflow: hidden;
+  background: linear-gradient(155deg, rgba(255,255,255,.98), rgba(239,246,255,.96)) !important;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+article.group:hover {
+  border-color: rgba(37, 99, 235, .36) !important;
+  box-shadow: 0 24px 50px rgba(16, 46, 91, .15);
+}
+#catalog {
+  scroll-margin-top: 6rem;
+}
+#catalog > div.grid {
+  border-radius: 1.25rem !important;
+  background: rgba(255,255,255,.78) !important;
+  backdrop-filter: blur(14px);
+}
+input, select, textarea {
+  border-color: rgba(116, 145, 183, .34);
+}
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .10);
+}
+button, a {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: .18s;
+}
+button:active, a:active {
+  transform: translateY(1px);
+}
+@media (max-width: 640px) {
+  body { background: linear-gradient(160deg, #eef4fc, #f7f9fd 65%, #edf3fb); }
+  #catalog { padding-top: 1.5rem; }
+  article.group { border-radius: 1.1rem !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* Shared surfaces used by workspaces, plans, messaging and account flows */
+section[class*="rounded-2xl"][class*="bg-white"],
+section[class*="rounded-3xl"][class*="bg-white"],
+div[class*="rounded-2xl"][class*="bg-white"][class*="border"],
+div[class*="rounded-3xl"][class*="bg-white"][class*="border"] {
+  border-color: var(--mc-line);
+  box-shadow: 0 12px 34px rgba(15, 39, 78, .065);
+}
+[class*="bg-slate-50"] {
+  --tw-bg-opacity: 1;
+}
+main[class*="min-h-screen"] > section:not([class*="bg-slate-950"]):not([class*="bg-blue-"]),
+main[class*="min-h-screen"] > div > section {
+  scroll-margin-top: 5.5rem;
+}
+[class*="border-slate-200"] {
+  border-color: var(--mc-line) !important;
+}
+
+
+/* Accessibility and consistency pass: visible controls, clear focus, and more deliberate hierarchy. */
+:where(button, a, input, select, textarea, summary) {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(button, a, input, select, textarea, summary):focus-visible {
+  outline: 3px solid rgba(37, 99, 235, .7);
+  outline-offset: 3px;
+}
+:where(button, a)[aria-disabled="true"],
+:where(button, a):disabled {
+  opacity: .58;
+  cursor: not-allowed;
+}
+main.min-h-screen h1 {
+  text-wrap: balance;
+}
+main.min-h-screen h2,
+main.min-h-screen h3 {
+  text-wrap: pretty;
+}
+main.min-h-screen p {
+  text-wrap: pretty;
+}
+main.min-h-screen > section:not(#how-it-works) {
+  isolation: isolate;
+}
+main.min-h-screen #how-it-works {
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(59, 130, 246, .075), transparent 32rem),
+    linear-gradient(135deg, rgba(248, 251, 255, .96), rgba(232, 240, 250, .96)) !important;
+}
+main.min-h-screen #how-it-works article {
+  border: 1px solid rgba(130, 157, 192, .28);
+  background: linear-gradient(155deg, rgba(255,255,255,.98), rgba(241,246,253,.95));
+}
+main.min-h-screen #how-it-works article h3,
+main.min-h-screen #how-it-works article h4 {
+  color: #102642;
+}
+main.min-h-screen #how-it-works article p {
+  color: #52657e;
+}
+main.min-h-screen footer {
+  border-top: 1px solid rgba(124, 154, 193, .22);
+}
+main.min-h-screen :is(button, a).rounded-xl {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+main.min-h-screen :is(button, a).rounded-xl:not([class*="bg-white"]):hover {
+  filter: brightness(1.035);
+}
+main.min-h-screen :is(input, select, textarea):disabled {
+  background-color: #eef2f7;
+  color: #64748b;
+  cursor: not-allowed;
+}
+@media (max-width: 640px) {
+  main.min-h-screen h1 {
+    font-size: clamp(2rem, 9vw, 2.8rem);
+    line-height: 1.25;
+  }
+  main.min-h-screen #how-it-works {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  main.min-h-screen footer {
+    padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
+  }
+}
