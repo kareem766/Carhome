@@ -81,3 +81,57 @@ a {
 .text-navy {
   color: var(--platform-secondary, #0f172a) !important;
 }
+
+
+/* Card system refresh: consistent depth, clean borders, and legible contrast on dark surfaces. */
+:root {
+  --carhome-card-radius: 1.5rem;
+  --carhome-card-border: rgba(148, 163, 184, 0.22);
+  --carhome-card-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+}
+
+main [class*="rounded-"][class*="shadow"],
+main article,
+main [role="article"] {
+  border-color: var(--carhome-card-border);
+}
+
+main article,
+main [role="article"] {
+  border-radius: var(--carhome-card-radius);
+  box-shadow: var(--carhome-card-shadow);
+  transition: box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease;
+}
+
+main article:hover,
+main [role="article"]:hover {
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.13);
+  border-color: rgba(37, 99, 235, 0.32);
+}
+
+main :is(.bg-slate-950, .bg-slate-900, .bg-gray-950, .bg-gray-900, .bg-indigo-950) {
+  color: #f8fafc;
+  border-color: rgba(191, 219, 254, 0.22);
+}
+
+main :is(.bg-slate-950, .bg-slate-900, .bg-gray-950, .bg-gray-900, .bg-indigo-950)
+  :is(h1, h2, h3, h4, p, li, label, strong, b) {
+  color: #f8fafc;
+}
+
+main :is(.bg-slate-950, .bg-slate-900, .bg-gray-950, .bg-gray-900, .bg-indigo-950)
+  :is(.text-slate-400, .text-slate-500, .text-gray-400, .text-gray-500, .text-blue-100, .text-indigo-100) {
+  color: #cbd5e1 !important;
+}
+
+main :is(.bg-slate-950, .bg-slate-900, .bg-gray-950, .bg-gray-900, .bg-indigo-950)
+  :is(.border-slate-700, .border-slate-800, .border-gray-700, .border-gray-800) {
+  border-color: rgba(203, 213, 225, 0.24) !important;
+}
+
+@media (max-width: 640px) {
+  main article,
+  main [role="article"] {
+    border-radius: 1.25rem;
+  }
+}
