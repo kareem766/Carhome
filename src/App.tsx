@@ -86,11 +86,12 @@ export default function App() {
     document.documentElement.style.setProperty('--platform-primary', settings.primary_color || defaults.primary_color)
     document.documentElement.style.setProperty('--platform-secondary', settings.secondary_color || defaults.secondary_color)
     let link = document.querySelector<HTMLLinkElement>('link[rel~="icon"]')
-    if (settings.favicon_url) {
+    const brandIcon = settings.favicon_url || settings.logo_url
+    if (brandIcon) {
       if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link) }
-      link.href = settings.favicon_url
-    } else if (link) {
-      link.remove()
+      link.href = brandIcon
+    } else if (link && !link.href.endsWith('/carhome-icon.svg')) {
+      link.href = '/carhome-icon.svg'
     }
   }, [settings])
 
