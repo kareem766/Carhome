@@ -298,3 +298,77 @@ main.min-h-screen .bg-slate-950 {
   body { background-attachment: scroll; }
   main.min-h-screen > header::before { inset: 0 .75rem; }
 }
+
+
+/* My Car premium automotive surfaces — page-level refinement */
+:root {
+  --mc-ink: #0b1730;
+  --mc-navy: #0a1830;
+  --mc-blue: #1769d2;
+  --mc-line: rgba(113, 145, 187, .22);
+  --mc-surface: #f1f5fb;
+}
+body {
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(56, 130, 226, .11), transparent 33rem),
+    radial-gradient(ellipse at 94% 24%, rgba(14, 165, 233, .08), transparent 30rem),
+    linear-gradient(145deg, #edf3fb 0%, #f5f8fc 48%, #e9f0fa 100%);
+  color: var(--mc-ink);
+}
+main.min-h-screen.bg-slate-50,
+main.min-h-screen.bg-white {
+  background: transparent !important;
+}
+header.sticky {
+  border-color: rgba(124, 154, 193, .25) !important;
+  background: rgba(248, 251, 255, .88) !important;
+  box-shadow: 0 8px 30px rgba(10, 31, 68, .06);
+  backdrop-filter: blur(18px);
+}
+article.group,
+article.rounded-2xl,
+section#catalog > div.grid,
+form,
+[role="dialog"] > div {
+  border-color: var(--mc-line) !important;
+  box-shadow: 0 12px 36px rgba(20, 45, 84, .075);
+}
+article.group {
+  border-radius: 1.35rem !important;
+  overflow: hidden;
+  background: linear-gradient(155deg, rgba(255,255,255,.98), rgba(239,246,255,.96)) !important;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+article.group:hover {
+  border-color: rgba(37, 99, 235, .36) !important;
+  box-shadow: 0 24px 50px rgba(16, 46, 91, .15);
+}
+#catalog {
+  scroll-margin-top: 6rem;
+}
+#catalog > div.grid {
+  border-radius: 1.25rem !important;
+  background: rgba(255,255,255,.78) !important;
+  backdrop-filter: blur(14px);
+}
+input, select, textarea {
+  border-color: rgba(116, 145, 183, .34);
+}
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .10);
+}
+button, a {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: .18s;
+}
+button:active, a:active {
+  transform: translateY(1px);
+}
+@media (max-width: 640px) {
+  body { background: linear-gradient(160deg, #eef4fc, #f7f9fd 65%, #edf3fb); }
+  #catalog { padding-top: 1.5rem; }
+  article.group { border-radius: 1.1rem !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
