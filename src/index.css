@@ -372,3 +372,22 @@ button:active, a:active {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* Shared surfaces used by workspaces, plans, messaging and account flows */
+section[class*="rounded-2xl"][class*="bg-white"],
+section[class*="rounded-3xl"][class*="bg-white"],
+div[class*="rounded-2xl"][class*="bg-white"][class*="border"],
+div[class*="rounded-3xl"][class*="bg-white"][class*="border"] {
+  border-color: var(--mc-line);
+  box-shadow: 0 12px 34px rgba(15, 39, 78, .065);
+}
+[class*="bg-slate-50"] {
+  --tw-bg-opacity: 1;
+}
+main[class*="min-h-screen"] > section:not([class*="bg-slate-950"]):not([class*="bg-blue-"]),
+main[class*="min-h-screen"] > div > section {
+  scroll-margin-top: 5.5rem;
+}
+[class*="border-slate-200"] {
+  border-color: var(--mc-line) !important;
+}
