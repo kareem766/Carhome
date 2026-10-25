@@ -8,6 +8,7 @@ const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
+const AutomotiveServicesPage = lazy(() => import('./components/AutomotiveServicesPage'))
 const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPlansAdminPage'))
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
@@ -99,6 +100,7 @@ export default function App() {
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense>
   if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense>
   if (path === '/workspace/catalog') return <Suspense fallback={<RouteLoading />}><VehicleCatalogPage /></Suspense>
+  if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<RouteLoading />}><AutomotiveServicesPage /></Suspense>
   if (path === '/workspace/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansPage /></Suspense>
   if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<RouteLoading />}><AdminReviewPage /></Suspense>
   if (path.includes('/messages')) return <Suspense fallback={<RouteLoading />}><MessagingPage /></Suspense>
@@ -137,6 +139,7 @@ export default function App() {
           </span>
         </a>
         <div className="flex items-center gap-2">
+          <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
           <button onClick={() => openAuth('signin')} className="min-h-10 rounded-xl px-3 text-sm font-bold text-navy hover:bg-white sm:px-4">دخول</button>
           {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="min-h-10 rounded-xl px-4 text-sm font-bold text-white shadow-sm transition sm:px-5" style={{ backgroundColor: settings.primary_color }}>إنشاء حساب</button>}
         </div>
@@ -191,13 +194,21 @@ export default function App() {
           <div className="mt-9 grid gap-4 md:grid-cols-3">
             {features.map(({ icon: Icon, title, description }) => <article key={title} className="rounded-2xl border border-blue-800 bg-gradient-to-br from-blue-800 to-blue-950 p-6 text-white shadow-lg shadow-blue-950/10 transition hover:-translate-y-1 hover:shadow-xl"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-white"><Icon size={24} /></span><h3 className="mt-5 text-lg font-extrabold text-white">{title}</h3><p className="mt-2 leading-7 text-blue-100">{description}</p></article>)}
           </div>
+          <div className="mt-10">
+            <div className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="text-2xl font-black text-navy">ابدأ من المساحة المناسبة لك</h3><p className="mt-2 text-sm leading-7 text-slate-600">مسار واضح لكل دور، من التسجيل إلى متابعة الطلبات والسيارات.</p></div><a href="/services" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 font-bold text-blue-800">استكشف خدمات السيارات <ArrowLeft size={16}/></a></div>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              <article className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><Building2 size={22}/></span><h4 className="mt-4 text-lg font-extrabold">للشركات المستأجرة</h4><p className="mt-2 text-sm leading-7 text-slate-600">حدد احتياجك، استكشف السيارات المعتمدة، وتابع طلباتك والعروض والمحادثات في مكان واحد.</p><a href="/register/company" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">ابدأ حساب شركتك <ArrowLeft size={15}/></a></article>
+              <article className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"><span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><CarFront size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لموردي الأساطيل</h4><p className="mt-2 text-sm leading-7 text-slate-600">اعرض سيارات أسطولك، استقبل طلبات الشركات، وقدّم عروضًا منظمة تساعدك على الوصول لفرص مناسبة.</p><a href="/register/supplier" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">سجّل كمورد أسطول <ArrowLeft size={15}/></a></article>
+              <article className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"><span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-50 text-amber-700"><Users size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لملاك السيارات</h4><p className="mt-2 text-sm leading-7 text-slate-600">أضف سيارتك، حدّث بياناتها وتوافرها، وتابع حالة المراجعة والفرص الواردة من الشركات.</p><a href="/register/owner" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">اعرض سيارتك <ArrowLeft size={15}/></a></article>
+            </div>
+          </div>
           {settings.registration_enabled && <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl p-6 text-white sm:flex-row sm:p-8" style={{ backgroundColor: settings.secondary_color }}><div><h3 className="text-xl font-extrabold">جاهز للبدء؟</h3><p className="mt-2 text-sm leading-6 text-blue-100">اختر نوع حسابك وسجّل بياناتك الأساسية.</p></div><button onClick={() => { window.location.href = '/register' }} className="min-h-12 rounded-xl bg-white px-6 font-extrabold transition hover:bg-blue-50" style={{ color: settings.secondary_color }}>إنشاء حساب جديد</button></div>}
         </div>
       </section>
 
       <footer className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div><span>© {new Date().getFullYear()} {settings.platform_name}. </span><span>{settings.footer_text}</span></div>
-        <div className="flex flex-wrap items-center gap-3"><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
+        <div className="flex flex-wrap items-center gap-3"><a href="/services" className="font-bold text-blue-700 underline-offset-4 hover:underline">خدمات السيارات</a><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
         <span className="inline-flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${isSupabaseConfigured ? 'bg-cargreen' : 'bg-amber-500'}`} />{isSupabaseConfigured ? 'إعدادات الاتصال موجودة' : 'إعدادات الاتصال تحتاج إلى ضبط'}</span>
       </footer>
       {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} />}
