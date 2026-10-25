@@ -59,3 +59,25 @@ a {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
+
+
+/* Platform identity: colors are driven by the saved platform settings on every route. */
+.bg-blue-700,
+.bg-blue-800 {
+  background-color: var(--platform-primary, #1d4ed8) !important;
+}
+.text-blue-700,
+.text-blue-800 {
+  color: var(--platform-primary, #1d4ed8) !important;
+}
+.border-blue-700,
+.border-blue-800 {
+  border-color: var(--platform-primary, #1d4ed8) !important;
+}
+.hover\:bg-blue-800:hover,
+.hover\:bg-blue-700:hover {
+  background-color: var(--platform-primary, #1d4ed8) !important;
+}
+.text-navy {
+  color: var(--platform-secondary, #0f172a) !important;
+}

@@ -11,7 +11,7 @@ type RentalOffer = { id: string; monthly_price_egp: number; yearly_price_egp: nu
 type RentalRequest = { id: string; title: string; details: string | null; vehicle_type: string; quantity: number; duration_type: string; duration_months: number; governorate: string; with_driver: boolean; status: string; created_at: string; rental_offers?: RentalOffer[] }
 
 const names: Record<Role, string> = { company: 'مساحة الشركة', owner: 'مساحة مالك السيارة', supplier: 'مساحة مورد الأسطول' }
-const governorates = ['القاهرة','الجيزة','الإسكندرية','القليوبية','البحيرة','مطروح','المنوفية','الغربية','كفر الشيخ','الدقهلية','دمياط','الشرقية','بورسعيد','الإسماعيلية','السويس','شمال سيناء','جنوب سيناء','بني سويف','الفيوم','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد']
+const governorates = ['الإسكندرية','القاهرة','الجيزة']
 const vehicleTypes = ['سيدان','SUV','ميكروباص','ميني باص','أتوبيس','نقل خفيف','نقل ثقيل','فان','أخرى']
 
 function inferVehicleProfile(make: string, model: string): { type: string; seats: number; confidence: 'high' | 'medium' | 'low' } {
@@ -137,7 +137,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       transmission: String(form.get('transmission') || 'automatic'), seats: Number(form.get('seats')),
       governorate: String(form.get('governorate') || ''), address: String(form.get('address') || '').trim(),
       monthly_price_egp: Number(form.get('monthly_price_egp')), yearly_price_egp: form.get('yearly_price_egp') ? Number(form.get('yearly_price_egp')) : null,
-      with_driver: form.get('with_driver') === 'on', notes: String(form.get('notes') || '').trim() || null,
+      with_driver: form.get('with_driver') === 'on', has_gps: form.get('has_gps') === 'yes', notes: String(form.get('notes') || '').trim() || null,
       review_status: 'pending_review', payment_status: 'pending'
     }
     const photos = photoPreviews.map(photo => photo.file)
@@ -311,7 +311,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     <label className="text-sm font-bold">العنوان التفصيلي *<input name="address" required maxLength={300} className={fieldClass} placeholder="المنطقة والشارع"/></label>
     <label className="text-sm font-bold">السعر الشهري بالجنيه *<input name="monthly_price_egp" type="number" required min={0} step="0.01" className={fieldClass}/></label>
     <label className="text-sm font-bold">السعر السنوي بالجنيه (اختياري)<input name="yearly_price_egp" type="number" min={0} step="0.01" className={fieldClass}/></label>
-    <label className="flex items-center gap-3 rounded-xl border p-4 text-sm font-bold sm:col-span-2"><input type="checkbox" name="with_driver" className="h-4 w-4"/> السيارة متاحة بسائق</label>
+    <label className="text-sm font-bold">نظام GPS *<select name="has_gps" required defaultValue="" className={fieldClass}><option value="" disabled>حدد حالة GPS</option><option value="yes">نعم، السيارة مزودة بجهاز GPS</option><option value="no">لا، السيارة غير مزودة بجهاز GPS</option></select><span className="mt-1 block text-xs font-medium text-slate-500">تساعد هذه المعلومة الشركات على اختيار السيارة المناسبة لمتطلبات التشغيل.</span></label>\n    <label className="flex items-center gap-3 rounded-xl border p-4 text-sm font-bold"><input type="checkbox" name="with_driver" className="h-4 w-4"/> السيارة متاحة بسائق</label>
     <label className="text-sm font-bold sm:col-span-2">صور السيارة *<span className="mt-2 block rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/50 p-5"><span className="flex items-center gap-3 text-blue-800"><ImagePlus size={24}/><span><span className="block font-extrabold">ارفع صور سيارتك</span><span className="mt-1 block text-xs font-medium text-slate-500">من 1 إلى 8 صور · JPG أو PNG أو WEBP · 8 ميجابايت كحد أقصى للصورة</span></span></span><input name="vehicle_photos" type="file" accept="image/jpeg,image/png,image/webp" multiple required onChange={(event) => { photoPreviews.forEach(photo => URL.revokeObjectURL(photo.url)); const files = Array.from(event.currentTarget.files || []).slice(0, 8); setPhotoPreviews(files.map(file => ({ file, url: URL.createObjectURL(file) }))); if ((event.currentTarget.files?.length || 0) > 8) setError('تم اختيار أكثر من 8 صور؛ سيتم استخدام أول 8 صور فقط.') }} className="mt-4 block w-full text-sm file:me-3 file:rounded-lg file:border-0 file:bg-blue-700 file:px-4 file:py-2 file:font-bold file:text-white"/></span></label>
     {photoPreviews.length > 0 && <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:col-span-2">{photoPreviews.map((photo,index)=><div key={photo.url} className="relative overflow-hidden rounded-xl border bg-slate-50"><img src={photo.url} alt={'معاينة صورة السيارة '+(index+1)} className="h-32 w-full object-cover"/><button type="button" onClick={() => { URL.revokeObjectURL(photo.url); setPhotoPreviews(current => current.filter(item => item.url !== photo.url)); }} className="absolute left-2 top-2 rounded-full bg-white/95 p-1 text-slate-700 shadow" aria-label="حذف الصورة من الاختيار"><X size={16}/></button><p className="truncate px-2 py-1 text-xs text-slate-600">{photo.file.name}</p></div>)}</div>}
     <label className="text-sm font-bold sm:col-span-2">ملاحظات إضافية<textarea name="notes" maxLength={2000} rows={3} className={fieldClass} placeholder="حالة السيارة أو شروط التأجير"/></label>
