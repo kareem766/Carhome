@@ -17,6 +17,7 @@ import { isSupabaseConfigured, supabase } from './lib/supabase'
 import PartnerLogoTicker from './components/PartnerLogoTicker'
 
 // Release trigger: rebuild the current My Car production branch on Vercel.
+// Production retry commit: 2026-10-25; verify partner ticker and platform branding after build.
 
 type PlatformSettings = {
   platform_name: string; tagline: string; description: string; logo_url: string | null; favicon_url: string | null;
