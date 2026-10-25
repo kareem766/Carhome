@@ -69,7 +69,8 @@ export default function App() {
       if (active) setSettingsLoaded(true)
     }
     void loadSettings()
-    return () => { active = false }
+    window.addEventListener('platform-settings-updated', loadSettings)
+    return () => { active = false; window.removeEventListener('platform-settings-updated', loadSettings) }
   }, [])
 
   useEffect(() => {
