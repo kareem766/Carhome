@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, LoaderCircle, ShieldAlert } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import PlatformBrand from './PlatformBrand'
 import type { User } from '@supabase/supabase-js'
 
 type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company'
@@ -152,8 +153,8 @@ export default function AuthCallbackPage() {
   }, [])
 
   return <main dir="rtl" className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-    <section className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-7 text-center shadow-sm sm:p-10">
-      {error ? <><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><ShieldAlert size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تعذر تأكيد البريد</h1><p role="alert" className="mt-4 break-words text-sm leading-7 text-red-700">{error}</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="/register" className="rounded-xl bg-blue-700 px-5 py-3 font-bold text-white">العودة للتسجيل</a><a href="/?login=1" className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700">تسجيل الدخول</a></div></> : <><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-blue-50 text-blue-700"><LoaderCircle className="animate-spin" size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تأكيد حساب Carhome</h1><p role="status" className="mt-4 text-sm leading-7 text-slate-600">{message}</p><CheckCircle2 className="mx-auto mt-5 text-emerald-600" size={22}/></>}
+    <section className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-7 text-center shadow-sm sm:p-10"><div className="mb-6 flex justify-center"><PlatformBrand /></div>
+      {error ? <><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><ShieldAlert size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تعذر تأكيد البريد</h1><p role="alert" className="mt-4 break-words text-sm leading-7 text-red-700">{error}</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="/register" className="rounded-xl bg-blue-700 px-5 py-3 font-bold text-white">العودة للتسجيل</a><a href="/?login=1" className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700">تسجيل الدخول</a></div></> : <><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-blue-50 text-blue-700"><LoaderCircle className="animate-spin" size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تأكيد حساب My Car</h1><p role="status" className="mt-4 text-sm leading-7 text-slate-600">{message}</p><CheckCircle2 className="mx-auto mt-5 text-emerald-600" size={22}/></>}
     </section>
   </main>
 }
