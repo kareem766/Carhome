@@ -138,11 +138,11 @@ export default function App() {
     <main className="min-h-screen overflow-hidden bg-canvas text-slate-800" dir="rtl">
       {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
       <header className="mx-auto flex w-full max-w-7xl flex-col items-stretch gap-3 px-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-5">
-        <a href="/" className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:shrink sm:gap-3" aria-label={settings.platform_name + ' الرئيسية'}>
-          {settings.logo_url ? <img src={settings.logo_url} alt={settings.platform_name} className="h-10 w-10 shrink-0 rounded-xl object-contain sm:h-11 sm:w-11"/> : <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-white shadow-soft sm:h-11 sm:w-11" style={{ backgroundColor: settings.secondary_color }}><CarFront size={23} /></span>}
-          <span className="min-w-0">
-            <span className="block truncate text-lg font-extrabold tracking-tight text-navy sm:text-xl">{settings.platform_name}</span>
-            <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">{settings.tagline}</span>
+        <a href="/" className="flex w-full min-w-0 items-center gap-3 rounded-2xl py-1 sm:w-auto sm:shrink sm:gap-4" aria-label={settings.platform_name + ' الرئيسية'}>
+          {settings.logo_url ? <img src={settings.logo_url} alt={settings.platform_name} className="h-14 w-14 shrink-0 rounded-2xl object-contain sm:h-16 sm:w-16"/> : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-white shadow-soft sm:h-16 sm:w-16" style={{ backgroundColor: settings.secondary_color }}><CarFront size={31} /></span>}
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-2xl font-black leading-tight tracking-tight text-navy sm:text-3xl">{settings.platform_name}</span>
+            <span className="mt-1 block truncate text-xs font-bold text-slate-500 sm:text-sm">{settings.tagline}</span>
           </span>
         </a>
         <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:gap-2">
