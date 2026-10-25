@@ -186,7 +186,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
       <div className="my-auto w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div className="flex items-start justify-between border-b border-slate-100 p-5 sm:p-7">
           <div>
-            <p className="text-sm font-extrabold text-carblue">My Car</p>
+            <div className="mb-2"><PlatformBrand /></div>
             <h2 id="auth-title" className="mt-1 text-2xl font-extrabold text-navy">
               {session ? 'حسابك' : mode === 'signup' ? 'أنشئ حسابك' : 'أهلًا بعودتك'}
             </h2>
