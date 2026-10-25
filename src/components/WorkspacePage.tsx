@@ -66,7 +66,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     const { data: authData, error: authError } = await client.auth.getUser()
     if (authError || !authData.user) { window.location.replace('/?login=1'); return }
     const authUser = authData.user
-    setUser({ id: authUser.id, name: String(authUser.user_metadata?.display_name || authUser.user_metadata?.organization_name || 'مستخدم Carhome'), email: authUser.email || authUser.phone || '' })
+    setUser({ id: authUser.id, name: String(authUser.user_metadata?.display_name || authUser.user_metadata?.organization_name || 'مستخدم My Car'), email: authUser.email || authUser.phone || '' })
     const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations(id,name,organization_type)').eq('user_id', authUser.id).limit(1)
     if (membershipError) { setError(membershipError.message); setLoading(false); return }
     const member = memberships?.[0] as unknown as { organization_id: string; organizations: Organization | Organization[] | null } | undefined

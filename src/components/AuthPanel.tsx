@@ -185,7 +185,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
       <div className="my-auto w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div className="flex items-start justify-between border-b border-slate-100 p-5 sm:p-7">
           <div>
-            <p className="text-sm font-extrabold text-carblue">Carhome</p>
+            <p className="text-sm font-extrabold text-carblue">My Car</p>
             <h2 id="auth-title" className="mt-1 text-2xl font-extrabold text-navy">
               {session ? 'حسابك' : mode === 'signup' ? 'أنشئ حسابك' : 'أهلًا بعودتك'}
             </h2>
@@ -205,7 +205,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
               <div className="rounded-2xl bg-blue-50 p-4">
                 <div className="flex items-center gap-2 font-bold text-navy"><CheckCircle2 className="text-cargreen" size={20} /> أنت مسجل الدخول</div>
                 <p className="mt-2 break-all text-sm text-slate-600">{session.user.email}</p>
-                <p className="mt-2 text-sm text-slate-600">{String(session.user.user_metadata?.display_name || 'مستخدم Carhome')}</p>
+                <p className="mt-2 text-sm text-slate-600">{String(session.user.user_metadata?.display_name || 'مستخدم My Car')}</p>
               </div>
               <button onClick={() => { window.location.href = '/auth/callback' }} className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white hover:bg-blue-700">متابعة إلى مساحة العمل</button>
               <button onClick={handleSignOut} disabled={loading} className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 font-bold text-navy hover:bg-slate-50 disabled:opacity-60">
@@ -255,7 +255,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                   {loading ? 'جارٍ المعالجة...' : mode === 'signup' ? 'إنشاء الحساب' : 'تسجيل الدخول'}
                 </button>
               </form>
-              <p className="mt-4 text-center text-xs leading-6 text-slate-500">بإنشاء الحساب، أنت مسؤول عن صحة بياناتك. لا تتم أي مدفوعات بين أطراف التأجير عبر Carhome. <a href="/privacy" className="font-bold text-blue-700 underline">الخصوصية</a> · <a href="/terms" className="font-bold text-blue-700 underline">الشروط</a></p>
+              <p className="mt-4 text-center text-xs leading-6 text-slate-500">بإنشاء الحساب، أنت مسؤول عن صحة بياناتك. لا تتم أي مدفوعات بين أطراف التأجير عبر My Car. <a href="/privacy" className="font-bold text-blue-700 underline">الخصوصية</a> · <a href="/terms" className="font-bold text-blue-700 underline">الشروط</a></p>
             </>
           )}
           {notice && <div role="status" className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">{notice}</div>}
