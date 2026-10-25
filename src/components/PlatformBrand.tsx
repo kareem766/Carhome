@@ -3,7 +3,7 @@ import { CarFront } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type Brand = { platform_name: string; tagline: string; logo_url: string | null }
-const fallback: Brand = { platform_name: 'Carhome', tagline: 'تأجير السيارات للشركات', logo_url: null }
+const fallback: Brand = { platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر', logo_url: null }
 
 export default function PlatformBrand({ compact = false }: { compact?: boolean }) {
   const [brand, setBrand] = useState<Brand>(fallback)
