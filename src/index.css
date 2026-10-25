@@ -218,3 +218,83 @@ article:hover span.grid:has(> svg.lucide) {
     transition: none;
   }
 }
+
+
+/* Premium automotive platform refresh — shared across every route. */
+:root {
+  --surface-muted: #eaf0f8;
+  --surface: #f8fbff;
+  --platform-secondary: #102642;
+  --carhome-deep: #0b1b30;
+  --carhome-mid: #17385d;
+  --carhome-accent: #3478d4;
+  --carhome-glass: rgba(255,255,255,.82);
+}
+body {
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(67, 128, 205, .18), transparent 32rem),
+    radial-gradient(ellipse at 92% 18%, rgba(15, 61, 105, .10), transparent 30rem),
+    linear-gradient(145deg, #edf3fb 0%, #e6edf7 42%, #f4f7fc 100%);
+  background-attachment: fixed;
+}
+#root { min-height: 100vh; }
+main.min-h-screen {
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(59, 130, 246, .11), transparent 34rem),
+    radial-gradient(ellipse at 100% 10%, rgba(14, 55, 95, .09), transparent 30rem),
+    linear-gradient(145deg, #edf3fb 0%, #e7eef8 52%, #f5f8fc 100%) !important;
+}
+main.min-h-screen > header {
+  position: relative;
+  isolation: isolate;
+}
+main.min-h-screen > header::before {
+  content: "";
+  position: absolute;
+  inset: 0 1rem;
+  z-index: -1;
+  border: 1px solid rgba(255,255,255,.68);
+  border-radius: 1.5rem;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 12px 36px rgba(15, 39, 69, .06);
+  backdrop-filter: blur(18px);
+}
+main.min-h-screen > section {
+  position: relative;
+}
+main.min-h-screen > section.bg-white,
+main.min-h-screen > section.border-y.bg-white {
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(74, 126, 194, .12), transparent 34rem),
+    linear-gradient(135deg, #e4edf8 0%, #f4f7fc 56%, #e9f0f9 100%) !important;
+  border-color: rgba(148, 163, 184, .24) !important;
+}
+main.min-h-screen > section.bg-white h2,
+main.min-h-screen > section.bg-white h3,
+main.min-h-screen > section.bg-white h4 {
+  color: #102642;
+}
+main.min-h-screen article {
+  background: rgba(255,255,255,.88);
+  border-color: rgba(143, 164, 190, .28);
+  box-shadow: 0 12px 30px rgba(15, 39, 69, .075);
+  backdrop-filter: blur(10px);
+}
+main.min-h-screen article:hover {
+  box-shadow: 0 20px 44px rgba(15, 39, 69, .14);
+  transform: translateY(-3px);
+}
+main.min-h-screen footer {
+  color: #536782;
+}
+main.min-h-screen :is(input, select, textarea) {
+  background-color: rgba(255,255,255,.94);
+}
+main.min-h-screen .bg-slate-900,
+main.min-h-screen .bg-slate-950 {
+  background-image: linear-gradient(135deg, #102642, #0b1b30 75%) !important;
+}
+@media (max-width: 640px) {
+  body { background-attachment: scroll; }
+  main.min-h-screen > header::before { inset: 0 .75rem; }
+}
