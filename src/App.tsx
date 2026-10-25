@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
 import { ArrowLeft, Building2, CarFront, CheckCircle2, ShieldCheck, Users } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
@@ -87,7 +87,8 @@ export default function App() {
     return () => { active = false; window.removeEventListener('platform-settings-updated', loadSettings) }
   }, [])
 
-  useEffect(() => {
+  // Apply persisted branding before the browser paints, preventing a fallback-color flash.
+  useLayoutEffect(() => {
     document.title = settings.platform_name || defaults.platform_name
     const descriptionMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]')
     if (descriptionMeta) descriptionMeta.content = settings.description || defaults.description
