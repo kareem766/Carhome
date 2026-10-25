@@ -175,3 +175,46 @@ textarea:focus {
   box-shadow: 0 0 0 3px var(--focus-ring);
   outline: none;
 }
+
+
+/* Professional icon system: consistent stroke, sizing, alignment, and restrained icon surfaces. */
+svg.lucide {
+  flex: 0 0 auto;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+button > svg.lucide,
+a > svg.lucide {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+button > svg.lucide[class*="size-"],
+a > svg.lucide[class*="size-"] {
+  width: revert;
+  height: revert;
+}
+
+/* Small icon tiles use a clean, consistent shape without loud gradients. */
+span.grid:has(> svg.lucide) {
+  border-radius: 0.9rem;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+article:hover span.grid:has(> svg.lucide) {
+  transform: translateY(-1px);
+}
+
+/* Keep inline status and navigation icons optically aligned with Arabic text. */
+:where(button, a, p, h1, h2, h3, h4, label) > svg.lucide {
+  vertical-align: middle;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  span.grid:has(> svg.lucide) {
+    transition: none;
+  }
+}
