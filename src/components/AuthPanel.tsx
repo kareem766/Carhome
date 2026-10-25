@@ -88,6 +88,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [organizationName, setOrganizationName] = useState('')
+  const [acceptedLegal, setAcceptedLegal] = useState(false)
   const [accountType, setAccountType] = useState<AccountType>('individual_owner')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -122,6 +123,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     setLoading(true)
     try {
       if (mode === 'signup') {
+        if (!acceptedLegal) throw new Error('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية قبل إنشاء الحساب.')
         const name = fullName.trim()
         const orgName = organizationName.trim()
         if (!name || !orgName) throw new Error('اكتب الاسم واسم المؤسسة لإكمال التسجيل.')
@@ -132,7 +134,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
             data: {
               display_name: name,
               organization_name: orgName,
-              organization_type: accountType
+              organization_type: accountType,
+              legal_acceptance: { terms_version: '2026-10-25', privacy_version: '2026-10-25', accepted_at: new Date().toISOString() }
             }
           }
         })
@@ -246,12 +249,13 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                     <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="absolute left-3 top-3 rounded-md p-1 text-slate-400">{showPassword ? <EyeOff size={19} /> : <Eye size={19} />}</button>
                   </span>
                 </label>
-                <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                {mode === 'signup' && <label className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-slate-700"><input type="checkbox" required checked={acceptedLegal} onChange={(event) => setAcceptedLegal(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-blue-700"/><span>أوافق على <a href="/terms" target="_blank" rel="noreferrer" className="font-extrabold text-blue-700 underline">شروط الاستخدام</a> و<a href="/privacy" target="_blank" rel="noreferrer" className="font-extrabold text-blue-700 underline">سياسة الخصوصية</a>.</span></label>}
+                <button type="submit" disabled={loading || !supabase || (mode === 'signup' && !acceptedLegal)} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                   {loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}
                   {loading ? 'جارٍ المعالجة...' : mode === 'signup' ? 'إنشاء الحساب' : 'تسجيل الدخول'}
                 </button>
               </form>
-              <p className="mt-4 text-center text-xs leading-6 text-slate-500">بإنشاء الحساب، أنت مسؤول عن صحة بياناتك. لا تتم أي مدفوعات بين أطراف التأجير عبر Carhome.</p>
+              <p className="mt-4 text-center text-xs leading-6 text-slate-500">بإنشاء الحساب، أنت مسؤول عن صحة بياناتك. لا تتم أي مدفوعات بين أطراف التأجير عبر Carhome. <a href="/privacy" className="font-bold text-blue-700 underline">الخصوصية</a> · <a href="/terms" className="font-bold text-blue-700 underline">الشروط</a></p>
             </>
           )}
           {notice && <div role="status" className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">{notice}</div>}
