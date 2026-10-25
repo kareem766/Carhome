@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { CheckCircle2, Eye, EyeOff, LoaderCircle, LogOut, ShieldCheck, X } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import PlatformBrand from './PlatformBrand'
 
 type AccountType = 'individual_owner' | 'fleet_supplier' | 'company'
 type Props = { onClose: () => void; initialMode?: 'signin' | 'signup' }
