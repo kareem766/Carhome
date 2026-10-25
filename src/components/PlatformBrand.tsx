@@ -15,7 +15,8 @@ export default function PlatformBrand({ compact = false }: { compact?: boolean }
       if (active && data) setBrand({ ...fallback, ...data } as Brand)
     }
     void load()
-    return () => { active = false }
+    window.addEventListener('platform-settings-updated', load)
+    return () => { active = false; window.removeEventListener('platform-settings-updated', load) }
   }, [])
   if (compact) return <span className="inline-flex items-center gap-2 text-sm font-bold text-blue-700">
     {brand.logo_url ? <img src={brand.logo_url} alt="" className="h-6 w-6 rounded object-contain"/> : <CarFront size={17}/>}
