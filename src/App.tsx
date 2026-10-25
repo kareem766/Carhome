@@ -51,7 +51,7 @@ function RouteLoading() {
         </span>
       </div>
       <p className="text-sm font-extrabold tracking-wide text-slate-700">جارٍ تجهيز تجربتك على My Car...</p>
-      <span className="h-1 w-28 overflow-hidden rounded-full bg-blue-100"><span className="block h-full w-1/2 animate-[loadingBar_1.4s_ease-in-out_infinite] rounded-full bg-blue-600" /></span>
+      <span className="h-1 w-28 overflow-hidden rounded-full bg-blue-100"><span className="block h-full w-1/2 animate-pulse rounded-full bg-blue-600" /></span>
     </div>
   </main>
 }
