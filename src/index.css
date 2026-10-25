@@ -391,3 +391,75 @@ main[class*="min-h-screen"] > div > section {
 [class*="border-slate-200"] {
   border-color: var(--mc-line) !important;
 }
+
+
+/* Accessibility and consistency pass: visible controls, clear focus, and more deliberate hierarchy. */
+:where(button, a, input, select, textarea, summary) {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(button, a, input, select, textarea, summary):focus-visible {
+  outline: 3px solid rgba(37, 99, 235, .7);
+  outline-offset: 3px;
+}
+:where(button, a)[aria-disabled="true"],
+:where(button, a):disabled {
+  opacity: .58;
+  cursor: not-allowed;
+}
+main.min-h-screen h1 {
+  text-wrap: balance;
+}
+main.min-h-screen h2,
+main.min-h-screen h3 {
+  text-wrap: pretty;
+}
+main.min-h-screen p {
+  text-wrap: pretty;
+}
+main.min-h-screen > section:not(#how-it-works) {
+  isolation: isolate;
+}
+main.min-h-screen #how-it-works {
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(59, 130, 246, .075), transparent 32rem),
+    linear-gradient(135deg, rgba(248, 251, 255, .96), rgba(232, 240, 250, .96)) !important;
+}
+main.min-h-screen #how-it-works article {
+  border: 1px solid rgba(130, 157, 192, .28);
+  background: linear-gradient(155deg, rgba(255,255,255,.98), rgba(241,246,253,.95));
+}
+main.min-h-screen #how-it-works article h3,
+main.min-h-screen #how-it-works article h4 {
+  color: #102642;
+}
+main.min-h-screen #how-it-works article p {
+  color: #52657e;
+}
+main.min-h-screen footer {
+  border-top: 1px solid rgba(124, 154, 193, .22);
+}
+main.min-h-screen :is(button, a).rounded-xl {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+main.min-h-screen :is(button, a).rounded-xl:not([class*="bg-white"]):hover {
+  filter: brightness(1.035);
+}
+main.min-h-screen :is(input, select, textarea):disabled {
+  background-color: #eef2f7;
+  color: #64748b;
+  cursor: not-allowed;
+}
+@media (max-width: 640px) {
+  main.min-h-screen h1 {
+    font-size: clamp(2rem, 9vw, 2.8rem);
+    line-height: 1.25;
+  }
+  main.min-h-screen #how-it-works {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  main.min-h-screen footer {
+    padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
+  }
+}
