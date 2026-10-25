@@ -147,8 +147,8 @@ export default function App() {
         </a>
         <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:gap-2">
           <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
-          <button onClick={() => openAuth('signin')} className="inline-flex min-h-11 w-full items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-navy transition hover:bg-slate-50 sm:min-h-10 sm:w-auto sm:px-4 sm:text-sm">دخول</button>
-          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-11 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-bold text-white shadow-sm transition sm:min-h-10 sm:w-auto sm:px-5 sm:text-sm" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
+          <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold leading-none text-navy transition hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">دخول</button>
+          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-bold leading-none text-white shadow-sm transition sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
         </div>
       </header>
 
