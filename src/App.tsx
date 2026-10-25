@@ -15,6 +15,8 @@ const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 
+// Release trigger: rebuild the current Carhome production branch on Vercel.
+
 type PlatformSettings = {
   platform_name: string; tagline: string; description: string; logo_url: string | null; favicon_url: string | null;
   support_email: string | null; support_phone: string | null; website_url: string | null; address: string | null;
