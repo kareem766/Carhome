@@ -41,8 +41,18 @@ const features = [
 ]
 
 function RouteLoading() {
-  return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5 text-slate-600">
-    <div className="rounded-2xl border bg-white px-6 py-5 text-sm font-bold shadow-sm" role="status">جارٍ تحميل الصفحة...</div>
+  return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.10),transparent_48%),#f8fafc] px-5 text-slate-600">
+    <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل منصة My Car">
+      <div className="relative grid h-24 w-24 place-items-center">
+        <span aria-hidden="true" className="absolute inset-0 rounded-full border-[3px] border-blue-100" />
+        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-blue-600 border-l-blue-400" />
+        <span className="grid h-[4.25rem] w-[4.25rem] place-items-center rounded-2xl bg-white shadow-lg ring-1 ring-slate-200/80">
+          <img src="/carhome-icon.svg" alt="" className="h-14 w-14 object-contain" />
+        </span>
+      </div>
+      <p className="text-sm font-extrabold tracking-wide text-slate-700">جارٍ تجهيز تجربتك على My Car...</p>
+      <span className="h-1 w-28 overflow-hidden rounded-full bg-blue-100"><span className="block h-full w-1/2 animate-[loadingBar_1.4s_ease-in-out_infinite] rounded-full bg-blue-600" /></span>
+    </div>
   </main>
 }
 
@@ -215,7 +225,7 @@ export default function App() {
 
       <section id="how-it-works" className="border-y border-white/80 bg-white/80 py-16 shadow-[0_25px_70px_-55px_rgba(15,23,42,0.35)] backdrop-blur sm:py-20">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="mx-auto max-w-2xl text-center"><p className="text-sm font-extrabold" style={{ color: settings.primary_color }}>مصممة لاحتياجات السوق المصري</p><h2 className="mt-3 text-3xl font-black tracking-tight text-navy sm:text-4xl">منصة واحدة. فرص أوضح. قرارات أفضل.</h2><p className="mt-4 leading-8 text-slate-600">نربط الشركات بملاك السيارات وموردي الأساطيل عبر تجربة رقمية منظمة تدعم البحث عن الخيارات، وإدارة الطلبات، وتبادل العروض.</p></div>
+          <div className="mx-auto max-w-2xl text-center"><p className="text-sm font-extrabold" style={{ color: settings.primary_color }}>مصممة لاحتياجات السوق المصري</p><h2 className="mt-3 text-3xl font-black tracking-tight text-navy sm:text-4xl">سيارتك المناسبة، وفرصتك القادمة تبدأ من هنا.</h2><p className="mt-4 leading-8 text-slate-600">نوصلك بملاك السيارات وموردي الأساطيل في مكان واحد، لتكتشف خيارات تناسب احتياجك وتحوّل طلباتك إلى فرص عمل حقيقية.</p></div>
           <div className="mt-9 grid gap-4 md:grid-cols-3">
             {features.map(({ icon: Icon, title, description }) => <article key={title} className="rounded-3xl border border-white bg-white/95 p-6 text-slate-800 shadow-[0_20px_55px_-40px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700"><Icon size={24} /></span><h3 className="mt-5 text-lg font-extrabold text-navy">{title}</h3><p className="mt-2 leading-7 text-slate-600">{description}</p></article>)}
           </div>
