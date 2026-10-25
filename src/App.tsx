@@ -15,7 +15,7 @@ const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 
-// Release trigger: rebuild the current Carhome production branch on Vercel.
+// Release trigger: rebuild the current My Car production branch on Vercel.
 
 type PlatformSettings = {
   platform_name: string; tagline: string; description: string; logo_url: string | null; favicon_url: string | null;
@@ -25,7 +25,7 @@ type PlatformSettings = {
   supplier_registration_enabled: boolean; maintenance_mode: boolean
 }
 const defaults: PlatformSettings = {
-  platform_name: 'Carhome', tagline: 'تأجير السيارات للشركات',
+  platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر',
   description: 'منصة وسيطة تجمع ملاك السيارات وموردي الأساطيل مع الشركات التي تحتاج إلى تأجير شهري أو سنوي طويل الأجل، من خلال تجربة عربية منظمة.',
   logo_url: null, favicon_url: null, support_email: null, support_phone: null, website_url: null, address: null,
   footer_text: 'جميع الحقوق محفوظة.', announcement_text: null, primary_color: '#1d4ed8', secondary_color: '#0f172a',
