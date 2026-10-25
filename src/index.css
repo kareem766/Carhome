@@ -74,8 +74,8 @@ a {
 .border-blue-800 {
   border-color: var(--platform-primary, #1d4ed8) !important;
 }
-.hover\\:bg-blue-800:hover,
-.hover\\:bg-blue-700:hover {
+.hover\:bg-blue-800:hover,
+.hover\:bg-blue-700:hover {
   background-color: var(--platform-primary, #1d4ed8) !important;
 }
 .text-navy {
