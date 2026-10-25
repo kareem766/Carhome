@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { ArrowLeft, Building2, CarFront, CheckCircle2, ShieldCheck, Users } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
+import LegalPages from './components/LegalPages'
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
@@ -91,6 +92,8 @@ export default function App() {
   }
 
   const path = window.location.pathname
+  if (path === '/privacy') return <LegalPages kind="privacy" />
+  if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading />}><PlatformSettingsPage /></Suspense>
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense>
@@ -186,7 +189,7 @@ export default function App() {
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mx-auto max-w-2xl text-center"><p className="text-sm font-extrabold" style={{ color: settings.primary_color }}>مصممة لاحتياجات السوق المصري</p><h2 className="mt-3 text-3xl font-extrabold text-navy sm:text-4xl">تجربة أبسط لكل طرف</h2><p className="mt-4 leading-8 text-slate-600">ابدأ بحساب مناسب لدورك واستفد من مسار واضح للسيارات والطلبات والعروض والمراسلات.</p></div>
           <div className="mt-9 grid gap-4 md:grid-cols-3">
-            {features.map(({ icon: Icon, title, description }) => <article key={title} className="rounded-2xl border border-slate-100 bg-white p-6 transition hover:-translate-y-1 hover:shadow-soft"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50" style={{ color: settings.primary_color }}><Icon size={24} /></span><h3 className="mt-5 text-lg font-extrabold text-navy">{title}</h3><p className="mt-2 leading-7 text-slate-600">{description}</p></article>)}
+            {features.map(({ icon: Icon, title, description }) => <article key={title} className="rounded-2xl border border-blue-800 bg-gradient-to-br from-blue-800 to-blue-950 p-6 text-white shadow-lg shadow-blue-950/10 transition hover:-translate-y-1 hover:shadow-xl"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-white"><Icon size={24} /></span><h3 className="mt-5 text-lg font-extrabold text-white">{title}</h3><p className="mt-2 leading-7 text-blue-100">{description}</p></article>)}
           </div>
           {settings.registration_enabled && <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl p-6 text-white sm:flex-row sm:p-8" style={{ backgroundColor: settings.secondary_color }}><div><h3 className="text-xl font-extrabold">جاهز للبدء؟</h3><p className="mt-2 text-sm leading-6 text-blue-100">اختر نوع حسابك وسجّل بياناتك الأساسية.</p></div><button onClick={() => { window.location.href = '/register' }} className="min-h-12 rounded-xl bg-white px-6 font-extrabold transition hover:bg-blue-50" style={{ color: settings.secondary_color }}>إنشاء حساب جديد</button></div>}
         </div>
@@ -194,7 +197,7 @@ export default function App() {
 
       <footer className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div><span>© {new Date().getFullYear()} {settings.platform_name}. </span><span>{settings.footer_text}</span></div>
-        <div className="flex flex-wrap gap-3">{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
+        <div className="flex flex-wrap items-center gap-3"><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
         <span className="inline-flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${isSupabaseConfigured ? 'bg-cargreen' : 'bg-amber-500'}`} />{isSupabaseConfigured ? 'إعدادات الاتصال موجودة' : 'إعدادات الاتصال تحتاج إلى ضبط'}</span>
       </footer>
       {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} />}
