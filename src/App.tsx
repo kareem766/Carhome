@@ -69,7 +69,17 @@ export default function App() {
     async function loadSettings() {
       if (!supabase) { setSettingsLoaded(true); return }
       const { data, error } = await supabase.from('platform_settings').select('*').eq('id', true).maybeSingle()
-      if (active && !error && data) setSettings({ ...defaults, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings)
+      if (active && !error && data) {
+        const loadedSettings = { ...defaults, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings
+        // Apply saved brand tokens synchronously before React is allowed to paint the page.
+        // Updating them only in useEffect creates a visible frame with the fallback colors.
+        document.documentElement.style.setProperty('--platform-primary', loadedSettings.primary_color || defaults.primary_color)
+        document.documentElement.style.setProperty('--platform-secondary', loadedSettings.secondary_color || defaults.secondary_color)
+        const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+        if (themeMeta) themeMeta.content = loadedSettings.primary_color || defaults.primary_color
+        document.title = loadedSettings.platform_name || defaults.platform_name
+        setSettings(loadedSettings)
+      }
       if (active) setSettingsLoaded(true)
     }
     void loadSettings()
