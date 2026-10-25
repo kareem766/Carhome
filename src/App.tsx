@@ -179,8 +179,9 @@ export default function App() {
           <div className="absolute -right-7 -top-7 h-40 w-40 rounded-full bg-blue-300/30 blur-3xl" />
           <div className="absolute -bottom-8 -left-8 h-44 w-44 rounded-full bg-emerald-300/20 blur-3xl" />
           <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-slate-900 p-2 shadow-2xl">
-            <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] sm:min-h-[440px]">
-              <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1400&q=90" alt="سيارة حديثة مناسبة للتنقلات والأعمال" className="absolute inset-0 h-full w-full object-cover motion-safe:animate-[catalogFloat_9s_ease-in-out_infinite]" />
+            <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] bg-gradient-to-br from-blue-950 via-slate-800 to-slate-950 sm:min-h-[440px]">
+              <div aria-hidden="true" className="absolute inset-0 grid place-items-center bg-[radial-gradient(ellipse_at_70%_35%,rgba(59,130,246,.32),transparent_45%),linear-gradient(135deg,#0f172a,#172554_55%,#020617)]"><CarFront size={190} strokeWidth={0.65} className="text-white/15 sm:h-60 sm:w-60" /><span className="absolute bottom-28 right-7 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-blue-100 backdrop-blur">كتالوج السيارات المعتمدة</span></div>
+              <img onError={event => { event.currentTarget.style.display = "none" }} src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1400&q=90" alt="سيارة حديثة مناسبة للتنقلات والأعمال" className="absolute inset-0 h-full w-full object-cover motion-safe:animate-[catalogFloat_9s_ease-in-out_infinite]" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/10 to-slate-900/10" />
               <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-slate-950/75 p-5 text-white backdrop-blur-md sm:inset-x-6 sm:bottom-6">
                 <div className="flex items-center gap-2 text-xs font-bold text-blue-200"><ShieldCheck size={15}/> تجربة منظمة وآمنة</div>
