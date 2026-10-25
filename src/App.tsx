@@ -67,7 +67,7 @@ export default function App() {
     async function loadSettings() {
       if (!supabase) { setSettingsLoaded(true); return }
       const { data, error } = await supabase.from('platform_settings').select('*').eq('id', true).maybeSingle()
-      if (active && !error && data) setSettings({ ...defaults, ...data } as PlatformSettings)
+      if (active && !error && data) setSettings({ ...defaults, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings)
       if (active) setSettingsLoaded(true)
     }
     void loadSettings()
