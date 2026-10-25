@@ -36,7 +36,7 @@ const defaults: PlatformSettings = {
 }
 const features = [
   { icon: CarFront, title: 'سيارات تناسب احتياجك', description: 'استعرض السيارات المتاحة للتأجير طويل الأجل.' },
-  { icon: Building2, title: 'تواصل بين الشركات والموردين', description: 'مساحة منظمة لطلبات التأجير واستقبال العروض.' },
+  { icon: Building2, title: 'تواصل بين الشركات والموردين', description: 'إدارة أكثر وضوحًا لطلبات التأجير واستقبال عروض الموردين.' },
   { icon: ShieldCheck, title: 'خصوصية وأمان', description: 'صلاحيات وصول مبنية على الحساب وعضوية المؤسسة.' }
 ]
 
@@ -135,7 +135,7 @@ export default function App() {
   if (path === '/register/supplier') return <RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} />
 
   return (
-    <main className="min-h-screen overflow-hidden bg-canvas text-slate-800" dir="rtl">
+    <main className="min-h-screen overflow-hidden bg-slate-50 text-slate-800" dir="rtl">
       {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
       <header className="mx-auto flex w-full max-w-7xl flex-col items-stretch gap-3 px-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-5">
         <a href="/" className="flex w-full min-w-0 items-center gap-3 rounded-2xl py-1 sm:w-auto sm:shrink sm:gap-4" aria-label={settings.platform_name + ' الرئيسية'}>
@@ -147,18 +147,18 @@ export default function App() {
         </a>
         <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:gap-2">
           <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
-          <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold leading-none text-navy transition hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">دخول</button>
+          <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold leading-none text-navy transition hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">تسجيل الدخول</button>
           {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-bold leading-none text-white shadow-sm transition sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
         </div>
       </header>
 
       <section className="mx-auto grid max-w-7xl items-center gap-12 px-5 pb-16 pt-10 sm:px-8 md:grid-cols-[1.05fr_0.95fr] md:pb-24 md:pt-16">
         <div className="relative z-10">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-sm font-bold shadow-sm" style={{ color: settings.primary_color }}>
-            <span className="h-2 w-2 rounded-full bg-cargreen" /> حلقة وصل واحدة لاحتياجات تأجير الشركات
+          <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold shadow-sm" style={{ color: settings.primary_color }}>
+            <span className="h-2 w-2 rounded-full bg-cargreen" /> حلول تأجير طويلة الأجل للشركات والأساطيل
           </span>
-          <h1 className="mt-6 max-w-2xl text-4xl font-extrabold leading-[1.35] tracking-tight text-navy sm:text-5xl lg:text-6xl">
-            خلّي الوصول للسيارات المناسبة <span style={{ color: settings.primary_color }}>أسهل وأوضح.</span>
+          <h1 className="mt-6 max-w-2xl text-4xl font-black leading-[1.3] tracking-tight text-navy sm:text-5xl lg:text-6xl">
+            حلول أكثر كفاءة لتأجير السيارات <span style={{ color: settings.primary_color }}>للأعمال والنمو.</span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{settings.description}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -171,7 +171,7 @@ export default function App() {
           </div>
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-semibold text-slate-500">
             <span className="inline-flex items-center gap-2"><Users size={17} /> ملاك وموردون وشركات</span>
-            <span className="inline-flex items-center gap-2"><ShieldCheck size={17} /> تسجيل آمن وصلاحيات واضحة</span>
+            <span className="inline-flex items-center gap-2"><ShieldCheck size={17} /> خصوصية في التواصل وصلاحيات واضحة</span>
           </div>
         </div>
 
@@ -185,8 +185,8 @@ export default function App() {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/10 to-slate-900/10" />
               <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-slate-950/75 p-5 text-white backdrop-blur-md sm:inset-x-6 sm:bottom-6">
                 <div className="flex items-center gap-2 text-xs font-bold text-blue-200"><ShieldCheck size={15}/> تجربة منظمة وآمنة</div>
-                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">من البحث عن السيارة إلى التواصل</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-200">كتالوج معتمد، عروض واضحة، ومحادثات داخل المنصة.</p>
+                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">من الاحتياج إلى العرض المناسب</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-200">اكتشف الخيارات المتاحة، أرسل طلبك، وتابع التواصل في مساحة واحدة.</p>
                 <div className="mt-4 flex flex-wrap gap-2"><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">سيارات معتمدة</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">بيانات المالك محمية</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">للشركات والأساطيل</span></div>
               </div>
             </div>
@@ -198,21 +198,21 @@ export default function App() {
 
       <PartnerLogoTicker />
 
-      <section id="how-it-works" className="border-y border-slate-100 bg-white py-14 sm:py-16">
+      <section id="how-it-works" className="border-y border-slate-200/80 bg-white py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="mx-auto max-w-2xl text-center"><p className="text-sm font-extrabold" style={{ color: settings.primary_color }}>مصممة لاحتياجات السوق المصري</p><h2 className="mt-3 text-3xl font-extrabold text-navy sm:text-4xl">تجربة أبسط لكل طرف</h2><p className="mt-4 leading-8 text-slate-600">ابدأ بحساب مناسب لدورك واستفد من مسار واضح للسيارات والطلبات والعروض والمراسلات.</p></div>
+          <div className="mx-auto max-w-2xl text-center"><p className="text-sm font-extrabold" style={{ color: settings.primary_color }}>مصممة لاحتياجات السوق المصري</p><h2 className="mt-3 text-3xl font-black tracking-tight text-navy sm:text-4xl">منصة واحدة. فرص أوضح. قرارات أفضل.</h2><p className="mt-4 leading-8 text-slate-600">نربط الشركات بملاك السيارات وموردي الأساطيل عبر تجربة رقمية منظمة تدعم البحث عن الخيارات، وإدارة الطلبات، وتبادل العروض.</p></div>
           <div className="mt-9 grid gap-4 md:grid-cols-3">
-            {features.map(({ icon: Icon, title, description }) => <article key={title} className="rounded-2xl border border-blue-800 bg-gradient-to-br from-blue-800 to-blue-950 p-6 text-white shadow-lg shadow-blue-950/10 transition hover:-translate-y-1 hover:shadow-xl"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-white"><Icon size={24} /></span><h3 className="mt-5 text-lg font-extrabold text-white">{title}</h3><p className="mt-2 leading-7 text-blue-100">{description}</p></article>)}
+            {features.map(({ icon: Icon, title, description }) => <article key={title} className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-800 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700"><Icon size={24} /></span><h3 className="mt-5 text-lg font-extrabold text-navy">{title}</h3><p className="mt-2 leading-7 text-slate-600">{description}</p></article>)}
           </div>
           <div className="mt-10">
-            <div className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="text-2xl font-black text-navy">ابدأ من المساحة المناسبة لك</h3><p className="mt-2 text-sm leading-7 text-slate-600">مسار واضح لكل دور، من التسجيل إلى متابعة الطلبات والسيارات.</p></div><a href="/services" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 font-bold text-blue-800">استكشف خدمات السيارات <ArrowLeft size={16}/></a></div>
+            <div className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="text-2xl font-black text-navy">خدمات مصممة لكل شريك</h3><p className="mt-2 text-sm leading-7 text-slate-600">أدوات مناسبة لطبيعة عملك، من عرض السيارات وحتى متابعة الطلبات والعروض.</p></div><a href="/services" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 font-bold text-blue-800">استكشف خدمات السيارات <ArrowLeft size={16}/></a></div>
             <div className="mt-5 grid gap-4 md:grid-cols-3">
               <article className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><Building2 size={22}/></span><h4 className="mt-4 text-lg font-extrabold">للشركات المستأجرة</h4><p className="mt-2 text-sm leading-7 text-slate-600">حدد احتياجك، استكشف السيارات المعتمدة، وتابع طلباتك والعروض والمحادثات في مكان واحد.</p><a href="/register/company" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">ابدأ حساب شركتك <ArrowLeft size={15}/></a></article>
               <article className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"><span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><CarFront size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لموردي الأساطيل</h4><p className="mt-2 text-sm leading-7 text-slate-600">اعرض سيارات أسطولك، استقبل طلبات الشركات، وقدّم عروضًا منظمة تساعدك على الوصول لفرص مناسبة.</p><a href="/register/supplier" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">سجّل كمورد أسطول <ArrowLeft size={15}/></a></article>
               <article className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"><span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-50 text-amber-700"><Users size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لملاك السيارات</h4><p className="mt-2 text-sm leading-7 text-slate-600">أضف سيارتك، حدّث بياناتها وتوافرها، وتابع حالة المراجعة والفرص الواردة من الشركات.</p><a href="/register/owner" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">اعرض سيارتك <ArrowLeft size={15}/></a></article>
             </div>
           </div>
-          {settings.registration_enabled && <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl p-6 text-white sm:flex-row sm:p-8" style={{ backgroundColor: settings.secondary_color }}><div><h3 className="text-xl font-extrabold">جاهز للبدء؟</h3><p className="mt-2 text-sm leading-6 text-blue-100">اختر نوع حسابك وسجّل بياناتك الأساسية.</p></div><button onClick={() => { window.location.href = '/register' }} className="min-h-12 rounded-xl bg-white px-6 font-extrabold transition hover:bg-blue-50" style={{ color: settings.secondary_color }}>إنشاء حساب جديد</button></div>}
+          {settings.registration_enabled && <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl p-6 text-white sm:flex-row sm:p-8" style={{ backgroundColor: settings.secondary_color }}><div><h3 className="text-xl font-extrabold">ابدأ بخطوتك التالية</h3><p className="mt-2 text-sm leading-6 text-blue-100">أنشئ حسابك المناسب وابدأ في استكشاف خدمات My Car.</p></div><button onClick={() => { window.location.href = '/register' }} className="min-h-12 rounded-xl bg-white px-6 font-extrabold transition hover:bg-blue-50" style={{ color: settings.secondary_color }}>إنشاء حساب جديد</button></div>}
         </div>
       </section>
 
