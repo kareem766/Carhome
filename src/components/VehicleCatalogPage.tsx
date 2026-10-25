@@ -43,7 +43,6 @@ export default function VehicleCatalogPage() {
   const [sending, setSending] = useState(false)
   const [notice, setNotice] = useState('')
   const [botOpen, setBotOpen] = useState(false)
-  const [botAnswer, setBotAnswer] = useState('')
   const [botQuestion, setBotQuestion] = useState('')
   const [showPlans, setShowPlans] = useState(false)
 
@@ -195,11 +194,9 @@ export default function VehicleCatalogPage() {
     if (!answer) answer = 'أقدر أساعدك في البحث عن سيارة، إرسال عرض، بدء محادثة، أو الترويج لسياراتك. اكتب سؤالك بشكل أوضح أو اختار أحد الأسئلة المقترحة.'
     setBotMessages(current => [...current, { role: 'user', text: prompt }])
     setBotQuestion('')
-    setBotAnswer('')
     setBotSending(true)
     window.setTimeout(() => {
       setBotMessages(current => [...current, { role: 'assistant', text: answer }])
-      setBotAnswer(answer)
       setBotSending(false)
     }, 350)
   }
