@@ -7,6 +7,7 @@ const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
+const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPlansAdminPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
@@ -94,6 +95,7 @@ export default function App() {
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading />}><PlatformSettingsPage /></Suspense>
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense>
   if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense>
+  if (path === '/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansPage /></Suspense>
   if (path === '/workspace/catalog') return <Suspense fallback={<RouteLoading />}><VehicleCatalogPage /></Suspense>
   if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<RouteLoading />}><AdminReviewPage /></Suspense>
   if (path.includes('/messages')) return <Suspense fallback={<RouteLoading />}><MessagingPage /></Suspense>
