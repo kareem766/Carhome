@@ -8,6 +8,7 @@ const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
+const AutomotiveServicesPage = lazy(() => import('./components/AutomotiveServicesPage'))
 const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPlansAdminPage'))
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
@@ -99,6 +100,7 @@ export default function App() {
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense>
   if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense>
   if (path === '/workspace/catalog') return <Suspense fallback={<RouteLoading />}><VehicleCatalogPage /></Suspense>
+  if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<RouteLoading />}><AutomotiveServicesPage /></Suspense>
   if (path === '/workspace/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansPage /></Suspense>
   if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<RouteLoading />}><AdminReviewPage /></Suspense>
   if (path.includes('/messages')) return <Suspense fallback={<RouteLoading />}><MessagingPage /></Suspense>
@@ -137,6 +139,7 @@ export default function App() {
           </span>
         </a>
         <div className="flex items-center gap-2">
+          <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
           <button onClick={() => openAuth('signin')} className="min-h-10 rounded-xl px-3 text-sm font-bold text-navy hover:bg-white sm:px-4">دخول</button>
           {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="min-h-10 rounded-xl px-4 text-sm font-bold text-white shadow-sm transition sm:px-5" style={{ backgroundColor: settings.primary_color }}>إنشاء حساب</button>}
         </div>
@@ -197,7 +200,7 @@ export default function App() {
 
       <footer className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div><span>© {new Date().getFullYear()} {settings.platform_name}. </span><span>{settings.footer_text}</span></div>
-        <div className="flex flex-wrap items-center gap-3"><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
+        <div className="flex flex-wrap items-center gap-3"><a href="/services" className="font-bold text-blue-700 underline-offset-4 hover:underline">خدمات السيارات</a><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
         <span className="inline-flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${isSupabaseConfigured ? 'bg-cargreen' : 'bg-amber-500'}`} />{isSupabaseConfigured ? 'إعدادات الاتصال موجودة' : 'إعدادات الاتصال تحتاج إلى ضبط'}</span>
       </footer>
       {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} />}
