@@ -57,7 +57,7 @@ export default function PlatformSettingsPage() {
       const { data, error: settingsError } = await supabase.from('platform_settings').select('*').eq('id', true).maybeSingle()
       if (!active) return
       if (settingsError) setError('تعذر تحميل إعدادات المنصة. تأكد من تطبيق Migration إعدادات المنصة. ' + settingsError.message)
-      else if (data) setSettings({ ...defaults, ...data } as PlatformSettings)
+      else if (data) setSettings({ ...defaults, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings)
       setLoading(false)
     }
     void load()
