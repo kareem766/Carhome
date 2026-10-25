@@ -123,16 +123,16 @@ export default function PlatformSettingsPage() {
     setSettings(current => ({ ...current, [key]: value }))
   }
 
-  return <main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-7 sm:px-6">
-    <div className="mx-auto max-w-5xl">
-      <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-5">
+  return <main dir="rtl" className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.10),_transparent_36%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-3 py-5 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-6xl">
+      <header className="sticky top-3 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/80 bg-white/90 p-4 shadow-[0_18px_55px_-30px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-6">
         <div><PlatformBrand compact /><h1 className="mt-1 text-2xl font-extrabold text-slate-900">هوية المنصة وإعداداتها العامة</h1><p className="mt-2 text-sm leading-6 text-slate-500">تعديل الاسم والشعار ومعلومات التواصل ومظهر المنصة وخيارات التسجيل من مكان واحد.</p></div>
         <a href="/workspace/admin" className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold"><ArrowRight size={17}/> العودة للوحة الإدارة</a>
       </header>
-      {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}
-      {notice && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">{notice}</p>}
-      {loading ? <div className="flex justify-center py-16 text-slate-500"><LoaderCircle className="animate-spin"/> جارٍ تحميل الإعدادات...</div> : authorized && <form onSubmit={save} className="mt-6 space-y-5">
-        <section className="rounded-2xl border bg-white p-5 sm:p-6">
+      {error && <p role="alert" className="mt-5 rounded-2xl border border-red-100 bg-red-50/90 p-4 text-sm leading-7 text-red-800 shadow-sm">{error}</p>}
+      {notice && <p role="status" className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50/90 p-4 text-sm leading-7 text-emerald-800 shadow-sm">{notice}</p>}
+      {loading ? <div className="flex justify-center py-16 text-slate-500"><LoaderCircle className="animate-spin"/> جارٍ تحميل الإعدادات...</div> : authorized && <form onSubmit={save} className="mt-6 space-y-6">
+        <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
           <h2 className="text-lg font-extrabold">اسم المنصة وهويتها</h2>
           <p className="mt-1 text-sm text-slate-500">يتم عرض هذه البيانات في الواجهة العامة وعنوان المنصة وبيانات التذييل.</p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -151,7 +151,7 @@ export default function PlatformSettingsPage() {
             </div>
           </div>
         </section>
-        <section className="rounded-2xl border bg-white p-5 sm:p-6">
+        <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
           <h2 className="text-lg font-extrabold">شريط شعارات الشركات الشريكة</h2>
           <p className="mt-2 text-sm leading-7 text-slate-500">أضف فقط الشركات التي وافقت على عرض شعارها كشريك للمنصة. يتحرك الشريط تلقائيًا ويتوقف مؤقتًا عند مرور المؤشر عليه. كل سطر يمثل شركة واحدة.</p>
           <label className={labelClass+' mt-4'}>الشركات والشعارات
@@ -162,7 +162,7 @@ export default function PlatformSettingsPage() {
             <input type="number" min={12} max={90} value={settings.partner_ticker_seconds} onChange={e=>update('partner_ticker_seconds',Number(e.target.value))} className={fieldClass}/>
           </label>
         </section>
-        <section className="rounded-2xl border bg-white p-5 sm:p-6">
+        <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
           <h2 className="text-lg font-extrabold">معلومات التواصل الرسمية</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <label className={labelClass}>بريد الدعم<input type="email" maxLength={254} value={settings.support_email || ''} onChange={e=>update('support_email',e.target.value)} className={fieldClass}/></label>
@@ -173,7 +173,7 @@ export default function PlatformSettingsPage() {
             <label className={labelClass+' sm:col-span-2'}>إعلان عام أعلى الموقع (اختياري)<textarea maxLength={500} rows={2} value={settings.announcement_text || ''} onChange={e=>update('announcement_text',e.target.value)} className={fieldClass}/></label>
           </div>
         </section>
-        <section className="rounded-2xl border bg-white p-5 sm:p-6">
+        <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
           <h2 className="text-lg font-extrabold">المظهر وإتاحة التسجيل</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <label className={labelClass}>اللون الأساسي<div className="mt-2 flex items-center gap-3"><input type="color" value={settings.primary_color} onChange={e=>update('primary_color',e.target.value)} className="h-12 w-16 cursor-pointer rounded-lg border p-1"/><code>{settings.primary_color}</code></div></label>
