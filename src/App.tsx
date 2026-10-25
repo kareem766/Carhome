@@ -137,18 +137,18 @@ export default function App() {
   return (
     <main className="min-h-screen overflow-hidden bg-canvas text-slate-800" dir="rtl">
       {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
-      <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-3 py-4 sm:gap-4 sm:px-8 sm:py-5">
-        <a href="/" className="flex min-w-0 shrink items-center gap-2 sm:gap-3" aria-label={settings.platform_name + ' الرئيسية'}>
+      <header className="mx-auto flex w-full max-w-7xl flex-col items-stretch gap-3 px-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-5">
+        <a href="/" className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:shrink sm:gap-3" aria-label={settings.platform_name + ' الرئيسية'}>
           {settings.logo_url ? <img src={settings.logo_url} alt={settings.platform_name} className="h-10 w-10 shrink-0 rounded-xl object-contain sm:h-11 sm:w-11"/> : <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-white shadow-soft sm:h-11 sm:w-11" style={{ backgroundColor: settings.secondary_color }}><CarFront size={23} /></span>}
           <span className="min-w-0">
             <span className="block truncate text-lg font-extrabold tracking-tight text-navy sm:text-xl">{settings.platform_name}</span>
             <span className="block truncate text-[10px] font-semibold text-slate-500 sm:text-xs">{settings.tagline}</span>
           </span>
         </a>
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:gap-2">
           <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
-          <button onClick={() => openAuth('signin')} className="inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-navy transition hover:bg-slate-50 sm:px-4 sm:text-sm">دخول</button>
-          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-xl px-3 text-xs font-bold text-white shadow-sm transition sm:px-5 sm:text-sm" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
+          <button onClick={() => openAuth('signin')} className="inline-flex min-h-11 w-full items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-navy transition hover:bg-slate-50 sm:min-h-10 sm:w-auto sm:px-4 sm:text-sm">دخول</button>
+          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-11 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-bold text-white shadow-sm transition sm:min-h-10 sm:w-auto sm:px-5 sm:text-sm" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
         </div>
       </header>
 
