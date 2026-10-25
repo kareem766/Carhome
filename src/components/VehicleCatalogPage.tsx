@@ -17,7 +17,11 @@ const questions = [
   { title: 'كيف يمكنني بدء التواصل؟', answer: 'افتح تفاصيل السيارة واختر «بدء محادثة». يتم التواصل من خلال My Car مع الحفاظ على خصوصية بيانات الاتصال الشخصية.' },
   { title: 'هل كل السيارات معتمدة؟', answer: 'الكتالوج يعرض السيارات التي اجتازت مراجعة الإدارة وحالة الرسوم المطلوبة فقط.' },
   { title: 'كيف أرسل طلب عرض؟', answer: 'من صفحة تفاصيل السيارة، اختر «إرسال عرض» وأضف المدة والكمية والسعر المقترح أو تفاصيل احتياجك لإرسال الطلب عبر المنصة.' },
-  { title: 'كيف يمكنني تعزيز ظهور سيارتي؟', answer: 'ملاك السيارات وموردو الأساطيل يمكنهم الاطلاع على باقات الظهور الإعلاني المتاحة من مساحة العمل. الترويج لا يُفعّل إلا بعد اعتماد الطلب.' }
+  { title: 'كيف يمكنني تعزيز ظهور سيارتي؟', answer: 'ملاك السيارات وموردو الأساطيل يمكنهم الاطلاع على باقات الظهور الإعلاني المتاحة من مساحة العمل. الترويج لا يُفعّل إلا بعد اعتماد الطلب والتحقق من الدفع.' },
+  { title: 'كيف أسجل سيارة جديدة؟', answer: 'افتح مساحة العمل الخاصة بك، ثم اختر إضافة سيارة وأدخل بياناتها وارفع صورًا واضحة. لن تظهر السيارة في الكتالوج إلا بعد مراجعة الإدارة واعتماد البيانات واستكمال حالة الرسوم المطلوبة.' },
+  { title: 'متى يتم تفعيل الإعلان؟', answer: 'بعد اختيار الباقة وإرسال طلب الترويج، تراجع الإدارة الطلب وتتحقق من الدفع. لا يظهر الإعلان في مقدمة الكتالوج قبل اعتماد الطلب وتأكيد الدفع أو الإعفاء.' },
+  { title: 'هل تظهر بيانات الاتصال الخاصة بالمالك؟', answer: 'لا، لا يعرض الكتالوج رقم هاتف المالك أو بيانات الاتصال الشخصية. التواصل بين الشركة ومقدم السيارة يتم عبر المحادثات داخل منصة My Car.' },
+  { title: 'ما أنواع الحسابات المتاحة؟', answer: 'تدعم My Car ثلاثة أنواع من الحسابات: مالك سيارة فردي، شركة تبحث عن سيارات للتأجير طويل الأجل، ومورد أسطول. تختلف مساحة العمل والأدوات حسب نوع الحساب.' }
 ]
 
 export default function VehicleCatalogPage() {
@@ -191,13 +195,25 @@ export default function VehicleCatalogPage() {
     window.setTimeout(() => {
       const match = questions.find(q => q.title === submitted)
       const normalized = submitted.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\\u064B-\\u065F\\u0670]/g, '')
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ى/g, 'ي')
+        .replace(/ة/g, 'ه')
+        .replace(/[؟?!.,،]/g, ' ')
+        .replace(/\\s+/g, ' ')
+        .trim()
       let answer = match?.answer || ''
-      if (!answer && /بحث|ابحث|فلتر|مدينة|سعر|نوع/.test(normalized)) answer = questions[0].answer
-      if (!answer && /محادث|شات|تواصل|رسالة|رسائل/.test(normalized)) answer = questions[1].answer
-      if (!answer && /اعتماد|معتمد|مراجعة/.test(normalized)) answer = questions[2].answer
-      if (!answer && /عرض|سعر|تأجير|طلب/.test(normalized)) answer = questions[3].answer
-      if (!answer && /إعلان|اعلان|ترويج|باق/.test(normalized)) answer = questions[4].answer
-      if (!answer) answer = 'أقدر أساعدك في البحث عن سيارة، إرسال عرض، بدء محادثة، أو الترويج لسياراتك. وضّح سؤالك أو اختار أحد الاقتراحات.'
+      if (!answer && /تسجيل|اسجل|اضافه سياره|سياره جديده|ارفع صور/.test(normalized)) answer = questions[5].answer
+      if (!answer && /خصوصيه|رقم|هاتف|تليفون|بيانات المالك|بيانات الاتصال/.test(normalized)) answer = questions[7].answer
+      if (!answer && /حساب|انواع الحساب|نوع الحساب|مورد اسطول|مالك سياره|شركه/.test(normalized)) answer = questions[8].answer
+      if (!answer && /دفع|فلوس|تحويل|تفعيل الاعلان|امتي يظهر|متي يظهر|اعتماد الاعلان/.test(normalized)) answer = questions[6].answer
+      if (!answer && /بحث|ابحث|فلتر|مدينه|سعر|نوع/.test(normalized)) answer = questions[0].answer
+      if (!answer && /محادث|شات|تواصل|رساله|رسائل/.test(normalized)) answer = questions[1].answer
+      if (!answer && /اعتماد|معتمد|مراجعه/.test(normalized)) answer = questions[2].answer
+      if (!answer && /عرض|تاجير|طلب/.test(normalized)) answer = questions[3].answer
+      if (!answer && /اعلان|ترويج|باق/.test(normalized)) answer = questions[4].answer
+      if (!answer) answer = 'أقدر أساعدك في البحث عن سيارة، تسجيل سيارة جديدة، إرسال عرض، بدء محادثة، خصوصية البيانات، أو باقات الإعلان. جرّب صياغة سؤالك بشكل أوضح أو اختار أحد الاقتراحات.'
       setBotMessages(previous => [...previous, { role: 'assistant', text: answer }])
       setBotReplying(false)
     }, 250)
