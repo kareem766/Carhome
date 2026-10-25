@@ -4,8 +4,8 @@
 
 :root {
   font-family: 'Cairo', sans-serif;
-  color: #1e293b;
-  background: #F4F7FB;
+  color: #243247;
+  background: #F6F8FC;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -39,7 +39,7 @@ a {
 }
 
 ::selection {
-  background: #dbeafe;
+  background: #e3edff;
   color: #142D4E;
 }
 
@@ -134,4 +134,44 @@ main :is(.bg-slate-950, .bg-slate-900, .bg-gray-950, .bg-gray-900, .bg-indigo-95
   main [role="article"] {
     border-radius: 1.25rem;
   }
+}
+
+
+/* My Car design system: restrained navy, clear blue accents, and consistent controls. */
+:root {
+  --platform-primary: #2459a9;
+  --platform-secondary: #14263f;
+  --surface: #ffffff;
+  --surface-muted: #f6f8fc;
+  --line: #e2e8f0;
+  --text-muted: #64748b;
+  --focus-ring: rgba(36, 89, 169, 0.16);
+}
+body {
+  color: #243247;
+  background: var(--surface-muted);
+}
+button, input, select, textarea {
+  font: inherit;
+}
+button, a {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: 160ms;
+  transition-timing-function: ease-out;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+  border-color: #d8e0eb;
+  border-radius: 0.8rem;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--platform-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  outline: none;
 }
