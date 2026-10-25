@@ -66,7 +66,7 @@ export default function MessagingPage() {
     setNotice('تم إرسال الرسالة.')
   }
   const active = conversations.find(c=>c.id===activeId)
-  const otherName = active ? (active.vehicle_id ? 'الطرف الآخر داخل Carhome' : (active.company_organization_id===organizationId ? active.provider?.name : active.company?.name)) : ''
+  const otherName = active ? (active.vehicle_id ? 'الطرف الآخر داخل المنصة' : (active.company_organization_id===organizationId ? active.provider?.name : active.company?.name)) : ''
   return <main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6"><div className="mx-auto max-w-6xl">
     <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-5"><div><PlatformBrand compact /><h1 className="mt-1 text-2xl font-extrabold">المراسلات الداخلية</h1><p className="mt-2 text-sm text-slate-500">تواصل مع الطرف الآخر داخل المنصة دون عرض أرقام الهواتف.</p></div><div className="flex flex-wrap gap-2"><button type="button" onClick={() => void refreshMessages()} disabled={refreshing} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold disabled:opacity-50"><RefreshCw size={16} className={refreshing ? 'animate-spin' : ''}/> تحديث الرسائل</button><a href="/" className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold"><ArrowLeft size={16}/> الرئيسية</a></div></header>
     {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}{notice && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p>}
