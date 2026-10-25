@@ -25,7 +25,7 @@ type PlatformSettings = {
   maintenance_mode: boolean
 }
 const defaults: PlatformSettings = {
-  id: true, platform_name: 'Carhome', tagline: 'تأجير السيارات للشركات',
+  id: true, platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر',
   description: 'منصة تجمع الشركات وملاك السيارات وموردي الأساطيل لتسهيل التأجير طويل الأجل.',
   logo_url: null, favicon_url: null, support_email: '', support_phone: '', website_url: '', address: '',
   footer_text: 'جميع الحقوق محفوظة.', announcement_text: '', primary_color: '#1d4ed8',
