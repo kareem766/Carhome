@@ -23,6 +23,8 @@ type PlatformSettings = {
   company_registration_enabled: boolean
   supplier_registration_enabled: boolean
   maintenance_mode: boolean
+  partner_logos: { name: string; logo_url: string; website_url?: string }[]
+  partner_ticker_seconds: number
 }
 const defaults: PlatformSettings = {
   id: true, platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر',
@@ -30,7 +32,8 @@ const defaults: PlatformSettings = {
   logo_url: null, favicon_url: null, support_email: '', support_phone: '', website_url: '', address: '',
   footer_text: 'جميع الحقوق محفوظة.', announcement_text: '', primary_color: '#1d4ed8',
   secondary_color: '#0f172a', registration_enabled: true, owner_registration_enabled: true,
-  company_registration_enabled: true, supplier_registration_enabled: true, maintenance_mode: false
+  company_registration_enabled: true, supplier_registration_enabled: true, maintenance_mode: false,
+  partner_logos: [], partner_ticker_seconds: 28
 }
 const fieldClass = 'mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
 const labelClass = 'block text-sm font-bold text-slate-700'
@@ -43,6 +46,7 @@ export default function PlatformSettingsPage() {
   const [uploading, setUploading] = useState<'logo_url' | 'favicon_url' | null>(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [partnerLogosText, setPartnerLogosText] = useState('')
 
   useEffect(() => {
     let active = true
@@ -57,7 +61,7 @@ export default function PlatformSettingsPage() {
       const { data, error: settingsError } = await supabase.from('platform_settings').select('*').eq('id', true).maybeSingle()
       if (!active) return
       if (settingsError) setError('تعذر تحميل إعدادات المنصة. تأكد من تطبيق Migration إعدادات المنصة. ' + settingsError.message)
-      else if (data) setSettings({ ...defaults, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings)
+      else if (data) { const loaded = { ...defaults, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings; setSettings(loaded); setPartnerLogosText((loaded.partner_logos || []).map(p => [p.name, p.logo_url, p.website_url || ''].join(' | ')).join('\n')) }
       setLoading(false)
     }
     void load()
@@ -88,7 +92,12 @@ export default function PlatformSettingsPage() {
     if (!settings.platform_name.trim() || !settings.tagline.trim()) { setError('اسم المنصة والوصف المختصر مطلوبان.'); return }
     setSaving(true); setError(''); setNotice('')
     const { data: auth } = await supabase.auth.getUser()
+    let partnerLogos: PlatformSettings['partner_logos']
+    try {
+      partnerLogos = partnerLogosText.split('\n').map(line => line.trim()).filter(Boolean).map(line => { const [name, logo_url, website_url] = line.split('|').map(part => part.trim()); if (!name || !logo_url || !/^https:\/\//i.test(logo_url)) throw new Error('اكتب كل شريك بالشكل: اسم الشركة | رابط اللوجو https:// | رابط الموقع اختياري'); if (website_url && !/^https:\/\//i.test(website_url)) throw new Error('رابط موقع الشركة يجب أن يبدأ بـ https://'); return { name, logo_url, ...(website_url ? { website_url } : {}) } })
+    } catch (caught) { setError(caught instanceof Error ? caught.message : 'راجع بيانات شعارات الشركاء.'); setSaving(false); return }
     const payload = {
+      partner_logos: partnerLogos, partner_ticker_seconds: settings.partner_ticker_seconds,
       platform_name: settings.platform_name.trim(), tagline: settings.tagline.trim(),
       description: settings.description.trim(), logo_url: settings.logo_url || null,
       favicon_url: settings.favicon_url || null, support_email: settings.support_email?.trim() || null,
@@ -141,6 +150,17 @@ export default function PlatformSettingsPage() {
               {settings.favicon_url && <button type="button" onClick={()=>update('favicon_url',null)} className="mr-2 rounded-lg border px-3 py-2 text-sm font-bold text-red-700">إزالة الأيقونة</button>}
             </div>
           </div>
+        </section>
+        <section className="rounded-2xl border bg-white p-5 sm:p-6">
+          <h2 className="text-lg font-extrabold">شريط شعارات الشركات الشريكة</h2>
+          <p className="mt-2 text-sm leading-7 text-slate-500">أضف فقط الشركات التي وافقت على عرض شعارها كشريك للمنصة. يتحرك الشريط تلقائيًا ويتوقف مؤقتًا عند مرور المؤشر عليه. كل سطر يمثل شركة واحدة.</p>
+          <label className={labelClass+' mt-4'}>الشركات والشعارات
+            <textarea rows={5} value={partnerLogosText} onChange={e=>setPartnerLogosText(e.target.value)} placeholder={'اسم الشركة | https://example.com/logo.png | https://example.com\nاسم شركة أخرى | https://example.com/logo2.png'} className={fieldClass+' font-mono text-xs'} dir="ltr"/>
+          </label>
+          <p className="mt-2 text-xs leading-6 text-slate-500">الصيغة: اسم الشركة | رابط صورة الشعار https:// | رابط الموقع اختياري. اترك الحقل فارغًا لإخفاء الشريط حتى إضافة شركاء حقيقيين.</p>
+          <label className={labelClass+' mt-4'}>سرعة الشريط (بالثواني لكل دورة)
+            <input type="number" min={12} max={90} value={settings.partner_ticker_seconds} onChange={e=>update('partner_ticker_seconds',Number(e.target.value))} className={fieldClass}/>
+          </label>
         </section>
         <section className="rounded-2xl border bg-white p-5 sm:p-6">
           <h2 className="text-lg font-extrabold">معلومات التواصل الرسمية</h2>
