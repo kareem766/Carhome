@@ -14,6 +14,7 @@ const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPag
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 import { isSupabaseConfigured, supabase } from './lib/supabase'
+import PartnerLogoTicker from './components/PartnerLogoTicker'
 
 // Release trigger: rebuild the current My Car production branch on Vercel.
 
@@ -192,6 +193,8 @@ export default function App() {
           <div className="absolute -left-3 bottom-24 hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:block motion-safe:animate-[catalogFloat_7s_ease-in-out_infinite]"><span className="flex items-center gap-2 text-sm font-extrabold text-slate-800"><CheckCircle2 size={18} className="text-emerald-600"/> مراجعة واعتماد</span><p className="mt-1 text-xs text-slate-500">عرض السيارات المستوفية للشروط</p></div>
         </div>
       </section>
+
+      <PartnerLogoTicker />
 
       <section id="how-it-works" className="border-y border-slate-100 bg-white py-14 sm:py-16">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
