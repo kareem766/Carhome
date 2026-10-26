@@ -119,6 +119,6 @@ export default function SubscriptionPlansPage() {
         <div className="mt-5 flex gap-2"><button onClick={()=>startEdit(plan)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Save size={15}/> تعديل الباقة</button>{plan.is_active&&<button onClick={()=>void deactivate(plan)} className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-700"><X size={15}/> إيقاف</button>}</div>
       </article>)}</div>}
     </section>
-    <p className="mt-6 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm leading-7 text-amber-900">تنبيه: هذه الشاشة تدير كتالوج الباقات وأسعارها. لم يكن في قاعدة المنصة الحالية جدول اشتراكات أو نظام تحصيل مرتبط بالباقات؛ لذلك لن يتم خصم أي مبلغ أو تغيير اشتراكات العملاء تلقائيًا من هذه الشاشة.</p>
+    <p className="mt-6 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm leading-7 text-amber-900">تنبيه: هذه الشاشة تدير كتالوج باقات الشركات وأسعارها. بعد إضافة الباقات وتفعيلها، تستطيع الشركة اختيار الباقة وإرسال مرجع التحويل من صفحة اشتراك الشركة، وتراجع الإدارة إثبات الدفع وتفعّل مدة الاشتراك يدويًا. المنصة لا تسحب الأموال تلقائيًا ولا تنفّذ تحويلات مالية.</p>
   </div></main>
 }

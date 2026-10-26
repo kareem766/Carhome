@@ -6,7 +6,7 @@ import PlatformBrand from './PlatformBrand'
 type Vehicle = {
   id: string; make: string; model: string; model_year: number; vehicle_type: string; transmission: string;
   seats: number; governorate: string; monthly_price_egp: number; yearly_price_egp: number | null;
-  with_driver: boolean; has_gps: boolean | null; notes: string | null; organization_id: string; images: { url: string; alt_text: string }[]
+  with_driver: boolean; has_gps: boolean | null; notes: string | null; organization_id: string; registration_expires_at: string | null; images: { url: string; alt_text: string }[]
 }
 type AdPlan = { id: string; name: string; description: string; duration_days: number; price_egp: number; features: string[] }
 type OwnedVehicle = { id: string; make: string; model: string; model_year: number; review_status: string }
@@ -63,9 +63,10 @@ export default function VehicleCatalogPage() {
       const { data: org } = await supabase.from('organizations').select('organization_type').eq('id',membership.organization_id).maybeSingle()
       if (!active) return
       setUserId(auth.user.id); setOrgId(membership.organization_id); setOrgType(String(org?.organization_type || ''))
-      const { data, error: listError } = await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,monthly_price_egp,yearly_price_egp,with_driver,has_gps,notes,organization_id').eq('review_status','approved').in('payment_status',['verified','waived']).order('created_at',{ascending:false})
+      const { data, error: listError } = await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,monthly_price_egp,yearly_price_egp,with_driver,has_gps,notes,organization_id,registration_expires_at').eq('review_status','approved').in('payment_status',['verified','waived']).order('created_at',{ascending:false})
       if (listError) setError('تعذر تحميل الكتالوج: '+listError.message)
-      const rows = (data || []) as Omit<Vehicle,'images'>[]
+      const nowMs = Date.now()
+      const rows = ((data || []) as Omit<Vehicle,'images'>[]).filter(v => !v.registration_expires_at || new Date(v.registration_expires_at).getTime() > nowMs)
       const imageRows = rows.length ? await supabase.from('vehicle_images').select('vehicle_id,storage_path,alt_text,sort_order').in('vehicle_id',rows.map(v=>v.id)).order('sort_order',{ascending:true}) : { data: [], error: null }
       const signed = await Promise.all((imageRows.data || []).map(async image => {
         const result = await supabase!.storage.from('vehicle-images').createSignedUrl(image.storage_path,3600)

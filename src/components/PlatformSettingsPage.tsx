@@ -23,10 +23,13 @@ type PlatformSettings = {
   company_registration_enabled: boolean
   supplier_registration_enabled: boolean
   maintenance_mode: boolean
+  company_subscription_required: boolean
   partner_logos: { name: string; logo_url: string; website_url?: string }[]
   partner_ticker_seconds: number
   owner_vehicle_monthly_fee_egp: number
   supplier_vehicle_registration_fee_egp: number
+  vodafone_cash_number: string | null
+  instapay_number: string | null
 }
 const defaults: PlatformSettings = {
   id: true, platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر',
@@ -34,9 +37,10 @@ const defaults: PlatformSettings = {
   logo_url: null, favicon_url: null, support_email: '', support_phone: '', website_url: '', address: '',
   footer_text: 'جميع الحقوق محفوظة.', announcement_text: '', primary_color: '#1d4ed8',
   secondary_color: '#0f172a', registration_enabled: true, owner_registration_enabled: true,
-  company_registration_enabled: true, supplier_registration_enabled: true, maintenance_mode: false,
+  company_registration_enabled: true, supplier_registration_enabled: true, maintenance_mode: false, company_subscription_required: false,
   partner_logos: [], partner_ticker_seconds: 28,
-  owner_vehicle_monthly_fee_egp: 300, supplier_vehicle_registration_fee_egp: 150
+  owner_vehicle_monthly_fee_egp: 300, supplier_vehicle_registration_fee_egp: 150,
+  vodafone_cash_number: '01096656281', instapay_number: '01208987035'
 }
 const fieldClass = 'mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
 const labelClass = 'block text-sm font-bold text-slate-700'
@@ -103,6 +107,8 @@ export default function PlatformSettingsPage() {
       partner_logos: partnerLogos, partner_ticker_seconds: settings.partner_ticker_seconds,
       owner_vehicle_monthly_fee_egp: Math.max(1, Math.round(Number(settings.owner_vehicle_monthly_fee_egp) || 300)),
       supplier_vehicle_registration_fee_egp: Math.max(1, Math.round(Number(settings.supplier_vehicle_registration_fee_egp) || 150)),
+      vodafone_cash_number: settings.vodafone_cash_number?.trim() || null,
+      instapay_number: settings.instapay_number?.trim() || null,
       platform_name: settings.platform_name.trim(), tagline: settings.tagline.trim(),
       description: settings.description.trim(), logo_url: settings.logo_url || null,
       favicon_url: settings.favicon_url || null, support_email: settings.support_email?.trim() || null,
@@ -114,7 +120,9 @@ export default function PlatformSettingsPage() {
       owner_registration_enabled: settings.owner_registration_enabled,
       company_registration_enabled: settings.company_registration_enabled,
       supplier_registration_enabled: settings.supplier_registration_enabled,
-      maintenance_mode: settings.maintenance_mode, updated_at: new Date().toISOString(),
+      maintenance_mode: settings.maintenance_mode,
+      company_subscription_required: settings.company_subscription_required,
+      updated_at: new Date().toISOString(),
       updated_by: auth.user?.id || null
     }
     const { error: saveError } = await supabase.from('platform_settings').update(payload).eq('id', true)
@@ -188,6 +196,8 @@ export default function PlatformSettingsPage() {
             <label className={labelClass}>رسوم مورد الأسطول لكل سيارة (جنيه)
               <input type="number" required min={1} max={1000000} step={1} value={settings.supplier_vehicle_registration_fee_egp} onChange={e=>update('supplier_vehicle_registration_fee_egp',Number(e.target.value))} className={fieldClass}/>
             </label>
+            <label className={labelClass}>رقم Vodafone Cash<input maxLength={40} value={settings.vodafone_cash_number || ''} onChange={e=>update('vodafone_cash_number',e.target.value)} className={fieldClass} placeholder="رقم محفظة التحويل"/></label>
+            <label className={labelClass}>رقم InstaPay<input maxLength={40} value={settings.instapay_number || ''} onChange={e=>update('instapay_number',e.target.value)} className={fieldClass} placeholder="رقم/معرّف InstaPay"/></label>
           </div>
         </section>
         <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
@@ -200,7 +210,8 @@ export default function PlatformSettingsPage() {
               ['owner_registration_enabled','تسجيل ملاك السيارات'],
               ['company_registration_enabled','تسجيل الشركات'],
               ['supplier_registration_enabled','تسجيل موردي الأساطيل'],
-              ['maintenance_mode','وضع الصيانة (إيقاف الواجهة العامة)']
+              ['maintenance_mode','وضع الصيانة (إيقاف الواجهة العامة)'],
+              ['company_subscription_required','اشتراط اشتراك شركة نشط قبل نشر طلبات التأجير']
             ] as const).map(([key,label])=><label key={key} className="flex items-center gap-3 rounded-xl border p-4 text-sm font-bold"><input type="checkbox" checked={settings[key]} onChange={e=>update(key,e.target.checked)} className="h-4 w-4"/>{label}</label>)}
             <p className="sm:col-span-2 rounded-xl bg-amber-50 p-3 text-xs leading-6 text-amber-900"><ShieldCheck className="ml-1 inline" size={15}/> تؤثر هذه الخيارات على مسارات التسجيل والواجهة العامة فقط؛ وتظل لوحة صاحب المنصة متاحة لإعادة تشغيل الخدمة، ولا تُحذف الحسابات القائمة.</p>
           </div>
