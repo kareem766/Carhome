@@ -180,7 +180,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
         new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('تم حفظ بيانات السيارة ورفع الصور، لكن تأخر ربط الصور بالسجل. حدّث الصفحة قبل أي محاولة جديدة.')), 30000))
       ])
       if (imageInsert.error) throw new Error('تم حفظ بيانات السيارة، لكن تعذر ربط الصور بها: ' + imageInsert.error.message)
-      setNotice('تم حفظ السيارة ورفع ' + photos.length + ' صور بنجاح. السيارة قيد مراجعة الإدارة وحالة الدفع معلّقة؛ لم يتم تحصيل أي مبلغ من خلال المنصة.')
+      setNotice('تم حفظ السيارة ورفع ' + photos.length + ' صور بنجاح. السيارة قيد مراجعة الإدارة وحالة الدفع معلّقة؛ لم يتم تحصيل أي مبلغ من خلال المنصة. المبلغ المطلوب مقابل الاشتراك وعرض السيارة أمام الشركات فقط، ولا تضمن المنصة تشغيل السيارة أو الحصول على عقد تأجير.')
       formElement.reset()
       photoPreviews.forEach(photo => URL.revokeObjectURL(photo.url))
       setPhotoPreviews([])
@@ -291,7 +291,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     }
     setPaymentVehicle(null)
     setPaymentSubmissions(current => ({ ...current, [vehicle.id]: 'pending' }))
-    setNotice('تم إرسال بيانات التحويل بنجاح، وحاليًا في انتظار المراجعة.')
+    setNotice('تم إرسال بيانات التحويل بنجاح، وحاليًا في انتظار المراجعة. المبلغ مقابل الاشتراك وعرض السيارة أمام الشركات فقط، ولا تضمن المنصة تشغيل السيارة أو الحصول على عقد تأجير.')
   }
 
   if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
@@ -315,7 +315,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     <label className="text-sm font-bold sm:col-span-2">صور السيارة *<span className="mt-2 block rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/50 p-5"><span className="flex items-center gap-3 text-blue-800"><ImagePlus size={24}/><span><span className="block font-extrabold">ارفع صور سيارتك</span><span className="mt-1 block text-xs font-medium text-slate-500">من 1 إلى 8 صور · JPG أو PNG أو WEBP · 8 ميجابايت كحد أقصى للصورة</span></span></span><input name="vehicle_photos" type="file" accept="image/jpeg,image/png,image/webp" multiple required onChange={(event) => { photoPreviews.forEach(photo => URL.revokeObjectURL(photo.url)); const files = Array.from(event.currentTarget.files || []).slice(0, 8); setPhotoPreviews(files.map(file => ({ file, url: URL.createObjectURL(file) }))); if ((event.currentTarget.files?.length || 0) > 8) setError('تم اختيار أكثر من 8 صور؛ سيتم استخدام أول 8 صور فقط.') }} className="mt-4 block w-full text-sm file:me-3 file:rounded-lg file:border-0 file:bg-blue-700 file:px-4 file:py-2 file:font-bold file:text-white"/></span></label>
     {photoPreviews.length > 0 && <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:col-span-2">{photoPreviews.map((photo,index)=><div key={photo.url} className="relative overflow-hidden rounded-xl border bg-slate-50"><img src={photo.url} alt={'معاينة صورة السيارة '+(index+1)} className="h-32 w-full object-cover"/><button type="button" onClick={() => { URL.revokeObjectURL(photo.url); setPhotoPreviews(current => current.filter(item => item.url !== photo.url)); }} className="absolute left-2 top-2 rounded-full bg-white/95 p-1 text-slate-700 shadow" aria-label="حذف الصورة من الاختيار"><X size={16}/></button><p className="truncate px-2 py-1 text-xs text-slate-600">{photo.file.name}</p></div>)}</div>}
     <label className="text-sm font-bold sm:col-span-2">ملاحظات إضافية<textarea name="notes" maxLength={2000} rows={3} className={fieldClass} placeholder="حالة السيارة أو شروط التأجير"/></label>
-    {(role === 'owner' || role === 'supplier') && <div className="rounded-xl bg-amber-50 p-4 text-sm leading-7 text-amber-900 sm:col-span-2"><strong>رسوم التسجيل:</strong> {role === 'supplier' ? '150 جنيهًا لكل سيارة، تُدفع مرة واحدة لكل تسجيل.' : '300 جنيه لكل سيارة شهريًا.'} بعد حفظ البيانات، ستظل السيارة قيد المراجعة والدفع معلّقًا حتى التحويل والتحقق الإداري. لا يوجد دفع إلكتروني داخل المنصة حاليًا.</div>}
+    {(role === 'owner' || role === 'supplier') && <div className="rounded-xl bg-amber-50 p-4 text-sm leading-7 text-amber-900 sm:col-span-2"><strong>رسوم التسجيل:</strong> {role === 'supplier' ? '150 جنيهًا لكل سيارة، تُدفع مرة واحدة لكل تسجيل.' : '300 جنيه لكل سيارة شهريًا.'} بعد حفظ البيانات، ستظل السيارة قيد المراجعة والدفع معلّقًا حتى التحويل والتحقق الإداري. لا يوجد دفع إلكتروني داخل المنصة حاليًا. المبلغ مقابل اشتراك تسجيل السيارة وعرضها أمام الشركات فقط، ولا تضمن المنصة تشغيل السيارة أو الحصول على عقد تأجير.</div>}
     <button disabled={saving} className={primaryClass+' sm:col-span-2'}>{saving ? (savingStage || 'جارٍ الحفظ...') : 'حفظ وإرسال للمراجعة'} <CarFront size={18}/></button>
   </form></section>
   const requestForm = <section className="mt-6 rounded-3xl border bg-white p-6 sm:p-8"><button onClick={() => { window.location.href='/workspace/company/requests' }} className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-blue-700"><ArrowLeft size={17}/> رجوع لطلبات الشركة</button><h2 className="text-2xl font-extrabold">إنشاء طلب تأجير سيارات</h2><p className="mt-2 text-sm leading-7 text-slate-600">وضّح احتياج شركتك ليتمكن الملاك وموردو الأساطيل من تقديم عروض مناسبة.</p><form onSubmit={saveRequest} className="mt-6 grid gap-4 sm:grid-cols-2">
