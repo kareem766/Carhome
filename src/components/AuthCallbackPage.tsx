@@ -36,10 +36,9 @@ async function finishAccount(user: User) {
         throw new Error('صيغة اللوجو غير مدعومة أو حجم الملف أكبر من 2 ميجابايت.')
       }
       const extension = logoBlob.type === 'image/png' ? 'png' : logoBlob.type === 'image/webp' ? 'webp' : 'jpg'
-      logoPath = `${user.id}/logo-${Date.now()}.${extension}`
-      const uploaded = await supabase.storage.from('organization-logos').upload(logoPath, logoBlob, { contentType: logoBlob.type, upsert: false })
+      logoPath = `${user.id}/logo.${extension}`
+      const uploaded = await supabase.storage.from('organization-logos').upload(logoPath, logoBlob, { contentType: logoBlob.type, upsert: true })
       if (uploaded.error) throw uploaded.error
-      localStorage.removeItem('carhome_pending_company_logo')
     } catch (logoError) {
       throw new Error(`تعذر حفظ لوجو الشركة: ${logoError instanceof Error ? logoError.message : 'حاول تسجيل الدخول مرة أخرى من نفس المتصفح.'}`)
     }
@@ -65,6 +64,7 @@ async function finishAccount(user: User) {
       const updated = await supabase.from('organizations').update({ logo_path: logoPath }).eq('id', membership.data.organization_id)
       if (updated.error) throw updated.error
     }
+    if (pendingLogo && logoPath) localStorage.removeItem('carhome_pending_company_logo')
     return role
   }
 
@@ -107,6 +107,7 @@ async function finishAccount(user: User) {
     organization_id: organizationId, user_id: user.id, role: 'owner'
   })
   if (inserted.error && inserted.error.code !== '23505') throw inserted.error
+  if (pendingLogo && logoPath) localStorage.removeItem('carhome_pending_company_logo')
   return role
 }
 
