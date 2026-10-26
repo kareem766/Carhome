@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Activity, ArrowLeft, BadgeCheck, Banknote, Building2, CarFront, ClipboardCheck, FileText, Megaphone, RefreshCw, Settings, ShieldCheck, Users, WalletCards, MessageSquare, Megaphone } from 'lucide-react'
+import { Activity, ArrowLeft, BadgeCheck, Banknote, Building2, CarFront, ClipboardCheck, FileText, Megaphone, RefreshCw, Settings, ShieldCheck, Users, WalletCards, MessageSquare } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
