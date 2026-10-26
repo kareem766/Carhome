@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 type Metric = { label: string; value: number | string; hint: string; icon: typeof CarFront; tone: string }
 const money = (value: number) => new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(value)
 const sections = [
+  { title: 'إدارة الحسابات والسيارات والتحويلات', description: 'تعديل بيانات الشركات والملاك والموردين، مراجعة حالات السيارات، واعتماد أو رفض تحويلات الرسوم.', href: '/workspace/admin/management', icon: ShieldCheck, tag: 'إدارة مباشرة' },
   { title: 'المراجعة والاعتمادات', description: 'مراجعة السيارات والتحويلات والحسابات والطلبات والعروض.', href: '/workspace/admin', icon: ClipboardCheck, tag: 'مركز العمليات' },
   { title: 'هوية وإعدادات المنصة', description: 'الاسم والشعار والألوان وبيانات التواصل والإعلانات العامة وحالة التسجيل والصيانة.', href: '/workspace/admin/platform-settings', icon: Settings, tag: 'إعدادات عامة' },
   { title: 'باقات اشتراك الشركات', description: 'إدارة خطط الاشتراك والأسعار والمزايا وحدود الاستخدام.', href: '/workspace/admin/subscription-plans', icon: WalletCards, tag: 'الاشتراكات' },
