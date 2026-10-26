@@ -611,3 +611,40 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   body::before { transition: none; }
 }
+
+
+/* Consistent restrained electric-blue frames for interactive controls and content cards. */
+:root {
+  --mc-neon-border: rgba(37, 120, 235, .52);
+  --mc-neon-glow: rgba(37, 120, 235, .12);
+  --mc-neon-glow-hover: rgba(37, 120, 235, .22);
+}
+:where(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  border-color: var(--mc-neon-border);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, .055), 0 0 10px var(--mc-neon-glow);
+}
+:where(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]):not(:disabled):not([aria-disabled="true"]):not(.mc-signout):hover {
+  border-color: rgba(37, 120, 235, .82);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, .10), 0 0 17px var(--mc-neon-glow-hover);
+}
+:where(article, [role="article"], [role="dialog"], .mc-entry-banner, .mc-profile-menu, .mc-notification-menu) {
+  border-color: var(--mc-neon-border);
+  box-shadow: 0 10px 28px rgba(15, 39, 78, .065), 0 0 0 1px rgba(59, 130, 246, .045), 0 0 13px var(--mc-neon-glow);
+}
+:where(article, [role="article"]):hover {
+  border-color: rgba(37, 120, 235, .76);
+  box-shadow: 0 16px 36px rgba(15, 39, 78, .10), 0 0 0 1px rgba(59, 130, 246, .10), 0 0 19px var(--mc-neon-glow-hover);
+}
+:where(button, [role="button"], article, [role="article"], [role="dialog"], .mc-entry-banner, .mc-profile-menu, .mc-notification-menu) {
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+/* Preserve deliberate danger/destructive styling rather than recoloring those controls blue. */
+:where(button, [role="button"]):is(.mc-signout, .text-red-600, .text-red-700, .bg-red-600, .bg-red-700) {
+  border-color: rgba(220, 38, 38, .45);
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, .035), 0 0 8px rgba(220, 38, 38, .06);
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(button, [role="button"], article, [role="article"], [role="dialog"], .mc-entry-banner, .mc-profile-menu, .mc-notification-menu) {
+    transition: none;
+  }
+}
