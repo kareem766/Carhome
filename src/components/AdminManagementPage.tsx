@@ -30,7 +30,7 @@ export default function AdminManagementPage() {
     if(tab==='accounts') result=await supabase.from('organizations').select('id,name,organization_type,approval_status,contact_name,phone,contact_email,city,address,company_type,fleet_vehicle_count,created_at').order('created_at',{ascending:false}).limit(300)
     else if(tab==='vehicles') result=await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,address,monthly_price_egp,yearly_price_egp,with_driver,notes,has_gps,review_status,payment_status,created_at,organization_id').order('created_at',{ascending:false}).limit(300)
     else if(tab==='payments') result=await supabase.from('vehicle_payment_submissions').select('id,vehicle_id,organization_id,amount_egp,review_status,transfer_reference,created_at,reviewed_at,admin_notes').order('created_at',{ascending:false}).limit(300)
-    else if(tab==='promotions') result=await supabase.from('vehicle_promotions').select('id,vehicle_id,organization_id,advertising_plan_id,status,payment_status,payment_reference,starts_at,ends_at,created_at,admin_notes').order('created_at',{ascending:false}).limit(300)
+    else if(tab==='promotions') result=await supabase.from('vehicle_promotions').select('id,vehicle_id,organization_id,advertising_plan_id,status,payment_status,payment_reference,starts_at,ends_at,created_at,admin_notes,advertising_plans(duration_days,name)').order('created_at',{ascending:false}).limit(300)
     else if(tab==='requests') result=await supabase.from('rental_requests').select('id,organization_id,title,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,details,status,created_at').order('created_at',{ascending:false}).limit(300)
     else result=await supabase.from('rental_offers').select('id,request_id,organization_id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,created_at').order('created_at',{ascending:false}).limit(300)
     if(result.error){setError('تعذر تحميل البيانات: '+result.error.message);setRows([])}else setRows(result.data||[])
@@ -97,7 +97,15 @@ export default function AdminManagementPage() {
     setError('');setNotice('')
     const {data:auth}=await supabase.auth.getUser()
     const update:Row={status,reviewed_at:new Date().toISOString(),reviewed_by:auth.user?.id||null,updated_at:new Date().toISOString()}
-    if(status==='approved') { update.starts_at=row.starts_at||new Date().toISOString() }
+    if(status==='approved') {
+      const planRelation=row.advertising_plans
+      const plan=Array.isArray(planRelation)?planRelation[0]:planRelation
+      const durationDays=Number(plan?.duration_days)
+      if(!Number.isFinite(durationDays)||durationDays<1||durationDays>365){setError('تعذر اعتماد الإعلان: مدة الباقة غير متاحة أو غير صحيحة. راجع إعدادات باقة الإعلان.');return}
+      const start=row.starts_at&&new Date(row.starts_at).getTime()>Date.now()?new Date(row.starts_at):new Date()
+      update.starts_at=start.toISOString()
+      update.ends_at=new Date(start.getTime()+durationDays*24*60*60*1000).toISOString()
+    }
     const {error:e}=await supabase.from('vehicle_promotions').update(update).eq('id',row.id)
     if(e){setError('تعذر تحديث طلب الإعلان: '+e.message);return}
     setNotice(status==='approved'?'تم اعتماد الإعلان بعد التحقق من الدفع.':'تم رفض طلب الإعلان.');await load()
