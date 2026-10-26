@@ -175,3 +175,17 @@ WITH CHECK (
 
 CREATE INDEX IF NOT EXISTS vehicles_registration_expires_idx ON public.vehicles(registration_expires_at);
 CREATE INDEX IF NOT EXISTS company_subscriptions_active_expiry_idx ON public.company_subscriptions(organization_id,status,payment_status,ends_at);
+
+
+-- Keep existing company request workflows working until subscription prices are configured; owner can enable enforcement at launch.
+ALTER TABLE public.platform_settings ADD COLUMN IF NOT EXISTS company_subscription_required boolean NOT NULL DEFAULT false;
+DROP POLICY IF EXISTS "company members can create rental requests" ON public.rental_requests;
+CREATE POLICY "company members can create rental requests" ON public.rental_requests FOR INSERT TO authenticated
+WITH CHECK (
+  created_by=(SELECT auth.uid()) AND status='open'
+  AND EXISTS (SELECT 1 FROM public.organization_memberships m JOIN public.organizations o ON o.id=m.organization_id
+    WHERE m.organization_id=rental_requests.organization_id AND m.user_id=(SELECT auth.uid()) AND o.organization_type='company' AND o.approval_status='approved')
+  AND (NOT COALESCE((SELECT ps.company_subscription_required FROM public.platform_settings ps WHERE ps.id=true),false)
+    OR EXISTS (SELECT 1 FROM public.company_subscriptions s WHERE s.organization_id=rental_requests.organization_id
+      AND s.status='active' AND s.payment_status IN ('verified','waived') AND s.starts_at<=now() AND s.ends_at>now()))
+);
