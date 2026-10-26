@@ -463,3 +463,42 @@ main.min-h-screen :is(input, select, textarea):disabled {
     padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
   }
 }
+
+
+/* Global navigation, account identity and electric-blue control system */
+.mc-global-nav { box-shadow: 0 8px 28px rgba(15, 39, 78, .08); }
+.mc-brand-logo { border: 1px solid rgba(59, 130, 246, .28); box-shadow: 0 0 0 2px rgba(59, 130, 246, .07), 0 0 20px rgba(37, 99, 235, .14); }
+.mc-neon-button {
+  display: inline-flex; min-height: 42px; align-items: center; gap: .45rem;
+  border: 1px solid rgba(37, 99, 235, .62); border-radius: .85rem; padding: .55rem .8rem;
+  background: rgba(255,255,255,.96); color: #124d9e; font-size: .82rem; font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(147,197,253,.24), 0 0 12px rgba(37,99,235,.10);
+  transition: box-shadow .18s ease, background .18s ease, transform .18s ease;
+}
+.mc-neon-button:hover { background: #eff6ff; box-shadow: 0 0 0 2px rgba(59,130,246,.13), 0 0 19px rgba(37,99,235,.24); }
+.mc-neon-primary { background: linear-gradient(135deg,#1769d2,#1553b7); color: white; border-color: #3b82f6; }
+.mc-neon-primary:hover { background: linear-gradient(135deg,#1553b7,#123f8d); }
+.mc-profile-trigger {
+  display: inline-flex; min-height: 46px; align-items: center; gap: .6rem; border: 1px solid rgba(37,99,235,.7);
+  border-radius: 999px; padding: .25rem .65rem .25rem .3rem; background: #fff;
+  box-shadow: 0 0 0 2px rgba(59,130,246,.09), 0 0 17px rgba(37,99,235,.2);
+}
+.mc-profile-trigger:hover { box-shadow: 0 0 0 3px rgba(59,130,246,.13), 0 0 24px rgba(37,99,235,.3); }
+.mc-avatar {
+  display: inline-grid; width: 36px; height: 36px; flex: 0 0 auto; place-items: center; border-radius: 999px;
+  border: 2px solid #60a5fa; background: radial-gradient(circle at 30% 20%,#eff6ff,#bfdbfe 55%,#2563eb);
+  color: #123c78; font-size: 1rem; font-weight: 900; box-shadow: 0 0 0 2px rgba(37,99,235,.14), 0 0 14px rgba(37,99,235,.25);
+}
+.mc-avatar-large { width: 48px; height: 48px; font-size: 1.2rem; }
+.mc-profile-menu { animation: mcMenuIn .14s ease-out both; box-shadow: 0 18px 60px rgba(15,35,70,.18), 0 0 24px rgba(37,99,235,.1); }
+.mc-menu-action { display:flex; width:100%; min-height:44px; align-items:center; gap:.65rem; border:1px solid #dbeafe; border-radius:.8rem; padding:.65rem .8rem; color:#164e9b; font-size:.875rem; font-weight:800; text-align:right; }
+.mc-menu-action:hover { background:#eff6ff; border-color:#60a5fa; box-shadow:0 0 13px rgba(37,99,235,.12); }
+.mc-signout { margin-top:.55rem; border-color:#fee2e2; color:#b91c1c; }
+.mc-signout:hover { background:#fff1f2; border-color:#fda4af; box-shadow:0 0 13px rgba(225,29,72,.1); }
+@keyframes mcMenuIn { from { opacity:0; transform:translateY(-4px) scale(.99); } to { opacity:1; transform:translateY(0) scale(1); } }
+@media (max-width: 420px) {
+  .mc-global-nav { padding-inline: .55rem; }
+  .mc-neon-button { min-height: 40px; padding: .5rem .58rem; }
+  .mc-profile-trigger { min-height: 42px; padding-right: .35rem; }
+  .mc-avatar { width: 32px; height: 32px; }
+}
