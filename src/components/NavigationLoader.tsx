@@ -36,9 +36,10 @@ export default function NavigationLoader() {
   }, [])
 
   if (!pending) return null
+  const logoUrl = document.documentElement.dataset.platformLogo || '/carhome-icon.svg'
   return (
     <div className="mc-route-loading-overlay" role="status" aria-label="جارٍ تحميل المنصة" aria-live="polite">
-      <img src="/carhome-icon.svg" alt="" className="mc-route-loading-logo" />
+      <img src={logoUrl} alt="" className="mc-route-loading-logo" />
       <span className="sr-only">جارٍ تحميل المنصة</span>
     </div>
   )
