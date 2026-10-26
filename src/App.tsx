@@ -97,7 +97,7 @@ export default function App() {
   // Apply persisted branding before the browser paints, preventing a fallback-color flash.
   useLayoutEffect(() => {
     document.title = settings.platform_name || defaults.platform_name
-    document.documentElement.dataset.platformLogo = settings.logo_url || ''
+    document.documentElement.dataset.platformLogo = settings.logo_url || '/mycar-logo.svg'
     const descriptionMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]')
     if (descriptionMeta) descriptionMeta.content = settings.description || defaults.description
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
@@ -105,12 +105,12 @@ export default function App() {
     document.documentElement.style.setProperty('--platform-primary', settings.primary_color || defaults.primary_color)
     document.documentElement.style.setProperty('--platform-secondary', settings.secondary_color || defaults.secondary_color)
     let link = document.querySelector<HTMLLinkElement>('link[rel~="icon"]')
-    const brandIcon = settings.favicon_url || settings.logo_url
+    const brandIcon = settings.favicon_url || settings.logo_url || '/mycar-logo.svg'
     if (brandIcon) {
       if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link) }
       link.href = brandIcon
-    } else if (link && !link.href.endsWith('/carhome-icon.svg')) {
-      link.href = '/carhome-icon.svg'
+    } else if (link && !link.href.endsWith('/mycar-logo.svg')) {
+      link.href = '/mycar-logo.svg'
     }
   }, [settings])
 
@@ -167,7 +167,7 @@ export default function App() {
       {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
       <header className="sticky top-0 z-30 mx-auto flex w-full max-w-[90rem] flex-col items-stretch gap-3 border-b border-white/70 bg-white/85 px-3 py-3 shadow-[0_12px_35px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
         <a href="/" className="flex w-full min-w-0 items-center gap-3 rounded-2xl py-1 sm:w-auto sm:shrink sm:gap-4" aria-label={settings.platform_name + ' الرئيسية'}>
-          {settings.logo_url ? <img src={settings.logo_url} alt={settings.platform_name} className="h-14 w-14 shrink-0 rounded-2xl object-contain sm:h-16 sm:w-16"/> : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-white shadow-soft sm:h-16 sm:w-16" style={{ backgroundColor: settings.secondary_color }}><CarFront size={31} /></span>}
+          <img src={settings.logo_url || "/mycar-logo.svg"} alt={settings.platform_name} className="h-14 w-14 shrink-0 rounded-2xl object-contain sm:h-16 sm:w-16"/>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-2xl font-black leading-tight tracking-tight text-navy sm:text-3xl">{settings.platform_name}</span>
             <span className="mt-1 block truncate text-xs font-bold text-slate-500 sm:text-sm">{settings.tagline}</span>
