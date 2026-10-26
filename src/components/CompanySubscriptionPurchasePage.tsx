@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, BadgeCheck, CalendarClock, CreditCard, RefreshCw } from 'lucide-react'
+import { ArrowRight, BadgeCheck, CreditCard, RefreshCw } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 
@@ -36,8 +36,8 @@ export default function CompanySubscriptionPurchasePage(){
   setLoading(false)
  }
  useEffect(()=>{void load()},[])
- async function submit(e:FormEvent<HTMLFormElement>){
-  e.preventDefault();if(!supabase||!orgId)return
+ async function submit(event:FormEvent<HTMLFormElement>){
+  event.preventDefault();if(!supabase||!orgId)return
   const plan=plans.find(p=>p.id===planId)
   if(!plan){setError('اختر باقة اشتراك متاحة.');return}
   if(orgStatus!=='approved'){setError('يجب اعتماد حساب الشركة من الإدارة قبل طلب الاشتراك.');return}
