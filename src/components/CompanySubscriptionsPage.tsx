@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, BadgeCheck, CalendarClock, LoaderCircle, Plus, RefreshCw, Save, XCircle } from 'lucide-react'
+import { ArrowRight, BadgeCheck, CalendarClock, LoaderCircle, Plus, RefreshCw, XCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 
