@@ -37,10 +37,17 @@ export default function AdminDashboardPage() {
       return result.count || 0
     }
     try {
-      const [companies, owners, suppliers, vehicles, approvedVehicles, pendingVehicles, rejectedVehicles, pendingPayments, verifiedPayments, pendingRequests, pendingOffers, pendingPromotions, paymentRows] = await Promise.all([
+      const [companies, owners, suppliers, approvedCompanies, pendingCompanies, rejectedCompanies, approvedOwners, pendingOwners, approvedSuppliers, pendingSuppliers, vehicles, approvedVehicles, pendingVehicles, rejectedVehicles, pendingPayments, verifiedPayments, pendingRequests, pendingOffers, pendingPromotions, paymentRows] = await Promise.all([
         count('organizations', [['organization_type','company']]),
         count('organizations', [['organization_type','individual_owner']]),
         count('organizations', [['organization_type','fleet_supplier']]),
+        count('organizations', [['organization_type','company'],['approval_status','approved']]),
+        count('organizations', [['organization_type','company'],['approval_status','pending_review']]),
+        count('organizations', [['organization_type','company'],['approval_status','rejected']]),
+        count('organizations', [['organization_type','individual_owner'],['approval_status','approved']]),
+        count('organizations', [['organization_type','individual_owner'],['approval_status','pending_review']]),
+        count('organizations', [['organization_type','fleet_supplier'],['approval_status','approved']]),
+        count('organizations', [['organization_type','fleet_supplier'],['approval_status','pending_review']]),
         count('vehicles'),
         count('vehicles', [['review_status','approved']]),
         count('vehicles', [['review_status','pending_review']]),
@@ -58,9 +65,9 @@ export default function AdminDashboardPage() {
       const pendingAmount = paymentData.filter(p => p.review_status === 'pending').reduce((sum,p) => sum + Number(p.amount_egp || 0), 0)
       const verifiedAmount = paymentData.filter(p => p.review_status === 'approved').reduce((sum,p) => sum + Number(p.amount_egp || 0), 0)
       setMetrics([
-        { label:'الشركات المسجلة', value:companies, hint:'إجمالي حسابات الشركات؛ لا يوجد حاليًا حقل مستقل لاعتماد الحساب.', icon:Building2, tone:'blue' },
-        { label:'ملاك السيارات', value:owners, hint:'إجمالي حسابات الملاك المسجلة.', icon:Users, tone:'violet' },
-        { label:'موردو الأساطيل', value:suppliers, hint:'إجمالي حسابات موردي الأساطيل المسجلة.', icon:Building2, tone:'cyan' },
+        { label:'الشركات المسجلة', value:companies, hint:`${approvedCompanies} معتمدة · ${pendingCompanies} تنتظر المراجعة · ${rejectedCompanies} مرفوضة`, icon:Building2, tone:'blue' },
+        { label:'ملاك السيارات', value:owners, hint:`${approvedOwners} معتمدون · ${pendingOwners} ينتظرون المراجعة`, icon:Users, tone:'violet' },
+        { label:'موردو الأساطيل', value:suppliers, hint:`${approvedSuppliers} معتمدون · ${pendingSuppliers} ينتظرون المراجعة`, icon:Building2, tone:'cyan' },
         { label:'إجمالي السيارات', value:vehicles, hint:`${approvedVehicles} معتمدة · ${pendingVehicles} تنتظر المراجعة · ${rejectedVehicles} مرفوضة`, icon:CarFront, tone:'blue' },
         { label:'تحويلات تنتظر المراجعة', value:pendingPayments, hint:`${money(pendingAmount)} إجمالي المبالغ المعلّقة حسب سجلات التحويل`, icon:Banknote, tone:'amber' },
         { label:'مبالغ مؤكدة', value:money(verifiedAmount), hint:`${verifiedPayments} تحويلات مؤكدة`, icon:BadgeCheck, tone:'emerald' },
