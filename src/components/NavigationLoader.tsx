@@ -23,12 +23,12 @@ export default function NavigationLoader() {
     }
     const onPageShow = () => setPending(false)
     const onBeforeUnload = () => setPending(true)
-    document.addEventListener('click', onClick, true)
+    document.addEventListener('click', onClick)
     window.addEventListener('pageshow', onPageShow)
     window.addEventListener('beforeunload', onBeforeUnload)
     window.addEventListener('popstate', onPageShow)
     return () => {
-      document.removeEventListener('click', onClick, true)
+      document.removeEventListener('click', onClick)
       window.removeEventListener('pageshow', onPageShow)
       window.removeEventListener('beforeunload', onBeforeUnload)
       window.removeEventListener('popstate', onPageShow)
