@@ -3,12 +3,15 @@ import { ArrowRight, Bell, ChevronDown, Home, LogOut, Pencil, UserRound, X, Chec
 import { supabase } from '../lib/supabase'
 import PlatformEntryBanner from './PlatformEntryBanner'
 
-type Role = 'مالك سيارة' | 'شركة' | 'مورد أسطول' | 'إدارة المنصة' | 'مستخدم'\ntype NotificationRow = { id: string; title: string; body: string; notification_type: string; action_url: string | null; read_at: string | null; created_at: string }
+type Role = 'مالك سيارة' | 'شركة' | 'مورد أسطول' | 'إدارة المنصة' | 'مستخدم'
+type NotificationRow = { id: string; title: string; body: string; notification_type: string; action_url: string | null; read_at: string | null; created_at: string }
 type Props = { children: React.ReactNode; platformName?: string; logoUrl?: string | null }
 
 export default function GlobalAppNavigation({ children, platformName = 'My Car', logoUrl }: Props) {
   const [user, setUser] = useState<{ id: string; name: string; email: string; phone: string; role: Role; organizationId: string | null } | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)\n  const [notificationOpen, setNotificationOpen] = useState(false)\n  const [notifications, setNotifications] = useState<NotificationRow[]>([])
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(false)
+  const [notifications, setNotifications] = useState<NotificationRow[]>([])
   const [editOpen, setEditOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState('')
