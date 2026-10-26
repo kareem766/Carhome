@@ -1,14 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, ChevronDown, Home, LogOut, Pencil, UserRound, X } from 'lucide-react'
+import { ArrowRight, Bell, ChevronDown, Home, LogOut, Pencil, UserRound, X, CheckCheck, ExternalLink } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformEntryBanner from './PlatformEntryBanner'
 
-type Role = 'مالك سيارة' | 'شركة' | 'مورد أسطول' | 'إدارة المنصة' | 'مستخدم'
+type Role = 'مالك سيارة' | 'شركة' | 'مورد أسطول' | 'إدارة المنصة' | 'مستخدم'\ntype NotificationRow = { id: string; title: string; body: string; notification_type: string; action_url: string | null; read_at: string | null; created_at: string }
 type Props = { children: React.ReactNode; platformName?: string; logoUrl?: string | null }
 
 export default function GlobalAppNavigation({ children, platformName = 'My Car', logoUrl }: Props) {
   const [user, setUser] = useState<{ id: string; name: string; email: string; phone: string; role: Role; organizationId: string | null } | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)\n  const [notificationOpen, setNotificationOpen] = useState(false)\n  const [notifications, setNotifications] = useState<NotificationRow[]>([])
   const [editOpen, setEditOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState('')
@@ -49,6 +49,28 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
     const authListener = supabase?.auth.onAuthStateChange(() => { void loadUser() })
     return () => { alive = false; authListener?.data.subscription.unsubscribe() }
   }, [])
+
+  async function loadNotifications() {
+    if (!supabase || !user) return
+    const { data, error: notificationError } = await supabase.from('platform_notifications')
+      .select('id,title,body,notification_type,action_url,read_at,created_at')
+      .eq('user_id', user.id).order('created_at', { ascending: false }).limit(15)
+    if (!notificationError) setNotifications((data || []) as NotificationRow[])
+  }
+
+  useEffect(() => { void loadNotifications() }, [user?.id])
+
+  async function markNotificationRead(item: NotificationRow) {
+    if (!supabase || !user) return
+    if (!item.read_at) {
+      const readAt = new Date().toISOString()
+      const { error: updateError } = await supabase.from('platform_notifications').update({ read_at: readAt }).eq('id', item.id).eq('user_id', user.id)
+      if (!updateError) setNotifications(current => current.map(row => row.id === item.id ? { ...row, read_at: readAt } : row))
+    }
+    if (item.action_url) window.location.assign(item.action_url)
+  }
+
+  const unreadCount = notifications.filter(item => !item.read_at).length
 
   async function saveProfile(event: FormEvent) {
     event.preventDefault()
@@ -100,6 +122,19 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
         <nav className="flex shrink-0 items-center gap-2" aria-label="التنقل الرئيسي">
           <button type="button" onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.assign(homePath) }} className="mc-neon-button" title="الرجوع للخلف"><ArrowRight size={17}/><span className="hidden sm:inline">رجوع</span></button>
           <a href={homePath} className="mc-neon-button" title="الصفحة الرئيسية"><Home size={17}/><span className="hidden sm:inline">الرئيسية</span></a>
+          {user && <div className="relative">
+            <button type="button" onClick={() => { const next = !notificationOpen; setNotificationOpen(next); setMenuOpen(false); if (next) void loadNotifications() }} aria-label={`الإشعارات ${unreadCount ? '(' + unreadCount + ' غير مقروءة)' : ''}`} aria-expanded={notificationOpen} className="mc-neon-button mc-notification-trigger">
+              <Bell size={17}/>{unreadCount > 0 && <span className="mc-notification-count">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+            </button>
+            {notificationOpen && <div className="mc-notification-menu absolute left-0 top-[calc(100%+12px)] z-50 w-[min(92vw,380px)] overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3"><div><strong className="text-slate-900">الإشعارات</strong><p className="mt-0.5 text-xs text-slate-500">{unreadCount} غير مقروءة</p></div><button type="button" onClick={async()=>{if(!supabase||!user||!unreadCount)return;const ids=notifications.filter(n=>!n.read_at).map(n=>n.id);const readAt=new Date().toISOString();const result=await supabase.from('platform_notifications').update({read_at:readAt}).in('id',ids).eq('user_id',user.id);if(!result.error)setNotifications(current=>current.map(n=>({...n,read_at:n.read_at||readAt})))}} className="inline-flex items-center gap-1 text-xs font-extrabold text-blue-700"><CheckCheck size={15}/> قراءة الكل</button></div>
+              <div className="max-h-[min(60vh,440px)] overflow-y-auto">
+                {notifications.length === 0 ? <p className="p-6 text-center text-sm text-slate-500">لا توجد إشعارات حتى الآن.</p> : notifications.map(item=><button key={item.id} type="button" onClick={()=>void markNotificationRead(item)} className={`block w-full border-b border-slate-100 p-4 text-right transition hover:bg-blue-50 ${item.read_at ? 'bg-white' : 'bg-blue-50/60'}`}>
+                  <span className="flex items-start gap-2"><span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${item.read_at ? 'bg-slate-300' : 'bg-blue-600'}`}/><span className="min-w-0 flex-1"><strong className="block text-sm text-slate-900">{item.title}</strong>{item.body && <span className="mt-1 block text-xs leading-5 text-slate-600">{item.body}</span>}<span className="mt-2 flex items-center justify-between gap-2 text-[11px] text-slate-400"><span>{new Date(item.created_at).toLocaleString('ar-EG')}</span>{item.action_url && <ExternalLink size={13}/>}</span></span></span>
+                </button>)}
+              </div>
+            </div>}
+          </div>}
           {user ? <div className="relative">
             <button type="button" onClick={() => { setMenuOpen(!menuOpen); setError(''); setNotice('') }} aria-expanded={menuOpen} className="mc-profile-trigger" title="ملف الحساب">
               <span className="mc-avatar">{initials}</span>
