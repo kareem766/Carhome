@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
 import App from './App'
 import NavigationLoader from './components/NavigationLoader'
+import AppErrorBoundary from './components/AppErrorBoundary'
 import './index.css'
 
 registerSW({ immediate: true })
