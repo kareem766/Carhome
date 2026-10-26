@@ -143,8 +143,9 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         if (signUpError) throw signUpError
         if (data.session && data.user) {
           await prepareAccount(data.user, name)
-          setSession(data.session)
-          setNotice('تم إنشاء الحساب وتجهيز الملف الشخصي والمؤسسة بنجاح.')
+          // Use the same callback as role-based registration so admin detection and workspace routing stay consistent.
+          window.location.replace('/auth/callback')
+          return
         } else {
           setNotice('تم إرسال طلب التسجيل. افتح رسالة تأكيد البريد الإلكتروني، ثم ارجع وسجّل الدخول لإكمال إعداد الحساب.')
           setMode('signin')
