@@ -27,6 +27,8 @@ type PlatformSettings = {
   partner_ticker_seconds: number
   owner_vehicle_monthly_fee_egp: number
   supplier_vehicle_registration_fee_egp: number
+  vodafone_cash_number: string | null
+  instapay_number: string | null
 }
 const defaults: PlatformSettings = {
   id: true, platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر',
@@ -36,7 +38,8 @@ const defaults: PlatformSettings = {
   secondary_color: '#0f172a', registration_enabled: true, owner_registration_enabled: true,
   company_registration_enabled: true, supplier_registration_enabled: true, maintenance_mode: false,
   partner_logos: [], partner_ticker_seconds: 28,
-  owner_vehicle_monthly_fee_egp: 300, supplier_vehicle_registration_fee_egp: 150
+  owner_vehicle_monthly_fee_egp: 300, supplier_vehicle_registration_fee_egp: 150,
+  vodafone_cash_number: '01096656281', instapay_number: '01208987035'
 }
 const fieldClass = 'mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
 const labelClass = 'block text-sm font-bold text-slate-700'
@@ -103,6 +106,8 @@ export default function PlatformSettingsPage() {
       partner_logos: partnerLogos, partner_ticker_seconds: settings.partner_ticker_seconds,
       owner_vehicle_monthly_fee_egp: Math.max(1, Math.round(Number(settings.owner_vehicle_monthly_fee_egp) || 300)),
       supplier_vehicle_registration_fee_egp: Math.max(1, Math.round(Number(settings.supplier_vehicle_registration_fee_egp) || 150)),
+      vodafone_cash_number: settings.vodafone_cash_number?.trim() || null,
+      instapay_number: settings.instapay_number?.trim() || null,
       platform_name: settings.platform_name.trim(), tagline: settings.tagline.trim(),
       description: settings.description.trim(), logo_url: settings.logo_url || null,
       favicon_url: settings.favicon_url || null, support_email: settings.support_email?.trim() || null,
@@ -188,6 +193,8 @@ export default function PlatformSettingsPage() {
             <label className={labelClass}>رسوم مورد الأسطول لكل سيارة (جنيه)
               <input type="number" required min={1} max={1000000} step={1} value={settings.supplier_vehicle_registration_fee_egp} onChange={e=>update('supplier_vehicle_registration_fee_egp',Number(e.target.value))} className={fieldClass}/>
             </label>
+            <label className={labelClass}>رقم Vodafone Cash<input maxLength={40} value={settings.vodafone_cash_number || ''} onChange={e=>update('vodafone_cash_number',e.target.value)} className={fieldClass} placeholder="رقم محفظة التحويل"/></label>
+            <label className={labelClass}>رقم InstaPay<input maxLength={40} value={settings.instapay_number || ''} onChange={e=>update('instapay_number',e.target.value)} className={fieldClass} placeholder="رقم/معرّف InstaPay"/></label>
           </div>
         </section>
         <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
