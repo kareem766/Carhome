@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react'
+import PlatformLoadingScreen from './PlatformLoadingScreen'
 
-/**
- * Lightweight transition feedback for same-origin page navigation.
- * The app currently uses pathname-based route selection, so native navigation
- * remains intact; this overlay simply prevents an abrupt blank/loading flash.
- */
+/** Shared branded loading feedback for same-origin document navigation. */
 export default function NavigationLoader() {
   const [pending, setPending] = useState(false)
 
@@ -16,8 +13,8 @@ export default function NavigationLoader() {
       const anchor = target.closest('a[href]') as HTMLAnchorElement | null
       if (!anchor || anchor.target === '_blank' || anchor.hasAttribute('download')) return
       if (anchor.origin !== window.location.origin) return
+      if (anchor.hasAttribute('data-no-navigation-loader') || anchor.getAttribute('role') === 'tab') return
       const next = new URL(anchor.href, window.location.href)
-      if (next.pathname === window.location.pathname && next.search === window.location.search && next.hash) return
       if (next.pathname === window.location.pathname && next.search === window.location.search) return
       setPending(true)
     }
@@ -36,11 +33,9 @@ export default function NavigationLoader() {
   }, [])
 
   if (!pending) return null
-  const logoUrl = document.documentElement.dataset.platformLogo || '/carhome-icon.svg'
   return (
-    <div className="mc-route-loading-overlay" role="status" aria-label="جارٍ تحميل المنصة" aria-live="polite">
-      <img src={logoUrl} alt="" className="mc-route-loading-logo" />
-      <span className="sr-only">جارٍ تحميل المنصة</span>
+    <div className="mc-navigation-loading-backdrop" aria-hidden="false">
+      <PlatformLoadingScreen fullscreen />
     </div>
   )
 }
