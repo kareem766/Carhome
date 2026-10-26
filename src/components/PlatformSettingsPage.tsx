@@ -25,6 +25,8 @@ type PlatformSettings = {
   maintenance_mode: boolean
   partner_logos: { name: string; logo_url: string; website_url?: string }[]
   partner_ticker_seconds: number
+  owner_vehicle_monthly_fee_egp: number
+  supplier_vehicle_registration_fee_egp: number
 }
 const defaults: PlatformSettings = {
   id: true, platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر',
@@ -33,7 +35,8 @@ const defaults: PlatformSettings = {
   footer_text: 'جميع الحقوق محفوظة.', announcement_text: '', primary_color: '#1d4ed8',
   secondary_color: '#0f172a', registration_enabled: true, owner_registration_enabled: true,
   company_registration_enabled: true, supplier_registration_enabled: true, maintenance_mode: false,
-  partner_logos: [], partner_ticker_seconds: 28
+  partner_logos: [], partner_ticker_seconds: 28,
+  owner_vehicle_monthly_fee_egp: 300, supplier_vehicle_registration_fee_egp: 150
 }
 const fieldClass = 'mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
 const labelClass = 'block text-sm font-bold text-slate-700'
@@ -98,6 +101,8 @@ export default function PlatformSettingsPage() {
     } catch (caught) { setError(caught instanceof Error ? caught.message : 'راجع بيانات شعارات الشركاء.'); setSaving(false); return }
     const payload = {
       partner_logos: partnerLogos, partner_ticker_seconds: settings.partner_ticker_seconds,
+      owner_vehicle_monthly_fee_egp: Math.max(1, Math.round(Number(settings.owner_vehicle_monthly_fee_egp) || 300)),
+      supplier_vehicle_registration_fee_egp: Math.max(1, Math.round(Number(settings.supplier_vehicle_registration_fee_egp) || 150)),
       platform_name: settings.platform_name.trim(), tagline: settings.tagline.trim(),
       description: settings.description.trim(), logo_url: settings.logo_url || null,
       favicon_url: settings.favicon_url || null, support_email: settings.support_email?.trim() || null,
@@ -171,6 +176,18 @@ export default function PlatformSettingsPage() {
             <label className={labelClass}>العنوان<input maxLength={300} value={settings.address || ''} onChange={e=>update('address',e.target.value)} className={fieldClass}/></label>
             <label className={labelClass+' sm:col-span-2'}>نص التذييل وحقوق النشر<input maxLength={300} value={settings.footer_text} onChange={e=>update('footer_text',e.target.value)} className={fieldClass}/></label>
             <label className={labelClass+' sm:col-span-2'}>إعلان عام أعلى الموقع (اختياري)<textarea maxLength={500} rows={2} value={settings.announcement_text || ''} onChange={e=>update('announcement_text',e.target.value)} className={fieldClass}/></label>
+          </div>
+        </section>
+        <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
+          <h2 className="text-lg font-extrabold">رسوم تسجيل السيارات</h2>
+          <p className="mt-1 text-sm leading-7 text-slate-500">تُستخدم هذه الأسعار في نموذج التحويل وحساب المبلغ المطلوب؛ لا يؤدي تعديلها إلى تأكيد أي دفعة تلقائيًا.</p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label className={labelClass}>رسوم مالك السيارة لكل سيارة شهريًا (جنيه)
+              <input type="number" required min={1} max={1000000} step={1} value={settings.owner_vehicle_monthly_fee_egp} onChange={e=>update('owner_vehicle_monthly_fee_egp',Number(e.target.value))} className={fieldClass}/>
+            </label>
+            <label className={labelClass}>رسوم مورد الأسطول لكل سيارة (جنيه)
+              <input type="number" required min={1} max={1000000} step={1} value={settings.supplier_vehicle_registration_fee_egp} onChange={e=>update('supplier_vehicle_registration_fee_egp',Number(e.target.value))} className={fieldClass}/>
+            </label>
           </div>
         </section>
         <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
