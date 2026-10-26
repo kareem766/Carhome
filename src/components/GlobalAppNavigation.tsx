@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, ChevronDown, Home, LogOut, Pencil, UserRound, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import PlatformEntryBanner from './PlatformEntryBanner'
 
 type Role = 'مالك سيارة' | 'شركة' | 'مورد أسطول' | 'إدارة المنصة' | 'مستخدم'
 type Props = { children: React.ReactNode; platformName?: string; logoUrl?: string | null }
@@ -120,6 +121,7 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
       {notice && <p role="status" className="mx-auto mt-2 max-w-[96rem] text-sm font-bold text-emerald-700">{notice}</p>}
       {error && !editOpen && <p role="alert" className="mx-auto mt-2 max-w-[96rem] text-sm font-bold text-red-700">{error}</p>}
     </header>}
+    <PlatformEntryBanner />
     {children}
     {editOpen && <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm" dir="rtl" role="dialog" aria-modal="true" aria-labelledby="mc-profile-edit-title">
       <form onSubmit={saveProfile} className="w-full max-w-md rounded-3xl border border-blue-200 bg-white p-6 shadow-2xl">
