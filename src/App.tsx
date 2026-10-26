@@ -23,6 +23,7 @@ import { isSupabaseConfigured, supabase } from './lib/supabase'
 import PartnerLogoTicker from './components/PartnerLogoTicker'
 import PlatformEntryBanner from './components/PlatformEntryBanner'
 import GlobalAppNavigation from './components/GlobalAppNavigation'
+import PlatformLoadingScreen from './components/PlatformLoadingScreen'
 
 // Release trigger: rebuild the current My Car production branch on Vercel.
 // Production retry commit: 2026-10-25; verify partner ticker and platform branding after build.
@@ -49,19 +50,7 @@ const features = [
 ]
 
 function RouteLoading() {
-  return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.10),transparent_48%),#f8fafc] px-5 text-slate-600">
-    <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل منصة My Car">
-      <div className="relative grid h-24 w-24 place-items-center">
-        <span aria-hidden="true" className="absolute inset-0 rounded-full border-[3px] border-blue-100" />
-        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-blue-600 border-l-blue-400" />
-        <span className="grid h-[4.25rem] w-[4.25rem] place-items-center rounded-2xl bg-white shadow-lg ring-1 ring-slate-200/80">
-          <img src="/carhome-icon.svg" alt="" className="h-14 w-14 object-contain" />
-        </span>
-      </div>
-      <p className="text-sm font-extrabold tracking-wide text-slate-700">جارٍ تجهيز تجربتك على My Car...</p>
-      <span className="h-1 w-28 overflow-hidden rounded-full bg-blue-100"><span className="block h-full w-1/2 animate-pulse rounded-full bg-blue-600" /></span>
-    </div>
-  </main>
+  return <PlatformLoadingScreen fullscreen />
 }
 
 function ServiceNotice({ title, message, settings }: { title: string; message: string; settings: PlatformSettings }) {
