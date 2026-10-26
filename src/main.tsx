@@ -11,10 +11,10 @@ registerSW({ immediate: true })
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <>
+    <AppErrorBoundary>
       <App />
       <NavigationLoader />
       <ConnectivityStatus />
-    </>
+    </AppErrorBoundary>
   </React.StrictMode>
 )
