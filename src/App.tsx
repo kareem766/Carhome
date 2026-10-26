@@ -13,11 +13,13 @@ const CompanySubscriptionsPage = lazy(() => import('./components/CompanySubscrip
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
 const AutomotiveServicesPage = lazy(() => import('./components/AutomotiveServicesPage'))
 const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPlansAdminPage'))
+const PlatformBannersAdminPage = lazy(() => import('./components/PlatformBannersAdminPage'))
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import PartnerLogoTicker from './components/PartnerLogoTicker'
+import PlatformEntryBanner from './components/PlatformEntryBanner'
 import GlobalAppNavigation from './components/GlobalAppNavigation'
 
 // Release trigger: rebuild the current My Car production branch on Vercel.
@@ -138,6 +140,7 @@ export default function App() {
   if (path === '/workspace/admin/subscription-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/subscriptions') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><CompanySubscriptionsPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/advertising-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin/banners') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><PlatformBannersAdminPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/catalog') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><VehicleCatalogPage /></Suspense></GlobalAppNavigation>
   if (path === '/services' || path === '/automotive-services') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AutomotiveServicesPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/advertising-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdvertisingPlansPage /></Suspense></GlobalAppNavigation>
@@ -168,6 +171,7 @@ export default function App() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.10),_transparent_36%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_48%,#f8fafc_100%)] text-slate-800" dir="rtl">
+      <PlatformEntryBanner />
       {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
       <header className="sticky top-0 z-30 mx-auto flex w-full max-w-[90rem] flex-col items-stretch gap-3 border-b border-white/70 bg-white/85 px-3 py-3 shadow-[0_12px_35px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
         <a href="/" className="flex w-full min-w-0 items-center gap-3 rounded-2xl py-1 sm:w-auto sm:shrink sm:gap-4" aria-label={settings.platform_name + ' الرئيسية'}>
