@@ -22,13 +22,14 @@ export default function AdminDashboardPage() {
   async function load() {
     if (!supabase) { setError('إعدادات الاتصال بقاعدة البيانات غير مكتملة.'); setLoading(false); return }
     setLoading(true); setError('')
-    const { data: auth, error: authError } = await supabase.auth.getUser()
+    const db = supabase
+    const { data: auth, error: authError } = await db.auth.getUser()
     if (authError || !auth.user) { window.location.replace('/?login=1'); return }
-    const { data: admin, error: adminError } = await supabase.from('platform_admins').select('user_id').eq('user_id', auth.user.id).maybeSingle()
+    const { data: admin, error: adminError } = await db.from('platform_admins').select('user_id').eq('user_id', auth.user.id).maybeSingle()
     if (adminError || !admin) { setAuthorized(false); setError(adminError?.message || 'هذه اللوحة مخصصة لصاحب المنصة فقط.'); setLoading(false); return }
     setAuthorized(true)
     const count = async (table: string, filters: [string, string][] = []) => {
-      let query = supabase.from(table).select('id', { count: 'exact', head: true })
+      let query = db.from(table).select('id', { count: 'exact', head: true })
       for (const [column, value] of filters) query = query.eq(column, value)
       const result = await query
       if (result.error) throw result.error
@@ -49,7 +50,7 @@ export default function AdminDashboardPage() {
         count('rental_requests', [['status','open']]),
         count('rental_offers', [['status','submitted']]),
         count('vehicle_promotions', [['status','pending_review']]),
-        supabase.from('vehicle_payment_submissions').select('amount_egp,review_status')
+        db.from('vehicle_payment_submissions').select('amount_egp,review_status')
       ])
       if (paymentRows.error) throw paymentRows.error
       const paymentData = paymentRows.data || []
