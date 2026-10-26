@@ -6,8 +6,6 @@ on:
       - fix/commercial-launch-readiness
       - fix/database-index-performance
   pull_request:
-    branches:
-      - feat/account-notifications
 
 permissions:
   contents: read
@@ -25,6 +23,6 @@ jobs:
         with:
           node-version: 22
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Type-check and production build
         run: npm run build
