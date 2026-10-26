@@ -23,6 +23,7 @@ type PlatformSettings = {
   company_registration_enabled: boolean
   supplier_registration_enabled: boolean
   maintenance_mode: boolean
+  company_subscription_required: boolean
   partner_logos: { name: string; logo_url: string; website_url?: string }[]
   partner_ticker_seconds: number
   owner_vehicle_monthly_fee_egp: number
@@ -36,7 +37,7 @@ const defaults: PlatformSettings = {
   logo_url: null, favicon_url: null, support_email: '', support_phone: '', website_url: '', address: '',
   footer_text: 'جميع الحقوق محفوظة.', announcement_text: '', primary_color: '#1d4ed8',
   secondary_color: '#0f172a', registration_enabled: true, owner_registration_enabled: true,
-  company_registration_enabled: true, supplier_registration_enabled: true, maintenance_mode: false,
+  company_registration_enabled: true, supplier_registration_enabled: true, maintenance_mode: false, company_subscription_required: false,
   partner_logos: [], partner_ticker_seconds: 28,
   owner_vehicle_monthly_fee_egp: 300, supplier_vehicle_registration_fee_egp: 150,
   vodafone_cash_number: '01096656281', instapay_number: '01208987035'
@@ -119,7 +120,9 @@ export default function PlatformSettingsPage() {
       owner_registration_enabled: settings.owner_registration_enabled,
       company_registration_enabled: settings.company_registration_enabled,
       supplier_registration_enabled: settings.supplier_registration_enabled,
-      maintenance_mode: settings.maintenance_mode, updated_at: new Date().toISOString(),
+      maintenance_mode: settings.maintenance_mode,
+      company_subscription_required: settings.company_subscription_required,
+      updated_at: new Date().toISOString(),
       updated_by: auth.user?.id || null
     }
     const { error: saveError } = await supabase.from('platform_settings').update(payload).eq('id', true)
@@ -207,7 +210,8 @@ export default function PlatformSettingsPage() {
               ['owner_registration_enabled','تسجيل ملاك السيارات'],
               ['company_registration_enabled','تسجيل الشركات'],
               ['supplier_registration_enabled','تسجيل موردي الأساطيل'],
-              ['maintenance_mode','وضع الصيانة (إيقاف الواجهة العامة)']
+              ['maintenance_mode','وضع الصيانة (إيقاف الواجهة العامة)'],
+              ['company_subscription_required','اشتراط اشتراك شركة نشط قبل نشر طلبات التأجير']
             ] as const).map(([key,label])=><label key={key} className="flex items-center gap-3 rounded-xl border p-4 text-sm font-bold"><input type="checkbox" checked={settings[key]} onChange={e=>update(key,e.target.checked)} className="h-4 w-4"/>{label}</label>)}
             <p className="sm:col-span-2 rounded-xl bg-amber-50 p-3 text-xs leading-6 text-amber-900"><ShieldCheck className="ml-1 inline" size={15}/> تؤثر هذه الخيارات على مسارات التسجيل والواجهة العامة فقط؛ وتظل لوحة صاحب المنصة متاحة لإعادة تشغيل الخدمة، ولا تُحذف الحسابات القائمة.</p>
           </div>
