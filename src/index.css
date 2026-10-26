@@ -515,3 +515,9 @@ main.min-h-screen :is(input, select, textarea):disabled {
 @keyframes mcBannerProgress { from {transform:scaleX(1)} to {transform:scaleX(0)} }
 @media (min-width:700px) { .mc-entry-banner:has(.mc-entry-banner-image) { grid-template-columns:1.05fr .95fr; align-items:stretch; } .mc-entry-banner-image { height:100%; max-height:480px; min-height:300px; } .mc-entry-banner-copy { align-self:center; padding:2rem; } }
 @media (prefers-reduced-motion:reduce) { .mc-banner-backdrop,.mc-banner-progress {animation-duration:.01ms!important} }
+
+
+/* Notification center */
+.mc-notification-trigger { position:relative; }
+.mc-notification-count { position:absolute; top:-7px; left:-6px; display:grid; min-width:19px; height:19px; place-items:center; padding:0 4px; border:2px solid #fff; border-radius:999px; background:#dc2626; color:#fff; font-size:10px; font-weight:900; line-height:1; box-shadow:0 0 0 1px rgba(220,38,38,.18); }
+.mc-notification-menu { box-shadow:0 20px 65px rgba(15,35,70,.2),0 0 24px rgba(37,99,235,.1); animation:mcMenuIn .14s ease-out both; }
