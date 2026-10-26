@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Activity, ArrowLeft, BadgeCheck, Banknote, Building2, CarFront, ClipboardCheck, FileText, Megaphone, RefreshCw, Settings, ShieldCheck, Users, WalletCards } from 'lucide-react'
+import { Activity, ArrowLeft, BadgeCheck, Banknote, Building2, CarFront, ClipboardCheck, FileText, Megaphone, RefreshCw, Settings, ShieldCheck, Users, WalletCards, MessageSquare, Megaphone } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
@@ -62,6 +62,13 @@ export default function AdminDashboardPage() {
         db.from('vehicle_payment_submissions').select('amount_egp,review_status,created_at')
       ])
       if (paymentRows.error) throw paymentRows.error
+      const [activePromotions, activeAdvertisingPlans, activeSubscriptionPlans, conversationsCount, messagesCount] = await Promise.all([
+        count('vehicle_promotions', [['status','approved']]),
+        count('advertising_plans', [['is_active','true']]),
+        count('platform_subscription_plans', [['is_active','true']]),
+        count('conversations'),
+        count('messages')
+      ])
       const paymentData = paymentRows.data || []
       const pendingAmount = paymentData.filter(p => p.review_status === 'pending').reduce((sum,p) => sum + Number(p.amount_egp || 0), 0)
       const verifiedAmount = paymentData.filter(p => p.review_status === 'approved').reduce((sum,p) => sum + Number(p.amount_egp || 0), 0)
@@ -75,6 +82,11 @@ export default function AdminDashboardPage() {
         { label:'طلبات تأجير مفتوحة', value:pendingRequests, hint:'طلبات تنتظر العروض أو المتابعة.', icon:FileText, tone:'indigo' },
         { label:'عروض تنتظر المراجعة', value:pendingOffers, hint:'عروض حالتها قيد الإرسال.', icon:ClipboardCheck, tone:'amber' },
         { label:'طلبات ترويج معلّقة', value:pendingPromotions, hint:'طلبات باقات إعلانية تنتظر قرار الإدارة.', icon:Megaphone, tone:'rose' },
+        { label:'إعلانات معتمدة', value:activePromotions, hint:'طلبات الترويج التي حالتها معتمدة؛ يُراجع تاريخ الانتهاء في صفحة الإعلانات.', icon:Megaphone, tone:'emerald' },
+        { label:'باقات الإعلانات المتاحة', value:activeAdvertisingPlans, hint:'باقات مفعّلة للعرض من جدول باقات الإعلانات.', icon:Megaphone, tone:'blue' },
+        { label:'خطط اشتراك الشركات', value:activeSubscriptionPlans, hint:'خطط اشتراك مفعّلة للعرض، وليست عدد اشتراكات مدفوعة.', icon:WalletCards, tone:'violet' },
+        { label:'المحادثات المسجلة', value:conversationsCount, hint:'إجمالي المحادثات المسجلة في المنصة.', icon:MessageSquare, tone:'indigo' },
+        { label:'الرسائل المسجلة', value:messagesCount, hint:'إجمالي الرسائل المسجلة في المنصة.', icon:MessageSquare, tone:'cyan' },
       ])
       // Build the last-seven-day analytics directly from persisted records, never from demo values.
       const since = new Date()
