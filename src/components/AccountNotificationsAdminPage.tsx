@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ArrowLeft, BellRing, CheckCircle2, Send, Users } from 'lucide-react'
+import { ArrowLeft, BellRing, Send, Users } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
