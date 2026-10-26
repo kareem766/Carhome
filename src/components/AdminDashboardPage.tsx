@@ -12,6 +12,7 @@ const sections = [
   { title: 'باقات اشتراك الشركات', description: 'إدارة خطط الاشتراك والأسعار والمزايا وحدود الاستخدام.', href: '/workspace/admin/subscription-plans', icon: WalletCards, tag: 'الخطط' },
   { title: 'سجلات اشتراكات الشركات', description: 'إنشاء سجل اشتراك لكل شركة، ومراجعة مرجع الدفع، وتفعيل مدة الاشتراك بعد التأكد من التحويل.', href: '/workspace/admin/subscriptions', icon: WalletCards, tag: 'سجلات فعلية' },
   { title: 'باقات إعلانات السيارات', description: 'إضافة وتعديل الأسعار والمدة والمزايا وترتيب الباقات المنشورة.', href: '/workspace/admin/advertising-plans', icon: Megaphone, tag: 'الإعلانات' },
+  { title: 'بانرات بداية الدخول', description: 'إنشاء وإدارة إعلانات الظهور عند دخول المنصة والتحكم بالصورة والنص والرابط والمدة والجدولة.', href: '/workspace/admin/banners', icon: Megaphone, tag: 'إعلانات الواجهة' },
   { title: 'كتالوج السيارات', description: 'معاينة السيارات المنشورة والمتاحة للشركات.', href: '/workspace/catalog', icon: CarFront, tag: 'عرض عام' },
   { title: 'طلبات التأجير', description: 'متابعة طلبات الشركات والعروض الواردة من الملاك والموردين.', href: '/workspace/admin', icon: FileText, tag: 'سير العمل' },
 ]
