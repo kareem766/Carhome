@@ -18,6 +18,7 @@ const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import PartnerLogoTicker from './components/PartnerLogoTicker'
+import GlobalAppNavigation from './components/GlobalAppNavigation'
 
 // Release trigger: rebuild the current My Car production branch on Vercel.
 // Production retry commit: 2026-10-25; verify partner ticker and platform branding after build.
@@ -131,20 +132,20 @@ export default function App() {
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
-  if (path === '/workspace/admin/dashboard') return <Suspense fallback={<RouteLoading />}><AdminDashboardPage /></Suspense>
-  if (path === '/workspace/admin/management') return <Suspense fallback={<RouteLoading />}><AdminManagementPage /></Suspense>
-  if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading />}><PlatformSettingsPage /></Suspense>
-  if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense>
-  if (path === '/workspace/admin/subscriptions') return <Suspense fallback={<RouteLoading />}><CompanySubscriptionsPage /></Suspense>
-  if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense>
-  if (path === '/workspace/catalog') return <Suspense fallback={<RouteLoading />}><VehicleCatalogPage /></Suspense>
-  if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<RouteLoading />}><AutomotiveServicesPage /></Suspense>
-  if (path === '/workspace/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansPage /></Suspense>
-  if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<RouteLoading />}><AdminReviewPage /></Suspense>
-  if (path.includes('/messages')) return <Suspense fallback={<RouteLoading />}><MessagingPage /></Suspense>
-  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<RouteLoading />}><WorkspacePage role="company" /></Suspense>
-  if (path.startsWith('/workspace/owner')) return <Suspense fallback={<RouteLoading />}><WorkspacePage role="owner" /></Suspense>
-  if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<RouteLoading />}><WorkspacePage role="supplier" /></Suspense>
+  if (path === '/workspace/admin/dashboard') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdminDashboardPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin/management') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdminManagementPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin/platform-settings') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><PlatformSettingsPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin/subscription-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin/subscriptions') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><CompanySubscriptionsPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin/advertising-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/catalog') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><VehicleCatalogPage /></Suspense></GlobalAppNavigation>
+  if (path === '/services' || path === '/automotive-services') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AutomotiveServicesPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/advertising-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdvertisingPlansPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdminReviewPage /></Suspense></GlobalAppNavigation>
+  if (path.includes('/messages')) return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><MessagingPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><WorkspacePage role="company" /></Suspense></GlobalAppNavigation>
+  if (path.startsWith('/workspace/owner')) return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><WorkspacePage role="owner" /></Suspense></GlobalAppNavigation>
+  if (path.startsWith('/workspace/supplier')) return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><WorkspacePage role="supplier" /></Suspense></GlobalAppNavigation>
 
   if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
   if (settings.maintenance_mode && (path === '/' || path === '/register' || path.startsWith('/register/'))) {
@@ -156,14 +157,14 @@ export default function App() {
   if (path === '/register/owner' && !settings.owner_registration_enabled) return <ServiceNotice settings={settings} title="تسجيل ملاك السيارات متوقف" message="التسجيل لهذا النوع من الحسابات غير متاح حاليًا." />
   if (path === '/register/company' && !settings.company_registration_enabled) return <ServiceNotice settings={settings} title="تسجيل الشركات متوقف" message="التسجيل لهذا النوع من الحسابات غير متاح حاليًا." />
   if (path === '/register/supplier' && !settings.supplier_registration_enabled) return <ServiceNotice settings={settings} title="تسجيل موردي الأساطيل متوقف" message="التسجيل لهذا النوع من الحسابات غير متاح حاليًا." />
-  if (path === '/register') return <RoleChooserPage onChoose={(role) => {
+  if (path === '/register') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><RoleChooserPage onChoose={(role) => {
     const enabled = role === 'individual_owner' ? settings.owner_registration_enabled : role === 'fleet_supplier' ? settings.supplier_registration_enabled : settings.company_registration_enabled
     if (!enabled) { window.alert('التسجيل لهذا النوع من الحسابات غير متاح حاليًا.'); return }
     window.location.href = '/register/' + (role === 'individual_owner' ? 'owner' : role === 'fleet_supplier' ? 'supplier' : 'company')
-  }} onLogin={() => { window.location.href = '/?login=1' }} />
-  if (path === '/register/owner') return <RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} />
-  if (path === '/register/company') return <RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} />
-  if (path === '/register/supplier') return <RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} />
+  }} onLogin={() => { window.location.href = '/?login=1' }} /></GlobalAppNavigation>
+  if (path === '/register/owner') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} /></GlobalAppNavigation>
+  if (path === '/register/company') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} /></GlobalAppNavigation>
+  if (path === '/register/supplier') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} /></GlobalAppNavigation>
 
   return (
     <main className="min-h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.10),_transparent_36%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_48%,#f8fafc_100%)] text-slate-800" dir="rtl">
