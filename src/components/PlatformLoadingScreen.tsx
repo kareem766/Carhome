@@ -1,6 +1,7 @@
 type Props = { fullscreen?: boolean }
 
 export default function PlatformLoadingScreen({ fullscreen = false }: Props) {
+  const logoUrl = typeof document !== 'undefined' ? document.documentElement.dataset.platformLogo || '/carhome-icon.svg' : '/carhome-icon.svg'
   return (
     <div
       className={fullscreen ? 'mc-platform-loading mc-platform-loading-fullscreen' : 'mc-platform-loading'}
@@ -8,7 +9,7 @@ export default function PlatformLoadingScreen({ fullscreen = false }: Props) {
       aria-label="جارٍ تحميل المنصة"
       aria-live="polite"
     >
-      <img src="/carhome-icon.svg" alt="" className="mc-platform-loading-logo" />
+      <img src={logoUrl} alt="" className="mc-platform-loading-logo" />
       <span className="sr-only">جارٍ تحميل المنصة</span>
     </div>
   )
