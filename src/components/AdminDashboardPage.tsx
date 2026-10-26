@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
         { label:'طلبات تأجير مفتوحة', value:pendingRequests, hint:'طلبات تنتظر العروض أو المتابعة.', icon:FileText, tone:'indigo' },
         { label:'عروض تنتظر المراجعة', value:pendingOffers, hint:'عروض حالتها قيد الإرسال.', icon:ClipboardCheck, tone:'amber' },
         { label:'طلبات ترويج معلّقة', value:pendingPromotions, hint:'طلبات باقات إعلانية تنتظر قرار الإدارة.', icon:Megaphone, tone:'rose' },
-        { label:'إعلانات معتمدة', value:activePromotions, hint:'طلبات الترويج التي حالتها معتمدة؛ يُراجع تاريخ الانتهاء في صفحة الإعلانات.', icon:Megaphone, tone:'emerald' },
+        { label:'طلبات ترويج معتمدة', value:activePromotions, hint:'إجمالي طلبات الترويج بحالة معتمدة، وليس عدد الإعلانات التي ما زالت ضمن مدة العرض.', icon:Megaphone, tone:'emerald' },
         { label:'باقات الإعلانات المتاحة', value:activeAdvertisingPlans, hint:'باقات مفعّلة للعرض من جدول باقات الإعلانات.', icon:Megaphone, tone:'blue' },
         { label:'خطط اشتراك الشركات', value:activeSubscriptionPlans, hint:'خطط اشتراك مفعّلة للعرض، وليست عدد اشتراكات مدفوعة.', icon:WalletCards, tone:'violet' },
         { label:'المحادثات المسجلة', value:conversationsCount, hint:'إجمالي المحادثات المسجلة في المنصة.', icon:MessageSquare, tone:'indigo' },
