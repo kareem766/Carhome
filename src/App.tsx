@@ -14,6 +14,7 @@ const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
 const AutomotiveServicesPage = lazy(() => import('./components/AutomotiveServicesPage'))
 const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPlansAdminPage'))
 const PlatformBannersAdminPage = lazy(() => import('./components/PlatformBannersAdminPage'))
+const AccountNotificationsAdminPage = lazy(() => import('./components/AccountNotificationsAdminPage'))
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
@@ -141,6 +142,7 @@ export default function App() {
   if (path === '/workspace/admin/subscriptions') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><CompanySubscriptionsPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/advertising-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/banners') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><PlatformBannersAdminPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin/notifications') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AccountNotificationsAdminPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/catalog') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><VehicleCatalogPage /></Suspense></GlobalAppNavigation>
   if (path === '/services' || path === '/automotive-services') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AutomotiveServicesPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/advertising-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdvertisingPlansPage /></Suspense></GlobalAppNavigation>
