@@ -5,6 +5,7 @@ import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistra
 import LegalPages from './components/LegalPages'
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
+const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
@@ -128,6 +129,7 @@ export default function App() {
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
+  if (path === '/workspace/admin/dashboard') return <Suspense fallback={<RouteLoading />}><AdminDashboardPage /></Suspense>
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading />}><PlatformSettingsPage /></Suspense>
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense>
   if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense>
