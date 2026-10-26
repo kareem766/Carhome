@@ -133,6 +133,7 @@ export default function App() {
   // Wait for saved platform identity to load before painting any route.
   // This prevents a default-theme flash before persisted brand colors are applied.
   if (!settingsLoaded) return <RouteLoading />
+  if (settings.maintenance_mode && !path.startsWith('/workspace/admin') && path !== '/auth/callback') return <ServiceNotice settings={settings} title="المنصة تحت الصيانة" message="نعمل على تحسين الخدمة. يرجى المحاولة مرة أخرى لاحقًا." />
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
@@ -155,9 +156,6 @@ export default function App() {
   if (path.startsWith('/workspace/supplier')) return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><WorkspacePage role="supplier" /></Suspense></GlobalAppNavigation>
 
   if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
-  if (settings.maintenance_mode && (path === '/' || path === '/register' || path.startsWith('/register/'))) {
-    return <ServiceNotice settings={settings} title="المنصة تحت الصيانة" message="نعمل على تحسين الخدمة. يرجى المحاولة مرة أخرى لاحقًا." />
-  }
   if ((path === '/register' || path.startsWith('/register/')) && !settings.registration_enabled) {
     return <ServiceNotice settings={settings} title="التسجيل متوقف مؤقتًا" message="لا نستقبل حسابات جديدة في الوقت الحالي. يمكنك التواصل مع إدارة المنصة للاستفسار." />
   }
