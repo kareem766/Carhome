@@ -48,6 +48,9 @@ export default function AdminManagementPage() {
   }
   async function setVehicleStatus(row:Row,status:string){
     if(!supabase)return
+    if(status==='approved' && row.payment_status!=='verified' && row.payment_status!=='waived'){
+      setError('لا يمكن اعتماد السيارة قبل تأكيد رسوم التسجيل. راجع تحويل الرسوم أولًا.');return
+    }
     setError('');setNotice('')
     const {error:e}=await supabase.from('vehicles').update({review_status:status,updated_at:new Date().toISOString()}).eq('id',row.id)
     if(e){setError('تعذر تغيير حالة السيارة: '+e.message);return}
@@ -60,7 +63,11 @@ export default function AdminManagementPage() {
     const {data:auth}=await supabase.auth.getUser()
     const {error:e}=await supabase.from('vehicle_payment_submissions').update({review_status:status,reviewed_at:new Date().toISOString(),reviewed_by:auth.user?.id||null}).eq('id',row.id)
     if(e){setError('تعذر تحديث حالة التحويل: '+e.message);return}
-    setNotice(status==='approved'?'تم اعتماد التحويل.':'تم رفض التحويل.');await load()
+    if(status==='approved'){
+      const {error:vehicleError}=await supabase.from('vehicles').update({payment_status:'verified',updated_at:new Date().toISOString()}).eq('id',row.vehicle_id)
+      if(vehicleError){setError('تم اعتماد سجل التحويل لكن تعذر تحديث حالة دفع السيارة: '+vehicleError.message);await load();return}
+    }
+    setNotice(status==='approved'?'تم اعتماد التحويل وتأكيد رسوم السيارة؛ راجع واعتمد السيارة بصورة منفصلة بعد فحص بياناتها.':'تم رفض التحويل.');await load()
   }
   async function setPromotionStatus(row:Row,status:string){
     if(!supabase)return
