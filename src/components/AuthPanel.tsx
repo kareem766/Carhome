@@ -13,76 +13,6 @@ const accountTypes: { value: AccountType; label: string; detail: string }[] = [
   { value: 'company', label: 'شركة طالبة', detail: 'طلب سيارات للتأجير الشهري أو السنوي' }
 ]
 
-async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: string) {
-  if (!supabase) throw new Error('خدمة الحسابات غير متاحة حاليًا.')
-  const metadata = user.user_metadata ?? {}
-  const displayName = String(metadata.display_name || fallbackName || user.email || '').trim()
-  const orgName = String(metadata.organization_name || displayName).trim()
-  const orgType = accountTypes.some((item) => item.value === metadata.organization_type)
-    ? metadata.organization_type as AccountType
-    : 'individual_owner'
-
-  const profileResult = await supabase.from('profiles').upsert({
-    id: user.id,
-    display_name: displayName,
-    locale: 'ar',
-    phone: String(metadata.phone || user.phone || '').trim() || null,
-    contact_email: String(metadata.email_contact || user.email || '').trim() || null,
-    address: String(metadata.address || '').trim() || null
-  }, { onConflict: 'id' })
-  if (profileResult.error) {
-    const missingNewColumns = /column|schema cache|could not find/i.test(profileResult.error.message)
-    if (!missingNewColumns) throw profileResult.error
-    const legacyProfile = await supabase.from('profiles').upsert({ id: user.id, display_name: displayName, locale: 'ar' }, { onConflict: 'id' })
-    if (legacyProfile.error) throw legacyProfile.error
-  }
-
-  const membershipResult = await supabase.from('organization_memberships')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
-  if (membershipResult.error) throw membershipResult.error
-  if (membershipResult.data) return
-
-  const existingOrg = await supabase.from('organizations')
-    .select('id')
-    .eq('created_by', user.id)
-    .limit(1)
-    .maybeSingle()
-  if (existingOrg.error) throw existingOrg.error
-
-  let organizationId = existingOrg.data?.id
-  if (!organizationId) {
-    const organizationResult = await supabase.from('organizations').insert({
-      name: orgName,
-      organization_type: orgType,
-      created_by: user.id,
-      city: String(metadata.governorate || '').trim() || null,
-      contact_name: displayName,
-      phone: String(metadata.phone || user.phone || '').trim() || null,
-      contact_email: String(metadata.email_contact || user.email || '').trim() || null,
-      address: String(metadata.address || '').trim() || null,
-      company_type: String(metadata.company_type || '').trim() || null
-    }).select('id').single()
-    if (organizationResult.error && /column|schema cache|could not find/i.test(organizationResult.error.message)) {
-      const legacyOrganization = await supabase.from('organizations').insert({ name: orgName, organization_type: orgType, created_by: user.id, city: String(metadata.governorate || '').trim() || null }).select('id').single()
-      if (legacyOrganization.error) throw legacyOrganization.error
-      organizationId = legacyOrganization.data.id
-    } else {
-      if (organizationResult.error) throw organizationResult.error
-      organizationId = organizationResult.data.id
-    }
-  }
-
-  const membershipInsert = await supabase.from('organization_memberships').insert({
-    organization_id: organizationId,
-    user_id: user.id,
-    role: 'owner'
-  })
-  if (membershipInsert.error && membershipInsert.error.code !== '23505') throw membershipInsert.error
-}
-
 export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
   const [email, setEmail] = useState('')
@@ -142,8 +72,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         })
         if (signUpError) throw signUpError
         if (data.session && data.user) {
-          await prepareAccount(data.user, name)
-          // Use the same callback as role-based registration so admin detection and workspace routing stay consistent.
+          // The callback is the single owner of profile, organization, membership, and logo setup.
           window.location.replace('/auth/callback')
           return
         } else {
