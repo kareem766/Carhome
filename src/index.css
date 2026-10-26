@@ -578,3 +578,36 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-route-loading-overlay { animation: none; }
   .mc-platform-loading-logo, .mc-route-loading-logo { animation: none; }
 }
+
+
+/* Subtle electric-blue neon linework: shared page backdrop, behind all interactive content. */
+body {
+  position: relative;
+  isolation: isolate;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(112deg, transparent 0 13%, rgba(38, 132, 255, .07) 13.08%, rgba(38, 132, 255, .015) 13.22%, transparent 13.45% 100%),
+    linear-gradient(112deg, transparent 0 72%, rgba(42, 151, 255, .065) 72.08%, rgba(42, 151, 255, .012) 72.22%, transparent 72.45% 100%),
+    linear-gradient(22deg, transparent 0 36%, rgba(28, 112, 235, .045) 36.08%, rgba(28, 112, 235, .01) 36.2%, transparent 36.4% 100%),
+    radial-gradient(ellipse at 8% 36%, rgba(31, 126, 255, .10), transparent 23rem),
+    radial-gradient(ellipse at 94% 72%, rgba(14, 165, 233, .08), transparent 25rem);
+  opacity: .9;
+}
+@media (max-width: 640px) {
+  body::before {
+    background:
+      linear-gradient(112deg, transparent 0 16%, rgba(38, 132, 255, .055) 16.1%, transparent 16.35% 100%),
+      linear-gradient(112deg, transparent 0 78%, rgba(42, 151, 255, .05) 78.1%, transparent 78.35% 100%),
+      radial-gradient(ellipse at 8% 36%, rgba(31, 126, 255, .07), transparent 18rem),
+      radial-gradient(ellipse at 94% 72%, rgba(14, 165, 233, .06), transparent 20rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before { transition: none; }
+}
