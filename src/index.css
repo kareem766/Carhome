@@ -521,3 +521,19 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-notification-trigger { position:relative; }
 .mc-notification-count { position:absolute; top:-7px; left:-6px; display:grid; min-width:19px; height:19px; place-items:center; padding:0 4px; border:2px solid #fff; border-radius:999px; background:#dc2626; color:#fff; font-size:10px; font-weight:900; line-height:1; box-shadow:0 0 0 1px rgba(220,38,38,.18); }
 .mc-notification-menu { box-shadow:0 20px 65px rgba(15,35,70,.2),0 0 24px rgba(37,99,235,.1); animation:mcMenuIn .14s ease-out both; }
+
+
+/* Mobile notification drawer: keep the panel inside the viewport, including RTL layouts and iPhone safe areas. */
+@media (max-width: 640px) {
+  .mc-notification-menu {
+    position: fixed !important;
+    top: calc(64px + env(safe-area-inset-top)) !important;
+    right: max(8px, env(safe-area-inset-right)) !important;
+    left: max(8px, env(safe-area-inset-left)) !important;
+    width: auto !important;
+    max-width: 380px;
+    max-height: calc(100dvh - 84px - env(safe-area-inset-top)) !important;
+    transform: none;
+    box-sizing: border-box;
+  }
+}
