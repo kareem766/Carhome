@@ -97,6 +97,7 @@ export default function App() {
   // Apply persisted branding before the browser paints, preventing a fallback-color flash.
   useLayoutEffect(() => {
     document.title = settings.platform_name || defaults.platform_name
+    document.documentElement.dataset.platformLogo = settings.logo_url || ''
     const descriptionMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]')
     if (descriptionMeta) descriptionMeta.content = settings.description || defaults.description
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
