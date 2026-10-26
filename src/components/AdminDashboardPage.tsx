@@ -63,12 +63,15 @@ export default function AdminDashboardPage() {
         db.from('vehicle_payment_submissions').select('amount_egp,review_status,created_at')
       ])
       if (paymentRows.error) throw paymentRows.error
-      const [activePromotions, activeAdvertisingPlans, activeSubscriptionPlans, conversationsCount, messagesCount] = await Promise.all([
+      const [activePromotions, activeAdvertisingPlans, activeSubscriptionPlans, conversationsCount, messagesCount, companySubscriptions, activeCompanySubscriptions, pendingCompanySubscriptions] = await Promise.all([
         count('vehicle_promotions', [['status','approved']]),
         count('advertising_plans', [['is_active','true']]),
         count('platform_subscription_plans', [['is_active','true']]),
         count('conversations'),
-        count('messages')
+        count('messages'),
+        count('company_subscriptions'),
+        count('company_subscriptions', [['status','active']]),
+        count('company_subscriptions', [['payment_status','pending']])
       ])
       const paymentData = paymentRows.data || []
       const pendingAmount = paymentData.filter(p => p.review_status === 'pending').reduce((sum,p) => sum + Number(p.amount_egp || 0), 0)
@@ -86,6 +89,7 @@ export default function AdminDashboardPage() {
         { label:'طلبات ترويج معتمدة', value:activePromotions, hint:'إجمالي طلبات الترويج بحالة معتمدة، وليس عدد الإعلانات التي ما زالت ضمن مدة العرض.', icon:Megaphone, tone:'emerald' },
         { label:'باقات الإعلانات المتاحة', value:activeAdvertisingPlans, hint:'باقات مفعّلة للعرض من جدول باقات الإعلانات.', icon:Megaphone, tone:'blue' },
         { label:'خطط اشتراك الشركات', value:activeSubscriptionPlans, hint:'خطط اشتراك مفعّلة للعرض، وليست عدد اشتراكات مدفوعة.', icon:WalletCards, tone:'violet' },
+        { label:'سجلات اشتراك الشركات', value:companySubscriptions, hint:`${activeCompanySubscriptions} نشطة · ${pendingCompanySubscriptions} بانتظار الدفع`, icon:WalletCards, tone:'indigo' },
         { label:'المحادثات المسجلة', value:conversationsCount, hint:'إجمالي المحادثات المسجلة في المنصة.', icon:MessageSquare, tone:'indigo' },
         { label:'الرسائل المسجلة', value:messagesCount, hint:'إجمالي الرسائل المسجلة في المنصة.', icon:MessageSquare, tone:'cyan' },
       ])
