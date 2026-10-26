@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, Bell, CarFront, ChevronDown, CircleUserRound, Home, LogOut, Pencil, UserRound, X } from 'lucide-react'
+import { ArrowRight, ChevronDown, Home, LogOut, Pencil, UserRound, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type Role = 'مالك سيارة' | 'شركة' | 'مورد أسطول' | 'إدارة المنصة' | 'مستخدم'
@@ -45,8 +45,8 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
       setPhoneDraft(phone)
     }
     void loadUser()
-    const { data: authListener } = supabase?.auth.onAuthStateChange(() => { void loadUser() }) || { data: { subscription: { unsubscribe: () => {} } } }
-    return () => { alive = false; authListener.subscription.unsubscribe() }
+    const authListener = supabase?.auth.onAuthStateChange(() => { void loadUser() })
+    return () => { alive = false; authListener?.data.subscription.unsubscribe() }
   }, [])
 
   async function saveProfile(event: FormEvent) {
