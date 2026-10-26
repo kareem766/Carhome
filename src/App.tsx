@@ -56,7 +56,7 @@ function RouteLoading() {
 function ServiceNotice({ title, message, settings }: { title: string; message: string; settings: PlatformSettings }) {
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5">
     <section className="w-full max-w-xl rounded-3xl border bg-white p-8 text-center shadow-sm">
-      {settings.logo_url && <img src={settings.logo_url} alt={settings.platform_name} className="mx-auto mb-5 h-20 max-w-40 object-contain"/>}
+      <img src={settings.logo_url || "/mycar-logo.svg"} alt={settings.platform_name} className="mx-auto mb-5 h-20 max-w-40 object-contain"/>
       <h1 className="text-2xl font-extrabold text-slate-900">{title}</h1>
       <p className="mt-3 leading-8 text-slate-600">{message}</p>
       {(settings.support_email || settings.support_phone) && <p className="mt-4 text-sm text-slate-500">{settings.support_email || ''}{settings.support_email && settings.support_phone ? ' · ' : ''}{settings.support_phone || ''}</p>}
@@ -145,7 +145,7 @@ export default function App() {
   if (path.startsWith('/workspace/owner')) return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><WorkspacePage role="owner" /></Suspense></GlobalAppNavigation>
   if (path.startsWith('/workspace/supplier')) return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><WorkspacePage role="supplier" /></Suspense></GlobalAppNavigation>
 
-  if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
+  if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <RouteLoading />
   if ((path === '/register' || path.startsWith('/register/')) && !settings.registration_enabled) {
     return <ServiceNotice settings={settings} title="التسجيل متوقف مؤقتًا" message="لا نستقبل حسابات جديدة في الوقت الحالي. يمكنك التواصل مع إدارة المنصة للاستفسار." />
   }
