@@ -141,7 +141,7 @@ export default function AuthCallbackPage() {
         const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
         if (!active) return
         setMessage(adminRecord ? 'تم التحقق من صلاحية صاحب المنصة. جارٍ فتح لوحة الإدارة...' : 'تم تأكيد البريد وتجهيز حسابك. جارٍ تحويلك إلى مساحة العمل...')
-        window.location.replace(adminRecord ? '/workspace/admin' : workspaceFor(role))
+        window.location.replace(adminRecord ? '/workspace/admin/dashboard' : workspaceFor(role))
       } catch (caught) {
         if (!active) return
         setError(caught instanceof Error ? caught.message : 'تعذر تأكيد البريد الإلكتروني. جرّب إرسال رابط جديد.')
