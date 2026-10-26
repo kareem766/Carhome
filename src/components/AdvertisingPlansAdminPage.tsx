@@ -24,18 +24,22 @@ export default function AdvertisingPlansAdminPage() {
   async function save(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!supabase||!authorized)return;setSaving(true);setError('');const {data:auth}=await supabase.auth.getUser();const payload={name:draft.name.trim(),description:draft.description.trim(),duration_days:Number(draft.duration_days),price_egp:Number(draft.price_egp),features:featuresText.split('\n').map(s=>s.trim()).filter(Boolean),display_order:Number(draft.display_order),is_active:draft.is_active,updated_at:new Date().toISOString(),updated_by:auth.user?.id||null};const result=draft.id?await supabase.from('advertising_plans').update(payload).eq('id',draft.id):await supabase.from('advertising_plans').insert(payload);setSaving(false);if(result.error){setError('تعذر حفظ الباقة: '+result.error.message);return}setNotice('تم حفظ باقة الإعلان. تفعيل التحصيل والإعلانات يظل متوقفًا حتى اكتمال المراجعة.');setDraft({...blank});setFeaturesText('');await load()}
   async function reviewPromotion(p:Promotion,action:'approve'|'paid'|'reject'){
     if(!supabase)return
+    if(action==='paid' && p.status!=='approved'){setError('اعتمد الطلب مبدئيًا أولًا قبل تأكيد الدفع.');return}
     if(action==='paid'&&!String(p.payment_reference||'').trim()){setError('لا يمكن تأكيد الدفع دون تسجيل مرجع التحويل ومراجعته.');return}
-    if(action==='paid'&&!window.confirm('هل تحققت من استلام مبلغ الإعلان ومطابقة مرجع التحويل؟'))return
+    if(action==='paid'&&!window.confirm('هل تحققت فعليًا من استلام مبلغ الإعلان ومطابقة مرجع التحويل؟'))return
+    if(action==='approve' && p.payment_status!=='verified' && p.payment_status!=='waived' && !window.confirm('اعتماد مبدئي فقط. لن يبدأ احتساب مدة الإعلان قبل تأكيد الدفع. متابعة؟'))return
     const now=new Date()
-    const start=p.starts_at?new Date(p.starts_at):now
-    const days=Number(p.advertising_plans?.duration_days||7)
-    const end=p.ends_at?new Date(p.ends_at):new Date(start.getTime()+days*86400000)
-    const patch=action==='reject'?{status:'rejected',reviewed_by:(await supabase.auth.getUser()).data.user?.id,reviewed_at:now.toISOString(),updated_at:now.toISOString()}:
-      action==='paid'?{status:'approved',payment_status:'verified',starts_at:start.toISOString(),ends_at:end.toISOString(),reviewed_by:(await supabase.auth.getUser()).data.user?.id,reviewed_at:now.toISOString(),updated_at:now.toISOString()}:
-      {status:'approved',starts_at:start.toISOString(),ends_at:end.toISOString(),reviewed_by:(await supabase.auth.getUser()).data.user?.id,reviewed_at:now.toISOString(),updated_at:now.toISOString()}
+    const days=Math.max(1,Number(p.advertising_plans?.duration_days||7))
+    const {data:auth}=await supabase.auth.getUser()
+    const audit={reviewed_by:auth.user?.id||null,reviewed_at:now.toISOString(),updated_at:now.toISOString()}
+    const patch=action==='reject'
+      ? {status:'rejected',...audit}
+      : action==='paid'
+        ? {payment_status:'verified',starts_at:now.toISOString(),ends_at:new Date(now.getTime()+days*86400000).toISOString(),...audit}
+        : {status:'approved',...(p.payment_status==='verified'||p.payment_status==='waived'?{starts_at:p.starts_at||now.toISOString(),ends_at:p.ends_at||new Date(now.getTime()+days*86400000).toISOString()}:{}),...audit}
     const {error:e}=await supabase.from('vehicle_promotions').update(patch).eq('id',p.id)
     if(e){setError('تعذر تحديث طلب الترويج: '+e.message);return}
-    setNotice(action==='reject'?'تم رفض طلب الترويج.':action==='paid'?'تم تأكيد الدفع وتفعيل الإعلان.':'تم اعتماد الطلب مبدئيًا؛ لن يظهر الإعلان حتى تأكيد الدفع أو الإعفاء.')
+    setNotice(action==='reject'?'تم رفض طلب الترويج.':action==='paid'?'تم تأكيد الدفع وبدء مدة الإعلان من تاريخ التحقق.':'تم اعتماد الطلب مبدئيًا؛ لن تبدأ مدة الإعلان قبل تأكيد الدفع.')
     await load()
   }
   async function toggle(plan:Plan){if(!supabase)return;const {error:e}=await supabase.from('advertising_plans').update({is_active:!plan.is_active,updated_at:new Date().toISOString()}).eq('id',plan.id);if(e)setError(e.message);else{setNotice(plan.is_active?'تم إيقاف الباقة.':'تم تفعيل ظهور الباقة في الكتالوج.');await load()}}
