@@ -23,6 +23,7 @@ import { isSupabaseConfigured, supabase } from './lib/supabase'
 import PartnerLogoTicker from './components/PartnerLogoTicker'
 import PlatformEntryBanner from './components/PlatformEntryBanner'
 import GlobalAppNavigation from './components/GlobalAppNavigation'
+import SupportPage from './components/SupportPage'
 import PlatformLoadingScreen from './components/PlatformLoadingScreen'
 
 // Release trigger: rebuild the current My Car production branch on Vercel.
@@ -59,7 +60,7 @@ function ServiceNotice({ title, message, settings }: { title: string; message: s
       <img src={settings.logo_url || "/mycar-logo.svg"} alt={settings.platform_name} className="mx-auto mb-5 h-20 max-w-40 object-contain"/>
       <h1 className="text-2xl font-extrabold text-slate-900">{title}</h1>
       <p className="mt-3 leading-8 text-slate-600">{message}</p>
-      {(settings.support_email || settings.support_phone) && <p className="mt-4 text-sm text-slate-500">{settings.support_email || ''}{settings.support_email && settings.support_phone ? ' · ' : ''}{settings.support_phone || ''}</p>}
+      <a href="/support" className="mt-5 inline-flex rounded-xl border border-slate-200 px-4 py-2 font-bold text-blue-700">التواصل مع الدعم عبر البريد الإلكتروني</a>
       <a href="/" className="mt-6 inline-flex rounded-xl bg-blue-700 px-5 py-3 font-bold text-white">العودة للرئيسية</a>
     </section>
   </main>
@@ -124,6 +125,7 @@ export default function App() {
   // This prevents a default-theme flash before persisted brand colors are applied.
   if (!settingsLoaded) return <RouteLoading />
   if (settings.maintenance_mode && !path.startsWith('/workspace/admin') && path !== '/auth/callback') return <ServiceNotice settings={settings} title="المنصة تحت الصيانة" message="نعمل على تحسين الخدمة. يرجى المحاولة مرة أخرى لاحقًا." />
+  if (path === '/support') return <SupportPage />
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
@@ -246,7 +248,7 @@ export default function App() {
 
       <footer className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div><span>© {new Date().getFullYear()} {settings.platform_name}. </span><span>{settings.footer_text}</span></div>
-        <div className="flex flex-wrap items-center gap-3"><a href="/services" className="font-bold text-blue-700 underline-offset-4 hover:underline">خدمات السيارات</a><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
+        <div className="flex flex-wrap items-center gap-3"><a href="/support" className="font-bold text-blue-700 underline-offset-4 hover:underline">الدعم الفني عبر البريد الإلكتروني</a><a href="/services" className="font-bold text-blue-700 underline-offset-4 hover:underline">خدمات السيارات</a><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}</div>
         <span className="inline-flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${isSupabaseConfigured ? 'bg-cargreen' : 'bg-amber-500'}`} />{isSupabaseConfigured ? 'إعدادات الاتصال موجودة' : 'إعدادات الاتصال تحتاج إلى ضبط'}</span>
       </footer>
       {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} />}
