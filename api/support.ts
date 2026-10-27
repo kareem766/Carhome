@@ -1,8 +1,9 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+type SupportRequest = { method?: string; body?: unknown }
+type SupportResponse = { setHeader(name: string, value: string): void; status(code: number): SupportResponse; json(value: unknown): unknown }
+
+export default async function handler(req: SupportRequest, res: SupportResponse) {
   res.setHeader('Cache-Control', 'no-store')
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
