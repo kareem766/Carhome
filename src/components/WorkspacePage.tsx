@@ -84,7 +84,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     setOrganization({ ...org, id: member.organization_id })
     if (role === 'company') {
       if (isCompanyVehicles) {
-        const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('review_status','approved').eq('payment_status','verified').order('created_at',{ascending:false})
+        const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('review_status','approved').in('payment_status',['verified','waived']).order('created_at',{ascending:false})
         if (result.error) setError(result.error.message); else setVehicles((result.data || []) as Vehicle[])
       } else {
         const result = await client.from('rental_requests').select('id,title,details,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at,rental_offers(id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,organizations(id,name))').eq('organization_id', member.organization_id).order('created_at',{ascending:false})

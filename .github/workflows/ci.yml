@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - fix/commercial-launch-readiness
+      - fix/database-index-performance
   pull_request:
-    branches:
-      - feat/account-notifications
 
 permissions:
   contents: read

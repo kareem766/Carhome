@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+<title id="title">My Car</title>
+<defs>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe66d"/><stop offset=".48" stop-color="#ffad08"/><stop offset="1" stop-color="#d66a00"/></linearGradient>
+ <linearGradient id="road" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#34383f"/><stop offset="1" stop-color="#05070b"/></linearGradient>
+ <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#b9c0ca"/></linearGradient>
+</defs>
+<rect width="512" height="512" rx="72" fill="#fff"/>
+<circle cx="256" cy="184" r="139" fill="url(#gold)" stroke="#d77b00" stroke-width="7"/>
+<circle cx="256" cy="184" r="111" fill="#101318" stroke="#f8b323" stroke-width="5"/>
+<path d="M155 185l24-40q7-12 23-13h108q16 1 23 13l24 40-8 45q-2 12-16 12H179q-14 0-16-12z" fill="url(#silver)" stroke="#fff" stroke-width="4"/>
+<path d="M194 151q5-8 15-8h94q10 0 15 8l15 25H179z" fill="#181d25"/>
+<path d="M173 187l40 15h86l40-15-10 17-31 11h-84l-31-11z" fill="#171a20"/>
+<path d="M165 212l36 11h110l36-11-4 19h-174z" fill="#090b0f"/>
+<path d="M246 254c42 18 88 35 120 63 34 30 40 55 19 78-24 26-68 39-112 55L100 477l110-55 124-47c28-11 37-22 24-36-20-22-62-39-103-53z" fill="url(#road)" stroke="url(#gold)" stroke-width="10" stroke-linejoin="round"/>
+<path d="M274 287c30 13 57 27 75 43" fill="none" stroke="#fff" stroke-width="7" stroke-dasharray="22 17" stroke-linecap="round"/>
+<path d="M320 351l-22 15m-27 21l-30 13" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+<path d="M84 440l130-48-100 55z" fill="#f7a900"/><path d="M95 465l126-48-75 48z" fill="#d97706"/>
+<text x="256" y="493" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="46" font-style="italic" font-weight="900" letter-spacing="-2"><tspan fill="#15171c">My</tspan><tspan fill="#ef9700">Car</tspan></text>
+</svg>

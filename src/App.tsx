@@ -23,6 +23,7 @@ import { isSupabaseConfigured, supabase } from './lib/supabase'
 import PartnerLogoTicker from './components/PartnerLogoTicker'
 import PlatformEntryBanner from './components/PlatformEntryBanner'
 import GlobalAppNavigation from './components/GlobalAppNavigation'
+import PlatformLoadingScreen from './components/PlatformLoadingScreen'
 
 // Release trigger: rebuild the current My Car production branch on Vercel.
 // Production retry commit: 2026-10-25; verify partner ticker and platform branding after build.
@@ -49,25 +50,13 @@ const features = [
 ]
 
 function RouteLoading() {
-  return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.10),transparent_48%),#f8fafc] px-5 text-slate-600">
-    <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل منصة My Car">
-      <div className="relative grid h-24 w-24 place-items-center">
-        <span aria-hidden="true" className="absolute inset-0 rounded-full border-[3px] border-blue-100" />
-        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-blue-600 border-l-blue-400" />
-        <span className="grid h-[4.25rem] w-[4.25rem] place-items-center rounded-2xl bg-white shadow-lg ring-1 ring-slate-200/80">
-          <img src="/carhome-icon.svg" alt="" className="h-14 w-14 object-contain" />
-        </span>
-      </div>
-      <p className="text-sm font-extrabold tracking-wide text-slate-700">جارٍ تجهيز تجربتك على My Car...</p>
-      <span className="h-1 w-28 overflow-hidden rounded-full bg-blue-100"><span className="block h-full w-1/2 animate-pulse rounded-full bg-blue-600" /></span>
-    </div>
-  </main>
+  return <PlatformLoadingScreen fullscreen />
 }
 
 function ServiceNotice({ title, message, settings }: { title: string; message: string; settings: PlatformSettings }) {
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5">
     <section className="w-full max-w-xl rounded-3xl border bg-white p-8 text-center shadow-sm">
-      {settings.logo_url && <img src={settings.logo_url} alt={settings.platform_name} className="mx-auto mb-5 h-20 max-w-40 object-contain"/>}
+      <img src={settings.logo_url || "/mycar-logo.svg"} alt={settings.platform_name} className="mx-auto mb-5 h-20 max-w-40 object-contain"/>
       <h1 className="text-2xl font-extrabold text-slate-900">{title}</h1>
       <p className="mt-3 leading-8 text-slate-600">{message}</p>
       {(settings.support_email || settings.support_phone) && <p className="mt-4 text-sm text-slate-500">{settings.support_email || ''}{settings.support_email && settings.support_phone ? ' · ' : ''}{settings.support_phone || ''}</p>}
@@ -108,6 +97,7 @@ export default function App() {
   // Apply persisted branding before the browser paints, preventing a fallback-color flash.
   useLayoutEffect(() => {
     document.title = settings.platform_name || defaults.platform_name
+    document.documentElement.dataset.platformLogo = settings.logo_url || '/mycar-logo.svg'
     const descriptionMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]')
     if (descriptionMeta) descriptionMeta.content = settings.description || defaults.description
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
@@ -115,12 +105,12 @@ export default function App() {
     document.documentElement.style.setProperty('--platform-primary', settings.primary_color || defaults.primary_color)
     document.documentElement.style.setProperty('--platform-secondary', settings.secondary_color || defaults.secondary_color)
     let link = document.querySelector<HTMLLinkElement>('link[rel~="icon"]')
-    const brandIcon = settings.favicon_url || settings.logo_url
+    const brandIcon = settings.favicon_url || settings.logo_url || '/mycar-logo.svg'
     if (brandIcon) {
       if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link) }
       link.href = brandIcon
-    } else if (link && !link.href.endsWith('/carhome-icon.svg')) {
-      link.href = '/carhome-icon.svg'
+    } else if (link && !link.href.endsWith('/mycar-logo.svg')) {
+      link.href = '/mycar-logo.svg'
     }
   }, [settings])
 
@@ -155,7 +145,7 @@ export default function App() {
   if (path.startsWith('/workspace/owner')) return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><WorkspacePage role="owner" /></Suspense></GlobalAppNavigation>
   if (path.startsWith('/workspace/supplier')) return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><WorkspacePage role="supplier" /></Suspense></GlobalAppNavigation>
 
-  if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
+  if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <RouteLoading />
   if ((path === '/register' || path.startsWith('/register/')) && !settings.registration_enabled) {
     return <ServiceNotice settings={settings} title="التسجيل متوقف مؤقتًا" message="لا نستقبل حسابات جديدة في الوقت الحالي. يمكنك التواصل مع إدارة المنصة للاستفسار." />
   }
@@ -177,7 +167,7 @@ export default function App() {
       {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
       <header className="sticky top-0 z-30 mx-auto flex w-full max-w-[90rem] flex-col items-stretch gap-3 border-b border-white/70 bg-white/85 px-3 py-3 shadow-[0_12px_35px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
         <a href="/" className="flex w-full min-w-0 items-center gap-3 rounded-2xl py-1 sm:w-auto sm:shrink sm:gap-4" aria-label={settings.platform_name + ' الرئيسية'}>
-          {settings.logo_url ? <img src={settings.logo_url} alt={settings.platform_name} className="h-14 w-14 shrink-0 rounded-2xl object-contain sm:h-16 sm:w-16"/> : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-white shadow-soft sm:h-16 sm:w-16" style={{ backgroundColor: settings.secondary_color }}><CarFront size={31} /></span>}
+          <img src={settings.logo_url || "/mycar-logo.svg"} alt={settings.platform_name} className="h-14 w-14 shrink-0 rounded-2xl object-contain sm:h-16 sm:w-16"/>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-2xl font-black leading-tight tracking-tight text-navy sm:text-3xl">{settings.platform_name}</span>
             <span className="mt-1 block truncate text-xs font-bold text-slate-500 sm:text-sm">{settings.tagline}</span>

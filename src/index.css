@@ -537,3 +537,209 @@ main.min-h-screen :is(input, select, textarea):disabled {
     box-sizing: border-box;
   }
 }
+
+
+/* Quiet, logo-only loading states for route transitions and lazy-loaded pages. */
+.mc-route-loading-overlay,
+.mc-platform-loading {
+  display: grid;
+  place-items: center;
+  background: rgba(248, 251, 255, 0.96);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.mc-route-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  animation: mc-loader-appear 120ms ease-out both;
+}
+.mc-platform-loading-fullscreen {
+  min-height: 100vh;
+  width: 100%;
+}
+.mc-platform-loading-logo,
+.mc-route-loading-logo {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  animation: mc-logo-breathe 1.25s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes mc-logo-breathe {
+  0%, 100% { transform: scale(.94); opacity: .72; }
+  50% { transform: scale(1); opacity: 1; }
+}
+@keyframes mc-loader-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc-route-loading-overlay { animation: none; }
+  .mc-platform-loading-logo, .mc-route-loading-logo { animation: none; }
+}
+
+
+/* Subtle electric-blue neon linework: shared page backdrop, behind all interactive content. */
+body {
+  position: relative;
+  isolation: isolate;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(112deg, transparent 0 13%, rgba(38, 132, 255, .07) 13.08%, rgba(38, 132, 255, .015) 13.22%, transparent 13.45% 100%),
+    linear-gradient(112deg, transparent 0 72%, rgba(42, 151, 255, .065) 72.08%, rgba(42, 151, 255, .012) 72.22%, transparent 72.45% 100%),
+    linear-gradient(22deg, transparent 0 36%, rgba(28, 112, 235, .045) 36.08%, rgba(28, 112, 235, .01) 36.2%, transparent 36.4% 100%),
+    radial-gradient(ellipse at 8% 36%, rgba(31, 126, 255, .10), transparent 23rem),
+    radial-gradient(ellipse at 94% 72%, rgba(14, 165, 233, .08), transparent 25rem);
+  opacity: .9;
+}
+@media (max-width: 640px) {
+  body::before {
+    background:
+      linear-gradient(112deg, transparent 0 16%, rgba(38, 132, 255, .055) 16.1%, transparent 16.35% 100%),
+      linear-gradient(112deg, transparent 0 78%, rgba(42, 151, 255, .05) 78.1%, transparent 78.35% 100%),
+      radial-gradient(ellipse at 8% 36%, rgba(31, 126, 255, .07), transparent 18rem),
+      radial-gradient(ellipse at 94% 72%, rgba(14, 165, 233, .06), transparent 20rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before { transition: none; }
+}
+
+
+/* Consistent restrained electric-blue frames for interactive controls and content cards. */
+:root {
+  --mc-neon-border: rgba(37, 120, 235, .52);
+  --mc-neon-glow: rgba(37, 120, 235, .12);
+  --mc-neon-glow-hover: rgba(37, 120, 235, .22);
+}
+:where(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  border-color: var(--mc-neon-border);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, .055), 0 0 10px var(--mc-neon-glow);
+}
+:where(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]):not(:disabled):not([aria-disabled="true"]):not(.mc-signout):hover {
+  border-color: rgba(37, 120, 235, .82);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, .10), 0 0 17px var(--mc-neon-glow-hover);
+}
+:where(article, [role="article"], [role="dialog"], .mc-entry-banner, .mc-profile-menu, .mc-notification-menu) {
+  border-color: var(--mc-neon-border);
+  box-shadow: 0 10px 28px rgba(15, 39, 78, .065), 0 0 0 1px rgba(59, 130, 246, .045), 0 0 13px var(--mc-neon-glow);
+}
+:where(article, [role="article"]):hover {
+  border-color: rgba(37, 120, 235, .76);
+  box-shadow: 0 16px 36px rgba(15, 39, 78, .10), 0 0 0 1px rgba(59, 130, 246, .10), 0 0 19px var(--mc-neon-glow-hover);
+}
+:where(button, [role="button"], article, [role="article"], [role="dialog"], .mc-entry-banner, .mc-profile-menu, .mc-notification-menu) {
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+/* Preserve deliberate danger/destructive styling rather than recoloring those controls blue. */
+:where(button, [role="button"]):is(.mc-signout, .text-red-600, .text-red-700, .bg-red-600, .bg-red-700) {
+  border-color: rgba(220, 38, 38, .45);
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, .035), 0 0 8px rgba(220, 38, 38, .06);
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(button, [role="button"], article, [role="article"], [role="dialog"], .mc-entry-banner, .mc-profile-menu, .mc-notification-menu) {
+    transition: none;
+  }
+}
+
+
+/* My Car orange automation orbit — shared loading identity across route changes and lazy pages. */
+.mc-loader-orbit {
+  position: relative;
+  display: grid;
+  width: 142px;
+  height: 142px;
+  place-items: center;
+  isolation: isolate;
+}
+.mc-loader-orbit::before,
+.mc-loader-orbit::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.mc-loader-orbit::before {
+  border: 3px solid rgba(234, 137, 9, .13);
+  box-shadow: 0 0 22px rgba(245, 158, 11, .10), inset 0 0 18px rgba(245, 158, 11, .06);
+}
+.mc-loader-orbit::after {
+  border: 3px solid transparent;
+  border-top-color: #f59e0b;
+  border-right-color: #ffb52e;
+  border-bottom-color: rgba(217, 119, 6, .68);
+  filter: drop-shadow(0 0 5px rgba(245, 158, 11, .35));
+  animation: mc-orange-orbit 1.35s cubic-bezier(.55,.15,.35,.85) infinite;
+}
+.mc-loader-orbit-core {
+  position: absolute;
+  inset: 15px;
+  border: 1px solid rgba(234, 137, 9, .2);
+  border-radius: 50%;
+  box-shadow: 0 0 0 5px rgba(245, 158, 11, .035);
+}
+.mc-loader-orbit-dot {
+  position: absolute;
+  z-index: 2;
+  top: 11px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, .85);
+  transform-origin: 4.5px 60px;
+  animation: mc-orange-orbit-dot 1.35s linear infinite;
+}
+.mc-platform-loading-logo,
+.mc-route-loading-logo {
+  position: relative;
+  z-index: 1;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 3px 18px rgba(16, 24, 40, .10), 0 0 0 1px rgba(245, 158, 11, .13);
+  animation: mc-logo-breathe 1.8s ease-in-out infinite;
+}
+.mc-platform-loading-fullscreen { min-height: 100vh; min-height: 100dvh; }
+.mc-route-loading-overlay { display: grid; place-items: center; }
+.mc-route-loading-logo { width: 88px; height: 88px; }
+@keyframes mc-orange-orbit { to { transform: rotate(360deg); } }
+@keyframes mc-orange-orbit-dot { to { transform: rotate(360deg); } }
+@media (max-width: 480px) {
+  .mc-loader-orbit { width: 126px; height: 126px; }
+  .mc-platform-loading-logo, .mc-route-loading-logo { width: 78px; height: 78px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc-loader-orbit::after, .mc-loader-orbit-dot, .mc-platform-loading-logo, .mc-route-loading-logo { animation: none !important; }
+}
+
+
+.mc-navigation-loading-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, .88);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+.mc-navigation-loading-backdrop .mc-platform-loading-fullscreen {
+  width: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
+  background: transparent;
+}

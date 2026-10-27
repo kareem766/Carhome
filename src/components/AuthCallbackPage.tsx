@@ -7,8 +7,9 @@ import type { User } from '@supabase/supabase-js'
 type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company'
 
 function workspaceFor(role: unknown) {
-  void role
-  return '/workspace/catalog'
+  if (role === 'company') return '/workspace/company'
+  if (role === 'fleet_supplier') return '/workspace/supplier'
+  return '/workspace/owner'
 }
 
 async function finishAccount(user: User) {
@@ -35,10 +36,9 @@ async function finishAccount(user: User) {
         throw new Error('صيغة اللوجو غير مدعومة أو حجم الملف أكبر من 2 ميجابايت.')
       }
       const extension = logoBlob.type === 'image/png' ? 'png' : logoBlob.type === 'image/webp' ? 'webp' : 'jpg'
-      logoPath = `${user.id}/logo-${Date.now()}.${extension}`
-      const uploaded = await supabase.storage.from('organization-logos').upload(logoPath, logoBlob, { contentType: logoBlob.type, upsert: false })
+      logoPath = `${user.id}/logo.${extension}`
+      const uploaded = await supabase.storage.from('organization-logos').upload(logoPath, logoBlob, { contentType: logoBlob.type, upsert: true })
       if (uploaded.error) throw uploaded.error
-      localStorage.removeItem('carhome_pending_company_logo')
     } catch (logoError) {
       throw new Error(`تعذر حفظ لوجو الشركة: ${logoError instanceof Error ? logoError.message : 'حاول تسجيل الدخول مرة أخرى من نفس المتصفح.'}`)
     }
@@ -64,6 +64,7 @@ async function finishAccount(user: User) {
       const updated = await supabase.from('organizations').update({ logo_path: logoPath }).eq('id', membership.data.organization_id)
       if (updated.error) throw updated.error
     }
+    if (pendingLogo && logoPath) localStorage.removeItem('carhome_pending_company_logo')
     return role
   }
 
@@ -106,6 +107,7 @@ async function finishAccount(user: User) {
     organization_id: organizationId, user_id: user.id, role: 'owner'
   })
   if (inserted.error && inserted.error.code !== '23505') throw inserted.error
+  if (pendingLogo && logoPath) localStorage.removeItem('carhome_pending_company_logo')
   return role
 }
 
@@ -141,7 +143,7 @@ export default function AuthCallbackPage() {
         const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
         if (!active) return
         setMessage(adminRecord ? 'تم التحقق من صلاحية صاحب المنصة. جارٍ فتح لوحة الإدارة...' : 'تم تأكيد البريد وتجهيز حسابك. جارٍ تحويلك إلى مساحة العمل...')
-        window.location.replace(adminRecord ? '/workspace/admin' : workspaceFor(role))
+        window.location.replace(adminRecord ? '/workspace/admin/dashboard' : workspaceFor(role))
       } catch (caught) {
         if (!active) return
         setError(caught instanceof Error ? caught.message : 'تعذر تأكيد البريد الإلكتروني. جرّب إرسال رابط جديد.')

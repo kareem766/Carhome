@@ -115,7 +115,7 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
       <div className="mx-auto flex max-w-[96rem] items-center justify-between gap-3">
         <a href={homePath} className="flex min-w-0 items-center gap-3" aria-label={platformName + ' - الصفحة الرئيسية'}>
           <span className="mc-brand-logo grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white p-1.5">
-            {logoUrl ? <img src={logoUrl} alt="" className="h-full w-full object-contain" /> : <img src="/carhome-icon.svg" alt="" className="h-full w-full object-contain" />}
+            {logoUrl ? <img src={logoUrl} alt="" className="h-full w-full object-contain" /> : <img src="/mycar-logo.svg" alt="" className="h-full w-full object-contain" />}
           </span>
           <span className="min-w-0">
             <span className="block truncate text-lg font-black leading-tight text-slate-900 sm:text-xl">{platformName}</span>
