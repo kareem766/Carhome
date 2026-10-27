@@ -23,7 +23,7 @@ export default function PlatformEntryBanner() {
         const scheduled = (data as Banner[]).find(item => {
           const starts = item.starts_at ? new Date(item.starts_at).getTime() : Number.NEGATIVE_INFINITY
           const ends = item.ends_at ? new Date(item.ends_at).getTime() : Number.POSITIVE_INFINITY
-          const hasContent = Boolean(item.title?.trim() || item.body?.trim() || item.image_url?.trim())
+          const hasContent = Boolean(item.title?.trim() || item.body?.trim())
           return hasContent && starts <= now && ends > now
         })
         if (!scheduled) return
