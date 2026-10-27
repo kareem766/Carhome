@@ -61,7 +61,28 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
     if (!notificationError) setNotifications((data || []) as NotificationRow[])
   }
 
-  useEffect(() => { void loadNotifications() }, [user?.id])
+  useEffect(() => {
+    if (!user?.id || !supabase) return
+    void loadNotifications()
+    const channel = supabase.channel(`customer-notifications-${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'platform_notifications',
+        filter: `user_id=eq.${user.id}`
+      }, (payload) => {
+        const item = payload.new as NotificationRow
+        setNotifications(current => [item, ...current.filter(row => row.id !== item.id)].slice(0, 15))
+        if (typeof window !== 'undefined' && 'Notification' in window && window.Notification.permission === 'granted') {
+          const browserNotice = new window.Notification(item.title, { body: item.body || 'لديك تحديث جديد على منصة My Car', tag: item.id, dir: 'rtl' })
+          browserNotice.onclick = () => {
+            window.focus()
+            if (item.action_url) window.location.assign(item.action_url)
+            browserNotice.close()
+          }
+        }
+      })
+      .subscribe()
+    return () => { void supabase?.removeChannel(channel) }
+  }, [user?.id])
 
   async function markNotificationRead(item: NotificationRow) {
     if (!supabase || !user) return
@@ -126,7 +147,7 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
           <button type="button" onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.assign(homePath) }} className="mc-neon-button" title="الرجوع للخلف"><ArrowRight size={17}/><span className="hidden sm:inline">رجوع</span></button>
           <a href={homePath} className="mc-neon-button" title="الصفحة الرئيسية"><Home size={17}/><span className="hidden sm:inline">الرئيسية</span></a>
           {user && <div className="relative">
-            <button type="button" onClick={() => { const next = !notificationOpen; setNotificationOpen(next); setMenuOpen(false); if (next) void loadNotifications() }} aria-label={`الإشعارات ${unreadCount ? '(' + unreadCount + ' غير مقروءة)' : ''}`} aria-expanded={notificationOpen} className="mc-neon-button mc-notification-trigger">
+            <button type="button" onClick={() => { const next = !notificationOpen; setNotificationOpen(next); setMenuOpen(false); if (next) { void loadNotifications(); if ('Notification' in window && window.Notification.permission === 'default') void window.Notification.requestPermission() } }} aria-label={`الإشعارات ${unreadCount ? '(' + unreadCount + ' غير مقروءة)' : ''}`} aria-expanded={notificationOpen} className="mc-neon-button mc-notification-trigger">
               <Bell size={17}/>{unreadCount > 0 && <span className="mc-notification-count">{unreadCount > 99 ? '99+' : unreadCount}</span>}
             </button>
             {notificationOpen && <div className="mc-notification-menu absolute left-0 top-[calc(100%+12px)] z-50 w-[min(92vw,380px)] overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-2xl">
