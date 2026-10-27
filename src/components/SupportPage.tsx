@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, CheckCircle2, Mail, Send, ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import PlatformBrand from './PlatformBrand'
 
 type SupportSettings = { platform_name: string; logo_url: string | null; support_email: string | null }
 const initial = { name: '', email: '', subject: '', message: '', website: '' }
