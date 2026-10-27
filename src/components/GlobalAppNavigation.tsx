@@ -10,6 +10,7 @@ type Props = { children: React.ReactNode; platformName?: string; logoUrl?: strin
 export default function GlobalAppNavigation({ children, platformName = 'My Car', logoUrl }: Props) {
   const [user, setUser] = useState<{ id: string; name: string; email: string; phone: string; role: Role; organizationId: string | null } | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [notifications, setNotifications] = useState<NotificationRow[]>([])
   const [editOpen, setEditOpen] = useState(false)
@@ -22,9 +23,10 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
   useEffect(() => {
     let alive = true
     async function loadUser() {
-      if (!supabase) return
+      if (!supabase) { if (alive) setAuthChecked(true); return }
       const { data } = await supabase.auth.getUser()
-      if (!alive || !data.user) return
+      if (!alive) return
+      if (!data.user) { setUser(null); setAuthChecked(true); return }
       const authUser = data.user
       const meta = authUser.user_metadata || {}
       let role: Role = 'مستخدم'
@@ -45,6 +47,7 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
       const name = String(meta.display_name || organizationName || authUser.email || 'مستخدم My Car')
       const phone = String(meta.phone || '')
       setUser({ id: authUser.id, name, email: authUser.email || '', phone, role, organizationId })
+      setAuthChecked(true)
       setNameDraft(name)
       setPhoneDraft(phone)
     }
@@ -174,7 +177,7 @@ export default function GlobalAppNavigation({ children, platformName = 'My Car',
               <button type="button" onClick={() => { setNameDraft(user.name); setPhoneDraft(user.phone); setEditOpen(true); setMenuOpen(false) }} className="mc-menu-action mt-4"><Pencil size={17}/> تعديل بيانات الحساب</button>
               <button type="button" onClick={signOut} className="mc-menu-action mc-signout"><LogOut size={17}/> تسجيل الخروج</button>
             </div>}
-          </div> : <a href="/?login=1" className="mc-neon-button"><UserRound size={17}/><span className="hidden sm:inline">تسجيل الدخول</span></a>}
+          </div> : authChecked ? <a href="/?login=1" className="mc-neon-button"><UserRound size={17}/><span className="hidden sm:inline">تسجيل الدخول</span></a> : null}
         </nav>
       </div>
       {notice && <p role="status" className="mx-auto mt-2 max-w-[96rem] text-sm font-bold text-emerald-700">{notice}</p>}
