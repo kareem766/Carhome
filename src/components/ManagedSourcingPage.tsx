@@ -29,6 +29,8 @@ export default function ManagedSourcingPage() {
   const [actions,setActions] = useState<Row[]>([])
   const [pricing,setPricing] = useState<Row[]>([])
   const [packages,setPackages] = useState<Row[]>([])
+  const [subscriptions,setSubscriptions] = useState<Row[]>([])
+  const [internalNotes,setInternalNotes] = useState<Row[]>([])
   const [expanded,setExpanded] = useState<string|null>(null)
   const [offerFor,setOfferFor] = useState<string|null>(null)
   const [search,setSearch] = useState('')
@@ -58,6 +60,11 @@ export default function ManagedSourcingPage() {
       if (p.error) throw p.error
       if (pk.error) throw pk.error
       setPricing(p.data||[]); setPackages(pk.data||[])
+      let subscriptionQuery = supabase.from('managed_sourcing_subscriptions').select('*').order('created_at',{ascending:false}).limit(200)
+      if (!adminRoute && !isAdmin) subscriptionQuery = subscriptionQuery.eq('organization_id',companyId)
+      const subscriptionResult = await subscriptionQuery
+      if (subscriptionResult.error) throw subscriptionResult.error
+      setSubscriptions(subscriptionResult.data||[])
       let query = supabase.from('managed_sourcing_requests').select('*').order('created_at',{ascending:false}).limit(250)
       if (!adminRoute && !isAdmin) query = query.eq('company_organization_id',companyId)
       const result = await query
@@ -75,7 +82,12 @@ export default function ManagedSourcingPage() {
         if (u.error) throw u.error
         if (a.error) throw a.error
         setOffers(o.data||[]); setUpdates(u.data||[]); setActions(a.data||[])
-      } else { setOffers([]); setUpdates([]); setActions([]) }
+        if (adminRoute) {
+          const noteResult = await supabase.from('managed_sourcing_internal_notes').select('*').in('request_id',ids).order('created_at',{ascending:false})
+          if (noteResult.error) throw noteResult.error
+          setInternalNotes(noteResult.data||[])
+        } else setInternalNotes([])
+      } else { setOffers([]); setUpdates([]); setActions([]); setInternalNotes([]) }
     } catch(e) { setError(e instanceof Error ? e.message : 'تعذر تحميل بيانات خدمة التوفير.') }
     finally { setLoading(false) }
   },[adminRoute])
@@ -90,8 +102,10 @@ export default function ManagedSourcingPage() {
     const formElement = event.currentTarget
     const form = new FormData(formElement)
     const paymentModel = String(form.get('payment_model')||'per_request')
-    const packageId = String(form.get('package_id')||'')||null
-    if (paymentModel==='subscription' && !packageId) { setError('اختر باقة شهرية مفعلة قبل إرسال الطلب.'); return }
+    const subscriptionId = String(form.get('subscription_id')||'')||null
+    const selectedSubscription = subscriptions.find(s=>s.id===subscriptionId && s.status==='active' && s.payment_status==='verified' && s.ends_at && new Date(s.ends_at).getTime()>Date.now() && Number(s.requests_used)<Number(s.requests_included))
+    if (paymentModel==='subscription' && !selectedSubscription) { setError('لا يوجد اشتراك شهري نشط به طلبات متاحة. اشترك في باقة من القسم المخصص أولًا.'); return }
+    const packageId = paymentModel==='subscription' ? selectedSubscription.package_id : null
     setSaving(true); setError(''); setNotice('')
     const payload = {
       company_organization_id:orgId,created_by:user.id,title:String(form.get('title')||'').trim(),
@@ -107,14 +121,10 @@ export default function ManagedSourcingPage() {
       requirements:String(form.get('requirements')||'').trim(),
       delegation_level:String(form.get('delegation_level')||'full_coordination'),
       urgency:form.get('urgency')==='on'?'urgent':'standard',payment_model:paymentModel,
-      package_id:paymentModel==='subscription'?packageId:null,status:'new',payment_status:'not_required'
+      package_id:paymentModel==='subscription'?packageId:null,subscription_id:paymentModel==='subscription'?subscriptionId:null,status:'new',payment_status:'not_required'
     }
     const {error:saveError} = await supabase.from('managed_sourcing_requests').insert(payload)
     if (saveError) { setSaving(false); setError('تعذر إرسال الطلب: '+saveError.message); return }
-    try {
-      const {data:admins} = await supabase.from('platform_admins').select('user_id')
-      if (admins?.length) await supabase.from('platform_notifications').insert(admins.map((a:Row)=>({user_id:a.user_id,title:'طلب توفير سيارات جديد',body:'وصل طلب جديد من شركة ويحتاج إلى المراجعة.',notification_type:'managed_sourcing_request',action_url:'/workspace/admin/managed-sourcing',created_by:user.id})))
-    } catch { /* notifications are best effort */ }
     setSaving(false); setNotice('تم إرسال طلبك. سيراجع فريق My Car الاحتياج ويحدد نطاق الخدمة ورسومها قبل بدء البحث. لا يبدأ العمل قبل موافقتك وسداد الرسوم المتفق عليها.')
     formElement.reset()
     await load()
@@ -136,7 +146,8 @@ export default function ManagedSourcingPage() {
     const status=String(form.get('status')||request.status)
     const paymentStatus=String(form.get('payment_status')||request.payment_status)
     const fee=String(form.get('quoted_fee_egp')||'')
-    const payload:Row={status,payment_status:paymentStatus,quoted_fee_egp:fee===''?null:Number(fee),admin_internal_notes:String(form.get('admin_internal_notes')||''),assigned_to:String(form.get('assigned_to')||'')||null,updated_at:new Date().toISOString()}
+    const newInternalNote=String(form.get('internal_note')||'').trim()
+    const payload:Row={status,payment_status:paymentStatus,quoted_fee_egp:fee===''?null:Number(fee),assigned_to:String(form.get('assigned_to')||'')||null,updated_at:new Date().toISOString()}
     if(status==='awaiting_payment')payload.payment_status='awaiting_payment'
     if(paymentStatus==='verified')payload.payment_verified_at=new Date().toISOString()
     if(status==='completed')payload.completed_at=new Date().toISOString()
@@ -148,7 +159,7 @@ export default function ManagedSourcingPage() {
     const result=await supabase.from('managed_sourcing_requests').update(payload).eq('id',request.id)
     setSaving(false)
     if(result.error){setError('تعذر حفظ الطلب: '+result.error.message);return}
-    if(status!==request.status){try{await supabase.from('platform_notifications').insert({user_id:request.created_by,title:'تحديث طلب توفير السيارات',body:statusNames[status]||status,notification_type:'managed_sourcing_update',action_url:'/workspace/company/managed-sourcing',created_by:user.id})}catch{}}
+    if(newInternalNote){const noteResult=await supabase.from('managed_sourcing_internal_notes').insert({request_id:request.id,created_by:user.id,note:newInternalNote});if(noteResult.error){setError('تم حفظ حالة الطلب، لكن تعذر حفظ الملاحظة الداخلية: '+noteResult.error.message);await load();return}}
     setNotice('تم حفظ حالة الطلب والرسوم.')
     await load()
   }
@@ -222,12 +233,12 @@ export default function ManagedSourcingPage() {
           {!adminRoute&&request.status==='awaiting_company_approval'&&<div className="rounded-xl border border-violet-200 bg-violet-50 p-4"><h4 className="font-extrabold">عرض رسوم الخدمة جاهز</h4><p className="mt-2 text-sm leading-6">رسوم My Car: <strong>{money(request.quoted_fee_egp)}</strong>. لا تشمل هذه الرسوم إيجار السيارات أو أي دفعات للموردين.</p><button disabled={saving} className={primary+' mt-3'} onClick={()=>void companyAction(request,'approve_quote','أوافق على نطاق الخدمة ورسومها.')}>موافقة على الرسوم والنطاق</button></div>}
           {!adminRoute&&(request.status==='awaiting_payment'||request.payment_status==='awaiting_payment'||request.payment_status==='rejected')&&<form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);void companyAction(request,'submit_payment_reference',String(f.get('payment_notes')||''),String(f.get('payment_reference')||''))}} className="rounded-xl border border-orange-200 bg-orange-50 p-4"><h4 className="font-extrabold">تسجيل سداد رسوم خدمة My Car</h4><p className="mt-1 text-sm leading-6">استخدم وسيلة الدفع المعتمدة التي يعرضها الفريق، ثم أرسل مرجع العملية. لا تحول إيجار السيارات من هذا النموذج.</p><label className="mt-3 block text-sm font-bold">مرجع التحويل أو رقم العملية *<input name="payment_reference" required minLength={3} maxLength={200} className={field}/></label><label className="mt-3 block text-sm font-bold">ملاحظات<textarea name="payment_notes" rows={2} className={field}/></label><button disabled={saving} className={primary+' mt-3'}>إرسال بيانات الدفع</button></form>}
           {!adminRoute&&request.status==='results_ready'&&<div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4"><h4 className="font-extrabold">الخيارات جاهزة</h4><p className="mt-1 text-sm leading-6">اختيارك يعني طلب متابعة الخيار فقط، ولا ينشئ عقد إيجار أو التزامًا ماليًا مع المورد.</p></div>}
-          {adminRoute&&<form onSubmit={e=>void saveAdminRequest(e,request)} className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4"><h4 className="font-extrabold">إدارة سير الطلب</h4><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"><label className="text-xs font-bold">الحالة<select name="status" defaultValue={request.status} className={field}>{states.map(s=><option key={s} value={s}>{statusNames[s]}</option>)}</select></label><label className="text-xs font-bold">رسوم الخدمة (جنيه)<input name="quoted_fee_egp" type="number" min={0} step="50" defaultValue={request.quoted_fee_egp??''} className={field}/></label><label className="text-xs font-bold">حالة الدفع<select name="payment_status" defaultValue={request.payment_status} className={field}>{Object.keys(payNames).map(s=><option key={s} value={s}>{payNames[s]}</option>)}</select></label><label className="text-xs font-bold">مسؤول المتابعة (معرف المستخدم)<input name="assigned_to" defaultValue={request.assigned_to||''} className={field} placeholder="UUID اختياري"/></label><label className="text-xs font-bold sm:col-span-2 lg:col-span-3">ملاحظات داخلية للفريق<textarea name="admin_internal_notes" rows={3} defaultValue={request.admin_internal_notes||''} className={field}/></label></div><button disabled={saving} className={primary+' mt-3'}>حفظ الحالة والرسوم</button></form>}
+          {adminRoute&&<form onSubmit={e=>void saveAdminRequest(e,request)} className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4"><h4 className="font-extrabold">إدارة سير الطلب</h4><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"><label className="text-xs font-bold">الحالة<select name="status" defaultValue={request.status} className={field}>{states.map(s=><option key={s} value={s}>{statusNames[s]}</option>)}</select></label><label className="text-xs font-bold">رسوم الخدمة (جنيه)<input name="quoted_fee_egp" type="number" min={0} step="50" defaultValue={request.quoted_fee_egp??''} className={field}/></label><label className="text-xs font-bold">حالة الدفع<select name="payment_status" defaultValue={request.payment_status} className={field}>{Object.keys(payNames).map(s=><option key={s} value={s}>{payNames[s]}</option>)}</select></label><label className="text-xs font-bold">مسؤول المتابعة (معرف المستخدم)<input name="assigned_to" defaultValue={request.assigned_to||''} className={field} placeholder="UUID اختياري"/></label><label className="text-xs font-bold sm:col-span-2 lg:col-span-3">إضافة ملاحظة داخلية للفريق (لن تظهر للشركة)<textarea name="internal_note" rows={3} className={field} placeholder="أضف ملاحظة جديدة للفريق..."/></label></div><button disabled={saving} className={primary+' mt-3'}>حفظ الحالة والرسوم</button></form>}
           {adminRoute&&<div className="rounded-2xl border p-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="font-extrabold">خيارات السيارات وعروض الموردين</h4><p className="mt-1 text-xs text-slate-500">أدخل فقط الأسعار والتوافر التي تم تأكيدها مع المورد.</p></div><button className={primary} onClick={()=>setOfferFor(offerFor===request.id?null:request.id)}><Plus size={16}/> إضافة خيار</button></div>{offerFor===request.id&&<form onSubmit={e=>void addOffer(e,request)} className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-xs font-bold">الماركة *<input name="make" required className={field}/></label><label className="text-xs font-bold">الموديل *<input name="model" required className={field}/></label><label className="text-xs font-bold">سنة الصنع<input name="model_year" type="number" min={1950} max={2100} className={field}/></label><label className="text-xs font-bold">نوع السيارة<input name="vehicle_type" className={field}/></label><label className="text-xs font-bold">عدد المقاعد<input name="seats" type="number" min={1} max={100} className={field}/></label><label className="text-xs font-bold">المحافظة<input name="governorate" className={field}/></label><label className="text-xs font-bold">السعر الشهري<input name="monthly_price_egp" type="number" min={0} className={field}/></label><label className="text-xs font-bold">السعر السنوي<input name="yearly_price_egp" type="number" min={0} className={field}/></label><label className="text-xs font-bold">التوافر<select name="availability_status" className={field}><option value="awaiting_confirmation">بانتظار التأكيد</option><option value="available">متاحة ومؤكدة</option><option value="limited">توافر محدود</option><option value="unavailable">غير متاحة</option></select></label><label className="text-xs font-bold">حالة التواصل<select name="outreach_status" className={field}><option value="contacted">تم التواصل</option><option value="waiting_reply">بانتظار الرد</option><option value="price_received">تم استلام السعر</option><option value="confirmed">تم التأكيد</option><option value="unavailable">غير متاح</option><option value="not_contacted">لم يتم التواصل</option></select></label><label className="text-xs font-bold sm:col-span-2">شروط العرض<textarea name="terms" rows={2} className={field}/></label><label className="text-xs font-bold sm:col-span-2">ملاحظات داخلية<textarea name="notes" rows={2} className={field}/></label><button disabled={saving} className={primary+' sm:col-span-2'}>حفظ الخيار</button></form>}</div>}
           {reqOffers.length>0&&<div><h4 className="mb-3 font-extrabold">خيارات السيارات ({reqOffers.length})</h4><div className="space-y-3">{reqOffers.map(o=>renderOffer(o,request))}</div></div>}
           {adminRoute&&reqActions.length>0&&<div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4"><h4 className="font-extrabold">إجراءات الشركة</h4><div className="mt-3 space-y-2">{reqActions.map(a=><div key={a.id} className="rounded-xl bg-white p-3 text-sm"><strong>{({approve_quote:'موافقة على الرسوم',submit_payment_reference:'مرجع دفع مرسل',select_offer:'اختيار عرض',request_alternatives:'طلب بدائل',change_requirements:'تعديل الاحتياج',cancel_request:'إلغاء الطلب',question:'استفسار'} as Record<string,string>)[a.action_type]||a.action_type}</strong>{a.payment_reference&&<p className="mt-1">مرجع الدفع: {a.payment_reference}</p>}{a.message&&<p className="mt-1 leading-6 text-slate-600">{a.message}</p>}<p className="mt-1 text-[11px] text-slate-400">{date(a.created_at)}</p></div>)}</div></div>}
           {reqUpdates.length>0&&<div><h4 className="mb-3 font-extrabold">سجل التحديثات</h4><div className="space-y-2">{reqUpdates.map(u=><div key={u.id} className="rounded-xl border p-3"><div className="flex items-center justify-between gap-2"><strong className="text-sm">{u.title}</strong><span className="text-[11px] text-slate-400">{date(u.created_at)}</span></div>{u.body&&<p className="mt-1 text-sm leading-6 text-slate-600">{u.body}</p>}</div>)}</div></div>}
-          {adminRoute&&request.admin_internal_notes&&<div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900"><strong>ملاحظات الفريق:</strong> {request.admin_internal_notes}</div>}
+          {adminRoute&&internalNotes.filter(n=>n.request_id===request.id).length>0&&<div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900"><strong>ملاحظات الفريق الداخلية:</strong><ul className="mt-2 list-disc space-y-2 pr-5">{internalNotes.filter(n=>n.request_id===request.id).map(n=><li key={n.id}>{n.note} <span className="text-[11px] text-amber-700">({date(n.created_at)})</span></li>)}</ul></div>}
         </div>}
       </article>
       })}</div>
