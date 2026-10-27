@@ -108,8 +108,8 @@ export default function ManagedSourcingPage() {
 
   useEffect(()=>{void load()},[load])
   const visible = useMemo(()=>requests.filter(r=>!search.trim() || [r.title,r.vehicle_type,r.id,(r.governorates||[]).join(' ')].some(v=>String(v||'').toLowerCase().includes(search.toLowerCase()))),[requests,search])
-  const activePackages = packages.filter(p=>p.is_active && Number(p.monthly_price_egp)>0)
-  const activeSubscriptions = subscriptions.filter(s=>s.status==='active' && s.payment_status==='verified' && s.ends_at && new Date(s.ends_at).getTime()>Date.now() && Number(s.requests_used)<Number(s.requests_included))
+  const activePackages = packages.filter(p=>p.is_active && Number(p.monthly_price_egp)>0 && Number(p.included_requests)>=1)
+  const activeSubscriptions = subscriptions.filter(s=>s.status==='active' && s.payment_status==='verified' && s.starts_at && new Date(s.starts_at).getTime()<=Date.now() && s.ends_at && new Date(s.ends_at).getTime()>Date.now() && Number(s.requests_used)<Number(s.requests_included))
 
   async function createRequest(event:FormEvent<HTMLFormElement>) {
     event.preventDefault()
