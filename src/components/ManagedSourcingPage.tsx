@@ -87,7 +87,8 @@ export default function ManagedSourcingPage() {
   async function createRequest(event:FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!supabase || !user || !orgId) return
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     const paymentModel = String(form.get('payment_model')||'per_request')
     const packageId = String(form.get('package_id')||'')||null
     if (paymentModel==='subscription' && !packageId) { setError('اختر باقة شهرية مفعلة قبل إرسال الطلب.'); return }
@@ -115,7 +116,7 @@ export default function ManagedSourcingPage() {
       if (admins?.length) await supabase.from('platform_notifications').insert(admins.map((a:Row)=>({user_id:a.user_id,title:'طلب توفير سيارات جديد',body:'وصل طلب جديد من شركة ويحتاج إلى المراجعة.',notification_type:'managed_sourcing_request',action_url:'/workspace/admin/managed-sourcing',created_by:user.id})))
     } catch { /* notifications are best effort */ }
     setSaving(false); setNotice('تم إرسال طلبك. سيراجع فريق My Car الاحتياج ويحدد نطاق الخدمة ورسومها قبل بدء البحث. لا يبدأ العمل قبل موافقتك وسداد الرسوم المتفق عليها.')
-    ;(event.currentTarget as HTMLFormElement).reset()
+    formElement.reset()
     await load()
   }
 
