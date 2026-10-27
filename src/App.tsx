@@ -7,6 +7,7 @@ const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'))
 const AdminManagementPage = lazy(() => import('./components/AdminManagementPage'))
+const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
 const CompanySubscriptionsPage = lazy(() => import('./components/CompanySubscriptionsPage'))
@@ -144,6 +145,8 @@ export default function App() {
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
   if (path === '/workspace/admin/dashboard') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdminDashboardPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin/managed-sourcing') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><ManagedSourcingPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/company/managed-sourcing') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><ManagedSourcingPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/management') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdminManagementPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/platform-settings') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><PlatformSettingsPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/subscription-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense></GlobalAppNavigation>
