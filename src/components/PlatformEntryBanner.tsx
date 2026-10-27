@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ExternalLink, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
-type Banner = { id: string; title: string; body: string; image_url: string | null; button_label: string | null; button_url: string | null; duration_seconds: number }
+type Banner = { id: string; title: string; body: string; image_url: string | null; button_label: string | null; button_url: string | null; duration_seconds: number; starts_at: string | null; ends_at: string | null }
 
 export default function PlatformEntryBanner() {
   const [banner, setBanner] = useState<Banner | null>(null)
@@ -16,14 +16,22 @@ export default function PlatformEntryBanner() {
       try {
         if (window.sessionStorage.getItem('mycar-entry-banner-shown') === '1') return
         const { data, error } = await supabase.from('platform_banners')
-          .select('id,title,body,image_url,button_label,button_url,duration_seconds')
-          .eq('enabled', true).order('display_order', { ascending: true }).limit(1)
+          .select('id,title,body,image_url,button_label,button_url,duration_seconds,starts_at,ends_at')
+          .eq('enabled', true).order('display_order', { ascending: true })
         if (error || !data?.length || !alive) return
-        const active = data[0] as Banner
-        setBanner(active)
+        const now = Date.now()
+        const scheduled = (data as Banner[]).find(item => {
+          const starts = item.starts_at ? new Date(item.starts_at).getTime() : Number.NEGATIVE_INFINITY
+          const ends = item.ends_at ? new Date(item.ends_at).getTime() : Number.POSITIVE_INFINITY
+          const hasContent = Boolean(item.title?.trim() || item.body?.trim() || item.image_url?.trim())
+          return hasContent && starts <= now && ends > now
+        })
+        if (!scheduled) return
+        const activeBanner = scheduled
+        setBanner(activeBanner)
         setVisible(true)
         window.sessionStorage.setItem('mycar-entry-banner-shown', '1')
-        closeTimer = setTimeout(() => { if (alive) setVisible(false) }, Math.max(1, Math.min(30, active.duration_seconds || 5)) * 1000)
+        closeTimer = setTimeout(() => { if (alive) setVisible(false) }, Math.max(1, Math.min(30, activeBanner.duration_seconds || 5)) * 1000)
       } catch {
         // Banner is optional: never block the main platform when storage or the banner table is unavailable.
       }
