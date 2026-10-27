@@ -15,6 +15,7 @@ const sections = [
   { title: 'بانرات بداية الدخول', description: 'إنشاء وإدارة إعلانات الظهور عند دخول المنصة والتحكم بالصورة والنص والرابط والمدة والجدولة.', href: '/workspace/admin/banners', icon: Megaphone, tag: 'إعلانات الواجهة' },
   { title: 'إشعارات الحسابات', description: 'إرسال إشعارات داخل المنصة لجميع الحسابات أو حسب نوع الحساب أو لمستخدم محدد، مع سجل الإرسال.', href: '/workspace/admin/notifications', icon: MessageSquare, tag: 'تواصل مباشر' },
   { title: 'كتالوج السيارات', description: 'معاينة السيارات المنشورة والمتاحة للشركات.', href: '/workspace/catalog', icon: CarFront, tag: 'عرض عام' },
+  { title: 'خدمة توفير السيارات المُدار', description: 'إدارة طلبات التفويض للشركات، وتسعير الخدمة، ومتابعة الموردين والعروض وحالات الدفع.', href: '/workspace/admin/managed-sourcing', icon: FileText, tag: 'خدمة الشركات' },
   { title: 'طلبات التأجير', description: 'متابعة طلبات الشركات والعروض الواردة من الملاك والموردين.', href: '/workspace/admin', icon: FileText, tag: 'سير العمل' },
 ]
 export default function AdminDashboardPage() {
