@@ -197,12 +197,12 @@ export default function VehicleCatalogPage() {
       const match = questions.find(q => q.title === submitted)
       const normalized = submitted.toLowerCase()
         .normalize('NFD')
-        .replace(/[\\u064B-\\u065F\\u0670]/g, '')
+        .replace(/[\u064B-\u065F\u0670]/g, '')
         .replace(/[أإآ]/g, 'ا')
         .replace(/ى/g, 'ي')
         .replace(/ة/g, 'ه')
         .replace(/[؟?!.,،]/g, ' ')
-        .replace(/\\s+/g, ' ')
+        .replace(/\s+/g, ' ')
         .trim()
       let answer = match?.answer || ''
       if (!answer && /تسجيل|اسجل|اضافه سياره|سياره جديده|ارفع صور/.test(normalized)) answer = questions[5].answer
