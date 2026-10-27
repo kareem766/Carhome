@@ -19,11 +19,12 @@ export default async function handler(req: SupportRequest, res: SupportResponse)
 
   const body = typeof req.body === 'string' ? (() => { try { return JSON.parse(req.body) } catch { return null } })() : req.body
   if (!body || typeof body !== 'object') return res.status(400).json({ error: 'بيانات الرسالة غير صالحة.' })
-  if (typeof body.website === 'string' && body.website.trim()) return res.status(200).json({ ok: true })
-  const name = typeof body.name === 'string' ? body.name.trim().slice(0, 100) : ''
-  const email = typeof body.email === 'string' ? body.email.trim().slice(0, 254) : ''
-  const subject = typeof body.subject === 'string' ? body.subject.trim().slice(0, 120) : ''
-  const message = typeof body.message === 'string' ? body.message.trim().slice(0, 5000) : ''
+  const payload = body as Record<string, unknown>
+  if (typeof payload.website === 'string' && payload.website.trim()) return res.status(200).json({ ok: true })
+  const name = typeof payload.name === 'string' ? payload.name.trim().slice(0, 100) : ''
+  const email = typeof payload.email === 'string' ? payload.email.trim().slice(0, 254) : ''
+  const subject = typeof payload.subject === 'string' ? payload.subject.trim().slice(0, 120) : ''
+  const message = typeof payload.message === 'string' ? payload.message.trim().slice(0, 5000) : ''
   const allowedSubjects = new Set(['مشكلة في تسجيل الدخول أو الحساب','السيارات والطلبات والعروض','الاشتراكات والإعلانات والدفع','الإبلاغ عن مشكلة تقنية','استفسار عام','أخرى'])
   if (!emailPattern.test(email) || !allowedSubjects.has(subject) || message.length < 15 || !emailPattern.test(from) || !emailPattern.test(to)) {
     return res.status(400).json({ error: 'راجع البريد الإلكتروني وموضوع الرسالة وتفاصيلها.' })
