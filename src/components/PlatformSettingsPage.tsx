@@ -112,7 +112,7 @@ export default function PlatformSettingsPage() {
       platform_name: settings.platform_name.trim(), tagline: settings.tagline.trim(),
       description: settings.description.trim(), logo_url: settings.logo_url || null,
       favicon_url: settings.favicon_url || null, support_email: settings.support_email?.trim() || null,
-      support_phone: settings.support_phone?.trim() || null, website_url: settings.website_url?.trim() || null,
+      support_phone: null, website_url: settings.website_url?.trim() || null,
       address: settings.address?.trim() || null, footer_text: settings.footer_text.trim(),
       announcement_text: settings.announcement_text?.trim() || null,
       primary_color: settings.primary_color, secondary_color: settings.secondary_color,
@@ -176,10 +176,10 @@ export default function PlatformSettingsPage() {
           </label>
         </section>
         <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
-          <h2 className="text-lg font-extrabold">معلومات التواصل الرسمية</h2>
+          <h2 className="text-lg font-extrabold">إعدادات الدعم والبريد الإلكتروني</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <label className={labelClass}>بريد الدعم<input type="email" maxLength={254} value={settings.support_email || ''} onChange={e=>update('support_email',e.target.value)} className={fieldClass}/></label>
-            <label className={labelClass}>هاتف الدعم<input maxLength={40} value={settings.support_phone || ''} onChange={e=>update('support_phone',e.target.value)} className={fieldClass}/></label>
+            
             <label className={labelClass}>الموقع الإلكتروني<input type="url" maxLength={500} placeholder="https://example.com" value={settings.website_url || ''} onChange={e=>update('website_url',e.target.value)} className={fieldClass}/></label>
             <label className={labelClass}>العنوان<input maxLength={300} value={settings.address || ''} onChange={e=>update('address',e.target.value)} className={fieldClass}/></label>
             <label className={labelClass+' sm:col-span-2'}>نص التذييل وحقوق النشر<input maxLength={300} value={settings.footer_text} onChange={e=>update('footer_text',e.target.value)} className={fieldClass}/></label>
