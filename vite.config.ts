@@ -7,11 +7,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['carhome-icon.svg'],
+      includeAssets: ['mycar-logo.svg'],
       manifest: {
-        name: 'Carhome',
-        short_name: 'Carhome',
-        description: 'منصة تأجير السيارات طويل الأجل للشركات في مصر',
+        name: 'My Car',
+        short_name: 'My Car',
+        description: 'منصة تربط ملاك السيارات وموردي الأساطيل بالشركات الباحثة عن تأجير طويل الأجل في مصر',
         lang: 'ar',
         dir: 'rtl',
         theme_color: '#142D4E',
@@ -20,8 +20,8 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/carhome-icon.svg',
-            sizes: 'any',
+            src: '/mycar-logo.svg',
+            sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'any maskable'
           }

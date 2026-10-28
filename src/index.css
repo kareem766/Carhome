@@ -746,13 +746,13 @@ body::before {
 
 
 /* Homepage legibility and premium action system — scoped to the dark automotive landing page. */
-main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy {
+main.bg-\[\#07172c\] .mc-home-hero-copy {
   background: linear-gradient(145deg, rgba(4, 17, 36, .94), rgba(7, 27, 52, .84));
   border-color: rgba(191, 219, 254, .24);
   box-shadow: 0 24px 65px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255,255,255,.06);
 }
-main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy h1 { color: #fff; text-shadow: 0 3px 18px rgba(0,0,0,.45); }
-main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy > p { color: #e8f0fb; line-height: 1.95; }
+main.bg-\[\#07172c\] .mc-home-hero-copy h1 { color: #fff; text-shadow: 0 3px 18px rgba(0,0,0,.45); }
+main.bg-\[\#07172c\] .mc-home-hero-copy > p { color: #e8f0fb; line-height: 1.95; }
 .mc-home-primary {
   color: #14243b !important;
   background: linear-gradient(135deg, #ffd36a 0%, #f7ad24 55%, #ed9411 100%) !important;
@@ -772,6 +772,147 @@ main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy > p { color: #e8f0fb; line-he
 .mc-home-footer a { color: #ffd36a !important; }
 .mc-home-footer a:hover { color: #fff !important; }
 @media (max-width: 640px) {
-  main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy { padding: 1.15rem; border-radius: 1.35rem; }
+  main.bg-\[\#07172c\] .mc-home-hero-copy { padding: 1.15rem; border-radius: 1.35rem; }
   .mc-home-primary, .mc-home-secondary { width: 100%; min-height: 48px; }
+}
+
+/* Final landing-page contrast hardening: avoid relying on the dir attribute being on the main element. */
+.mc-home-hero-copy { color: #f8fafc !important; }
+.mc-home-hero-copy h1, .mc-home-hero-copy h2 { color: #fff !important; }
+.mc-home-hero-copy p, .mc-home-hero-copy li { color: #e8f0fb !important; }
+.mc-home-hero-copy .text-blue-100, .mc-home-hero-copy .text-blue-200, .mc-home-hero-copy .text-slate-300 { color: #e8f0fb !important; }
+.mc-home-primary, .mc-home-secondary { font-size: 15px; font-weight: 800; letter-spacing: 0; line-height: 1.4; text-align: center; white-space: normal; }
+.mc-home-primary:focus-visible, .mc-home-secondary:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.mc-home-footer a:not(:first-child) { color: #dbeafe !important; }
+.mc-home-footer a:focus-visible { outline: 2px solid #ffd36a; outline-offset: 3px; border-radius: 4px; }
+@media (max-width: 640px) {
+  .mc-home-primary, .mc-home-secondary { min-height: 50px; padding-inline: 1rem; }
+}
+
+
+/* Premium homepage polish: clearer hierarchy, calmer surfaces, and consistent interaction states. */
+main.bg-\\[\\#07172c\\] {
+  color: #f8fafc;
+  text-rendering: optimizeLegibility;
+}
+main.bg-\\[\\#07172c\\] .mc-home-hero-copy {
+  border-color: rgba(226, 232, 240, .22);
+  background: linear-gradient(145deg, rgba(3, 13, 28, .96), rgba(7, 27, 52, .91));
+  box-shadow: 0 28px 75px rgba(0, 0, 0, .32), inset 0 1px 0 rgba(255, 255, 255, .07);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+main.bg-\\[\\#07172c\\] .mc-home-hero-copy h1 {
+  max-width: 13ch;
+  text-wrap: balance;
+  line-height: 1.24;
+}
+main.bg-\\[\\#07172c\\] .mc-home-hero-copy > p {
+  max-width: 56ch;
+  font-size: clamp(1rem, 1.15vw, 1.125rem);
+  text-wrap: pretty;
+}
+main.bg-\\[\\#07172c\\] .mc-home-primary,
+main.bg-\\[\\#07172c\\] .mc-home-secondary {
+  min-height: 52px;
+  padding: .85rem 1.25rem;
+  border-radius: 14px;
+  gap: .65rem;
+  font-size: .96rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.35;
+  white-space: normal;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
+}
+main.bg-\\[\\#07172c\\] .mc-home-primary {
+  color: #172033 !important;
+  background: linear-gradient(135deg, #ffe19a 0%, #ffc247 48%, #f3a51b 100%) !important;
+  border: 1px solid #ffe7b0 !important;
+  box-shadow: 0 10px 26px rgba(245, 158, 11, .22), inset 0 1px 0 rgba(255, 255, 255, .65) !important;
+}
+main.bg-\\[\\#07172c\\] .mc-home-primary:hover {
+  color: #111827 !important;
+  box-shadow: 0 14px 32px rgba(245, 158, 11, .32), inset 0 1px 0 rgba(255, 255, 255, .7) !important;
+  transform: translateY(-2px);
+}
+main.bg-\\[\\#07172c\\] .mc-home-secondary {
+  color: #fff !important;
+  background: rgba(15, 36, 62, .96) !important;
+  border: 1px solid rgba(219, 234, 254, .78) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+}
+main.bg-\\[\\#07172c\\] .mc-home-secondary:hover {
+  background: #1a426c !important;
+  border-color: #fff !important;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, .24) !important;
+  transform: translateY(-2px);
+}
+main.bg-\\[\\#07172c\\] .mc-home-primary:active,
+main.bg-\\[\\#07172c\\] .mc-home-secondary:active {
+  transform: translateY(0) scale(.985);
+}
+main.bg-\\[\\#07172c\\] .mc-home-primary:focus-visible,
+main.bg-\\[\\#07172c\\] .mc-home-secondary:focus-visible,
+main.bg-\\[\\#07172c\\] header a:focus-visible,
+main.bg-\\[\\#07172c\\] header button:focus-visible,
+main.bg-\\[\\#07172c\\] section a:focus-visible {
+  outline: 3px solid #ffd36a;
+  outline-offset: 3px;
+}
+main.bg-\\[\\#07172c\\] #how-it-works article {
+  border-color: #e5edf7;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, .055);
+}
+main.bg-\\[\\#07172c\\] #how-it-works article p {
+  color: #475569;
+  line-height: 1.8;
+}
+main.bg-\\[\\#07172c\\] #how-it-works article a {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: .4rem;
+  border-radius: 9px;
+  text-underline-offset: 4px;
+}
+main.bg-\\[\\#07172c\\] #how-it-works article a:hover {
+  color: #123d78;
+  text-decoration: underline;
+}
+main.bg-\\[\\#07172c\\] .mc-home-footer {
+  gap: 1rem;
+  line-height: 1.8;
+}
+main.bg-\\[\\#07172c\\] .mc-home-footer a {
+  overflow-wrap: anywhere;
+  text-underline-offset: 4px;
+}
+@media (max-width: 640px) {
+  main.bg-\\[\\#07172c\\] .mc-home-hero-copy h1 {
+    max-width: 100%;
+    font-size: clamp(2rem, 8.8vw, 2.65rem);
+    line-height: 1.3;
+  }
+  main.bg-\\[\\#07172c\\] .mc-home-hero-copy > p {
+    font-size: 1rem;
+    line-height: 1.85;
+  }
+  main.bg-\\[\\#07172c\\] .mc-home-primary,
+  main.bg-\\[\\#07172c\\] .mc-home-secondary {
+    width: 100%;
+    min-height: 52px;
+    justify-content: center;
+  }
+  main.bg-\\[\\#07172c\\] .mc-home-footer > div:last-of-type {
+    gap: .75rem 1rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  main.bg-\\[\\#07172c\\] .mc-home-primary,
+  main.bg-\\[\\#07172c\\] .mc-home-secondary {
+    transition: none;
+  }
 }
