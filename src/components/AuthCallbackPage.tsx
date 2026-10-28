@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, LoaderCircle, ShieldAlert } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
-import type { User } from '@supabase/supabase-js'
+import type { EmailOtpType, User } from '@supabase/supabase-js'
 
 type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company'
 
@@ -126,9 +126,14 @@ export default function AuthCallbackPage() {
         const authError = params.get('error_description') || params.get('error')
         if (authError) throw new Error(authError)
         const code = params.get('code')
+        const tokenHash = params.get('token_hash')
         if (code) {
           const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
           if (exchangeError) throw exchangeError
+        } else if (tokenHash) {
+          const otpType = (params.get('type') || 'signup') as EmailOtpType
+          const { error: verifyError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: otpType })
+          if (verifyError) throw verifyError
         }
         const { data, error: sessionError } = await supabase.auth.getSession()
         if (sessionError) throw sessionError
@@ -144,7 +149,10 @@ export default function AuthCallbackPage() {
         window.location.replace(adminRecord ? '/workspace/admin' : workspaceFor(role))
       } catch (caught) {
         if (!active) return
-        setError(caught instanceof Error ? caught.message : 'تعذر تأكيد البريد الإلكتروني. جرّب إرسال رابط جديد.')
+        const detail = caught && typeof caught === 'object' && 'message' in caught
+          ? String((caught as { message?: unknown }).message || '')
+          : String(caught || '')
+        setError(detail || 'تعذر تأكيد البريد الإلكتروني. افتح أحدث رسالة تأكيد أو اطلب رابطًا جديدًا.')
         setMessage('')
       }
     }
