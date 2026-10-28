@@ -7,6 +7,7 @@ const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'))
 const AdminManagementPage = lazy(() => import('./components/AdminManagementPage'))
+const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
 const CompanySubscriptionsPage = lazy(() => import('./components/CompanySubscriptionsPage'))
@@ -70,6 +71,22 @@ export default function App() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [settings, setSettings] = useState<PlatformSettings>(defaults)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [authStateReady, setAuthStateReady] = useState(false)
+
+  useEffect(() => {
+    if (!supabase) { setAuthStateReady(true); return }
+    let active = true
+    const syncSession = (session: { user: { id: string } } | null) => {
+      if (!active) return
+      setIsAuthenticated(Boolean(session))
+      setAuthStateReady(true)
+      if (session) setAuthOpen(false)
+    }
+    void supabase.auth.getSession().then(({ data }) => syncSession(data.session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => syncSession(session))
+    return () => { active = false; subscription.unsubscribe() }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -128,6 +145,8 @@ export default function App() {
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
   if (path === '/workspace/admin/dashboard') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdminDashboardPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/admin/managed-sourcing') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><ManagedSourcingPage /></Suspense></GlobalAppNavigation>
+  if (path === '/workspace/company/managed-sourcing') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><ManagedSourcingPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/management') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><AdminManagementPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/platform-settings') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><PlatformSettingsPage /></Suspense></GlobalAppNavigation>
   if (path === '/workspace/admin/subscription-plans') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense></GlobalAppNavigation>
@@ -175,8 +194,10 @@ export default function App() {
         </a>
         <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:gap-2">
           <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
+{authStateReady && !isAuthenticated && <>
           <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold leading-none text-navy transition hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">تسجيل الدخول</button>
           {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-bold leading-none text-white shadow-sm transition sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
+          </>}
         </div>
       </header>
 
@@ -190,7 +211,7 @@ export default function App() {
           </h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{settings.description}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold text-white shadow-lg transition" style={{ backgroundColor: settings.primary_color }}>
+            {authStateReady && !isAuthenticated && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold text-white shadow-lg transition" style={{ backgroundColor: settings.primary_color }}>
               ابدأ بإنشاء حساب <ArrowLeft size={18} />
             </button>}
             <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 font-bold text-navy">
@@ -235,12 +256,12 @@ export default function App() {
           <div className="mt-10">
             <div className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="text-2xl font-black text-navy">خدمات مصممة لكل شريك</h3><p className="mt-2 text-sm leading-7 text-slate-600">أدوات مناسبة لطبيعة عملك، من عرض السيارات وحتى متابعة الطلبات والعروض.</p></div><a href="/services" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 font-bold text-blue-800">استكشف خدمات السيارات <ArrowLeft size={16}/></a></div>
             <div className="mt-5 grid gap-4 md:grid-cols-3">
-              <article className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><Building2 size={22}/></span><h4 className="mt-4 text-lg font-extrabold">للشركات المستأجرة</h4><p className="mt-2 text-sm leading-7 text-slate-600">سواء محتاج عربية أو أسطول كامل، هتلاقي اختيارات تناسبك.</p><a href="/register/company" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">ابدأ حساب شركتك <ArrowLeft size={15}/></a></article>
-              <article className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl"><span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><CarFront size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لموردي الأساطيل</h4><p className="mt-2 text-sm leading-7 text-slate-600">اعرض سيارات أسطولك، استقبل طلبات الشركات، وقدّم عروضًا منظمة تساعدك على الوصول لفرص مناسبة.</p><a href="/register/supplier" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">سجّل كمورد أسطول <ArrowLeft size={15}/></a></article>
-              <article className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl"><span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-50 text-amber-700"><Users size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لملاك السيارات</h4><p className="mt-2 text-sm leading-7 text-slate-600">خلّي عربياتك توصل للشركات اللي بتدور عليها.</p><a href="/register/owner" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">اعرض سيارتك <ArrowLeft size={15}/></a></article>
+              <article className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><Building2 size={22}/></span><h4 className="mt-4 text-lg font-extrabold">للشركات المستأجرة</h4><p className="mt-2 text-sm leading-7 text-slate-600">سواء محتاج عربية أو أسطول كامل، هتلاقي اختيارات تناسبك.</p>{authStateReady && !isAuthenticated && <a href="/register/company" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">ابدأ حساب شركتك <ArrowLeft size={15}/></a>}</article>
+              <article className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl"><span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><CarFront size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لموردي الأساطيل</h4><p className="mt-2 text-sm leading-7 text-slate-600">اعرض سيارات أسطولك، استقبل طلبات الشركات، وقدّم عروضًا منظمة تساعدك على الوصول لفرص مناسبة.</p>{authStateReady && !isAuthenticated && <a href="/register/supplier" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">سجّل كمورد أسطول <ArrowLeft size={15}/></a>}</article>
+              <article className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl"><span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-50 text-amber-700"><Users size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لملاك السيارات</h4><p className="mt-2 text-sm leading-7 text-slate-600">خلّي عربياتك توصل للشركات اللي بتدور عليها.</p>{authStateReady && !isAuthenticated && <a href="/register/owner" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">اعرض سيارتك <ArrowLeft size={15}/></a>}</article>
             </div>
           </div>
-          {settings.registration_enabled && <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl p-6 text-white sm:flex-row sm:p-8" style={{ backgroundColor: settings.secondary_color }}><div><h3 className="text-xl font-extrabold">ابدأ بخطوتك التالية</h3><p className="mt-2 text-sm leading-6 text-blue-100">أنشئ حسابك المناسب وابدأ في استكشاف خدمات My Car.</p></div><button onClick={() => { window.location.href = '/register' }} className="min-h-12 rounded-xl bg-white px-6 font-extrabold transition hover:bg-blue-50" style={{ color: settings.secondary_color }}>إنشاء حساب جديد</button></div>}
+          {authStateReady && !isAuthenticated && settings.registration_enabled && <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl p-6 text-white sm:flex-row sm:p-8" style={{ backgroundColor: settings.secondary_color }}><div><h3 className="text-xl font-extrabold">ابدأ بخطوتك التالية</h3><p className="mt-2 text-sm leading-6 text-blue-100">أنشئ حسابك المناسب وابدأ في استكشاف خدمات My Car.</p></div><button onClick={() => { window.location.href = '/register' }} className="min-h-12 rounded-xl bg-white px-6 font-extrabold transition hover:bg-blue-50" style={{ color: settings.secondary_color }}>إنشاء حساب جديد</button></div>}
         </div>
       </section>
 
