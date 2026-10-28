@@ -186,7 +186,7 @@ export default function App() {
       <div aria-hidden="true" className="pointer-events-none absolute -left-32 top-[520px] -z-10 h-96 w-96 rounded-full bg-amber-400/10 blur-[100px]" />
       <PlatformEntryBanner />
       {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
-      <header className="sticky top-0 z-30 mx-auto flex w-full max-w-[90rem] flex-col items-stretch gap-3 border-b border-white/10 bg-[#07172c]/80 px-3 py-3 text-white shadow-[0_12px_35px_-30px_rgba(0,0,0,0.65)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
+      <header className="relative sticky top-0 z-30 mx-auto flex w-full max-w-[90rem] flex-col items-stretch gap-3 border-b border-white/10 bg-[#07172c]/80 px-3 py-3 text-white shadow-[0_12px_35px_-30px_rgba(0,0,0,0.65)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
         <a href="/" className="flex w-full min-w-0 items-center gap-3 rounded-2xl py-1 sm:w-auto sm:shrink sm:gap-4" aria-label={settings.platform_name + ' الرئيسية'}>
           <img src={settings.logo_url || "/mycar-logo.svg"} alt={settings.platform_name} className="h-14 w-14 shrink-0 rounded-2xl object-contain sm:h-16 sm:w-16"/>
           <span className="min-w-0 flex-1">
@@ -196,7 +196,7 @@ export default function App() {
         </a>
         <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:gap-2">
           <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
-{authStateReady && !isAuthenticated && <>
+{(!authStateReady || !isAuthenticated) && <>
           <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-white/30 bg-white/5 px-3 text-sm font-bold leading-none text-white transition hover:bg-white/10 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">تسجيل الدخول</button>
           {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-extrabold leading-none text-[#14233d] shadow-[0_8px_24px_-8px_rgba(245,158,11,.65)] transition hover:brightness-105 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
           </>}
@@ -212,8 +212,8 @@ export default function App() {
             بنسهّل عليك الوصول للعربيات اللي تناسب شغلك.
           </h1>
           <p className="mt-4 max-w-xl text-base leading-8 text-slate-200 sm:mt-6 sm:text-lg">{settings.description}</p>
-          <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-            {authStateReady && !isAuthenticated && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-extrabold text-[#14233d] shadow-[0_10px_30px_-10px_rgba(245,158,11,.65)] transition hover:brightness-105" style={{ backgroundColor: settings.primary_color }}>
+          <div className="relative z-20 mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
+            {(!authStateReady || !isAuthenticated) && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-extrabold text-[#14233d] shadow-[0_10px_30px_-10px_rgba(245,158,11,.65)] transition hover:brightness-105" style={{ backgroundColor: settings.primary_color }}>
               ابدأ بإنشاء حساب <ArrowLeft size={18} />
             </button>}
             <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3 font-bold text-white backdrop-blur-md">
