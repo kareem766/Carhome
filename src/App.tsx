@@ -201,16 +201,16 @@ export default function App() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-16 pt-8 sm:gap-12 sm:px-8 md:grid-cols-[1.05fr_0.95fr] md:pb-24 md:pt-14">
-        <div className="relative z-10">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/90 px-4 py-2 text-sm font-bold shadow-[0_8px_28px_-18px_rgba(37,99,235,0.45)] backdrop-blur" style={{ color: settings.primary_color }}>
+      <section className="mx-auto grid max-w-7xl items-center gap-7 px-4 pb-12 pt-5 sm:gap-12 sm:px-8 md:grid-cols-[1.05fr_0.95fr] md:pb-24 md:pt-14">
+        <div className="relative z-10 order-2 md:order-1">
+          <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/95 px-3.5 py-2 text-xs font-extrabold shadow-[0_8px_28px_-18px_rgba(37,99,235,0.45)] backdrop-blur sm:px-4 sm:text-sm" style={{ color: settings.primary_color }}>
             <span className="h-2 w-2 rounded-full bg-cargreen" /> حلول تأجير طويلة الأجل للشركات والأساطيل
           </span>
-          <h1 className="mt-6 max-w-2xl text-4xl font-black leading-[1.3] tracking-tight text-navy sm:text-5xl lg:text-6xl">
+          <h1 className="mt-5 max-w-2xl text-[2.15rem] font-black leading-[1.28] tracking-tight text-navy sm:mt-6 sm:text-5xl lg:text-6xl">
             بنسهّل عليك الوصول للعربيات اللي تناسب شغلك.
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{settings.description}</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <p className="mt-4 max-w-xl text-base leading-8 text-slate-600 sm:mt-6 sm:text-lg">{settings.description}</p>
+          <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
             {authStateReady && !isAuthenticated && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold text-white shadow-lg transition" style={{ backgroundColor: settings.primary_color }}>
               ابدأ بإنشاء حساب <ArrowLeft size={18} />
             </button>}
@@ -218,24 +218,24 @@ export default function App() {
               <CheckCircle2 size={18} style={{ color: settings.primary_color }} /> اعرف طريقة العمل
             </a>
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-semibold text-slate-500">
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-semibold text-slate-600 sm:mt-8">
             <span className="inline-flex items-center gap-2"><Users size={17} /> ملاك وموردون وشركات</span>
             <span className="inline-flex items-center gap-2"><ShieldCheck size={17} /> خصوصية في التواصل وصلاحيات واضحة</span>
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-xl animate-fade-up">
+        <div className="relative mx-auto order-1 w-full max-w-xl animate-fade-up md:order-2">
           <div className="absolute -right-7 -top-7 h-40 w-40 rounded-full bg-blue-300/30 blur-3xl" />
           <div className="absolute -bottom-8 -left-8 h-44 w-44 rounded-full bg-emerald-300/20 blur-3xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-slate-900 p-2 shadow-[0_35px_90px_-28px_rgba(15,23,42,0.65)] ring-1 ring-slate-900/5">
-            <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] bg-gradient-to-br from-blue-950 via-slate-800 to-slate-950 sm:min-h-[440px]">
+          <div className="relative overflow-hidden rounded-[1.6rem] border border-white/80 bg-slate-900 p-1.5 shadow-[0_28px_75px_-28px_rgba(15,23,42,0.55)] ring-1 ring-slate-900/5 sm:rounded-[2rem] sm:p-2">
+            <div className="relative min-h-[280px] overflow-hidden rounded-[1.25rem] bg-gradient-to-br from-blue-950 via-slate-800 to-slate-950 sm:min-h-[440px] sm:rounded-[1.6rem]">
               <div aria-hidden="true" className="absolute inset-0 grid place-items-center bg-[radial-gradient(ellipse_at_70%_35%,rgba(59,130,246,.32),transparent_45%),linear-gradient(135deg,#0f172a,#172554_55%,#020617)]"><CarFront size={190} strokeWidth={0.65} className="text-white/15 sm:h-60 sm:w-60" /><span className="absolute bottom-28 right-7 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-blue-100 backdrop-blur">كتالوج السيارات المعتمدة</span></div>
               <img onError={event => { event.currentTarget.style.display = "none" }} src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1400&q=90" alt="سيارة حديثة مناسبة للتنقلات والأعمال" className="absolute inset-0 h-full w-full object-cover motion-safe:animate-[catalogFloat_9s_ease-in-out_infinite]" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/10 to-slate-900/10" />
-              <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-slate-950/75 p-5 text-white backdrop-blur-md sm:inset-x-6 sm:bottom-6">
+              <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-white/20 bg-slate-950/80 p-4 text-white shadow-2xl backdrop-blur-md sm:inset-x-6 sm:bottom-6 sm:p-5">
                 <div className="flex items-center gap-2 text-xs font-bold text-blue-200"><ShieldCheck size={15}/> تجربة منظمة وآمنة</div>
-                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">من الاحتياج إلى العرض المناسب</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-200">اكتشف الخيارات المتاحة، أرسل طلبك، وتابع التواصل في مساحة واحدة.</p>
+                <h2 className="mt-2 text-lg font-extrabold sm:text-2xl">من الاحتياج إلى العرض المناسب</h2>
+                <p className="mt-2 text-xs leading-6 text-slate-200 sm:text-sm">اكتشف الخيارات المتاحة، أرسل طلبك، وتابع التواصل في مساحة واحدة.</p>
                 <div className="mt-4 flex flex-wrap gap-2"><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">سيارات معتمدة</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">بيانات المالك محمية</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">للشركات والأساطيل</span></div>
               </div>
             </div>
