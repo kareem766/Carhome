@@ -916,3 +916,31 @@ main.bg-\\[\\#07172c\\] .mc-home-footer a {
     transition: none;
   }
 }
+
+
+/* Explicit high-contrast styling for legal links in the homepage footer. */
+.mc-home-footer .mc-home-legal-link,
+.mc-home-footer .mc-home-legal-link:visited {
+  color: #f8fafc !important;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(226, 232, 240, .35);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: .45rem .7rem;
+  text-decoration: underline;
+  text-decoration-color: rgba(248, 250, 252, .75);
+  text-underline-offset: 4px;
+}
+.mc-home-footer .mc-home-legal-link:hover {
+  color: #07172c !important;
+  background: #ffffff;
+  border-color: #ffffff;
+  text-decoration-color: #07172c;
+}
+.mc-home-footer .mc-home-legal-link:focus-visible {
+  color: #ffffff !important;
+  outline: 3px solid #ffd36a;
+  outline-offset: 3px;
+}
