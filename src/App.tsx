@@ -182,9 +182,9 @@ export default function App() {
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-[#07172c] text-slate-800" dir="rtl">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[760px] bg-[linear-gradient(180deg,rgba(4,16,33,.38)_0%,rgba(5,20,40,.62)_45%,#07172c_96%),url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2200&q=90)] bg-cover bg-[position:center_top]" />
-      <div aria-hidden="true" className="pointer-events-none absolute -left-32 top-[520px] -z-10 h-96 w-96 rounded-full bg-amber-400/10 blur-[100px]" />
-      <PlatformEntryBanner />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[760px] bg-[linear-gradient(180deg,rgba(4,16,33,.38)_0%,rgba(5,20,40,.62)_45%,#07172c_96%),url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2200&q=90)] bg-cover bg-[position:center_top]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -left-32 top-[520px] z-0 h-96 w-96 rounded-full bg-amber-400/10 blur-[100px]" />
+      <div className="relative z-20"><PlatformEntryBanner /></div>
       {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
       <header className="relative sticky top-0 z-30 mx-auto flex w-full max-w-[90rem] flex-col items-stretch gap-3 border-b border-white/10 bg-[#07172c]/80 px-3 py-3 text-white shadow-[0_12px_35px_-30px_rgba(0,0,0,0.65)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
         <a href="/" className="flex w-full min-w-0 items-center gap-3 rounded-2xl py-1 sm:w-auto sm:shrink sm:gap-4" aria-label={settings.platform_name + ' الرئيسية'}>
@@ -197,8 +197,8 @@ export default function App() {
         <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:gap-2">
           <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
 {(!authStateReady || !isAuthenticated) && <>
-          <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-white/30 bg-white/5 px-3 text-sm font-bold leading-none text-white transition hover:bg-white/10 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">تسجيل الدخول</button>
-          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-extrabold leading-none text-[#14233d] shadow-[0_8px_24px_-8px_rgba(245,158,11,.65)] transition hover:brightness-105 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
+          <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-white/30 bg-white px-3 text-sm font-extrabold leading-none text-[#07172c] transition hover:bg-slate-100 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">تسجيل الدخول</button>
+          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-extrabold leading-none text-[#07172c] ring-2 ring-amber-200 shadow-[0_8px_24px_-8px_rgba(245,158,11,.65)] transition hover:brightness-105 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
           </>}
         </div>
       </header>
@@ -213,10 +213,10 @@ export default function App() {
           </h1>
           <p className="mt-4 max-w-xl text-base leading-8 text-slate-200 sm:mt-6 sm:text-lg">{settings.description}</p>
           <div className="relative z-20 mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-            {(!authStateReady || !isAuthenticated) && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-extrabold text-[#14233d] shadow-[0_10px_30px_-10px_rgba(245,158,11,.65)] transition hover:brightness-105" style={{ backgroundColor: settings.primary_color }}>
+            {(!authStateReady || !isAuthenticated) && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-extrabold text-[#07172c] ring-2 ring-amber-200 shadow-[0_10px_30px_-10px_rgba(245,158,11,.65)] transition hover:brightness-105" style={{ backgroundColor: settings.primary_color }}>
               ابدأ بإنشاء حساب <ArrowLeft size={18} />
             </button>}
-            <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3 font-bold text-white backdrop-blur-md">
+            <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-white/70 bg-[#07172c]/80 px-6 py-3 font-extrabold text-white shadow-lg backdrop-blur-md hover:bg-[#102b4b]">
               <CheckCircle2 size={18} style={{ color: settings.primary_color }} /> اعرف طريقة العمل
             </a>
           </div>
