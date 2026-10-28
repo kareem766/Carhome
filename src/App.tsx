@@ -195,16 +195,16 @@ export default function App() {
           </span>
         </a>
         <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:gap-2">
-          <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
+          <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-white/90 hover:bg-white/10 hover:text-white sm:inline-flex">خدمات السيارات</a>
 {(!authStateReady || !isAuthenticated) && <>
           <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-white/30 bg-white px-3 text-sm font-extrabold leading-none text-[#07172c] transition hover:bg-slate-100 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">تسجيل الدخول</button>
-          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-extrabold leading-none text-[#07172c] ring-2 ring-amber-200 shadow-[0_8px_24px_-8px_rgba(245,158,11,.65)] transition hover:brightness-105 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
+          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="mc-home-primary inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-4 text-sm font-extrabold leading-none transition sm:min-h-11 sm:w-auto sm:min-w-[132px]">إنشاء الحساب</button>}
           </>}
         </div>
       </header>
 
       <section className="relative z-10 mx-auto grid max-w-7xl items-center gap-7 px-4 pb-12 pt-8 sm:gap-12 sm:px-8 md:grid-cols-[1.05fr_0.95fr] md:pb-24 md:pt-14">
-        <div className="relative z-10 order-2 md:order-1">
+        <div className="mc-home-hero-copy relative z-10 order-2 rounded-[1.75rem] border border-white/15 p-5 shadow-2xl backdrop-blur-md md:order-1 sm:p-8">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-slate-950/70 px-3.5 py-2 text-xs font-extrabold text-amber-300 shadow-lg backdrop-blur-md sm:px-4 sm:text-sm">
             <span className="h-2 w-2 rounded-full bg-cargreen" /> حلول تأجير طويلة الأجل للشركات والأساطيل
           </span>
@@ -213,10 +213,10 @@ export default function App() {
           </h1>
           <p className="mt-4 max-w-xl text-base leading-8 text-slate-200 sm:mt-6 sm:text-lg">{settings.description}</p>
           <div className="relative z-20 mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-            {(!authStateReady || !isAuthenticated) && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-extrabold text-[#07172c] ring-2 ring-amber-200 shadow-[0_10px_30px_-10px_rgba(245,158,11,.65)] transition hover:brightness-105" style={{ backgroundColor: settings.primary_color }}>
+            {(!authStateReady || !isAuthenticated) && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="mc-home-primary inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-extrabold transition">
               ابدأ بإنشاء حساب <ArrowLeft size={18} />
             </button>}
-            <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-white/70 bg-[#07172c]/80 px-6 py-3 font-extrabold text-white shadow-lg backdrop-blur-md hover:bg-[#102b4b]">
+            <a href="#how-it-works" className="mc-home-secondary inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-extrabold">
               <CheckCircle2 size={18} style={{ color: settings.primary_color }} /> اعرف طريقة العمل
             </a>
           </div>
@@ -267,9 +267,9 @@ export default function App() {
         </div>
       </section>
 
-      <footer className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <footer className="mc-home-footer mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div><span>© {new Date().getFullYear()} {settings.platform_name}. </span><span>{settings.footer_text}</span></div>
-        <div className="flex flex-wrap items-center gap-3"><a href="/services" className="font-bold text-blue-700 underline-offset-4 hover:underline">خدمات السيارات</a><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
+        <div className="flex flex-wrap items-center gap-3"><a href="/services" className="font-bold text-amber-300 underline-offset-4 hover:underline">خدمات السيارات</a><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
         <span className="inline-flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${isSupabaseConfigured ? 'bg-cargreen' : 'bg-amber-500'}`} />{isSupabaseConfigured ? 'إعدادات الاتصال موجودة' : 'إعدادات الاتصال تحتاج إلى ضبط'}</span>
       </footer>
       {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} />}
