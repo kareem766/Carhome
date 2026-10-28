@@ -746,13 +746,13 @@ body::before {
 
 
 /* Homepage legibility and premium action system — scoped to the dark automotive landing page. */
-main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy {
+main.bg-\[\#07172c\] .mc-home-hero-copy {
   background: linear-gradient(145deg, rgba(4, 17, 36, .94), rgba(7, 27, 52, .84));
   border-color: rgba(191, 219, 254, .24);
   box-shadow: 0 24px 65px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255,255,255,.06);
 }
-main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy h1 { color: #fff; text-shadow: 0 3px 18px rgba(0,0,0,.45); }
-main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy > p { color: #e8f0fb; line-height: 1.95; }
+main.bg-\[\#07172c\] .mc-home-hero-copy h1 { color: #fff; text-shadow: 0 3px 18px rgba(0,0,0,.45); }
+main.bg-\[\#07172c\] .mc-home-hero-copy > p { color: #e8f0fb; line-height: 1.95; }
 .mc-home-primary {
   color: #14243b !important;
   background: linear-gradient(135deg, #ffd36a 0%, #f7ad24 55%, #ed9411 100%) !important;
@@ -772,6 +772,19 @@ main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy > p { color: #e8f0fb; line-he
 .mc-home-footer a { color: #ffd36a !important; }
 .mc-home-footer a:hover { color: #fff !important; }
 @media (max-width: 640px) {
-  main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy { padding: 1.15rem; border-radius: 1.35rem; }
+  main.bg-\[\#07172c\] .mc-home-hero-copy { padding: 1.15rem; border-radius: 1.35rem; }
   .mc-home-primary, .mc-home-secondary { width: 100%; min-height: 48px; }
+}
+
+/* Final landing-page contrast hardening: avoid relying on the dir attribute being on the main element. */
+.mc-home-hero-copy { color: #f8fafc !important; }
+.mc-home-hero-copy h1, .mc-home-hero-copy h2 { color: #fff !important; }
+.mc-home-hero-copy p, .mc-home-hero-copy li { color: #e8f0fb !important; }
+.mc-home-hero-copy .text-blue-100, .mc-home-hero-copy .text-blue-200, .mc-home-hero-copy .text-slate-300 { color: #e8f0fb !important; }
+.mc-home-primary, .mc-home-secondary { font-size: 15px; font-weight: 800; letter-spacing: 0; line-height: 1.4; text-align: center; white-space: normal; }
+.mc-home-primary:focus-visible, .mc-home-secondary:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.mc-home-footer a:not(:first-child) { color: #dbeafe !important; }
+.mc-home-footer a:focus-visible { outline: 2px solid #ffd36a; outline-offset: 3px; border-radius: 4px; }
+@media (max-width: 640px) {
+  .mc-home-primary, .mc-home-secondary { min-height: 50px; padding-inline: 1rem; }
 }
