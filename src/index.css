@@ -743,3 +743,35 @@ body::before {
   min-height: 100dvh;
   background: transparent;
 }
+
+
+/* Homepage legibility and premium action system — scoped to the dark automotive landing page. */
+main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy {
+  background: linear-gradient(145deg, rgba(4, 17, 36, .94), rgba(7, 27, 52, .84));
+  border-color: rgba(191, 219, 254, .24);
+  box-shadow: 0 24px 65px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255,255,255,.06);
+}
+main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy h1 { color: #fff; text-shadow: 0 3px 18px rgba(0,0,0,.45); }
+main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy > p { color: #e8f0fb; line-height: 1.95; }
+.mc-home-primary {
+  color: #14243b !important;
+  background: linear-gradient(135deg, #ffd36a 0%, #f7ad24 55%, #ed9411 100%) !important;
+  border: 1px solid #ffe2a0 !important;
+  box-shadow: 0 9px 24px rgba(245, 158, 11, .24), inset 0 1px 0 rgba(255,255,255,.55) !important;
+  text-shadow: none;
+}
+.mc-home-primary:hover { background: linear-gradient(135deg, #ffe09a, #f7b733 55%, #ed9b1b) !important; box-shadow: 0 12px 30px rgba(245,158,11,.34) !important; transform: translateY(-1px); }
+.mc-home-secondary {
+  color: #fff !important;
+  background: rgba(9, 29, 53, .92) !important;
+  border: 1px solid rgba(219, 234, 254, .72) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.mc-home-secondary:hover { background: #16395f !important; border-color: #fff !important; transform: translateY(-1px); }
+.mc-home-footer { color: #c5d3e6 !important; }
+.mc-home-footer a { color: #ffd36a !important; }
+.mc-home-footer a:hover { color: #fff !important; }
+@media (max-width: 640px) {
+  main[dir="rtl"].bg-\[\#07172c\] .mc-home-hero-copy { padding: 1.15rem; border-radius: 1.35rem; }
+  .mc-home-primary, .mc-home-secondary { width: 100%; min-height: 48px; }
+}
