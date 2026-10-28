@@ -181,9 +181,9 @@ export default function App() {
   if (path === '/register/supplier') return <GlobalAppNavigation platformName={settings.platform_name} logoUrl={settings.logo_url}><RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} /></GlobalAppNavigation>
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#07172c] text-slate-800" dir="rtl">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[760px] bg-[linear-gradient(180deg,rgba(4,16,33,.38)_0%,rgba(5,20,40,.62)_45%,#07172c_96%),url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2200&q=90)] bg-cover bg-[position:center_top]" />
-      <div aria-hidden="true" className="pointer-events-none absolute -left-32 top-[520px] z-0 h-96 w-96 rounded-full bg-amber-400/10 blur-[100px]" />
+    <main className="relative isolate min-h-screen overflow-hidden bg-[#07172c] text-slate-800" dir="rtl">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[760px] bg-[linear-gradient(180deg,rgba(4,16,33,.38)_0%,rgba(5,20,40,.62)_45%,#07172c_96%),url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2200&q=90)] bg-cover bg-[position:center_top]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -left-32 top-[520px] -z-10 h-96 w-96 rounded-full bg-amber-400/10 blur-[100px]" />
       <PlatformEntryBanner />
       {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
       <header className="sticky top-0 z-30 mx-auto flex w-full max-w-[90rem] flex-col items-stretch gap-3 border-b border-white/10 bg-[#07172c]/80 px-3 py-3 text-white shadow-[0_12px_35px_-30px_rgba(0,0,0,0.65)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
@@ -198,14 +198,14 @@ export default function App() {
           <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
 {authStateReady && !isAuthenticated && <>
           <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-white/30 bg-white/5 px-3 text-sm font-bold leading-none text-white transition hover:bg-white/10 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">تسجيل الدخول</button>
-          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-bold leading-none text-white shadow-sm transition sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
+          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-extrabold leading-none text-[#14233d] shadow-[0_8px_24px_-8px_rgba(245,158,11,.65)] transition hover:brightness-105 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
           </>}
         </div>
       </header>
 
       <section className="relative z-10 mx-auto grid max-w-7xl items-center gap-7 px-4 pb-12 pt-8 sm:gap-12 sm:px-8 md:grid-cols-[1.05fr_0.95fr] md:pb-24 md:pt-14">
         <div className="relative z-10 order-2 md:order-1">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-slate-950/45 px-3.5 py-2 text-xs font-extrabold text-white shadow-lg backdrop-blur-md sm:px-4 sm:text-sm" style={{ color: settings.primary_color }}>
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-slate-950/70 px-3.5 py-2 text-xs font-extrabold text-amber-300 shadow-lg backdrop-blur-md sm:px-4 sm:text-sm">
             <span className="h-2 w-2 rounded-full bg-cargreen" /> حلول تأجير طويلة الأجل للشركات والأساطيل
           </span>
           <h1 className="mt-5 max-w-2xl text-[2.15rem] font-black leading-[1.28] tracking-tight text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.4)] sm:mt-6 sm:text-5xl lg:text-6xl">
@@ -213,7 +213,7 @@ export default function App() {
           </h1>
           <p className="mt-4 max-w-xl text-base leading-8 text-slate-200 sm:mt-6 sm:text-lg">{settings.description}</p>
           <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-            {authStateReady && !isAuthenticated && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold text-white shadow-lg transition" style={{ backgroundColor: settings.primary_color }}>
+            {authStateReady && !isAuthenticated && settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-extrabold text-[#14233d] shadow-[0_10px_30px_-10px_rgba(245,158,11,.65)] transition hover:brightness-105" style={{ backgroundColor: settings.primary_color }}>
               ابدأ بإنشاء حساب <ArrowLeft size={18} />
             </button>}
             <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3 font-bold text-white backdrop-blur-md">
@@ -249,7 +249,7 @@ export default function App() {
 
       <PartnerLogoTicker />
 
-      <section id="how-it-works" className="relative z-10 border-y border-white/15 bg-[linear-gradient(135deg,rgba(255,255,255,.97),rgba(235,243,255,.96)),url(https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80)] bg-cover bg-center py-16 shadow-[0_25px_70px_-55px_rgba(0,0,0,0.65)] sm:py-20">
+      <section id="how-it-works" className="relative z-10 border-y border-white/15 bg-[linear-gradient(135deg,rgba(255,255,255,.96),rgba(235,243,255,.94)),url(https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80)] bg-cover bg-center py-16 shadow-[0_25px_70px_-55px_rgba(0,0,0,0.65)] sm:py-20">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mx-auto max-w-2xl text-center"><p className="text-sm font-extrabold" style={{ color: settings.primary_color }}>مصممة لاحتياجات السوق المصري</p><h2 className="mt-3 text-3xl font-black tracking-tight text-navy sm:text-4xl">سيارتك المناسبة، وفرصتك القادمة تبدأ من هنا.</h2><p className="mt-4 leading-8 text-slate-600">نوصلك بملاك السيارات وموردي الأساطيل في مكان واحد، لتكتشف خيارات تناسب احتياجك وتحوّل طلباتك إلى فرص عمل حقيقية.</p></div>
           <div className="mt-9 grid gap-4 md:grid-cols-3">
