@@ -132,6 +132,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           email: email.trim().toLowerCase(),
           password,
           options: {
+            // Explicitly return confirmation links to the deployed app's callback, not Supabase's default URL.
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
             data: {
               display_name: name,
               organization_name: orgName,
