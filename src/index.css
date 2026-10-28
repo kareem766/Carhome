@@ -919,34 +919,39 @@ main.bg-\\[\\#07172c\\] .mc-home-footer a {
 
 
 /* Strong contrast for privacy/terms footer buttons in every interaction state. */
-main.bg-\\[\\#07172c\\] .mc-home-footer a.mc-home-legal-link,
-main.bg-\\[\\#07172c\\] .mc-home-footer a.mc-home-legal-link:link,
-main.bg-\\[\\#07172c\\] .mc-home-footer a.mc-home-legal-link:visited {
+.mc-home-footer a.mc-home-legal-link,
+.mc-home-footer a.mc-home-legal-link:link,
+.mc-home-footer a.mc-home-legal-link:visited {
   color: #07172c !important;
+  -webkit-text-fill-color: #07172c !important;
   background: #fff0bd !important;
   border: 2px solid #ffe19a !important;
   border-radius: 9px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: .55rem .85rem;
-  font-weight: 900;
-  line-height: 1.4;
-  text-decoration: underline;
-  text-decoration-color: #334155;
+  min-height: 46px;
+  padding: .6rem .9rem;
+  font-size: 1rem;
+  font-weight: 900 !important;
+  line-height: 1.45;
+  text-decoration: underline !important;
+  text-decoration-color: #334155 !important;
   text-underline-offset: 4px;
   opacity: 1 !important;
   text-shadow: none !important;
+  filter: none !important;
 }
-main.bg-\\[\\#07172c\\] .mc-home-footer a.mc-home-legal-link:hover {
+.mc-home-footer a.mc-home-legal-link:hover {
   color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
   background: #12345a !important;
   border-color: #ffffff !important;
-  text-decoration-color: #ffffff;
+  text-decoration-color: #ffffff !important;
 }
-main.bg-\\[\\#07172c\\] .mc-home-footer a.mc-home-legal-link:focus-visible {
+.mc-home-footer a.mc-home-legal-link:focus-visible {
   color: #07172c !important;
+  -webkit-text-fill-color: #07172c !important;
   outline: 3px solid #ffd36a;
   outline-offset: 3px;
 }
