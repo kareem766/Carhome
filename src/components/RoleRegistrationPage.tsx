@@ -122,7 +122,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
 
   return <main dir="rtl" className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.13),_transparent_38%),linear-gradient(180deg,#eff6ff_0%,#f8fafc_52%,#eef2ff_100%)] px-3 py-6 sm:px-6 sm:py-10">
     <div className="mx-auto max-w-4xl">
-      <button onClick={onBack} className="mb-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white bg-white/90 px-4 py-2.5 text-sm font-extrabold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-800"><ArrowRight size={18}/> العودة لاختيار نوع الحساب</button>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><button onClick={onBack} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white bg-white/90 px-4 py-2.5 text-sm font-extrabold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-800"><ArrowRight size={18}/> العودة لاختيار نوع الحساب</button><a href="/" className="inline-flex min-h-11 items-center rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-white/80 hover:text-blue-800">الرئيسية</a></div>
       <section className="overflow-hidden rounded-[2rem] border border-white/90 bg-white/95 shadow-[0_32px_90px_-38px_rgba(20,45,78,0.35)] ring-1 ring-blue-950/5 backdrop-blur-xl">
         <div className="relative overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_rgba(59,130,246,0.42),_transparent_45%),linear-gradient(125deg,#142D4E_0%,#173e70_58%,#0f2340_100%)] px-5 py-6 text-white sm:px-9 sm:py-9">
           <div aria-hidden="true" className="pointer-events-none absolute -left-10 -top-16 h-48 w-48 rounded-full border-[28px] border-white/5"></div>
