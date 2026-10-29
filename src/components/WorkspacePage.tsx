@@ -316,8 +316,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const activeVehicles = vehicles.filter(vehicle => vehicle.review_status === 'approved' && vehicle.payment_status === 'verified').length
   const pendingVehicles = vehicles.filter(vehicle => vehicle.review_status === 'pending_review' || vehicle.payment_status === 'pending').length
   const receivedOffers = requests.reduce((total, request) => total + (request.rental_offers?.length || 0), 0)
-  const dashboard = isWorkspaceHome ? <section className="mt-6 space-y-5">
-    <div className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-l from-[#0b2545] via-[#123b68] to-[#155e91] p-6 text-white shadow-xl sm:p-8">
+  const dashboard = isWorkspaceHome ? <section className="mc-dashboard mt-6 space-y-5">
+    <div className="mc-dashboard-hero relative overflow-hidden rounded-[1.75rem] bg-gradient-to-l from-[#0b2545] via-[#123b68] to-[#155e91] p-6 text-white shadow-xl sm:p-8">
       <div className="pointer-events-none absolute -left-12 -top-16 h-56 w-56 rounded-full border-[28px] border-white/5" />
       <div className="pointer-events-none absolute -bottom-24 right-1/3 h-56 w-56 rounded-full bg-cyan-300/10 blur-3xl" />
       <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-end">
