@@ -52,8 +52,8 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     setNotice('')
     if (!acceptedLegal) { setError('يجب الموافقة على سياسة الخصوصية وشروط الاستخدام قبل إنشاء الحساب.'); return }
     const email = values.email.trim().toLowerCase()
-    if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا، فالبريد الإلكتروني إلزامي لإنشاء الحساب.'); return }
-    const phone = values.phone.replace(/\\D/g, '')
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا، فالبريد الإلكتروني إلزامي لإنشاء الحساب.'); return }
+    const phone = values.phone.replace(/\D/g, '')
     if (!/^01[0-9]{9}$/.test(phone)) { setError('من فضلك أدخل رقم موبايل مصري صحيح مكوّن من 11 رقمًا ويبدأ بـ 01.'); return }
     if (values.password.length < 6) { setError('كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.'); return }
     if (!supabase) { setError('خدمة الحسابات غير مضبوطة حاليًا.'); return }
