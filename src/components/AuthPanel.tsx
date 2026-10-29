@@ -125,7 +125,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     if (!normalizedEmail.includes('@')) { setError('اكتب البريد الإلكتروني الصحيح لاستعادة كلمة المرور.'); return }
     setLoading(true)
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo: `${window.location.origin}/?reset-password=1` })
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo: `${window.location.origin}/auth/callback?flow=password-reset` })
       if (resetError) throw resetError
       setNotice('إذا كان البريد مسجلًا، ستصلك رسالة تحتوي على رابط آمن لإعادة تعيين كلمة المرور.')
     } catch (caught) {
