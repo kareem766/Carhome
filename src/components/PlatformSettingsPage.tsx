@@ -124,7 +124,7 @@ export default function PlatformSettingsPage() {
     setSettings(current => ({ ...current, [key]: value }))
   }
 
-  return <main dir="rtl" className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.10),_transparent_36%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-3 py-5 sm:px-6 sm:py-8">
+  return <main dir="rtl" className="mc-platform-settings-main min-h-screen bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.10),_transparent_36%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-3 py-5 sm:px-6 sm:py-8">
     <div className="mx-auto max-w-6xl">
       <header className="sticky top-3 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/80 bg-white/90 p-4 shadow-[0_18px_55px_-30px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-6">
         <div><PlatformBrand compact /><h1 className="mt-1 text-2xl font-extrabold text-slate-900">هوية المنصة وإعداداتها العامة</h1><p className="mt-2 text-sm leading-6 text-slate-500">تعديل الاسم والشعار ومعلومات التواصل ومظهر المنصة وخيارات التسجيل من مكان واحد.</p></div>
