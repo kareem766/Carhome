@@ -557,3 +557,44 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-messaging-main section form input { min-height: 48px; font-size: 16px !important; }
   .mc-messaging-main section form button { min-width: 4rem; min-height: 48px; }
 }
+
+
+/* Registration and admin screens: one clear action hierarchy on narrow viewports. */
+.mc-admin-section-nav a,
+.mc-admin-anchor-nav a { white-space: nowrap; }
+@media (max-width: 767px) {
+  .mc-registration-main { padding: 1rem .7rem 2rem !important; }
+  .mc-registration-main > div { width: 100%; }
+  .mc-registration-main > div > div:first-child { align-items: stretch; }
+  .mc-registration-main > div > div:first-child > :where(a,button) { justify-content: center; flex: 1 1 100%; }
+  .mc-registration-main section { border-radius: 1.25rem !important; }
+  .mc-registration-main section > div:first-child { padding: 1.15rem !important; }
+  .mc-registration-form { padding: 1rem !important; gap: 1rem !important; }
+  .mc-registration-form > div.grid { grid-template-columns: minmax(0, 1fr) !important; gap: .9rem !important; }
+  .mc-registration-form label { min-width: 0; line-height: 1.7; }
+  .mc-registration-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .mc-registration-form select { min-height: 3rem; }
+  .mc-role-chooser { padding: 1rem .75rem 2rem !important; }
+  .mc-role-chooser > div > section { border-radius: 1.25rem !important; padding: 1.25rem !important; }
+  .mc-role-chooser > div > div.grid { grid-template-columns: minmax(0, 1fr) !important; gap: .75rem !important; }
+  .mc-role-chooser > div > button { width: 100%; justify-content: center; }
+}
+@media (max-width: 640px) {
+  .mc-admin-main { padding: 1rem .7rem 2rem !important; }
+  .mc-admin-header { display: grid !important; grid-template-columns: minmax(0, 1fr); padding: 1rem !important; gap: .85rem !important; border-radius: 1.25rem !important; }
+  .mc-admin-header h1 { font-size: 1.3rem !important; line-height: 1.45 !important; }
+  .mc-admin-actions { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: .5rem !important; }
+  .mc-admin-actions > * { min-width: 0; width: 100%; min-height: 44px; justify-content: center; padding-inline: .55rem !important; font-size: .74rem !important; }
+  .mc-admin-section-nav,
+  .mc-admin-anchor-nav { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto; overscroll-behavior-x: contain; gap: .4rem !important; padding: .55rem !important; scroll-snap-type: x proximity; }
+  .mc-admin-section-nav a,
+  .mc-admin-anchor-nav a { flex: 0 0 auto; min-height: 42px; padding: .6rem .75rem !important; font-size: .75rem !important; scroll-snap-align: start; }
+  .mc-admin-main section { min-width: 0; padding: 1rem !important; border-radius: 1.2rem !important; }
+  .mc-admin-main section > div.flex,
+  .mc-admin-main article > div.flex { align-items: stretch; }
+  .mc-admin-main article { min-width: 0; padding: .9rem !important; }
+  .mc-admin-main article :where(button, a) { max-width: 100%; }
+  .mc-admin-main article > div.flex.flex-wrap { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .mc-admin-main form > div.flex { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .mc-admin-main form > div.flex > button { width: 100%; justify-content: center; }
+}
