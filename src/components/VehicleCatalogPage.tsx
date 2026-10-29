@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CircleUserRound, ArrowLeft, BadgeCheck, Bot, CarFront, Check, ChevronDown, CircleHelp, Filter, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { CircleUserRound, ArrowLeft, BadgeCheck, Bot, CarFront, Check, ChevronDown, CircleHelp, Filter, Menu, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
@@ -56,6 +56,7 @@ export default function VehicleCatalogPage() {
   const [botMessages, setBotMessages] = useState<{ role: 'user' | 'assistant'; text: string }[]>([])
   const [botReplying, setBotReplying] = useState(false)
   const [showPlans, setShowPlans] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -229,9 +230,10 @@ export default function VehicleCatalogPage() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <PlatformBrand />
         <nav className="hidden items-center gap-2 md:flex"><a href="/messages" className="rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">المحادثات</a><a href="/services" className="rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">خدمات السيارات</a><a href={orgType==='company'?'/workspace/company':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">مساحة عملك</a><a href="/workspace/advertising-plans" className="rounded-xl bg-blue-50 px-4 py-2 text-sm font-extrabold text-blue-800">باقات الظهور الإعلاني</a></nav>
-        <div className="flex items-center gap-2"><AccountNotifications/><a href={orgType==='company'?'/workspace/company':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="hidden items-center gap-2 rounded-xl border border-cyan-200 bg-slate-950 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_0_16px_rgba(34,211,238,.22)] sm:inline-flex"><span className="grid h-7 w-7 place-items-center rounded-full border border-cyan-300 text-cyan-200"><CircleUserRound size={16}/></span>مساحة عملك</a></div>
+        <div className="flex items-center gap-2"><button type="button" onClick={()=>setMobileNavOpen(value=>!value)} aria-label={mobileNavOpen?"إغلاق القائمة":"فتح القائمة"} aria-expanded={mobileNavOpen} aria-controls="catalog-mobile-navigation" className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 md:hidden">{mobileNavOpen?<X size={19}/>:<Menu size={19}/>}</button><AccountNotifications/><a href={orgType==='company'?'/workspace/company':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="hidden items-center gap-2 rounded-xl border border-cyan-200 bg-slate-950 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_0_16px_rgba(34,211,238,.22)] sm:inline-flex"><span className="grid h-7 w-7 place-items-center rounded-full border border-cyan-300 text-cyan-200"><CircleUserRound size={16}/></span>مساحة عملك</a></div>
       </div>
     </header>
+    {mobileNavOpen&&<nav id="catalog-mobile-navigation" aria-label="التنقل الرئيسي للهاتف" className="sticky top-[65px] z-20 mx-3 mt-2 grid gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl md:hidden"><a onClick={()=>setMobileNavOpen(false)} href="/" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">الرئيسية</a><a onClick={()=>setMobileNavOpen(false)} href="#catalog" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">السيارات المتاحة</a><a onClick={()=>setMobileNavOpen(false)} href="/messages" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">المحادثات</a><a onClick={()=>setMobileNavOpen(false)} href="/services" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">خدمات السيارات</a><a onClick={()=>setMobileNavOpen(false)} href="/workspace/advertising-plans" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">باقات الظهور الإعلاني</a></nav>}
     <section className="relative overflow-hidden bg-slate-950 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(37,99,235,.35),transparent_38%),radial-gradient(circle_at_85%_80%,rgba(16,185,129,.18),transparent_30%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[1.1fr_.9fr]">
