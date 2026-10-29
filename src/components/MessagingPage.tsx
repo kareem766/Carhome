@@ -20,7 +20,7 @@ export default function MessagingPage() {
   const [notice,setNotice] = useState('')
 
   async function loadConversations() {
-    if (!supabase) { window.location.replace('/'); return }
+    if (!supabase) { window.location.replace('/?login=1'); return }
     const { data: auth } = await supabase.auth.getUser()
     if (!auth.user) { window.location.replace('/?login=1'); return }
     setUserId(auth.user.id)
