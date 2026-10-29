@@ -67,9 +67,9 @@ export default function WorkspacePage({ role }: { role: Role }) {
     if (authError || !authData.user) { window.location.replace('/?login=1'); return }
     const authUser = authData.user
     setUser({ id: authUser.id, name: String(authUser.user_metadata?.display_name || authUser.user_metadata?.organization_name || 'مستخدم My Car'), email: authUser.email || authUser.phone || '' })
-    if (sessionStorage.getItem('mycar_welcome_banner') === '1') {
+    const welcomePending = localStorage.getItem('mycar_welcome_banner') === '1'
+    if (welcomePending) {
       setNotice('أهلًا بك في My Car! تم تأكيد بريدك وتجهيز حسابك بنجاح. نتمنى لك تجربة موفقة.')
-      sessionStorage.removeItem('mycar_welcome_banner')
     }
     const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations(id,name,organization_type)').eq('user_id', authUser.id).limit(1)
     if (membershipError) { setError(membershipError.message); setLoading(false); return }
@@ -83,6 +83,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       return
     }
     setOrganization({ ...org, id: member.organization_id })
+    if (welcomePending) localStorage.removeItem('mycar_welcome_banner')
     if (role === 'company') {
       if (isCompanyVehicles) {
         const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('review_status','approved').eq('payment_status','verified').order('created_at',{ascending:false})
