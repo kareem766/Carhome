@@ -41,7 +41,7 @@ export default function VehicleCatalogPage() {
   const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
   const [type, setType] = useState(() => {
     const requested = new URLSearchParams(window.location.search).get('vehicle_type') || ''
-    const translated: Record<string, string> = { sedan: 'سيدان', suv: 'SUV', van: 'فان', bus: 'أتوبيس', truck: 'نقل خفيف' }
+    const translated: Record<string, string> = { sedan: 'سيدان', suv: 'SUV', van: 'فان / ميكروباص', bus: 'أتوبيس', truck: 'نقل' }
     return translated[requested.toLowerCase()] || requested || 'الكل'
   })
   const [city, setCity] = useState(() => new URLSearchParams(window.location.search).get('governorate') || 'الكل')
@@ -102,9 +102,10 @@ export default function VehicleCatalogPage() {
   const filtered = useMemo(() => vehicles.filter(v => {
     const term = search.trim().toLowerCase()
     const matchesTerm = !term || `${v.make} ${v.model} ${v.model_year} ${v.vehicle_type} ${v.governorate}`.toLowerCase().includes(term)
-    return matchesTerm && (type === 'الكل' || v.vehicle_type === type) && (city === 'الكل' || v.governorate === city) && (!maxPrice || v.monthly_price_egp <= Number(maxPrice))
+    const matchesType = type === 'الكل' || (type === 'فان / ميكروباص' ? ['فان','ميكروباص'].includes(v.vehicle_type) : type === 'نقل' ? v.vehicle_type.includes('نقل') : v.vehicle_type === type)
+    return matchesTerm && matchesType && (city === 'الكل' || v.governorate === city) && (!maxPrice || v.monthly_price_egp <= Number(maxPrice))
   }), [vehicles,search,type,city,maxPrice])
-  const types = useMemo(() => ['الكل',...Array.from(new Set(vehicles.map(v=>v.vehicle_type)))], [vehicles])
+  const types = useMemo(() => ['الكل',...Array.from(new Set([...vehicles.map(v=>v.vehicle_type),'فان / ميكروباص','نقل']))], [vehicles])
   const cities = useMemo(() => ['الكل',...Array.from(new Set(vehicles.map(v=>v.governorate)))], [vehicles])
 
   async function startConversation() {
