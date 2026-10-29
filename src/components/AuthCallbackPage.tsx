@@ -114,7 +114,7 @@ async function finishAccount(user: User) {
 
 export default function AuthCallbackPage() {
   const started = useRef(false)
-  const [message, setMessage] = useState('جارٍ تأكيد البريد الإلكتروني وتجهيز حسابك...')
+  const [, setMessage] = useState('جارٍ تأكيد البريد الإلكتروني وتجهيز حسابك...')
   const [error, setError] = useState('')
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
