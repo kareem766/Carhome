@@ -153,18 +153,20 @@ export default function AuthCallbackPage() {
           window.location.replace('/reset-password')
           return
         }
-        await finishAccount(data.session.user)
+        const role = await finishAccount(data.session.user)
         if (!active) return
-        // Platform-owner accounts must land in the admin console instead of a regular workspace.
+        // Send every newly registered or authenticated user straight to their own workspace.
         const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
         if (!active) return
-        if (!adminRecord) localStorage.setItem('mycar_welcome_banner', '1')
+        const destination = adminRecord
+          ? '/workspace/admin'
+          : role === 'company' ? '/workspace/company'
+          : role === 'fleet_supplier' ? '/workspace/supplier'
+          : '/workspace/owner'
         setMessage(adminRecord
           ? 'تم تأكيد الحساب بنجاح. جارٍ فتح لوحة الإدارة...'
-          : 'تم تأكيد بريدك بنجاح! أهلًا بك في My Car، يمكنك الآن استكشاف المنصة والانتقال إلى مساحة عملك وقتما تريد.')
-        // Keep the first post-confirmation visit simple: return regular users to the homepage.
-        // The homepage remains available, and the authenticated navigation offers their workspace.
-        window.setTimeout(() => { if (active) window.location.replace(adminRecord ? '/workspace/admin' : '/') }, adminRecord ? 900 : 1800)
+          : 'تم تجهيز حسابك بنجاح. جارٍ فتح مساحة العمل الخاصة بك...')
+        window.setTimeout(() => { if (active) window.location.replace(destination) }, 700)
       } catch (caught) {
         if (!active) return
         const detail = caught && typeof caught === 'object' && 'message' in caught
