@@ -163,7 +163,7 @@ export default function AuthCallbackPage() {
           }, 500)
           return
         }
-        const role = await finishAccount(data.session.user)
+        await finishAccount(data.session.user)
         if (!active) return
         // Platform-owner accounts must land in the admin console instead of a regular workspace.
         const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
