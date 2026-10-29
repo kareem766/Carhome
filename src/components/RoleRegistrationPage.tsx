@@ -51,6 +51,11 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     setError('')
     setNotice('')
     if (!acceptedLegal) { setError('يجب الموافقة على سياسة الخصوصية وشروط الاستخدام قبل إنشاء الحساب.'); return }
+    const email = values.email.trim().toLowerCase()
+    if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا، فالبريد الإلكتروني إلزامي لإنشاء الحساب.'); return }
+    const phone = values.phone.replace(/\\D/g, '')
+    if (!/^01[0-9]{9}$/.test(phone)) { setError('من فضلك أدخل رقم موبايل مصري صحيح مكوّن من 11 رقمًا ويبدأ بـ 01.'); return }
+    if (values.password.length < 6) { setError('كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.'); return }
     if (!supabase) { setError('خدمة الحسابات غير مضبوطة حاليًا.'); return }
     setBusy(true)
     try {
@@ -60,8 +65,8 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         display_name: displayName,
         organization_name: organizationName,
         organization_type: role,
-        phone: values.phone.trim(),
-        email_contact: values.email.trim() || null,
+        phone,
+        email_contact: email,
         governorate: values.governorate,
         address: values.address.trim(),
         company_type: isCompany ? values.companyType : null,
@@ -69,10 +74,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         onboarding_version: 2,
         legal_acceptance: { terms_version: '2026-10-25', privacy_version: '2026-10-25', accepted_at: new Date().toISOString() }
       }
-      const credentials = values.email.trim()
-        ? { email: values.email.trim().toLowerCase(), password: values.password, options: { data: metadata } }
-        : { phone: values.phone.trim(), password: values.password, options: { data: metadata } }
-      const { data, error: signUpError } = await supabase.auth.signUp({ ...(credentials as Parameters<typeof supabase.auth.signUp>[0]), options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
+      const { data, error: signUpError } = await supabase.auth.signUp({ email, password: values.password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       if (signUpError) throw signUpError
       if (data.session && data.user) {
         if ((isCompany || role === 'fleet_supplier') && companyLogo) {
@@ -96,7 +98,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
           })
           localStorage.setItem('carhome_pending_company_logo', dataUrl)
         }
-        setNotice(values.email.trim() ? 'تم إرسال طلب التسجيل. أكّد البريد الإلكتروني من الرسالة. احتفظ بنفس المتصفح لإكمال إعداد الحساب وحفظ اللوجو.' : 'تم إرسال طلب التسجيل برقم الهاتف. أكّد رمز SMS إذا كانت الخدمة مفعّلة، ثم سجّل الدخول لإكمال إعداد الحساب.')
+        setNotice('تم إرسال طلب التسجيل. أكّد البريد الإلكتروني من الرسالة. احتفظ بنفس المتصفح لإكمال إعداد الحساب وحفظ اللوجو.')
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'تعذر إكمال التسجيل. حاول مرة أخرى.'
@@ -128,7 +130,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
           <div className="grid gap-4 sm:grid-cols-2">
             {isCompany ? <>{field('authorizedName','اسم المفوض',true)}{field('companyName','اسم الشركة',true)}</> : <>{field('fullName','الاسم بالكامل',true)}{role === 'fleet_supplier' && field('companyName','اسم المكتب / الشركة',true)}</>}
             {field('phone','رقم الموبايل',true,'tel','01xxxxxxxxx')}
-            {field('email','البريد الإلكتروني',isCompany || role === 'fleet_supplier','email','name@example.com')}
+            {field('email','البريد الإلكتروني',true,'email','name@example.com')}
             {(isCompany || role === 'fleet_supplier') && <div className="sm:col-span-2"><label className="block text-sm font-bold text-slate-700">{role === 'fleet_supplier' ? 'لوجو المكتب / الشركة (اختياري)' : 'لوجو الشركة (اختياري)'}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={chooseLogo} className={fieldClass + ' file:ml-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:font-bold file:text-blue-700'} /></label><p className="mt-1 text-xs text-slate-500">PNG أو JPG أو WEBP، بحد أقصى 2 ميجابايت.</p>{logoPreview && <img src={logoPreview} alt="معاينة لوجو الشركة" className="mt-3 h-24 w-24 rounded-2xl border border-slate-200 bg-white object-contain p-2" />}</div>}
             {role === 'fleet_supplier' && <label className="block text-sm font-bold text-slate-700">عدد عربيات المكتب / الشركة (اختياري)<input className={fieldClass} type="number" min="0" step="1" inputMode="numeric" value={fleetVehicleCount} onChange={(e) => setFleetVehicleCount(e.target.value)} placeholder="مثال: 15" /></label>}
             {isCompany && <label className="block text-sm font-bold text-slate-700">نوع الشركة *<span className="relative block"><select required className={fieldClass} value={values.companyType} onChange={(e) => update('companyType',e.target.value)}><option value="">اختر نشاط الشركة</option>{companyTypes.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>}
