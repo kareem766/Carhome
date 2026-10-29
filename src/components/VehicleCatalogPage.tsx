@@ -226,7 +226,7 @@ export default function VehicleCatalogPage() {
     }, 250)
   }
 
-  return <main dir="rtl" className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_48%,#f8fafc_100%)] text-slate-900">
+  return <main dir="rtl" className="mc-catalog-main min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_48%,#f8fafc_100%)] text-slate-900">
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <PlatformBrand />
@@ -244,7 +244,7 @@ export default function VehicleCatalogPage() {
     </section>
     <section id="catalog" className="mx-auto max-w-7xl px-4 py-9 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-bold text-blue-700">اختيار أسرع</p><h2 className="mt-1 text-2xl font-black">السيارات المتاحة</h2><p className="mt-2 text-sm text-slate-500">تظهر هنا السيارات المعتمدة والمستوفية لشروط الإتاحة فقط.</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-200" aria-live="polite">{filtered.length} سيارة</span>{(search || type !== 'الكل' || city !== 'الكل' || maxPrice) && <button type="button" onClick={() => { setSearch(''); setType('الكل'); setCity('الكل'); setMaxPrice('') }} className="min-h-10 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-blue-400 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">مسح الفلاتر</button>}</div></div>
-      <div className="mt-5 grid gap-3 rounded-3xl border border-white bg-white/95 p-4 shadow-lg shadow-slate-200/60 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <div className="mc-catalog-filters mt-5 grid gap-3 rounded-3xl border border-white bg-white/95 p-4 shadow-lg shadow-slate-200/60 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <label className="relative block"><Search size={17} className="absolute right-3 top-4 text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 pe-10 ps-3 text-sm outline-none focus:border-blue-600" placeholder="ابحث عن ماركة أو موديل أو مدينة"/></label>
         <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3"><Filter size={16} className="text-slate-400"/><select value={type} onChange={e=>setType(e.target.value)} className="min-h-12 w-full bg-transparent text-sm outline-none">{types.map(t=><option key={t}>{t}</option>)}</select></label>
         <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3"><ChevronDown size={16} className="text-slate-400"/><select value={city} onChange={e=>setCity(e.target.value)} className="min-h-12 w-full bg-transparent text-sm outline-none">{cities.map(t=><option key={t}>{t}</option>)}</select></label>
