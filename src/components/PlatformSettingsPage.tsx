@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { ArrowRight, ImagePlus, LoaderCircle, Save, ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
+import AdminPageNavigation from './AdminPageNavigation'
 
 type PlatformSettings = {
   id: boolean
@@ -129,6 +130,7 @@ export default function PlatformSettingsPage() {
         <div><PlatformBrand compact /><h1 className="mt-1 text-2xl font-extrabold text-slate-900">هوية المنصة وإعداداتها العامة</h1><p className="mt-2 text-sm leading-6 text-slate-500">تعديل الاسم والشعار ومعلومات التواصل ومظهر المنصة وخيارات التسجيل من مكان واحد.</p></div>
         <a href="/workspace/admin" className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold"><ArrowRight size={17}/> العودة للوحة الإدارة</a>
       </header>
+      <AdminPageNavigation />
       {error && <p role="alert" className="mt-5 rounded-2xl border border-red-100 bg-red-50/90 p-4 text-sm leading-7 text-red-800 shadow-sm">{error}</p>}
       {notice && <p role="status" className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50/90 p-4 text-sm leading-7 text-emerald-800 shadow-sm">{notice}</p>}
       {loading ? <div className="flex justify-center py-16 text-slate-500"><LoaderCircle className="animate-spin"/> جارٍ تحميل الإعدادات...</div> : authorized && <form onSubmit={save} className="mt-6 space-y-6">
