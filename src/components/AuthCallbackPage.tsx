@@ -116,6 +116,18 @@ export default function AuthCallbackPage() {
   const started = useRef(false)
   const [message, setMessage] = useState('جارٍ تأكيد البريد الإلكتروني وتجهيز حسابك...')
   const [error, setError] = useState('')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    async function loadLogo() {
+      if (!supabase) return
+      const { data } = await supabase.from('platform_settings').select('logo_url').eq('id', true).maybeSingle()
+      if (active && data?.logo_url) setLogoUrl(data.logo_url)
+    }
+    void loadLogo()
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     if (started.current) return
@@ -188,9 +200,17 @@ export default function AuthCallbackPage() {
     return () => { active = false }
   }, [])
 
-  return <main dir="rtl" className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-    <section className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-7 text-center shadow-sm sm:p-10"><div className="mb-6 flex justify-center"><PlatformBrand /></div>
-      {error ? <><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><ShieldAlert size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تعذر تأكيد البريد</h1><p role="alert" className="mt-4 break-words text-sm leading-7 text-red-700">{error}</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="/register" className="rounded-xl bg-blue-700 px-5 py-3 font-bold text-white">العودة للتسجيل</a><a href="/?login=1" className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700">تسجيل الدخول</a></div></> : <><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-blue-50 text-blue-700"><LoaderCircle className="animate-spin" size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تأكيد حساب My Car</h1><p role="status" className="mt-4 text-sm leading-7 text-slate-600">{message}</p><CheckCircle2 className="mx-auto mt-5 text-emerald-600" size={22}/></>}
-    </section>
+  return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(249,115,22,0.12),transparent_48%),#f8fafc] px-5 text-slate-600">
+    {error ? <section className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-7 text-center shadow-sm sm:p-10"><div className="mb-6 flex justify-center"><PlatformBrand /></div><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><ShieldAlert size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تعذر تأكيد البريد</h1><p role="alert" className="mt-4 break-words text-sm leading-7 text-red-700">{error}</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="/register" className="rounded-xl bg-blue-700 px-5 py-3 font-bold text-white">العودة للتسجيل</a><a href="/?login=1" className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700">تسجيل الدخول</a></div></section> : <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل المنصة">
+      <div className="relative grid h-28 w-28 place-items-center">
+        <span aria-hidden="true" className="absolute inset-0 rounded-full border-[4px] border-orange-100 shadow-[0_0_35px_rgba(249,115,22,0.16)]" />
+        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[4px] border-transparent border-t-orange-500 border-l-amber-400" />
+        <span aria-hidden="true" className="absolute inset-2 animate-pulse rounded-full bg-orange-500/10" />
+        <span className="relative grid h-[4.5rem] w-[4.5rem] place-items-center overflow-hidden rounded-full border-2 border-orange-400 bg-white shadow-[0_0_22px_rgba(249,115,22,0.25)]">
+          {logoUrl ? <img src={logoUrl} alt="" className="h-14 w-14 object-contain" /> : <span aria-hidden="true" className="h-8 w-8 rounded-full border-2 border-orange-200 border-t-orange-500 animate-spin" />}
+        </span>
+      </div>
+      <span aria-hidden="true" className="h-1 w-28 overflow-hidden rounded-full bg-orange-100"><span className="block h-full w-1/2 animate-pulse rounded-full bg-orange-500" /></span>
+    </div>}
   </main>
 }
