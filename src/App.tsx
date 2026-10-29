@@ -35,18 +35,19 @@ const defaults: PlatformSettings = {
   registration_enabled: true, owner_registration_enabled: true, company_registration_enabled: true,
   supplier_registration_enabled: true, maintenance_mode: false
 }
-function RouteLoading() {
-  return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.10),transparent_48%),#f8fafc] px-5 text-slate-600">
+function RouteLoading({ logoUrl }: { logoUrl?: string | null }) {
+  return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(249,115,22,0.12),transparent_48%),#f8fafc] px-5 text-slate-600">
     <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل منصة My Car">
-      <div className="relative grid h-24 w-24 place-items-center">
-        <span aria-hidden="true" className="absolute inset-0 rounded-full border-[3px] border-blue-100" />
-        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-blue-600 border-l-blue-400" />
-        <span className="grid h-[4.25rem] w-[4.25rem] place-items-center rounded-2xl bg-white shadow-lg ring-1 ring-slate-200/80">
-          <img src="/carhome-icon.svg" alt="" className="h-14 w-14 object-contain" />
+      <div className="relative grid h-28 w-28 place-items-center">
+        <span aria-hidden="true" className="absolute inset-0 rounded-full border-[4px] border-orange-100 shadow-[0_0_35px_rgba(249,115,22,0.16)]" />
+        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[4px] border-transparent border-t-orange-500 border-l-amber-400" />
+        <span aria-hidden="true" className="absolute inset-2 animate-pulse rounded-full bg-orange-500/10" />
+        <span className="relative grid h-[4.5rem] w-[4.5rem] place-items-center overflow-hidden rounded-full border-2 border-orange-400 bg-white shadow-[0_0_22px_rgba(249,115,22,0.25)]">
+          <img src={logoUrl || "/carhome-icon.svg"} alt="" className="h-14 w-14 object-contain" />
         </span>
       </div>
       <p className="text-sm font-extrabold tracking-wide text-slate-700">جارٍ تجهيز تجربتك على My Car...</p>
-      <span className="h-1 w-28 overflow-hidden rounded-full bg-blue-100"><span className="block h-full w-1/2 animate-pulse rounded-full bg-blue-600" /></span>
+      <span className="h-1 w-28 overflow-hidden rounded-full bg-orange-100"><span className="block h-full w-1/2 animate-pulse rounded-full bg-orange-500" /></span>
     </div>
   </main>
 }
@@ -148,23 +149,23 @@ export default function App() {
   const path = window.location.pathname
   // Wait for saved platform identity to load before painting any route.
   // This prevents a default-theme flash before persisted brand colors are applied.
-  if (!settingsLoaded) return <RouteLoading />
+  if (!settingsLoaded) return <RouteLoading logoUrl={settings.logo_url} />
   // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
-  if (pathIsHome(window.location.pathname) && !authLoaded) return <RouteLoading />
+  if (pathIsHome(window.location.pathname) && !authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
-  if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
-  if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading />}><PlatformSettingsPage /></Suspense>
-  if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading />}><SubscriptionPlansPage /></Suspense>
-  if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansAdminPage /></Suspense>
-  if (path === '/workspace/catalog') return <Suspense fallback={<RouteLoading />}><VehicleCatalogPage /></Suspense>
-  if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<RouteLoading />}><AutomotiveServicesPage /></Suspense>
-  if (path === '/workspace/advertising-plans') return <Suspense fallback={<RouteLoading />}><AdvertisingPlansPage /></Suspense>
-  if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<RouteLoading />}><AdminReviewPage /></Suspense>
-  if (path.includes('/messages')) return <Suspense fallback={<RouteLoading />}><MessagingPage /></Suspense>
-  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<RouteLoading />}><WorkspacePage role="company" /></Suspense>
-  if (path.startsWith('/workspace/owner')) return <Suspense fallback={<RouteLoading />}><WorkspacePage role="owner" /></Suspense>
-  if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<RouteLoading />}><WorkspacePage role="supplier" /></Suspense>
+  if (path === '/auth/callback') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AuthCallbackPage /></Suspense>
+  if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PlatformSettingsPage /></Suspense>
+  if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><SubscriptionPlansPage /></Suspense>
+  if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdvertisingPlansAdminPage /></Suspense>
+  if (path === '/workspace/catalog') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><VehicleCatalogPage /></Suspense>
+  if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AutomotiveServicesPage /></Suspense>
+  if (path === '/workspace/advertising-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdvertisingPlansPage /></Suspense>
+  if (path === '/workspace/admin' || path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminReviewPage /></Suspense>
+  if (path.includes('/messages')) return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><MessagingPage /></Suspense>
+  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><WorkspacePage role="company" /></Suspense>
+  if (path.startsWith('/workspace/owner')) return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><WorkspacePage role="owner" /></Suspense>
+  if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><WorkspacePage role="supplier" /></Suspense>
 
   if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
   if (settings.maintenance_mode && (path === '/' || path === '/register' || path.startsWith('/register/'))) {
