@@ -145,8 +145,9 @@ export default function AuthCallbackPage() {
         // Platform-owner accounts must land in the admin console instead of a regular workspace.
         const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
         if (!active) return
-        setMessage(adminRecord ? 'تم التحقق من صلاحية صاحب المنصة. جارٍ فتح لوحة الإدارة...' : 'تم تأكيد البريد وتجهيز حسابك. جارٍ تحويلك إلى مساحة العمل...')
-        window.location.replace(adminRecord ? '/workspace/admin' : workspaceFor(role))
+        if (!adminRecord) sessionStorage.setItem('mycar_welcome_banner', '1')
+        setMessage(adminRecord ? 'تم التحقق من صلاحية صاحب المنصة. جارٍ فتح لوحة الإدارة...' : 'تم تأكيد بريدك بنجاح! أهلًا بك في My Car، جارٍ تجهيز مساحة عملك...')
+        window.setTimeout(() => { if (active) window.location.replace(adminRecord ? '/workspace/admin' : workspaceFor(role)) }, adminRecord ? 900 : 2200)
       } catch (caught) {
         if (!active) return
         const detail = caught && typeof caught === 'object' && 'message' in caught
