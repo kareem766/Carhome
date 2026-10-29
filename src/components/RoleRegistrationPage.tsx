@@ -55,7 +55,11 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     const email = values.email.trim().toLowerCase()
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا، فالبريد الإلكتروني إلزامي لإنشاء الحساب.'); return }
     const phone = values.phone.replace(/\D/g, '')
-    if (!/^01[0-9]{9}$/.test(phone)) { setError('من فضلك أدخل رقم موبايل مصري صحيح مكوّن من 11 رقمًا ويبدأ بـ 01.'); return }
+    const phoneRequired = role !== 'fleet_supplier'
+    if ((phoneRequired || phone.length > 0) && !/^01[0-9]{9}$/.test(phone)) {
+      setError('من فضلك أدخل رقم موبايل مصري صحيح مكوّن من 11 رقمًا ويبدأ بـ 01.')
+      return
+    }
     if (values.password.length < 6) { setError('كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.'); return }
     if (!supabase) { setError('خدمة الحسابات غير مضبوطة حاليًا.'); return }
     setBusy(true)
@@ -103,7 +107,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'تعذر إكمال التسجيل. حاول مرة أخرى.'
-      setError(message.includes('User already registered') ? 'هذا البريد مسجل بالفعل. ارجع إلى تسجيل الدخول.' : message)
+      setError(/already registered|user already exists|already been registered|email exists|duplicate/i.test(message) ? 'هذا البريد مسجل بالفعل. انتقل إلى تسجيل الدخول أو استخدم «نسيت كلمة المرور».' : message)
     } finally { setBusy(false) }
   }
 
@@ -132,13 +136,13 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         <form onSubmit={submit} className="space-y-6 p-4 sm:p-8 lg:p-9">
           <div className="grid gap-4 sm:grid-cols-2">
             {isCompany ? <>{field('authorizedName','اسم المفوض',true)}{field('companyName','اسم الشركة',true)}</> : <>{field('fullName','الاسم بالكامل',true)}{role === 'fleet_supplier' && field('companyName','اسم المكتب / الشركة',true)}</>}
-            {field('phone','رقم الموبايل',true,'tel','01xxxxxxxxx')}
+            {field('phone','رقم الموبايل',role !== 'fleet_supplier','tel','01xxxxxxxxx')}
             {field('email','البريد الإلكتروني',true,'email','name@example.com')}
             {(isCompany || role === 'fleet_supplier') && <div className="sm:col-span-2"><label className="block text-sm font-bold text-slate-700">{role === 'fleet_supplier' ? 'لوجو المكتب / الشركة (اختياري)' : 'لوجو الشركة (اختياري)'}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={chooseLogo} className={fieldClass + ' file:ml-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:font-bold file:text-blue-700'} /></label><p className="mt-1 text-xs text-slate-500">PNG أو JPG أو WEBP، بحد أقصى 2 ميجابايت.</p>{logoPreview && <img src={logoPreview} alt="معاينة لوجو الشركة" className="mt-3 h-24 w-24 rounded-2xl border border-slate-200 bg-white object-contain p-2" />}</div>}
             {role === 'fleet_supplier' && <label className="block text-sm font-bold text-slate-700">عدد عربيات المكتب / الشركة (اختياري)<input className={fieldClass} type="number" min="0" step="1" inputMode="numeric" value={fleetVehicleCount} onChange={(e) => setFleetVehicleCount(e.target.value)} placeholder="مثال: 15" /></label>}
             {isCompany && <label className="block text-sm font-bold text-slate-700">نوع الشركة *<span className="relative block"><select required className={fieldClass} value={values.companyType} onChange={(e) => update('companyType',e.target.value)}><option value="">اختر نشاط الشركة</option>{companyTypes.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>}
-            <label className="block text-sm font-bold text-slate-700">المحافظة *<span className="relative block"><select required className={fieldClass} value={values.governorate} onChange={(e) => update('governorate',e.target.value)}><option value="">اختر المحافظة</option>{governorates.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>
-            {field('address',isCompany ? 'عنوان الشركة' : 'العنوان',true,'text','المركز / الشارع / رقم العقار')}
+            <label className="block text-sm font-bold text-slate-700">المحافظة {role === 'fleet_supplier' ? '(اختياري)' : '*'}<span className="relative block"><select required={role !== 'fleet_supplier'} className={fieldClass} value={values.governorate} onChange={(e) => update('governorate',e.target.value)}><option value="">اختر المحافظة</option>{governorates.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>
+            {field('address',isCompany ? 'عنوان الشركة' : 'العنوان',role !== 'fleet_supplier','text','المركز / الشارع / رقم العقار')}
             {field('password','كلمة المرور',true,'password','٦ أحرف على الأقل')}
           </div>
           <div className="rounded-2xl border border-blue-100 bg-gradient-to-l from-blue-50 to-white p-4 text-sm leading-7 text-blue-950"><p className="flex items-center gap-2 font-extrabold"><ShieldCheck size={18}/> حماية بياناتك</p><p className="mt-1">تُستخدم البيانات لإعداد حسابك والتواصل بشأن طلبات التأجير. لا تتم أي مدفوعات بين أطراف التأجير عبر المنصة.</p></div>
