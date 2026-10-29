@@ -62,7 +62,7 @@ function ServiceNotice({ title, message, settings }: { title: string; message: s
 }
 
 export default function App() {
-  const [authOpen, setAuthOpen] = useState(() => window.location.search.includes('login=1'))
+  const [authOpen, setAuthOpen] = useState(() => window.location.search.includes('login=1') || window.location.search.includes('reset-password=1'))
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [settings, setSettings] = useState<PlatformSettings>(defaults)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
