@@ -55,7 +55,7 @@ export default function VehicleCatalogPage() {
   useEffect(() => {
     let active = true
     async function load() {
-      if (!supabase) { window.location.replace('/'); return }
+      if (!supabase) { window.location.replace('/?login=1'); return }
       const { data: auth } = await supabase.auth.getUser()
       if (!auth.user) { window.location.replace('/?login=1'); return }
       const { data: membership, error: memberError } = await supabase.from('organization_memberships').select('organization_id').eq('user_id', auth.user.id).limit(1).maybeSingle()
