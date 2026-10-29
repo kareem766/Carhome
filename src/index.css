@@ -463,3 +463,97 @@ main.min-h-screen :is(input, select, textarea):disabled {
     padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
   }
 }
+
+
+/* Mobile-first page layouts: consistent spacing, touch targets, and intentional action groups. */
+@media (max-width: 640px) {
+  html, body, #root { max-width: 100%; overflow-x: clip; }
+  main.min-h-screen { min-height: 100svh; }
+  :where(button, a, input, select, textarea) { scroll-margin-bottom: 6rem; }
+  :where(button, a).rounded-xl,
+  :where(button, a).rounded-2xl { min-height: 44px; }
+  main.min-h-screen :is(section, article) { min-width: 0; }
+  main.min-h-screen :is(h1, h2, h3) { overflow-wrap: anywhere; }
+  main.min-h-screen :is(input, select, textarea) { max-width: 100%; min-height: 48px; font-size: 16px; }
+  main.min-h-screen textarea { min-height: 104px; }
+  main.min-h-screen form button[type="submit"] { width: 100%; min-height: 50px; }
+  main.min-h-screen [role="dialog"] { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+  main.min-h-screen [role="dialog"] > div { max-height: calc(100svh - 1rem); overflow-y: auto; }
+  main.min-h-screen footer { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+}
+
+/* Workspace: identity first, shortcuts second, and a compact horizontally scrollable page nav. */
+.mc-workspace-main > div { min-width: 0; }
+.mc-workspace-header { align-items: flex-start; }
+.mc-workspace-identity { min-width: 0; }
+.mc-workspace-actions { min-width: 0; justify-content: flex-end; }
+.mc-workspace-utility { display: contents; }
+.mc-workspace-nav { scrollbar-width: thin; }
+.mc-workspace-nav a { white-space: nowrap; }
+@media (max-width: 640px) {
+  .mc-workspace-main { padding: 1rem .75rem 2rem !important; }
+  .mc-workspace-header { display: grid !important; grid-template-columns: minmax(0, 1fr); gap: .9rem !important; padding: 1rem !important; border-radius: 1.25rem !important; }
+  .mc-workspace-identity h1 { font-size: 1.25rem !important; line-height: 1.4 !important; }
+  .mc-workspace-identity p { display: block; max-width: 100%; overflow-wrap: anywhere; line-height: 1.7; }
+  .mc-workspace-actions { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem !important; width: 100%; }
+  .mc-workspace-account { grid-column: 1 / -1; min-width: 0; width: 100%; border-radius: 1rem !important; box-shadow: none !important; }
+  .mc-workspace-account > span:last-child { min-width: 0; }
+  .mc-workspace-account > span:last-child > span { max-width: 100% !important; }
+  .mc-workspace-utility { display: contents; }
+  .mc-workspace-actions > a,
+  .mc-workspace-actions > button { min-width: 0; width: 100%; min-height: 44px; justify-content: center; padding-inline: .65rem !important; font-size: .75rem !important; }
+  .mc-workspace-actions > button.mc-workspace-logout { grid-column: span 2; }
+  .mc-workspace-actions > button.mc-workspace-icon-action { grid-column: span 2; }
+  .mc-workspace-nav { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto; overscroll-behavior-x: contain; gap: .45rem !important; padding: .55rem !important; border-radius: 1rem !important; scroll-snap-type: x proximity; }
+  .mc-workspace-nav a { flex: 0 0 auto; min-height: 42px; padding: .6rem .8rem !important; font-size: .78rem !important; scroll-snap-align: start; }
+  .mc-workspace-main section.rounded-3xl { border-radius: 1.25rem !important; padding: 1rem !important; }
+  .mc-workspace-main section form { gap: .85rem !important; }
+  .mc-workspace-main article { min-width: 0; }
+  .mc-workspace-main article > div.flex { align-items: stretch; }
+  .mc-workspace-main article button,
+  .mc-workspace-main article a { max-width: 100%; }
+  .mc-workspace-main .grid.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Vehicle catalogue: compact filters, uncluttered navigation and usable detail actions. */
+@media (max-width: 640px) {
+  .mc-catalog-main > header > div { min-height: 3.75rem; }
+  .mc-catalog-main > header { padding-top: env(safe-area-inset-top); }
+  .mc-catalog-main > section:first-of-type > div { padding-top: 2rem !important; padding-bottom: 2rem !important; gap: 1.25rem !important; }
+  .mc-catalog-main > section:first-of-type h1 { font-size: clamp(1.8rem, 8vw, 2.35rem) !important; line-height: 1.45 !important; }
+  .mc-catalog-main > section:first-of-type img { min-height: 12rem; }
+  .mc-catalog-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: .75rem !important; gap: .6rem !important; }
+  .mc-catalog-filters > label:first-child { grid-column: 1 / -1; }
+  .mc-catalog-filters > label { min-width: 0; }
+  .mc-catalog-filters > label input,
+  .mc-catalog-filters > label select { min-width: 0; font-size: 14px !important; }
+  .mc-catalog-main #catalog { padding-top: 1.5rem; }
+  .mc-catalog-main #catalog > div:first-child { align-items: flex-start; }
+  .mc-catalog-main #catalog article { border-radius: 1.15rem !important; }
+  .mc-catalog-main #catalog article button > div:last-child { padding: 1rem !important; }
+  .mc-catalog-main [role="dialog"] { align-items: flex-end; }
+  .mc-catalog-main [role="dialog"] > div { width: 100%; border-radius: 1.25rem 1.25rem 0 0 !important; padding: 1rem !important; }
+  .mc-catalog-main [role="dialog"] > div > div:last-child { gap: .6rem !important; }
+  .mc-catalog-main [role="dialog"] button,
+  .mc-catalog-main [role="dialog"] a { min-height: 48px; }
+  .mc-catalog-main > button.fixed { left: .75rem; bottom: max(.75rem, env(safe-area-inset-bottom)); min-height: 3rem; padding-inline: .9rem; font-size: .78rem; }
+}
+
+/* Messaging: conversation selector stays reachable; message composer remains thumb-friendly. */
+@media (max-width: 767px) {
+  .mc-messaging-main { padding: 1rem .75rem 2rem !important; }
+  .mc-messaging-header { display: grid !important; grid-template-columns: minmax(0, 1fr); gap: .9rem !important; padding: 1rem !important; border-radius: 1.25rem !important; }
+  .mc-messaging-header h1 { font-size: 1.35rem !important; }
+  .mc-messaging-actions { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: .5rem !important; }
+  .mc-messaging-actions > * { min-width: 0; width: 100%; justify-content: center; font-size: .75rem !important; padding-inline: .55rem !important; }
+  .mc-messaging-main > div > div.grid { grid-template-columns: minmax(0, 1fr) !important; min-height: 0 !important; gap: .75rem !important; }
+  .mc-messaging-main aside { display: flex; flex-direction: row; gap: .55rem; overflow-x: auto; overflow-y: hidden; padding-bottom: .25rem; scroll-snap-type: x proximity; }
+  .mc-messaging-main aside > div:first-child { flex: 0 0 10rem; min-width: 10rem; }
+  .mc-messaging-main aside > button { flex: 0 0 min(76vw, 18rem); min-width: 0; padding: .8rem !important; scroll-snap-align: start; }
+  .mc-messaging-main aside > button > span:first-child { align-items: flex-start; line-height: 1.5; }
+  .mc-messaging-main section.flex.min-h-\[60vh\] { min-height: 55svh !important; height: 58svh; border-radius: 1.15rem !important; }
+  .mc-messaging-main section > div.flex-1 { min-height: 0; }
+  .mc-messaging-main section form { padding: .65rem !important; gap: .5rem !important; }
+  .mc-messaging-main section form input { min-height: 48px; font-size: 16px !important; }
+  .mc-messaging-main section form button { min-width: 4rem; min-height: 48px; }
+}
