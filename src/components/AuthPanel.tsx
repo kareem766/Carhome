@@ -241,10 +241,10 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           <div>
             <div className="mb-2"><PlatformBrand /></div>
             <h2 id="auth-title" className="mt-1 text-2xl font-extrabold text-navy">
-              {session ? 'حسابك' : mode === 'signup' ? 'أنشئ حسابك' : 'أهلًا بعودتك'}
+              {settingNewPassword ? 'تعيين كلمة مرور جديدة' : forgotPassword ? 'استعادة كلمة المرور' : session ? 'حسابك' : mode === 'signup' ? 'أنشئ حسابك' : 'أهلًا بعودتك'}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              {session ? 'تم تسجيل الدخول. سنضيف وظائف لوحة التحكم في الخطوات التالية.' : 'حساب واحد لتبدأ رحلتك في تأجير السيارات للشركات.'}
+              {settingNewPassword ? 'اختر كلمة مرور جديدة وآمنة لحسابك.' : forgotPassword ? 'استعد الوصول إلى حسابك بسهولة.' : session ? 'تم تسجيل الدخول. سنضيف وظائف لوحة التحكم في الخطوات التالية.' : 'حساب واحد لتبدأ رحلتك في تأجير السيارات للشركات.'}
             </p>
           </div>
           <button onClick={onClose} aria-label="إغلاق" className="rounded-xl p-2 text-slate-500 hover:bg-slate-100"><X size={20} /></button>
@@ -254,6 +254,19 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           {!supabase && <div className="mb-4 rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-900">إعدادات Supabase غير متاحة. لن يتم حفظ أي بيانات حتى يتم ضبط متغيرات الاتصال.</div>}
           {sessionLoading ? (
             <div className="flex items-center justify-center gap-2 py-8 text-slate-500"><LoaderCircle className="animate-spin" size={20} /> جارٍ التحقق من الجلسة...</div>
+          ) : settingNewPassword ? (
+            <form onSubmit={handleSetNewPassword} className="space-y-4">
+              <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور جديدة لا تقل عن 6 أحرف.</p>
+              <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="6 أحرف على الأقل" dir="ltr" /></label>
+              <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة المرور الجديدة</button>
+            </form>
+          ) : forgotPassword ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <p className="text-sm leading-6 text-slate-600">اكتب بريدك الإلكتروني وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة المرور إذا كان الحساب مسجلًا.</p>
+              <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني<input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" /></label>
+              <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}إرسال رابط الاستعادة</button>
+              <button type="button" onClick={() => { setForgotPassword(false); setError(''); setNotice('') }} className="w-full py-2 text-sm font-bold text-blue-700">العودة لتسجيل الدخول</button>
+            </form>
           ) : session ? (
             <div>
               <div className="rounded-2xl bg-blue-50 p-4">
