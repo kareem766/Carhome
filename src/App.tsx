@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
-import { ArrowLeft, Building2, CarFront, ShieldCheck, Users, Menu, X, UserRound, UserRoundPlus, LogOut, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, Building, UsersRound } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, ShieldCheck, Users, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, Building, UsersRound } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import AccountNotifications from './components/AccountNotifications'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
