@@ -13,8 +13,7 @@ const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPla
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
-import { isSupabaseConfigured, supabase } from './lib/supabase'
-import PartnerLogoTicker from './components/PartnerLogoTicker'
+import { supabase } from './lib/supabase'
 
 // Release trigger: rebuild the current My Car production branch on Vercel.
 // Production retry commit: 2026-10-25; verify partner ticker and platform branding after build.
@@ -34,12 +33,6 @@ const defaults: PlatformSettings = {
   registration_enabled: true, owner_registration_enabled: true, company_registration_enabled: true,
   supplier_registration_enabled: true, maintenance_mode: false
 }
-const features = [
-  { icon: CarFront, title: 'سيارات تناسب احتياجك', description: 'استعرض السيارات المتاحة للتأجير طويل الأجل.' },
-  { icon: Building2, title: 'تواصل بين الشركات والموردين', description: 'إدارة أكثر وضوحًا لطلبات التأجير واستقبال عروض الموردين.' },
-  { icon: ShieldCheck, title: 'خصوصية وأمان', description: 'صلاحيات وصول مبنية على الحساب وعضوية المؤسسة.' }
-]
-
 function RouteLoading() {
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.10),transparent_48%),#f8fafc] px-5 text-slate-600">
     <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل منصة My Car">
