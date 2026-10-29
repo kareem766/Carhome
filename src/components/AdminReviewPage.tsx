@@ -39,7 +39,7 @@ export default function AdminReviewPage() {
   const [notice, setNotice] = useState('')
   const [busyId, setBusyId] = useState('')
   async function load() {
-    if (!supabase) { window.location.replace('/'); return }
+    if (!supabase) { window.location.replace('/?login=1'); return }
     const client = supabase
     setLoading(true); setError('')
     const { data: auth, error: authError } = await supabase.auth.getUser()
