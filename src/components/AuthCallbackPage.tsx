@@ -169,8 +169,12 @@ export default function AuthCallbackPage() {
         const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
         if (!active) return
         if (!adminRecord) localStorage.setItem('mycar_welcome_banner', '1')
-        setMessage(adminRecord ? 'تم التحقق من صلاحية صاحب المنصة. جارٍ فتح لوحة الإدارة...' : 'تم تأكيد بريدك بنجاح! أهلًا بك في My Car، جارٍ تجهيز مساحة عملك...')
-        window.setTimeout(() => { if (active) window.location.replace(adminRecord ? '/workspace/admin' : workspaceFor(role)) }, adminRecord ? 900 : 2200)
+        setMessage(adminRecord
+          ? 'تم تأكيد الحساب بنجاح. جارٍ فتح لوحة الإدارة...'
+          : 'تم تأكيد بريدك بنجاح! أهلًا بك في My Car، يمكنك الآن استكشاف المنصة والانتقال إلى مساحة عملك وقتما تريد.')
+        // Keep the first post-confirmation visit simple: return regular users to the homepage.
+        // The homepage remains available, and the authenticated navigation offers their workspace.
+        window.setTimeout(() => { if (active) window.location.replace(adminRecord ? '/workspace/admin' : '/') }, adminRecord ? 900 : 1800)
       } catch (caught) {
         if (!active) return
         const detail = caught && typeof caught === 'object' && 'message' in caught
