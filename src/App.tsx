@@ -14,6 +14,7 @@ const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPla
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
+const ResetPasswordPage = lazy(() => import('./components/ResetPasswordPage'))
 import { supabase } from './lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
@@ -154,6 +155,7 @@ export default function App() {
   if (pathIsHome(window.location.pathname) && !authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
+  if (path === '/reset-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ResetPasswordPage /></Suspense>
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AuthCallbackPage /></Suspense>
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PlatformSettingsPage /></Suspense>
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><SubscriptionPlansPage /></Suspense>
