@@ -197,8 +197,9 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         }
         if (data.session && data.user) {
           await prepareAccount(data.user, name)
-          setSession(data.session)
-          setNotice('تم إنشاء الحساب وتجهيز الملف الشخصي والمؤسسة بنجاح.')
+          // Complete account setup through the shared callback, then open the role workspace.
+          window.location.replace('/auth/callback')
+          return
         } else {
           setNotice('تم إرسال طلب التسجيل. افتح رسالة تأكيد البريد الإلكتروني، ثم ارجع وسجّل الدخول لإكمال إعداد الحساب.')
           setMode('signin')
