@@ -19,6 +19,8 @@ export default function AccountNotifications() {
   const [notifications, setNotifications] = useState<PlatformNotification[]>([])
   const [notificationsLoading, setNotificationsLoading] = useState(false)
   const [notificationsError, setNotificationsError] = useState('')
+  const [authChecked, setAuthChecked] = useState(false)
+  const [authenticated, setAuthenticated] = useState(false)
   const unreadCount = notifications.filter(item => !item.read_at).length
 
   const loadNotifications = useCallback(async () => {
@@ -48,9 +50,11 @@ export default function AccountNotifications() {
   useEffect(() => {
     let active = true
     async function loadIdentity() {
-      if (!supabase) return
+      if (!supabase) { setAuthChecked(true); return }
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user || !active) return
+      if (!active) return
+      if (!user) { setAuthenticated(false); setAuthChecked(true); return }
+      setAuthenticated(true)
       const meta = user.user_metadata || {}
       const { data: membership } = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
       let organization = '', role = 'مستخدم'
@@ -60,7 +64,10 @@ export default function AccountNotifications() {
         const type = String(org?.organization_type || '')
         role = type === 'company' ? 'حساب شركة' : type === 'fleet_supplier' ? 'مورد أسطول' : type === 'individual_owner' ? 'مالك سيارة' : type === 'admin' ? 'مدير المنصة' : 'مستخدم'
       }
-      if (active) setIdentity({ name: String(meta.full_name || meta.name || user.email?.split('@')[0] || 'الحساب'), email: user.email || '', organization, role })
+      if (active) {
+        setIdentity({ name: String(meta.full_name || meta.name || user.email?.split('@')[0] || 'الحساب'), email: user.email || '', organization, role })
+        setAuthChecked(true)
+      }
     }
     void loadIdentity()
     return () => { active = false }
@@ -89,6 +96,8 @@ export default function AccountNotifications() {
     await supabase.auth.signOut()
     window.location.href = '/?login=1'
   }
+
+  if (!authChecked || !authenticated) return null
 
   return <div className="relative flex items-center gap-2" dir="rtl">
     <button type="button" aria-label={unreadCount ? `الإشعارات، ${unreadCount} غير مقروءة` : 'فتح الإشعارات'} title="الإشعارات" aria-expanded={notificationsOpen} onClick={() => { setNotificationsOpen(v => !v); setOpen(false) }} className="relative grid h-11 w-11 place-items-center rounded-full border border-sky-200 bg-sky-50 text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-300">
