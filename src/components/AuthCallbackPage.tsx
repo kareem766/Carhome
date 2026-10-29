@@ -155,24 +155,10 @@ export default function AuthCallbackPage() {
         if (!data.session?.user) {
           throw new Error('لم نتمكن من استلام جلسة التحقق. افتح أحدث رسالة تأكيد، أو اطلب رسالة جديدة ثم جرّب مرة أخرى.')
         }
-        // Password recovery is already an authenticated Supabase flow. Do not sign the user out
-        // or force another login; route the existing recovery session straight to its workspace.
+        // A recovery link must always land on the dedicated password form.
+        // Never route a recovery session directly into the user's workspace.
         if (params.get('flow') === 'password-reset') {
-          const user = data.session.user
-          const rawRole = user.user_metadata?.organization_type
-          const role: AccountRole = (['individual_owner', 'fleet_supplier', 'company'].includes(String(rawRole))
-            ? rawRole
-            : 'individual_owner') as AccountRole
-          const { data: adminRecord, error: adminError } = await supabase.from('platform_admins')
-            .select('user_id').eq('user_id', user.id).maybeSingle()
-          if (adminError) throw adminError
-          if (!active) return
-          setMessage(adminRecord
-            ? 'تم تغيير كلمة المرور بنجاح. جارٍ فتح لوحة الإدارة...'
-            : 'تم تغيير كلمة المرور بنجاح. جارٍ فتح مساحة عملك...')
-          window.setTimeout(() => {
-            if (active) window.location.replace(adminRecord ? '/workspace/admin' : workspaceFor(role))
-          }, 500)
+          window.location.replace('/reset-password')
           return
         }
         await finishAccount(data.session.user)
