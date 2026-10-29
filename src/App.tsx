@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
-import { ArrowLeft, Building2, CarFront, ShieldCheck, Users, Menu, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, Building, UsersRound } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, ShieldCheck, Users, Menu, UserRound, UserRoundPlus, LogOut, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, Building, UsersRound } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import LegalPages from './components/LegalPages'
@@ -14,6 +14,7 @@ const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPag
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 import { supabase } from './lib/supabase'
+import type { User } from '@supabase/supabase-js'
 
 // Release trigger: rebuild the current My Car production branch on Vercel.
 // Production retry commit: 2026-10-25; verify partner ticker and platform branding after build.
@@ -49,6 +50,8 @@ function RouteLoading() {
   </main>
 }
 
+function pathIsHome(path: string) { return path === '/' || path === '' }
+
 function ServiceNotice({ title, message, settings }: { title: string; message: string; settings: PlatformSettings }) {
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5">
     <section className="w-full max-w-xl rounded-3xl border bg-white p-8 text-center shadow-sm">
@@ -66,6 +69,32 @@ export default function App() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [settings, setSettings] = useState<PlatformSettings>(defaults)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
+  const [authUser, setAuthUser] = useState<User | null>(null)
+  const [authLoaded, setAuthLoaded] = useState(false)
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
+
+  useEffect(() => {
+    if (!supabase) { setAuthLoaded(true); return }
+    let active = true
+    async function syncSession(user: User | null) {
+      if (!active) return
+      setAuthUser(user)
+      if (!user) {
+        setIsPlatformAdmin(false)
+        setAuthLoaded(true)
+        return
+      }
+      const { data } = await supabase!.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle()
+      if (!active) return
+      setIsPlatformAdmin(Boolean(data))
+      setAuthLoaded(true)
+    }
+    void supabase.auth.getSession().then(({ data }) => syncSession(data.session?.user ?? null))
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      void syncSession(session?.user ?? null)
+    })
+    return () => { active = false; listener.subscription.unsubscribe() }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -118,6 +147,8 @@ export default function App() {
   // Wait for saved platform identity to load before painting any route.
   // This prevents a default-theme flash before persisted brand colors are applied.
   if (!settingsLoaded) return <RouteLoading />
+  // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
+  if (pathIsHome(window.location.pathname) && !authLoaded) return <RouteLoading />
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading />}><AuthCallbackPage /></Suspense>
@@ -161,7 +192,7 @@ export default function App() {
         <header className="mx-auto flex max-w-[1400px] items-center justify-between gap-2 px-4 py-5 sm:px-8 sm:py-7">
           <button aria-label="القائمة" onClick={()=>document.getElementById('services')?.scrollIntoView({behavior:'smooth'})} className="order-3 rounded-xl p-2 text-white hover:bg-white/10 sm:order-1"><Menu size={28}/></button>
           <div className="order-1 flex min-w-0 items-center gap-2 sm:order-3"><div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#ffad0a]/70 bg-white/10 p-1 sm:h-16 sm:w-16">{settings.logo_url ? <img src={settings.logo_url} alt={`${settings.platform_name} logo`} className="h-full w-full object-contain" /> : <img src="/carhome-icon.svg" alt="My Car" className="h-full w-full object-contain" />}</div><div className="text-right"><div className="text-2xl font-black leading-none text-[#ffad0a] sm:text-4xl">{settings.platform_name || "My Car"}</div><div className="mt-1 text-[10px] font-bold text-white/85 sm:text-xs">{settings.tagline || "منصة تأجير السيارات"}</div></div></div>
-          <div className="order-2 flex items-center gap-2 sm:order-2"><button onClick={()=>openAuth('signin')} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/80 bg-[#102c49]/60 px-3 text-xs font-extrabold text-white hover:bg-white/10 sm:min-h-12 sm:px-5 sm:text-sm"><UserRound size={17}/> تسجيل الدخول</button>{settings.registration_enabled&&<a href="/register" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-3 text-xs font-black text-[#142b43] shadow-lg hover:bg-amber-300 sm:min-h-12 sm:px-5 sm:text-sm"><UserRoundPlus size={17}/> إنشاء حساب</a>}</div>
+          <div className="order-2 flex items-center gap-2 sm:order-2">{authUser ? <><a href={isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier' : '/workspace/owner'} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-3 text-xs font-black text-[#142b43] shadow-lg hover:bg-amber-300 sm:min-h-12 sm:px-5 sm:text-sm"><UserRound size={17}/> {isPlatformAdmin ? 'لوحة الإدارة' : 'مساحة العمل'}</a><button onClick={async()=>{if(!supabase)return;const {error}=await supabase.auth.signOut();if(!error){setAuthUser(null);setIsPlatformAdmin(false)}}} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/80 bg-[#102c49]/60 px-3 text-xs font-extrabold text-white hover:bg-white/10 sm:min-h-12 sm:px-4 sm:text-sm"><LogOut size={17}/> تسجيل الخروج</button></> : <><button onClick={()=>openAuth('signin')} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/80 bg-[#102c49]/60 px-3 text-xs font-extrabold text-white hover:bg-white/10 sm:min-h-12 sm:px-5 sm:text-sm"><UserRound size={17}/> تسجيل الدخول</button>{settings.registration_enabled&&<a href="/register" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-3 text-xs font-black text-[#142b43] shadow-lg hover:bg-amber-300 sm:min-h-12 sm:px-5 sm:text-sm"><UserRoundPlus size={17}/> إنشاء حساب</a>}</>}</div>
         </header>
         <div className="mx-auto max-w-[1400px] px-4 pb-10 pt-8 sm:px-8 sm:pt-12">
           <div className="mr-0 w-full max-w-3xl text-right"><p className="text-sm font-bold text-white/90 sm:text-lg">منصة <span className="text-[#ffad0a]">My Car</span></p><h1 className="mt-3 text-4xl font-black leading-[1.35] tracking-tight sm:text-6xl lg:text-7xl">نربطك بأفضل<br/><span className="text-[#ffad0a]">السيارات في مصر</span></h1><p className="mt-5 max-w-xl text-sm font-semibold leading-8 text-white/90 sm:text-lg">منصة تجمع بين ملاك السيارات وموردي الأساطيل لتسهيل التأجير طويل الأجل.</p></div>
