@@ -9,7 +9,7 @@ const links = [
 
 export default function AdminPageNavigation() {
   const path = window.location.pathname
-  return <nav aria-label="التنقل بين أقسام الإدارة" className="mt-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-sm backdrop-blur">
+  return <nav aria-label="التنقل بين أقسام الإدارة" className="mc-admin-section-nav mt-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-sm backdrop-blur">
     {links.map(({ href, label, icon: Icon }) => <a key={href} href={href} aria-current={path === href ? 'page' : undefined} className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition ${path === href ? 'bg-blue-700 text-white shadow-sm' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-800'}`}>
       <Icon size={16} />{label}
     </a>)}
