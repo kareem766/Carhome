@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CircleUserRound, ArrowLeft, BadgeCheck, Bot, CarFront, Check, ChevronDown, CircleHelp, Filter, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
+import AccountNotifications from './AccountNotifications'
 
 type Vehicle = {
   id: string; make: string; model: string; model_year: number; vehicle_type: string; transmission: string;
@@ -224,7 +225,7 @@ export default function VehicleCatalogPage() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <PlatformBrand />
         <nav className="hidden items-center gap-2 md:flex"><a href="/messages" className="rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">المحادثات</a><a href="/services" className="rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">خدمات السيارات</a><a href={orgType==='company'?'/workspace/company':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">مساحة عملك</a><a href="/workspace/advertising-plans" className="rounded-xl bg-blue-50 px-4 py-2 text-sm font-extrabold text-blue-800">باقات الظهور الإعلاني</a></nav>
-        <a href={orgType==='company'?'/workspace/company':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="inline-flex items-center gap-2 rounded-xl border border-cyan-200 bg-slate-950 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_0_16px_rgba(34,211,238,.22)]"><span className="grid h-7 w-7 place-items-center rounded-full border border-cyan-300 text-cyan-200"><CircleUserRound size={16}/></span>مساحة عملك</a>
+        <div className="flex items-center gap-2"><AccountNotifications/><a href={orgType==='company'?'/workspace/company':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="hidden items-center gap-2 rounded-xl border border-cyan-200 bg-slate-950 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_0_16px_rgba(34,211,238,.22)] sm:inline-flex"><span className="grid h-7 w-7 place-items-center rounded-full border border-cyan-300 text-cyan-200"><CircleUserRound size={16}/></span>مساحة عملك</a></div>
       </div>
     </header>
     <section className="relative overflow-hidden bg-slate-950 text-white">
