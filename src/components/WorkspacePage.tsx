@@ -93,12 +93,20 @@ export default function WorkspacePage({ role }: { role: Role }) {
       } else {
         const result = await client.from('rental_requests').select('id,title,details,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at,rental_offers(id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,organizations(id,name))').eq('organization_id', member.organization_id).order('created_at',{ascending:false})
         if (result.error) setError(result.error.message); else setRequests((result.data || []) as unknown as RentalRequest[])
+        if (path === '/workspace/company') {
+          const cars = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('review_status','approved').eq('payment_status','verified').order('created_at',{ascending:false}).limit(4)
+          if (!cars.error) setVehicles((cars.data || []) as Vehicle[])
+        }
       }
     } else if (!isRequestForm && !isRequestList) {
       const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('organization_id',member.organization_id).order('created_at',{ascending:false})
       if (result.error) setError(result.error.message)
       else {
         const vehicleRows = (result.data || []) as Vehicle[]
+        if (path === '/workspace/owner/vehicles' || path === '/workspace/supplier/vehicles') {
+          const openRequests = await client.from('rental_requests').select('id,title,details,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at').eq('status','open').order('created_at',{ascending:false}).limit(5)
+          if (!openRequests.error) setRequests((openRequests.data || []) as RentalRequest[])
+        }
         if (vehicleRows.length) {
           const paymentResult = await client.from('vehicle_payment_submissions').select('vehicle_id,review_status,created_at').in('vehicle_id', vehicleRows.map(vehicle => vehicle.id)).order('created_at', { ascending: false })
           if (!paymentResult.error) {
@@ -374,6 +382,13 @@ export default function WorkspacePage({ role }: { role: Role }) {
           {href:'/workspace/catalog',title:'كتالوج السيارات',desc:'تعرّف على السيارات المنشورة',icon:Building2}
         ]).map(item=><a key={item.href} href={item.href} className="group flex min-h-[88px] items-center gap-3 rounded-xl border border-slate-200 p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/60 hover:shadow-sm"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700 transition group-hover:bg-blue-700 group-hover:text-white"><item.icon size={20}/></span><span className="min-w-0"><strong className="block text-sm font-extrabold text-slate-900">{item.title}</strong><span className="mt-1 block text-xs leading-5 text-slate-500">{item.desc}</span></span><ArrowLeft size={16} className="mr-auto shrink-0 text-slate-400 transition group-hover:-translate-x-1 group-hover:text-blue-700"/></a>)}
       </div>
+    </div>
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(260px,.8fr)]">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-between gap-3"><div><h3 className="font-extrabold text-slate-950">{role==='company'?'السيارات المتاحة حديثًا':'أحدث طلبات الشركات'}</h3><p className="mt-1 text-xs text-slate-500">{role==='company'?'سيارات معتمدة وجاهزة للاستعراض':'فرص تشغيل منشورة على المنصة'}</p></div><a href={role==='company'?'/workspace/company/vehicles':role==='supplier'?'/workspace/supplier/requests':'/workspace/owner/requests'} className="text-xs font-extrabold text-blue-700">عرض الكل ←</a></div>
+        {role==='company' ? <div className="mt-4 grid gap-3 sm:grid-cols-2">{vehicles.slice(0,4).map(v=><article key={v.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-lg bg-white text-blue-700"><CarFront size={20}/></span><div className="min-w-0"><strong className="block truncate text-sm">{v.make} {v.model}</strong><span className="text-xs text-slate-500">{v.model_year} · {v.governorate}</span></div></div><p className="mt-2 text-xs font-bold text-blue-800">{Number(v.monthly_price_egp).toLocaleString('ar-EG')} جنيه / شهر</p></article>)}{vehicles.length===0&&<p className="col-span-2 py-6 text-center text-sm text-slate-500">لا توجد سيارات معتمدة للعرض حاليًا.</p>}</div> : <div className="mt-4 divide-y divide-slate-100">{requests.slice(0,4).map(r=><div key={r.id} className="py-3"><strong className="block text-sm text-slate-800">{r.title}</strong><span className="mt-1 block text-xs text-slate-500">{r.vehicle_type} · {r.quantity} سيارة · {r.governorate} · {r.duration_months} شهر</span></div>)}{requests.length===0&&<p className="py-6 text-center text-sm text-slate-500">لا توجد طلبات مفتوحة حاليًا.</p>}</div>}
+      </section>
+      <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-[#0e3260] to-[#071a32] p-5 text-white shadow-sm"><CarFront size={27} className="text-sky-200"/><h3 className="mt-3 font-extrabold">{role==='company'?'خدمة البحث نيابة عن شركتك':'زد فرص ظهور سياراتك'}</h3><p className="mt-2 text-sm leading-6 text-blue-100">{role==='company'?'فوّض فريق CarHome للبحث عن السيارات المناسبة وتجهيز اختيارات واضحة لشركتك.':'اكتشف باقات الإعلان المميزة لزيادة ظهور سياراتك أمام الشركات.'}</p><a href={role==='company'?'/services':'/workspace/advertising-plans'} className="mt-4 inline-flex min-h-10 items-center rounded-lg bg-white px-4 text-sm font-extrabold text-blue-900">{role==='company'?'استكشف خدمة البحث':'استكشف الباقات'}</a></section>
     </div>
   </section> : null
   const isWelcomeNotice = notice.startsWith('أهلًا بك في My Car')
