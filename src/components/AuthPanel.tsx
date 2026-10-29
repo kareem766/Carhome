@@ -236,7 +236,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-navy/60 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-labelledby="auth-title" dir="rtl">
+    <div className="mc-auth-overlay fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-navy/60 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-labelledby="auth-title" dir="rtl">
       <div className="my-auto w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div className="flex items-start justify-between border-b border-slate-100 p-5 sm:p-7">
           <div>
