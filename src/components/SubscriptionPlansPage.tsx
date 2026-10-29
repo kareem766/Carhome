@@ -86,7 +86,7 @@ export default function SubscriptionPlansPage() {
     await loadPlans()
   }
   const set=<K extends keyof PlanForm>(key:K,value:PlanForm[K])=>setForm(current=>({...current,[key]:value}))
-  return <main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-7 sm:px-6"><div className="mx-auto max-w-6xl">
+  return <main dir="rtl" className="mc-subscription-admin-main min-h-screen bg-slate-50 px-4 py-7 sm:px-6"><div className="mx-auto max-w-6xl">
     <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-5">
       <div><PlatformBrand compact /><h1 className="mt-1 text-2xl font-extrabold text-slate-900">إدارة أسعار وباقات الاشتراك</h1><p className="mt-2 text-sm leading-6 text-slate-500">تحكم في السعر الشهري والسنوي، التجربة المجانية، المميزات، الحدود، وترتيب وظهور كل باقة.</p></div>
       <a href="/workspace/admin" className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold"><ArrowRight size={17}/> العودة للإدارة</a>
