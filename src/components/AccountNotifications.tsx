@@ -90,7 +90,7 @@ export default function AccountNotifications() {
     window.location.href = '/?login=1'
   }
 
-  return <div className="relative flex items-center gap-2" dir="rtl">
+  return <div className="fixed left-3 top-3 z-[100] flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-lg backdrop-blur sm:left-5 sm:top-5" dir="ltr">
     <button type="button" aria-label={unreadCount ? `الإشعارات، ${unreadCount} غير مقروءة` : 'فتح الإشعارات'} title="الإشعارات" aria-expanded={notificationsOpen} onClick={() => { setNotificationsOpen(v => !v); setOpen(false) }} className="relative grid h-11 w-11 place-items-center rounded-full border border-sky-200 bg-sky-50 text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-300">
       <Bell size={19} />
       {unreadCount > 0 && <span aria-label={`${unreadCount} إشعارات غير مقروءة`} className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>}
