@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { CheckCircle2, LoaderCircle, ShieldAlert } from 'lucide-react'
+import { ShieldAlert } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import type { EmailOtpType, User } from '@supabase/supabase-js'
