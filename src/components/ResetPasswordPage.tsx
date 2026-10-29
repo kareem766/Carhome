@@ -13,10 +13,11 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); setReady(true); return }
+    const client = supabase
+    if (!client) { setError('خدمة الحسابات غير متاحة حاليًا.'); setReady(true); return }
     let active = true
     const verifySession = async () => {
-      const { data, error: sessionError } = await supabase.auth.getSession()
+      const { data, error: sessionError } = await client.auth.getSession()
       if (!active) return
       if (sessionError || !data.session?.user) {
         setError('رابط إعادة تعيين كلمة المرور غير صالح أو انتهت صلاحيته. اطلب رابطًا جديدًا من صفحة تسجيل الدخول.')
@@ -24,7 +25,7 @@ export default function ResetPasswordPage() {
       setReady(true)
     }
     void verifySession()
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: listener } = client.auth.onAuthStateChange((event, session) => {
       if (!active) return
       if (event === 'PASSWORD_RECOVERY' && session?.user) {
         setError('')
@@ -41,18 +42,19 @@ export default function ResetPasswordPage() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
-    if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
+    const client = supabase
+    if (!client) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
     if (password.length < 8) { setError('كلمة المرور يجب أن تكون 8 أحرف على الأقل.'); return }
     if (password !== confirmPassword) { setError('تأكيد كلمة المرور غير مطابق.'); return }
     setSaving(true)
     try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      const { data: sessionData, error: sessionError } = await client.auth.getSession()
       if (sessionError || !sessionData.session?.user) throw new Error('جلسة الاستعادة غير موجودة أو انتهت صلاحيتها. اطلب رابطًا جديدًا.')
-      const { error: updateError } = await supabase.auth.updateUser({ password })
+      const { error: updateError } = await client.auth.updateUser({ password })
       if (updateError) throw updateError
       setSuccess(true)
       const user = sessionData.session.user
-      const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle()
+      const { data: adminRecord } = await client.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle()
       const role = user.user_metadata?.organization_type
       const destination = adminRecord ? '/workspace/admin' : role === 'company' ? '/workspace/company' : role === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
       window.setTimeout(() => window.location.replace(destination), 1300)
