@@ -143,10 +143,11 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) throw updateError
       setSettingNewPassword(false); setForgotPassword(false); setPassword('')
-      setNotice('تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول بكلمة المرور الجديدة.')
-      await supabase.auth.signOut()
-      setSession(null)
-      window.history.replaceState({}, '', '/')
+      setNotice('تم تغيير كلمة المرور بنجاح. جارٍ توجيهك إلى مساحة عملك...')
+      // Keep the recovery session alive and reuse the shared account setup/router.
+      // This sends the user to the correct role workspace (or admin console) without another login.
+      window.location.replace('/auth/callback?flow=password-reset')
+      return
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'تعذر تغيير كلمة المرور. اطلب رابط استعادة جديدًا.')
     } finally { setLoading(false) }
