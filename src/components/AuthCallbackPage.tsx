@@ -7,8 +7,11 @@ import type { EmailOtpType, User } from '@supabase/supabase-js'
 type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company'
 
 function workspaceFor(role: unknown) {
-  void role
-  return '/workspace/catalog'
+  // Send each newly verified user directly to the correct role-specific starting point.
+  // Companies start at their request dashboard; owners and fleet suppliers start at vehicle management.
+  if (role === 'company') return '/workspace/company'
+  if (role === 'fleet_supplier') return '/workspace/supplier/vehicles'
+  return '/workspace/owner/vehicles'
 }
 
 async function finishAccount(user: User) {
