@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
-import { ArrowLeft, Building2, CarFront, CheckCircle2, ShieldCheck, Users } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, CheckCircle2, ShieldCheck, Users, Menu, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, Building, UsersRound } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import LegalPages from './components/LegalPages'
@@ -160,93 +160,39 @@ export default function App() {
   if (path === '/register/supplier') return <RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} />
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.10),_transparent_36%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_48%,#f8fafc_100%)] text-slate-800" dir="rtl">
-      {settings.announcement_text && <div className="px-5 py-2 text-center text-sm font-bold text-white" style={{ backgroundColor: settings.primary_color }}>{settings.announcement_text}</div>}
-      <header className="sticky top-0 z-30 mx-auto flex w-full max-w-[90rem] flex-col items-stretch gap-3 border-b border-white/70 bg-white/85 px-3 py-3 shadow-[0_12px_35px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
-        <a href="/" className="flex w-full min-w-0 items-center gap-3 rounded-2xl py-1 sm:w-auto sm:shrink sm:gap-4" aria-label={settings.platform_name + ' الرئيسية'}>
-          {settings.logo_url ? <img src={settings.logo_url} alt={settings.platform_name} className="h-14 w-14 shrink-0 rounded-2xl object-contain sm:h-16 sm:w-16"/> : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-white shadow-soft sm:h-16 sm:w-16" style={{ backgroundColor: settings.secondary_color }}><CarFront size={31} /></span>}
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-2xl font-black leading-tight tracking-tight text-navy sm:text-3xl">{settings.platform_name}</span>
-            <span className="mt-1 block truncate text-xs font-bold text-slate-500 sm:text-sm">{settings.tagline}</span>
-          </span>
-        </a>
-        <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:gap-2">
-          <a href="/services" className="hidden min-h-10 items-center rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-white sm:inline-flex">خدمات السيارات</a>
-          <button onClick={() => openAuth('signin')} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold leading-none text-navy transition hover:bg-slate-50 sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4">تسجيل الدخول</button>
-          {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 w-full items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-bold leading-none text-white shadow-sm transition sm:min-h-11 sm:w-auto sm:min-w-[132px] sm:px-4" style={{ backgroundColor: settings.primary_color }}>إنشاء الحساب</button>}
-        </div>
-      </header>
-
-      <section className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-16 pt-8 sm:gap-12 sm:px-8 md:grid-cols-[1.05fr_0.95fr] md:pb-24 md:pt-14">
-        <div className="relative z-10">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/90 px-4 py-2 text-sm font-bold shadow-[0_8px_28px_-18px_rgba(37,99,235,0.45)] backdrop-blur" style={{ color: settings.primary_color }}>
-            <span className="h-2 w-2 rounded-full bg-cargreen" /> حلول تأجير طويلة الأجل للشركات والأساطيل
-          </span>
-          <h1 className="mt-6 max-w-2xl text-4xl font-black leading-[1.3] tracking-tight text-navy sm:text-5xl lg:text-6xl">
-            سيارتك المناسبة، وفرصتك القادمة تبدأ من هنا.
-          </h1>
-          <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{settings.description}</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            {settings.registration_enabled && <button onClick={() => { window.location.href = '/register' }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold text-white shadow-lg transition" style={{ backgroundColor: settings.primary_color }}>
-              ابدأ بإنشاء حساب <ArrowLeft size={18} />
-            </button>}
-            <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 font-bold text-navy">
-              <CheckCircle2 size={18} style={{ color: settings.primary_color }} /> اعرف طريقة العمل
-            </a>
-          </div>
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-semibold text-slate-500">
-            <span className="inline-flex items-center gap-2"><Users size={17} /> ملاك وموردون وشركات</span>
-            <span className="inline-flex items-center gap-2"><ShieldCheck size={17} /> خصوصية في التواصل وصلاحيات واضحة</span>
-          </div>
-        </div>
-
-        <div className="relative mx-auto w-full max-w-xl animate-fade-up">
-          <div className="absolute -right-7 -top-7 h-40 w-40 rounded-full bg-blue-300/30 blur-3xl" />
-          <div className="absolute -bottom-8 -left-8 h-44 w-44 rounded-full bg-emerald-300/20 blur-3xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-slate-900 p-2 shadow-[0_35px_90px_-28px_rgba(15,23,42,0.65)] ring-1 ring-slate-900/5">
-            <div className="relative min-h-[360px] overflow-hidden rounded-[1.6rem] bg-gradient-to-br from-blue-950 via-slate-800 to-slate-950 sm:min-h-[440px]">
-              <div aria-hidden="true" className="absolute inset-0 grid place-items-center bg-[radial-gradient(ellipse_at_70%_35%,rgba(59,130,246,.32),transparent_45%),linear-gradient(135deg,#0f172a,#172554_55%,#020617)]"><CarFront size={190} strokeWidth={0.65} className="text-white/15 sm:h-60 sm:w-60" /><span className="absolute bottom-28 right-7 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-blue-100 backdrop-blur">كتالوج السيارات المعتمدة</span></div>
-              <img onError={event => { event.currentTarget.style.display = "none" }} src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1400&q=90" alt="سيارة حديثة مناسبة للتنقلات والأعمال" className="absolute inset-0 h-full w-full object-cover motion-safe:animate-[catalogFloat_9s_ease-in-out_infinite]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/10 to-slate-900/10" />
-              <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-slate-950/75 p-5 text-white backdrop-blur-md sm:inset-x-6 sm:bottom-6">
-                <div className="flex items-center gap-2 text-xs font-bold text-blue-200"><ShieldCheck size={15}/> تجربة منظمة وآمنة</div>
-                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">من الاحتياج إلى العرض المناسب</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-200">اكتشف الخيارات المتاحة، أرسل طلبك، وتابع التواصل في مساحة واحدة.</p>
-                <div className="mt-4 flex flex-wrap gap-2"><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">سيارات معتمدة</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">بيانات المالك محمية</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-xs">للشركات والأساطيل</span></div>
-              </div>
-            </div>
-          </div>
-          <div className="absolute -right-3 top-8 hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:block motion-safe:animate-[catalogFloat_6s_ease-in-out_infinite]"><span className="flex items-center gap-2 text-sm font-extrabold text-slate-800"><CarFront size={18} className="text-blue-700"/> كتالوج موحّد</span><p className="mt-1 text-xs text-slate-500">اختيارات واضحة في مكان واحد</p></div>
-          <div className="absolute -left-3 bottom-24 hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:block motion-safe:animate-[catalogFloat_7s_ease-in-out_infinite]"><span className="flex items-center gap-2 text-sm font-extrabold text-slate-800"><CheckCircle2 size={18} className="text-emerald-600"/> مراجعة واعتماد</span><p className="mt-1 text-xs text-slate-500">عرض السيارات المستوفية للشروط</p></div>
+    <main dir="rtl" className="min-h-screen overflow-hidden bg-white text-slate-900">
+      {settings.announcement_text && <div className="px-4 py-2 text-center text-sm font-bold text-white" style={{backgroundColor:settings.primary_color}}>{settings.announcement_text}</div>}
+      <section className="relative isolate overflow-hidden bg-[#09213b] text-white">
+        <div className="absolute inset-0 -z-20 bg-cover bg-center" style={{backgroundImage:"url(https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=2200&q=90)"}}/>
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#071b31]/80 via-[#0b2743]/40 to-[#071b31]"/>
+        <header className="mx-auto flex max-w-[1400px] items-center justify-between gap-2 px-4 py-5 sm:px-8 sm:py-7">
+          <button aria-label="القائمة" onClick={()=>document.getElementById('services')?.scrollIntoView({behavior:'smooth'})} className="order-3 rounded-xl p-2 text-white hover:bg-white/10 sm:order-1"><Menu size={28}/></button>
+          <div className="order-1 flex items-center gap-2 sm:order-3"><div className="text-right"><div className="text-2xl font-black leading-none text-[#ffad0a] sm:text-4xl">My Car</div><div className="mt-1 text-[10px] font-bold text-white/85 sm:text-xs">منصة تأجير السيارات</div></div><span className="grid h-11 w-11 place-items-center rounded-full border-2 border-[#ffad0a] text-[#ffad0a] sm:h-14 sm:w-14"><CarFront size={30}/></span></div>
+          <div className="order-2 flex items-center gap-2 sm:order-2"><button onClick={()=>openAuth('signin')} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/80 bg-[#102c49]/60 px-3 text-xs font-extrabold text-white hover:bg-white/10 sm:min-h-12 sm:px-5 sm:text-sm"><UserRound size={17}/> تسجيل الدخول</button>{settings.registration_enabled&&<a href="/register" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-3 text-xs font-black text-[#142b43] shadow-lg hover:bg-amber-300 sm:min-h-12 sm:px-5 sm:text-sm"><UserRoundPlus size={17}/> إنشاء حساب</a>}</div>
+        </header>
+        <div className="mx-auto max-w-[1400px] px-4 pb-10 pt-8 sm:px-8 sm:pt-12">
+          <div className="max-w-3xl text-center sm:mr-auto sm:text-right"><p className="text-sm font-bold text-white/90 sm:text-lg">منصة <span className="text-[#ffad0a]">My Car</span></p><h1 className="mt-2 text-4xl font-black leading-[1.25] sm:text-6xl lg:text-7xl">نربطك بأفضل<br/><span className="text-[#ffad0a]">السيارات في مصر</span></h1><p className="mx-auto mt-5 max-w-xl text-sm font-semibold leading-7 text-white/90 sm:mr-0 sm:text-lg">منصة تجمع بين ملاك السيارات وموردي الأساطيل لتسهيل التأجير طويل الأجل.</p></div>
+          <div className="mx-auto mt-8 flex max-w-5xl items-end justify-center sm:mt-4"><img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=90" alt="سيارة حديثة" className="relative z-10 -mr-7 w-[34%] max-w-[340px] rounded-2xl object-cover drop-shadow-2xl"/><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1100&q=90" alt="سيارة مناسبة للأعمال" className="relative z-20 w-[42%] max-w-[410px] rounded-2xl object-cover drop-shadow-2xl"/><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1000&q=90" alt="سيارة فاخرة" className="relative z-10 -ml-7 w-[34%] max-w-[320px] rounded-2xl object-cover drop-shadow-2xl"/></div>
+          <form onSubmit={(event)=>{event.preventDefault();const data=new FormData(event.currentTarget);const params=new URLSearchParams();['governorate','vehicle_type','duration'].forEach(key=>{const value=String(data.get(key)||'');if(value)params.set(key,value)});window.location.href='/workspace/catalog'+(params.toString()?'?'+params.toString():'')}} className="relative z-20 mx-auto mt-7 max-w-5xl rounded-3xl border border-white/70 bg-white p-3 text-slate-700 shadow-2xl sm:mt-8 sm:p-4">
+            <div className="grid gap-2 sm:grid-cols-3">
+              <label className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4"><MapPin className="shrink-0 text-[#173553]" size={21}/><span className="flex-1"><span className="block text-xs text-slate-500">المحافظة</span><select name="governorate" defaultValue="" className="w-full bg-transparent text-sm font-extrabold outline-none"><option value="">كل المحافظات</option>{['القاهرة','الجيزة','الإسكندرية','الشرقية','الغربية','الدقهلية','البحيرة','المنوفية','القليوبية','بورسعيد','السويس','أسيوط'].map(x=><option key={x} value={x}>{x}</option>)}</select></span></label>
+              <label className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4"><CarFront className="shrink-0 text-[#173553]" size={21}/><span className="flex-1"><span className="block text-xs text-slate-500">نوع السيارة</span><select name="vehicle_type" defaultValue="" className="w-full bg-transparent text-sm font-extrabold outline-none"><option value="">كل أنواع السيارات</option><option value="sedan">سيدان</option><option value="suv">SUV</option><option value="van">فان / ميكروباص</option><option value="bus">أتوبيس</option><option value="truck">نقل</option></select></span></label>
+              <label className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4"><CalendarDays className="shrink-0 text-[#173553]" size={21}/><span className="flex-1"><span className="block text-xs text-slate-500">مدة الإيجار</span><select name="duration" defaultValue="" className="w-full bg-transparent text-sm font-extrabold outline-none"><option value="">كل المدد</option><option value="monthly">شهري</option><option value="yearly">سنوي</option><option value="long-term">طويل الأجل</option></select></span></label>
+            </div><button type="submit" className="mt-2 flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-[#ffad0a] px-5 text-base font-black text-[#172d45] hover:bg-amber-300 sm:mt-3"><Search size={22}/> ابحث عن سيارة</button>
+          </form>
+          <div className="mx-auto mt-8 grid max-w-5xl grid-cols-2 gap-4 text-center sm:grid-cols-4 sm:gap-5">{[{icon:Star,title:'خيارات متعددة',desc:'بأسعار تنافسية'},{icon:HandCoins,title:'شركاء معتمدون',desc:'ملاك وموردون موثوقون'},{icon:Headset,title:'دعم مستمر',desc:'على مدار الساعة'},{icon:ShieldCheck,title:'مصداقية وأمان',desc:'تعامل موثوق'}].map(({icon:Icon,title,desc})=><div key={title} className="flex flex-col items-center border-white/15 px-2 sm:border-l"><span className="grid h-12 w-12 place-items-center rounded-full bg-white/10 text-[#ffad0a] ring-1 ring-white/10 sm:h-14 sm:w-14"><Icon size={25}/></span><strong className="mt-2 text-sm font-extrabold sm:text-base">{title}</strong><span className="mt-1 text-xs text-white/70 sm:text-sm">{desc}</span></div>)}</div>
         </div>
       </section>
-
-      <PartnerLogoTicker />
-
-      <section id="how-it-works" className="border-y border-white/80 bg-white/80 py-16 shadow-[0_25px_70px_-55px_rgba(15,23,42,0.35)] backdrop-blur sm:py-20">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="mx-auto max-w-2xl text-center"><p className="text-sm font-extrabold" style={{ color: settings.primary_color }}>مصممة لاحتياجات السوق المصري</p><h2 className="mt-3 text-3xl font-black tracking-tight text-navy sm:text-4xl">سيارتك المناسبة، وفرصتك القادمة تبدأ من هنا.</h2><p className="mt-4 leading-8 text-slate-600">نوصلك بملاك السيارات وموردي الأساطيل في مكان واحد، لتكتشف خيارات تناسب احتياجك وتحوّل طلباتك إلى فرص عمل حقيقية.</p></div>
-          <div className="mt-9 grid gap-4 md:grid-cols-3">
-            {features.map(({ icon: Icon, title, description }) => <article key={title} className="rounded-3xl border border-white bg-white/95 p-6 text-slate-800 shadow-[0_20px_55px_-40px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700"><Icon size={24} /></span><h3 className="mt-5 text-lg font-extrabold text-navy">{title}</h3><p className="mt-2 leading-7 text-slate-600">{description}</p></article>)}
-          </div>
-          <div className="mt-10">
-            <div className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="text-2xl font-black text-navy">خدمات مصممة لكل شريك</h3><p className="mt-2 text-sm leading-7 text-slate-600">أدوات مناسبة لطبيعة عملك، من عرض السيارات وحتى متابعة الطلبات والعروض.</p></div><a href="/services" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 font-bold text-blue-800">استكشف خدمات السيارات <ArrowLeft size={16}/></a></div>
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              <article className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><Building2 size={22}/></span><h4 className="mt-4 text-lg font-extrabold">للشركات المستأجرة</h4><p className="mt-2 text-sm leading-7 text-slate-600">سواء محتاج عربية أو أسطول كامل، هتلاقي اختيارات تناسبك.</p><a href="/register/company" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">ابدأ حساب شركتك <ArrowLeft size={15}/></a></article>
-              <article className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl"><span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><CarFront size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لموردي الأساطيل</h4><p className="mt-2 text-sm leading-7 text-slate-600">اعرض سيارات أسطولك، استقبل طلبات الشركات، وقدّم عروضًا منظمة تساعدك على الوصول لفرص مناسبة.</p><a href="/register/supplier" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">سجّل كمورد أسطول <ArrowLeft size={15}/></a></article>
-              <article className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl"><span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-50 text-amber-700"><Users size={22}/></span><h4 className="mt-4 text-lg font-extrabold">لملاك السيارات</h4><p className="mt-2 text-sm leading-7 text-slate-600">خلّي عربياتك توصل للشركات اللي بتدور عليها.</p><a href="/register/owner" className="mt-4 inline-flex items-center gap-2 font-extrabold text-blue-700">اعرض سيارتك <ArrowLeft size={15}/></a></article>
-            </div>
-          </div>
-          {settings.registration_enabled && <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl p-6 text-white sm:flex-row sm:p-8" style={{ backgroundColor: settings.secondary_color }}><div><h3 className="text-xl font-extrabold">ابدأ بخطوتك التالية</h3><p className="mt-2 text-sm leading-6 text-blue-100">أنشئ حسابك المناسب وابدأ في استكشاف خدمات My Car.</p></div><button onClick={() => { window.location.href = '/register' }} className="min-h-12 rounded-xl bg-white px-6 font-extrabold transition hover:bg-blue-50" style={{ color: settings.secondary_color }}>إنشاء حساب جديد</button></div>}
+      <section id="services" className="relative rounded-t-[2.5rem] bg-[#f7f9fc] px-4 pb-16 pt-12 sm:px-8 sm:pt-16"><div className="mx-auto max-w-7xl">
+        <div className="text-right"><p className="font-extrabold text-[#f5a400]">خدماتنا</p><h2 className="mt-2 text-3xl font-black text-[#102b47] sm:text-4xl">جميع احتياجاتك من السيارات</h2><span className="mt-3 block h-1.5 w-20 rounded-full bg-[#ffad0a]"></span><p className="mt-4 text-sm leading-7 text-slate-500 sm:text-base">نوفر لك مجموعة واسعة من السيارات المناسبة لجميع الاستخدامات</p></div>
+        <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[{title:'أسطول كامل لشركتك',desc:'حلول مرنة لاحتياجاتك المتنوعة',img:'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=900&q=85',icon:Building},{title:'سيارات لموظفي شركتك',desc:'نقل الموظفين بأمان وراحة',img:'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=900&q=85',icon:UsersRound},{title:'سيارات للتوصيل والتشغيل',desc:'شاحنات التوصيل والخدمات اللوجستية',img:'https://images.unsplash.com/photo-1519003722824-194d4455a60f?auto=format&fit=crop&w=900&q=85',icon:BusFront}].map(({title,desc,img,icon:Icon})=><a key={title} href="/register/company" className="group relative isolate flex min-h-[250px] items-end overflow-hidden rounded-2xl bg-[#102b47] p-5 text-white shadow-lg"><img src={img} alt="" className="absolute inset-0 -z-20 h-full w-full object-cover transition duration-500 group-hover:scale-105"/><div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#08223d] via-[#08223d]/65 to-transparent"/><span className="w-full"><Icon size={27} className="mb-3 text-[#ffad0a]"/><strong className="block text-lg">{title}</strong><span className="mt-1 block text-sm text-white/80">{desc}</span><span className="mt-4 inline-flex rounded-full bg-white/15 p-2"><ArrowLeft size={18}/></span></span></a>)}
         </div>
-      </section>
-
-      <footer className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <div><span>© {new Date().getFullYear()} {settings.platform_name}. </span><span>{settings.footer_text}</span></div>
-        <div className="flex flex-wrap items-center gap-3"><a href="/services" className="font-bold text-blue-700 underline-offset-4 hover:underline">خدمات السيارات</a><a href="/privacy" className="font-bold text-blue-700 underline-offset-4 hover:underline">سياسة الخصوصية</a><a href="/terms" className="font-bold text-blue-700 underline-offset-4 hover:underline">شروط الاستخدام</a>{settings.support_email && <a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone && <a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}{settings.website_url && <a href={settings.website_url} target="_blank" rel="noreferrer">الموقع الرسمي</a>}{settings.address && <span>{settings.address}</span>}</div>
-        <span className="inline-flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${isSupabaseConfigured ? 'bg-cargreen' : 'bg-amber-500'}`} />{isSupabaseConfigured ? 'إعدادات الاتصال موجودة' : 'إعدادات الاتصال تحتاج إلى ضبط'}</span>
-      </footer>
-      {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} />}
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">{[{icon:Building2,title:'للشركات المستأجرة',desc:'اطلب سيارة أو أسطولًا كاملًا حسب احتياج نشاطك.',href:'/register/company',cta:'ابدأ حساب شركتك'},{icon:CarFront,title:'لموردي الأساطيل',desc:'اعرض سياراتك واستقبل طلبات الشركات وعروضها.',href:'/register/supplier',cta:'سجّل كمورد أسطول'},{icon:Users,title:'لملاك السيارات',desc:'وصل سيارتك بالشركات الباحثة عن التأجير طويل الأجل.',href:'/register/owner',cta:'اعرض سيارتك'}].map(({icon:Icon,title,desc,href,cta})=><article key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><Icon size={25} className="text-[#f5a400]"/><h3 className="mt-3 text-lg font-black text-[#102b47]">{title}</h3><p className="mt-2 text-sm leading-7 text-slate-600">{desc}</p><a href={href} className="mt-4 inline-flex items-center gap-2 font-extrabold text-[#173553]">{cta}<ArrowLeft size={16}/></a></article>)}</div>
+        {settings.registration_enabled&&<div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-2xl bg-[#102b47] p-6 text-white sm:flex-row sm:items-center sm:p-8"><div><h3 className="text-xl font-extrabold">ابدأ رحلتك مع My Car</h3><p className="mt-2 text-sm leading-6 text-white/75">أنشئ حسابك واستكشف خدمات السيارات للشركات والأساطيل.</p></div><a href="/register" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#ffad0a] px-6 font-black text-[#102b47]">إنشاء حساب جديد</a></div>}
+      </div></section>
+      <footer className="bg-[#071b31] px-5 py-7 text-sm text-white/70 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div>© {new Date().getFullYear()} {settings.platform_name}. {settings.footer_text}</div><div className="flex flex-wrap items-center gap-4"><a href="/services" className="hover:text-[#ffad0a]">خدمات السيارات</a><a href="/privacy" className="hover:text-[#ffad0a]">سياسة الخصوصية</a><a href="/terms" className="hover:text-[#ffad0a]">شروط الاستخدام</a>{settings.support_email&&<a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone&&<a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}</div></div></footer>
+      {authOpen&&<AuthPanel onClose={()=>setAuthOpen(false)} initialMode={authMode}/>}
     </main>
   )
 }
