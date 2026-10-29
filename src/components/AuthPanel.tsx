@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { CheckCircle2, Eye, EyeOff, LoaderCircle, LogOut, ShieldCheck, X } from 'lucide-react'
+import { CheckCircle2, Eye, EyeOff, LoaderCircle, LogOut, ShieldCheck, X, CircleUserRound } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
@@ -210,7 +210,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                 <p className="mt-2 break-all text-sm text-slate-600">{session.user.email}</p>
                 <p className="mt-2 text-sm text-slate-600">{String(session.user.user_metadata?.display_name || 'مستخدم My Car')}</p>
               </div>
-              <button onClick={() => { window.location.href = '/auth/callback' }} className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white hover:bg-blue-700">متابعة إلى مساحة العمل</button>
+              <button onClick={() => { window.location.href = '/auth/callback' }} className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white hover:bg-blue-700"><CircleUserRound size={19}/> مساحة عملك</button>
               <button onClick={handleSignOut} disabled={loading} className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 font-bold text-navy hover:bg-slate-50 disabled:opacity-60">
                 {loading ? <LoaderCircle className="animate-spin" size={18} /> : <LogOut size={18} />} تسجيل الخروج
               </button>
