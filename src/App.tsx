@@ -183,7 +183,7 @@ export default function App() {
             <span className="h-2 w-2 rounded-full bg-cargreen" /> حلول تأجير طويلة الأجل للشركات والأساطيل
           </span>
           <h1 className="mt-6 max-w-2xl text-4xl font-black leading-[1.3] tracking-tight text-navy sm:text-5xl lg:text-6xl">
-            بنسهّل عليك الوصول للعربيات اللي تناسب شغلك.
+            سيارتك المناسبة، وفرصتك القادمة تبدأ من هنا.
           </h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{settings.description}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
