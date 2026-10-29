@@ -38,10 +38,14 @@ export default function VehicleCatalogPage() {
   const [orgType, setOrgType] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [search, setSearch] = useState('')
-  const [type, setType] = useState('الكل')
-  const [city, setCity] = useState('الكل')
-  const [maxPrice, setMaxPrice] = useState('')
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
+  const [type, setType] = useState(() => {
+    const requested = new URLSearchParams(window.location.search).get('vehicle_type') || ''
+    const translated: Record<string, string> = { sedan: 'سيدان', suv: 'SUV', van: 'فان', bus: 'أتوبيس', truck: 'نقل خفيف' }
+    return translated[requested.toLowerCase()] || requested || 'الكل'
+  })
+  const [city, setCity] = useState(() => new URLSearchParams(window.location.search).get('governorate') || 'الكل')
+  const [maxPrice, setMaxPrice] = useState(() => new URLSearchParams(window.location.search).get('max_price') || '')
   const [selected, setSelected] = useState<Vehicle | null>(null)
   const [showOffer, setShowOffer] = useState(false)
   const [offerText, setOfferText] = useState('')
