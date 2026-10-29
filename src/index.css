@@ -598,3 +598,37 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-admin-main form > div.flex { display: grid; grid-template-columns: minmax(0, 1fr); }
   .mc-admin-main form > div.flex > button { width: 100%; justify-content: center; }
 }
+
+
+/* Account, settings and pricing screens share the same mobile action rhythm. */
+@media (max-width: 767px) {
+  .mc-auth-overlay { align-items: flex-start !important; padding: max(.6rem, env(safe-area-inset-top)) .6rem max(.6rem, env(safe-area-inset-bottom)) !important; }
+  .mc-auth-overlay > div { width: 100%; max-height: calc(100svh - 1.2rem); overflow-y: auto; margin-block: auto; border-radius: 1.25rem !important; }
+  .mc-auth-overlay > div > div { padding: 1rem !important; }
+  .mc-platform-settings-main,
+  .mc-subscription-admin-main,
+  .mc-advertising-plans-main,
+  .mc-advertising-admin-main { padding: 1rem .7rem 2rem !important; }
+  .mc-platform-settings-main header,
+  .mc-subscription-admin-main header,
+  .mc-advertising-admin-main header { position: relative !important; top: auto !important; display: grid !important; grid-template-columns: minmax(0, 1fr); gap: .8rem !important; padding: 1rem !important; border-radius: 1.2rem !important; }
+  .mc-platform-settings-main header > div,
+  .mc-subscription-admin-main header > div,
+  .mc-advertising-admin-main header > div { min-width: 0; }
+  .mc-platform-settings-main header :where(button, a),
+  .mc-subscription-admin-main header :where(button, a),
+  .mc-advertising-admin-main header :where(button, a) { width: 100%; justify-content: center; }
+  .mc-platform-settings-main form > div.grid,
+  .mc-subscription-admin-main form > div.grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .mc-platform-settings-main form > div.sticky { position: sticky; bottom: max(.5rem, env(safe-area-inset-bottom)); }
+  .mc-platform-settings-main form > div.sticky button { width: 100%; justify-content: center; }
+  .mc-subscription-admin-main form button[type="submit"],
+  .mc-advertising-admin-main form button[type="submit"] { width: 100%; justify-content: center; }
+  .mc-advertising-plans-main > header > div { gap: .5rem !important; }
+  .mc-advertising-plans-main > header a { min-height: 44px; justify-content: center; padding-inline: .7rem !important; font-size: .75rem !important; }
+  .mc-advertising-plans-main > section:first-of-type > div { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+  .mc-advertising-plans-main h1 { font-size: clamp(1.8rem, 8vw, 2.35rem) !important; line-height: 1.45 !important; }
+  .mc-advertising-plans-main article { padding: 1rem !important; }
+  .mc-advertising-plans-main article button { width: 100%; justify-content: center; }
+  .mc-advertising-admin-main article > div:last-child { display: grid; grid-template-columns: minmax(0, 1fr); }
+}
