@@ -85,6 +85,7 @@ async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: 
 
 export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
+  const [forgotPassword, setForgotPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -112,6 +113,23 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     })
     return () => listener.subscription.unsubscribe()
   }, [])
+
+  async function handleForgotPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+    setNotice('')
+    if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail.includes('@')) { setError('اكتب البريد الإلكتروني الصحيح لاستعادة كلمة المرور.'); return }
+    setLoading(true)
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo: `${window.location.origin}/?reset-password=1` })
+      if (resetError) throw resetError
+      setNotice('إذا كان البريد مسجلًا، ستصلك رسالة تحتوي على رابط آمن لإعادة تعيين كلمة المرور.')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'تعذر إرسال رابط استعادة كلمة المرور.')
+    } finally { setLoading(false) }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -142,7 +160,19 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
             }
           }
         })
-        if (signUpError) throw signUpError
+        if (signUpError) {
+          const msg = signUpError.message.toLowerCase()
+          if (/already registered|user already exists|already been registered|email exists|duplicate/i.test(msg)) {
+            setMode('signin')
+            throw new Error('هذا البريد الإلكتروني لديه حساب بالفعل في قاعدة بيانات My Car. برجاء تسجيل الدخول أو استخدام «نسيت كلمة السر».')
+          }
+          throw signUpError
+        }
+        // Supabase may return a user without an error for an existing address when confirmations are enabled.
+        if (data.user && !data.session && data.user.identities?.length === 0) {
+          setMode('signin')
+          throw new Error('هذا البريد الإلكتروني لديه حساب بالفعل في قاعدة بيانات My Car. برجاء تسجيل الدخول أو استخدام «نسيت كلمة السر».')
+        }
         if (data.session && data.user) {
           await prepareAccount(data.user, name)
           setSession(data.session)
@@ -221,7 +251,16 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                 <button type="button" onClick={() => { setMode('signin'); setError(''); setNotice('') }} className={`rounded-lg px-3 py-2.5 text-sm font-bold transition ${mode === 'signin' ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>تسجيل الدخول</button>
                 <button type="button" onClick={() => { window.location.href = '/register' }} className="rounded-lg px-3 py-2.5 text-sm font-bold text-slate-500 transition">حساب جديد</button>
               </div>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              {forgotPassword ? (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <p className="text-sm leading-6 text-slate-600">اكتب بريدك الإلكتروني وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة المرور إذا كان الحساب مسجلًا.</p>
+                  <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني
+                    <input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" />
+                  </label>
+                  <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}إرسال رابط الاستعادة</button>
+                  <button type="button" onClick={() => { setForgotPassword(false); setError(''); setNotice('') }} className="w-full py-2 text-sm font-bold text-blue-700">العودة لتسجيل الدخول</button>
+                </form>
+              ) : <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === 'signup' && (
                   <>
                     <label className="block text-sm font-bold text-slate-700">الاسم الكامل
@@ -252,13 +291,14 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                     <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="absolute left-3 top-3 rounded-md p-1 text-slate-400">{showPassword ? <EyeOff size={19} /> : <Eye size={19} />}</button>
                   </span>
                 </label>
+                {mode === 'signin' && <div className="text-left"><button type="button" onClick={() => { setForgotPassword(true); setError(''); setNotice('') }} className="text-sm font-bold text-blue-700 hover:underline">نسيت كلمة السر؟</button></div>}
                 {mode === 'signup' && <label className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-slate-700"><input type="checkbox" required checked={acceptedLegal} onChange={(event) => setAcceptedLegal(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-blue-700"/><span>أوافق على <a href="/terms" target="_blank" rel="noreferrer" className="font-extrabold text-blue-700 underline">شروط الاستخدام</a> و<a href="/privacy" target="_blank" rel="noreferrer" className="font-extrabold text-blue-700 underline">سياسة الخصوصية</a>.</span></label>}
                 <button type="submit" disabled={loading || !supabase || (mode === 'signup' && !acceptedLegal)} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                   {loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}
                   {loading ? 'جارٍ المعالجة...' : mode === 'signup' ? 'إنشاء الحساب' : 'تسجيل الدخول'}
                 </button>
-              </form>
-              <p className="mt-4 text-center text-xs leading-6 text-slate-500">بإنشاء الحساب، أنت مسؤول عن صحة بياناتك. لا تتم أي مدفوعات بين أطراف التأجير عبر My Car. <a href="/privacy" className="font-bold text-blue-700 underline">الخصوصية</a> · <a href="/terms" className="font-bold text-blue-700 underline">الشروط</a></p>
+              </form>}
+              {!forgotPassword && <p className="mt-4 text-center text-xs leading-6 text-slate-500">بإنشاء الحساب، أنت مسؤول عن صحة بياناتك. لا تتم أي مدفوعات بين أطراف التأجير عبر My Car. <a href="/privacy" className="font-bold text-blue-700 underline">الخصوصية</a> · <a href="/terms" className="font-bold text-blue-700 underline">الشروط</a></p>}
             </>
           )}
           {notice && <div role="status" className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">{notice}</div>}
