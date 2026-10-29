@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Bell, CircleUserRound, LogOut, MessageCircle, ChevronDown, X, CheckCheck, ExternalLink } from 'lucide-react'
+import { Bell, CircleUserRound, LogOut, MessageCircle, ChevronDown, X, ExternalLink } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type PlatformNotification = {
