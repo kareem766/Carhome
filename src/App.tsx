@@ -11,6 +11,7 @@ const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansP
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
 const AutomotiveServicesPage = lazy(() => import('./components/AutomotiveServicesPage'))
 const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPlansAdminPage'))
+const AdminCommunicationsPage = lazy(() => import('./components/AdminCommunicationsPage'))
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
@@ -174,6 +175,7 @@ export default function App() {
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PlatformSettingsPage /></Suspense>
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><SubscriptionPlansPage /></Suspense>
   if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdvertisingPlansAdminPage /></Suspense>
+  if (path === '/workspace/admin/communications') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminCommunicationsPage /></Suspense>
   if (path === '/workspace/catalog') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><VehicleCatalogPage /></Suspense>
   if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AutomotiveServicesPage /></Suspense>
   if (path === '/workspace/advertising-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdvertisingPlansPage /></Suspense>
