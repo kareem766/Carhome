@@ -174,6 +174,7 @@ export default function App() {
   if (!settingsLoaded) return <RouteLoading logoUrl={settings.logo_url} />
   // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
   if (pathIsHome(window.location.pathname) && !authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
+  if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><FirstLoginPasswordPage /></Suspense>
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/workspace' && !authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
