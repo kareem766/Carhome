@@ -30,6 +30,53 @@ Deno.serve(async(req:Request)=>{
  }
  const {data:admin}=await db.from("platform_admins").select("user_id").eq("user_id",caller.user.id).maybeSingle();if(!admin)return send({error:"غير مصرح بإدارة الحسابات."},403);
 
+
+ if(body.action==="create"){
+  const email=String(body.email||"").trim().toLowerCase();
+  const displayName=String(body.display_name||"").trim();
+  const requestedOrgName=String(body.organization_name||"").trim();
+  const role=String(body.organization_type||"company");
+  const password=String(body.temporary_password||"");
+  const phone=String(body.phone||"").trim();
+  const city=String(body.city||"").trim();
+  const address=String(body.address||"").trim();
+  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))return send({error:"البريد الإلكتروني غير صحيح."},400);
+  if(!displayName||displayName.length>120)return send({error:"اسم المستخدم مطلوب وبحد أقصى 120 حرفًا."},400);
+  if(!["individual_owner","company","fleet_supplier"].includes(role))return send({error:"نوع الحساب غير صحيح."},400);
+  if(password.length<8)return send({error:"كلمة المرور المؤقتة يجب ألا تقل عن 8 أحرف."},400);
+  if(phone&&(phone.length<7||phone.length>30))return send({error:"رقم الهاتف يجب أن يكون من 7 إلى 30 رقمًا أو حرفًا."},400);
+  if(city&&(city.length<2||city.length>120))return send({error:"اسم المحافظة يجب أن يكون من حرفين إلى 120 حرفًا."},400);
+  if(address.length>500)return send({error:"العنوان أطول من الحد المسموح."},400);
+  const organizationName=requestedOrgName||displayName+" - "+(role==="individual_owner"?"مالك سيارة":role==="fleet_supplier"?"مورد أسطول":"شركة");
+  if(organizationName.length<2||organizationName.length>180)return send({error:"اسم الشركة أو المؤسسة يجب أن يكون من حرفين إلى 180 حرفًا."},400);
+  const {data:createdUser,error:createError}=await db.auth.admin.createUser({
+   email,password,email_confirm:true,
+   app_metadata:{must_change_password:true,created_by_platform_admin:true},
+   user_metadata:{display_name:displayName,organization_name:organizationName,organization_type:role,phone,governorate:city,address}
+  });
+  if(createError)return send({error:/already|registered|exists|duplicate/i.test(createError.message)?"هذا البريد الإلكتروني مسجل بالفعل.":createError.message},400);
+  const newUserId=createdUser.user.id;
+  const rollback=async(orgId?:string)=>{
+   if(orgId)await db.from("organizations").delete().eq("id",orgId);
+   await db.auth.admin.deleteUser(newUserId);
+  };
+  const {error:profileError}=await db.from("profiles").upsert({
+   id:newUserId,display_name:displayName,phone:phone||null,contact_email:email,address:address||null,locale:"ar"
+  },{onConflict:"id"});
+  if(profileError){await rollback();return send({error:"تم إنشاء بيانات الدخول لكن تعذر إنشاء الملف الشخصي: "+profileError.message},500);}
+  const {data:organization,error:organizationError}=await db.from("organizations").insert({
+   name:organizationName,organization_type:role,created_by:newUserId,city:city||null,
+   contact_name:displayName,phone:phone||null,contact_email:email,address:address||null,
+   approval_status:"pending_review"
+  }).select("id").single();
+  if(organizationError){await rollback();return send({error:"تعذر إنشاء المؤسسة المرتبطة بالحساب: "+organizationError.message},500);}
+  const {error:membershipError}=await db.from("organization_memberships").insert({
+   organization_id:organization.id,user_id:newUserId,role:"owner"
+  });
+  if(membershipError){await rollback(organization.id);return send({error:"تعذر ربط المستخدم بالمؤسسة: "+membershipError.message},500);}
+  return send({success:true,user_id:newUserId,message:"تم إنشاء الحساب وربطه بالمؤسسة بنجاح، والحساب في انتظار مراجعة بيانات المؤسسة."},201);
+ }
+
  if(body.action==="list"){
   const {data:users,error:userError}=await db.auth.admin.listUsers({page:1,perPage:1000});
   if(userError)return send({error:"تعذر تحميل حسابات المستخدمين."},500);
