@@ -310,7 +310,6 @@ export default function WorkspacePage({ role }: { role: Role }) {
 
   if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
 
-  const accountLabel = organization?.name?.trim() || user.name
   const isWorkspaceHome = (role === 'company' && path === '/workspace/company') || (role === 'owner' && path === '/workspace/owner/vehicles') || (role === 'supplier' && path === '/workspace/supplier/vehicles')
   const activeVehicles = vehicles.filter(vehicle => vehicle.review_status === 'approved' && vehicle.payment_status === 'verified').length
   const pendingVehicles = vehicles.filter(vehicle => vehicle.review_status === 'pending_review' || vehicle.payment_status === 'pending').length
