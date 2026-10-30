@@ -59,7 +59,7 @@ export default function PlatformSettingsPage() {
       if (!active) return
       if (adminError || !admin) { setError(adminError?.message || 'هذه الصفحة متاحة لصاحب المنصة فقط.'); setLoading(false); return }
       setAuthorized(true)
-      const { data, error: settingsError } = await supabase.from('platform_settings').select('*').eq('id', true).maybeSingle()
+      const { data, error: settingsError } = await supabase.from('platform_settings').select('id,platform_name,tagline,description,logo_url,favicon_url,support_email,website_url,address,footer_text,announcement_text,primary_color,secondary_color,registration_enabled,owner_registration_enabled,company_registration_enabled,supplier_registration_enabled,maintenance_mode,partner_logos,partner_ticker_seconds').eq('id', true).maybeSingle()
       if (!active) return
       if (settingsError) setError('تعذر تحميل إعدادات المنصة. تأكد من تطبيق Migration إعدادات المنصة. ' + settingsError.message)
       else if (data) { const loaded = { ...defaults, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings; setSettings(loaded); setPartnerLogosText((loaded.partner_logos || []).map(p => [p.name, p.logo_url, p.website_url || ''].join(' | ')).join('\n')) }
