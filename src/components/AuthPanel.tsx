@@ -227,6 +227,11 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         )
         if (signInError) throw signInError
         if (!data.user || !data.session) throw new Error('تم تسجيل الدخول لكن لم يتم إنشاء جلسة صالحة. حاول مرة أخرى.')
+        // Admin-provisioned accounts must change their temporary password before any onboarding or workspace route.
+        if (data.user.app_metadata?.must_change_password === true) {
+          window.location.replace('/first-login-password')
+          return
+        }
         // Use the shared callback to recover incomplete accounts and route every role consistently.
         window.location.replace('/auth/callback')
         return
