@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase'
 type ProfileRow = { id: string; display_name: string; phone: string | null; contact_email: string | null; address: string | null; created_at: string }
 type ProfileForm = { display_name: string; phone: string; contact_email: string; address: string }
 const emptyProfile: ProfileForm = { display_name: '', phone: '', contact_email: '', address: '' }
-type OrganizationRow = { id: string; name: string; organization_type: 'individual_owner' | 'company' | 'fleet_supplier'; city: string | null; contact_name: string | null; contact_email: string | null; address: string | null; company_type: string | null; fleet_vehicle_count: number | null; created_at: string }
+type OrganizationRow = { id: string; name: string; organization_type: 'individual_owner' | 'company' | 'fleet_supplier'; approval_status: 'pending_review' | 'approved' | 'rejected' | 'suspended'; city: string | null; contact_name: string | null; contact_email: string | null; address: string | null; company_type: string | null; fleet_vehicle_count: number | null; created_at: string }
 type OrganizationForm = { name: string; organization_type: 'individual_owner' | 'company' | 'fleet_supplier'; city: string; contact_name: string; contact_email: string; address: string; company_type: string; fleet_vehicle_count: string }
 const emptyOrganization: OrganizationForm = { name: '', organization_type: 'company', city: '', contact_name: '', contact_email: '', address: '', company_type: '', fleet_vehicle_count: '' }
 type VehicleRow = { id: string; make: string; model: string; model_year: number; vehicle_type: string; transmission: string; seats: number; governorate: string; address: string; monthly_price_egp: number; yearly_price_egp: number | null; with_driver: boolean; notes: string | null; review_status: string; payment_status: string; organizations: { name: string } | { name: string }[] | null; images?: { url: string; alt_text: string }[] }
@@ -53,7 +53,7 @@ export default function AdminReviewPage() {
     const [vehicleResult,paymentResult,organizationResult,profileResult,requestResult,offerResult] = await Promise.all([
       supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,address,monthly_price_egp,yearly_price_egp,with_driver,notes,review_status,payment_status,organizations(name)').order('created_at',{ascending:false}),
       supabase.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,period_months,transfer_method,transfer_reference,review_status,admin_notes,proof_path,created_at,vehicles(make,model),organizations(name,organization_type)').order('created_at',{ascending:false}),
-      supabase.from('organizations').select('id,name,organization_type,city,contact_name,contact_email,address,company_type,fleet_vehicle_count,created_at').order('created_at',{ascending:false}),
+      supabase.from('organizations').select('id,name,organization_type,approval_status,city,contact_name,contact_email,address,company_type,fleet_vehicle_count,created_at').order('created_at',{ascending:false}),
       supabase.from('profiles').select('id,display_name,phone,contact_email,address,created_at').order('created_at',{ascending:false}),
       supabase.from('rental_requests').select('id,title,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,details,status,created_at,organizations(name)').order('created_at',{ascending:false}),
       supabase.from('rental_offers').select('id,request_id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,created_at,organizations(name),rental_requests(title)').order('created_at',{ascending:false})
@@ -158,6 +158,18 @@ export default function AdminReviewPage() {
     await load()
   }
 
+  async function reviewOrganization(id: string, status: 'approved' | 'rejected') {
+    if (!supabase) return
+    const note = status === 'rejected' ? window.prompt('اكتب سبب رفض الحساب (اختياري):', '') : null
+    if (status === 'rejected' && note === null) return
+    setBusyId(id); setError(''); setNotice('')
+    const { error: updateError } = await supabase.from('organizations').update({ approval_status: status }).eq('id', id)
+    setBusyId('')
+    if (updateError) { setError('تعذر تحديث حالة الحساب: ' + updateError.message); return }
+    setNotice(status === 'approved' ? 'تم اعتماد الحساب بنجاح.' : 'تم رفض الحساب.')
+    await load()
+  }
+
   function startOrganizationEdit(row: OrganizationRow) {
     setEditingOrganizationId(row.id)
     setOrganizationForm({ name: row.name || '', organization_type: row.organization_type, city: row.city || '', contact_name: row.contact_name || '', contact_email: row.contact_email || '', address: row.address || '', company_type: row.company_type || '', fleet_vehicle_count: row.fleet_vehicle_count == null ? '' : String(row.fleet_vehicle_count) })
@@ -223,7 +235,7 @@ export default function AdminReviewPage() {
       </section>
       <section className="mt-7 rounded-3xl border border-white bg-white/95 p-5 shadow-md shadow-slate-200/50" id="admin-organizations">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><h2 className="flex items-center gap-2 text-xl font-extrabold"><Building2 size={21}/> إدارة المؤسسات ({organizations.length})</h2><p className="mt-1 text-sm text-slate-500">إضافة وتعديل بيانات المؤسسة. تم إيقاف الحذف المباشر لحماية السيارات والطلبات والعروض والمحادثات المرتبطة بها.</p></div>
+          <div><h2 className="flex items-center gap-2 text-xl font-extrabold"><Building2 size={21}/> مراجعة الحسابات والمؤسسات ({organizations.length})</h2><p className="mt-1 text-sm text-slate-500">راجع نوع الحساب وبيانات المؤسسة، ثم اعتمد الحساب أو ارفضه. اعتماد الحساب منفصل عن اعتماد السيارات والتحويلات.</p></div>
           <button onClick={() => { resetOrganizationForm(); setNotice(''); setError('') }} className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white"><Plus size={16}/> مؤسسة جديدة</button>
         </div>
         <form onSubmit={saveOrganization} className="mt-4 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
@@ -246,8 +258,8 @@ export default function AdminReviewPage() {
         </form>
         <div className="mt-4 space-y-2">
           {organizations.map(org=><article key={org.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
-            <div><h3 className="font-extrabold">{org.name}</h3><p className="mt-1 text-sm text-slate-600">{org.organization_type === 'individual_owner' ? 'مالك سيارة' : org.organization_type === 'fleet_supplier' ? 'مورد أسطول' : 'شركة طالبة'} · {org.city || 'المدينة غير محددة'}</p><p className="mt-1 text-xs text-slate-500">{org.contact_name || 'بدون مسؤول تواصل'} · {org.contact_email || 'بدون بريد مسجل'}{org.fleet_vehicle_count == null ? '' : ' · أسطول: ' + org.fleet_vehicle_count + ' سيارة'}</p></div>
-            <div className="flex gap-2"><button onClick={()=>startOrganizationEdit(org)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-bold"><Pencil size={15}/> تعديل</button></div>
+            <div><h3 className="font-extrabold">{org.name}</h3><p className="mt-1 text-sm text-slate-600">{org.organization_type === 'individual_owner' ? 'مالك سيارة' : org.organization_type === 'fleet_supplier' ? 'مورد أسطول' : 'شركة طالبة'} · {org.city || 'المدينة غير محددة'}</p><p className="mt-1 text-xs text-slate-500">{org.contact_name || 'بدون مسؤول تواصل'} · {org.contact_email || 'بدون بريد مسجل'}{org.fleet_vehicle_count == null ? '' : ' · أسطول: ' + org.fleet_vehicle_count + ' سيارة'}</p><p className="mt-2 text-sm font-bold">حالة الحساب: {org.approval_status === 'approved' ? 'معتمد' : org.approval_status === 'rejected' ? 'مرفوض' : org.approval_status === 'suspended' ? 'موقوف' : 'بانتظار المراجعة'}</p></div>
+            <div className="flex flex-wrap gap-2"><button onClick={()=>startOrganizationEdit(org)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-bold"><Pencil size={15}/> تعديل</button>{org.approval_status !== 'approved' && <button disabled={busyId===org.id} onClick={()=>void reviewOrganization(org.id,'approved')} className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-bold text-white disabled:opacity-50"><CheckCircle2 size={15}/> اعتماد الحساب</button>}{org.approval_status !== 'rejected' && <button disabled={busyId===org.id} onClick={()=>void reviewOrganization(org.id,'rejected')} className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-700 disabled:opacity-50"><XCircle size={15}/> رفض الحساب</button>}
           </article>)}
           {organizations.length===0 && <p className="rounded-xl border border-dashed p-5 text-sm text-slate-500">لا توجد مؤسسات مسجلة.</p>}
         </div>
