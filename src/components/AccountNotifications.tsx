@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { Bell, CircleUserRound, LogOut, MessageCircle, ChevronDown, X, ExternalLink } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformEntryBanner from './PlatformEntryBanner'
@@ -89,7 +90,7 @@ export default function AccountNotifications() {
   useEffect(() => {
     if (!supabase) return
     let active = true
-    let channel: ReturnType<typeof supabase.channel> | null = null
+    let channel: RealtimeChannel | null = null
 
     async function connectNotifications() {
       const { data: { user } } = await supabase!.auth.getUser()
