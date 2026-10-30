@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { BellRing, ImagePlus, Send, Trash2, RefreshCw } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import AdminPageNavigation from './AdminPageNavigation'
@@ -24,7 +24,7 @@ export default function AdminCommunicationsPage() {
   setLoading(false)
  }
  useEffect(()=>{void load()},[])
- async function saveBanner(e:React.FormEvent){
+ async function saveBanner(e:FormEvent){
   e.preventDefault();if(!supabase)return
   if(!title.trim()||!body.trim()){setError('اكتب عنوان الإعلان ومحتواه.');return}
   setBusy(true);setError('');setMessage('')
@@ -41,18 +41,13 @@ export default function AdminCommunicationsPage() {
   e.preventDefault();if(!supabase)return
   if(!notificationTitle.trim()||!notificationBody.trim()){setError('اكتب عنوان الإشعار ومحتواه.');return}
   setBusy(true);setError('');setMessage('')
-  let query=supabase.from('organization_memberships').select('user_id,organizations!inner(organization_type)')
-  if(audience!=='all')query=query.eq('organizations.organization_type',audience)
-  const {data:members,error:membersError}=await query
-  if(membersError){setBusy(false);setError('تعذر تحديد مستلمي الإشعار: '+membersError.message);return}
-  const ids=[...new Set((members||[]).map((m:any)=>m.user_id).filter(Boolean))]
-  if(!ids.length){setBusy(false);setError('لا يوجد مستخدمون ضمن الفئة المختارة.');return}
-  const {data:{user}}=await supabase.auth.getUser()
-  const rows=ids.map(user_id=>({user_id,title:notificationTitle.trim(),body:notificationBody.trim(),notification_type:'admin_broadcast',created_by:user?.id}))
-  const {error}=await supabase.from('platform_notifications').insert(rows)
-  setBusy(false);if(error){setError(error.message);return}
-  setMessage('تم إرسال الإشعار إلى '+ids.length+' حساب.');setNotificationTitle('');setNotificationBody('')
+  const {data:count,error}=await supabase.rpc('admin_broadcast_notifications',{p_title:notificationTitle.trim(),p_body:notificationBody.trim(),p_audience:audience})
+  setBusy(false);if(error){setError('تعذر إرسال الإشعار: '+error.message);return}
+  const sent=Number(count||0)
+  if(!sent){setError('لم يتم العثور على مستخدمين ضمن الفئة المختارة.');return}
+  setMessage('تم إرسال الإشعار إلى '+sent+' حساب.');setNotificationTitle('');setNotificationBody('')
  }
+
  if(loading)return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إدارة الاتصالات...</main>
  if(!authorized)return <main dir="rtl" className="mx-auto max-w-xl p-8 text-center"><h1 className="text-xl font-black">غير مصرح بالدخول</h1><p className="mt-2 text-slate-600">هذه الصفحة مخصصة لمسؤولي My Car فقط.</p></main>
  return <main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-6 text-slate-900 sm:px-8"><div className="mx-auto max-w-7xl"><PlatformBrand/><AdminPageNavigation/><header className="my-6"><p className="text-sm font-bold text-blue-700">إدارة التواصل مع المستخدمين</p><h1 className="mt-1 text-3xl font-black">الإشعارات والإعلانات</h1><p className="mt-2 text-sm text-slate-600">إرسال رسائل داخل المنصة وإدارة نافذة الإعلان التي تظهر عند دخول المستخدم.</p></header>
