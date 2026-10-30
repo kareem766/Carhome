@@ -26,16 +26,16 @@ export default function PaymentInformationPage(){
     else if(data){setInstapay(data.instapay_number||'');setVodafone(data.vodafone_cash_number||'')}
     setLoading(false)
   }void load();return()=>{active=false}},[])
-  async function save(e:FormEvent<HTMLFormElement>){
-    e.preventDefault()
+  async function save(event:FormEvent<HTMLFormElement>){
+    event.preventDefault()
     if(!supabase||!authorized)return
     const clean=(v:string)=>v.replace(/[\s-]/g,'')
     if(!/^01\d{9}$/.test(clean(instapay))||!/^01\d{9}$/.test(clean(vodafone))){setError('أدخل رقم موبايل مصري صحيح مكوّن من 11 رقمًا لكل وسيلة دفع.');return}
     setSaving(true);setError('');setNotice('')
     const {data:auth}=await supabase.auth.getUser()
-    const {error:e}=await supabase.from('platform_settings').update({instapay_number:clean(instapay),vodafone_cash_number:clean(vodafone),updated_at:new Date().toISOString(),updated_by:auth.user?.id||null}).eq('id',true)
+    const {error:saveError}=await supabase.from('platform_settings').update({instapay_number:clean(instapay),vodafone_cash_number:clean(vodafone),updated_at:new Date().toISOString(),updated_by:auth.user?.id||null}).eq('id',true)
     setSaving(false)
-    if(e){setError('تعذر حفظ معلومات الدفع: '+e.message);return}
+    if(saveError){setError('تعذر حفظ معلومات الدفع: '+saveError.message);return}
     setInstapay(clean(instapay));setVodafone(clean(vodafone))
     window.dispatchEvent(new Event('platform-settings-updated'))
     setNotice('تم حفظ معلومات الدفع. ستظهر الأرقام الجديدة تلقائيًا في صفحة باقات الإعلانات وأي صفحة دفع مرتبطة بإعدادات المنصة.')
