@@ -11,7 +11,7 @@ export default function PlatformBrand({ compact = false }: { compact?: boolean }
     let active = true
     async function load() {
       if (!supabase) return
-      const { data } = await supabase.from('platform_settings').select('platform_name,tagline,logo_url').eq('id', true).maybeSingle()
+      const { data } = await supabase.from('public_platform_settings').select('platform_name,tagline,logo_url').eq('id', true).maybeSingle()
       if (active && data) setBrand({ ...fallback, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || fallback.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? fallback.tagline : (data.tagline || fallback.tagline) } as Brand)
     }
     void load()
