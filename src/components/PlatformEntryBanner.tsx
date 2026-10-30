@@ -10,10 +10,12 @@ export default function PlatformEntryBanner() {
   let active=true
   async function load(){
    if(!supabase)return
-   const {data,error}=await supabase.from('platform_banners').select('id,title,body,image_url,button_label,button_url,duration_seconds').eq('enabled',true).or('starts_at.is.null,starts_at.lte.'+new Date().toISOString()).or('ends_at.is.null,ends_at.gt.'+new Date().toISOString()).order('display_order',{ascending:true}).order('created_at',{ascending:false}).limit(10)
+   const {data,error}=await supabase.from('platform_banners').select('id,title,body,image_url,button_label,button_url,duration_seconds,starts_at,ends_at').eq('enabled',true).order('display_order',{ascending:true}).order('created_at',{ascending:false}).limit(20)
    if(!active||error||!data?.length)return
+   const now=Date.now()
+   const eligible=(data as (Banner & {starts_at:string|null;ends_at:string|null})[]).filter(item=>(!item.starts_at||new Date(item.starts_at).getTime()<=now)&&(!item.ends_at||new Date(item.ends_at).getTime()>now))
    let selected:Banner|undefined
-   for(const item of data as Banner[]){
+   for(const item of eligible){
     let seen=false
     try{seen=sessionStorage.getItem('mycar-banner-seen-'+item.id)==='1'}catch{}
     if(!seen){selected=item;break}
