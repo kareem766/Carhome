@@ -12,7 +12,7 @@ export default function PartnerLogoTicker() {
     let active = true
     async function load() {
       if (!supabase) return
-      const { data } = await supabase.from('platform_settings').select('partner_logos,partner_ticker_seconds').eq('id', true).maybeSingle()
+      const { data } = await supabase.from('public_platform_settings').select('partner_logos,partner_ticker_seconds').eq('id', true).maybeSingle()
       if (!active || !data) return
       const rows = Array.isArray(data.partner_logos) ? data.partner_logos : []
       setPartners(rows.filter((p: Partner) => p && typeof p.name === 'string' && typeof p.logo_url === 'string' && /^https:\/\//i.test(p.logo_url)))
