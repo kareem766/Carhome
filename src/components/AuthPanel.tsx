@@ -7,6 +7,17 @@ import PlatformBrand from './PlatformBrand'
 type AccountType = 'individual_owner' | 'fleet_supplier' | 'company'
 type Props = { onClose: () => void; initialMode?: 'signin' | 'signup' }
 
+function normalizeEgyptianPhone(value: string) {
+  const compact = value.trim().replace(/[\\s().-]/g, '')
+  if (compact.startsWith('+')) return compact
+  const digits = compact.replace(/\\D/g, '')
+  if (digits.startsWith('0020')) return `+${digits.slice(2)}`
+  if (digits.startsWith('20')) return `+${digits}`
+  if (digits.startsWith('0')) return `+20${digits.slice(1)}`
+  if (digits.startsWith('1') && digits.length === 10) return `+20${digits}`
+  return compact
+}
+
 const accountTypes: { value: AccountType; label: string; detail: string }[] = [
   { value: 'individual_owner', label: 'مالك سيارة', detail: 'إدارة سياراتك واستقبال طلبات الشركات' },
   { value: 'fleet_supplier', label: 'مورد أسطول', detail: 'عرض سيارات الأسطول والتعامل مع الطلبات' },
@@ -206,8 +217,13 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         }
       } else {
         const identifier = email.trim()
+        const isEmail = identifier.includes('@')
+        const phone = normalizeEgyptianPhone(identifier)
+        if (!isEmail && !/^\\+20\\d{10}$/.test(phone)) {
+          throw new Error('اكتب بريدًا إلكترونيًا صحيحًا أو رقم موبايل مصريًا مكوّنًا من 11 رقمًا.')
+        }
         const { data, error: signInError } = await supabase.auth.signInWithPassword(
-          identifier.includes('@') ? { email: identifier.toLowerCase(), password } : { phone: identifier, password }
+          isEmail ? { email: identifier.toLowerCase(), password } : { phone, password }
         )
         if (signInError) throw signInError
         if (!data.user || !data.session) throw new Error('تم تسجيل الدخول لكن لم يتم إنشاء جلسة صالحة. حاول مرة أخرى.')
@@ -217,7 +233,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع. حاول مرة أخرى.'
-      setError(message.includes('Invalid login credentials') ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : message)
+      setError(message.includes('Invalid login credentials') ? 'البريد الإلكتروني أو رقم الموبايل أو كلمة المرور غير صحيحة.' : message)
     } finally {
       setLoading(false)
     }
