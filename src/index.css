@@ -726,3 +726,9 @@ main.min-h-screen :is(input, select, textarea):disabled {
  .mc-workspace-page .mc-dashboard>div:nth-child(2)>article{min-width:0;overflow:hidden}
  .mc-workspace-page .mc-dashboard>div:nth-child(2)>article strong{overflow-wrap:anywhere}
 }
+
+
+/* Keep the account popover fully visible and centered on narrow screens. */
+@media(max-width:760px){
+ .mc-account-menu{left:50%!important;right:auto!important;transform:translateX(-50%);width:min(20rem,calc(100vw - 24px))!important;max-width:calc(100vw - 24px);max-height:calc(100svh - 110px);overflow-y:auto;overscroll-behavior:contain}
+}
