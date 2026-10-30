@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Bell, CircleUserRound, LogOut, MessageCircle, ChevronDown, X, ExternalLink } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -21,6 +21,8 @@ export default function AccountNotifications() {
   const [notificationsError, setNotificationsError] = useState('')
   const [authChecked, setAuthChecked] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
+  const accountButtonRef = useRef<HTMLButtonElement>(null)
+  const [accountMenuPosition, setAccountMenuPosition] = useState({ top: 0, right: 16 })
   const unreadCount = notifications.filter(item => !item.read_at).length
 
   const loadNotifications = useCallback(async () => {
@@ -104,7 +106,7 @@ export default function AccountNotifications() {
       <Bell size={19} />
       {unreadCount > 0 && <span aria-label={`${unreadCount} إشعارات غير مقروءة`} className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>}
     </button>
-    <button type="button" aria-expanded={open} aria-label="تفاصيل الحساب" onClick={() => { setOpen(v => !v); setNotificationsOpen(false) }} className="flex items-center gap-2 rounded-full border border-cyan-200 bg-slate-950 px-2 py-1.5 text-white shadow-[0_0_16px_rgba(34,211,238,.18)] hover:border-cyan-300 sm:px-3">
+    <button ref={accountButtonRef} type="button" aria-expanded={open} aria-label="تفاصيل الحساب" onClick={() => { const rect = accountButtonRef.current?.getBoundingClientRect(); if (rect) setAccountMenuPosition({ top: rect.bottom + 8, right: Math.max(12, window.innerWidth - rect.right) }); setOpen(v => !v); setNotificationsOpen(false) }} className="flex items-center gap-2 rounded-full border border-cyan-200 bg-slate-950 px-2 py-1.5 text-white shadow-[0_0_16px_rgba(34,211,238,.18)] hover:border-cyan-300 sm:px-3">
       <span className="grid h-9 w-9 place-items-center rounded-full border-2 border-cyan-300 text-cyan-200 shadow-[0_0_10px_rgba(34,211,238,.45)]"><CircleUserRound size={19}/></span>
       <span className="hidden max-w-36 text-right sm:block"><span className="block truncate text-xs font-extrabold">{identity.name}</span><span className="block truncate text-[10px] text-cyan-100">{identity.organization || identity.role}</span></span><ChevronDown size={14} className="text-cyan-200"/>
     </button>
@@ -119,6 +121,6 @@ export default function AccountNotifications() {
       </div>}
       <a href="/workspace/messages" className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-sky-50 px-3 py-2.5 text-sm font-bold text-sky-800 hover:bg-sky-100"><MessageCircle size={16}/> الانتقال إلى المحادثات</a>
     </div>}
-    {open && <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-4 text-right text-slate-800 shadow-xl"><p className="font-black">{identity.name}</p><p className="mt-1 break-all text-xs text-slate-500">{identity.email}</p><p className="mt-2 text-sm font-bold text-sky-800">{identity.organization || 'لم يتم ربط مؤسسة'}</p><p className="mt-1 text-xs text-slate-500">{identity.role}</p><a href="/workspace/messages" className="mt-3 flex items-center gap-2 rounded-xl bg-sky-50 px-3 py-2 text-sm font-bold text-sky-800"><MessageCircle size={16}/> فتح المحادثات</a><button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold hover:bg-slate-50"><LogOut size={16}/> تسجيل الخروج</button></div>}
+    {open && <div style={{ position: 'fixed', top: accountMenuPosition.top, right: accountMenuPosition.right, width: 'min(18rem, calc(100vw - 1.5rem)', zIndex: 200 }} className="rounded-2xl border border-sky-200 bg-white p-4 text-right text-slate-800 shadow-[0_12px_36px_rgba(15,23,42,.22),0_0_0_1px_rgba(56,139,253,.14)]"><p className="font-black">{identity.name}</p><p className="mt-1 break-all text-xs text-slate-500">{identity.email}</p><p className="mt-2 text-sm font-bold text-sky-800">{identity.organization || 'لم يتم ربط مؤسسة'}</p><p className="mt-1 text-xs text-slate-500">{identity.role}</p><a href="/workspace/messages" className="mt-3 flex items-center gap-2 rounded-xl bg-sky-50 px-3 py-2 text-sm font-bold text-sky-800"><MessageCircle size={16}/> فتح المحادثات</a><button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold hover:bg-slate-50"><LogOut size={16}/> تسجيل الخروج</button></div>}
   </div>
 }
