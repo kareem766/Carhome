@@ -37,7 +37,7 @@ export default function AdminCommunicationsPage() {
  function editBanner(b:Banner){setBanner(b);setTitle(b.title);setBody(b.body);setImageUrl(b.image_url||'');setButtonLabel(b.button_label||'');setButtonUrl(b.button_url||'')}
  async function toggleBanner(b:Banner){if(!supabase)return;const {error}=await supabase.from('platform_banners').update({enabled:!b.enabled,updated_at:new Date().toISOString()}).eq('id',b.id);if(error)setError(error.message);else await load()}
  async function deleteBanner(b:Banner){if(!supabase||!window.confirm('حذف الإعلان نهائيًا؟'))return;const {error}=await supabase.from('platform_banners').delete().eq('id',b.id);if(error)setError(error.message);else await load()}
- async function sendNotification(e:React.FormEvent){
+ async function sendNotification(e:FormEvent){
   e.preventDefault();if(!supabase)return
   if(!notificationTitle.trim()||!notificationBody.trim()){setError('اكتب عنوان الإشعار ومحتواه.');return}
   setBusy(true);setError('');setMessage('')
