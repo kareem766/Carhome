@@ -1,10 +1,11 @@
-import { LayoutDashboard, Palette, CreditCard, Megaphone } from 'lucide-react'
+import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing } from 'lucide-react'
 
 const links = [
   { href: '/workspace/admin', label: 'مركز الإدارة', icon: LayoutDashboard },
   { href: '/workspace/admin/platform-settings', label: 'هوية المنصة', icon: Palette },
   { href: '/workspace/admin/subscription-plans', label: 'اشتراكات الشركات', icon: CreditCard },
-  { href: '/workspace/admin/advertising-plans', label: 'باقات الإعلانات', icon: Megaphone }
+  { href: '/workspace/admin/advertising-plans', label: 'باقات الإعلانات', icon: Megaphone },
+  { href: '/workspace/admin/communications', label: 'الإشعارات والبانرات', icon: BellRing }
 ]
 
 export default function AdminPageNavigation() {
