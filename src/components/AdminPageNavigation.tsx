@@ -1,9 +1,10 @@
-import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing } from 'lucide-react'
+import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing, Wallet } from 'lucide-react'
 import PlatformEntryBanner from './PlatformEntryBanner'
 
 const links = [
   { href: '/workspace/admin', label: 'مركز الإدارة', icon: LayoutDashboard },
   { href: '/workspace/admin/platform-settings', label: 'هوية المنصة', icon: Palette },
+  { href: '/workspace/admin/payment-information', label: 'معلومات الدفع', icon: Wallet },
   { href: '/workspace/admin/subscription-plans', label: 'اشتراكات الشركات', icon: CreditCard },
   { href: '/workspace/admin/advertising-plans', label: 'باقات الإعلانات', icon: Megaphone },
   { href: '/workspace/admin/communications', label: 'الإشعارات والبانرات', icon: BellRing }
