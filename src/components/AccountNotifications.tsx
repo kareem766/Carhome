@@ -22,6 +22,7 @@ export default function AccountNotifications() {
   const [notificationsError, setNotificationsError] = useState('')
   const [authChecked, setAuthChecked] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
+  const [showEntryBanner, setShowEntryBanner] = useState(true)
   const accountButtonRef = useRef<HTMLButtonElement>(null)
   const [accountMenuPosition, setAccountMenuPosition] = useState({ top: 0, right: 16 })
   const unreadCount = notifications.filter(item => !item.read_at).length
@@ -58,6 +59,8 @@ export default function AccountNotifications() {
       if (!active) return
       if (!user) { setAuthenticated(false); setAuthChecked(true); return }
       setAuthenticated(true)
+      const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle()
+      if (active) setShowEntryBanner(!adminRecord)
       const meta = user.user_metadata || {}
       const { data: membership } = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
       let organization = '', role = 'مستخدم'
@@ -102,7 +105,7 @@ export default function AccountNotifications() {
 
   if (!authChecked || !authenticated) return null
 
-  return <div className="relative flex items-center gap-2" dir="rtl"><PlatformEntryBanner/>
+  return <div className="relative flex items-center gap-2" dir="rtl">{showEntryBanner && <PlatformEntryBanner/>}
     <button type="button" aria-label={unreadCount ? `الإشعارات، ${unreadCount} غير مقروءة` : 'فتح الإشعارات'} title="الإشعارات" aria-expanded={notificationsOpen} onClick={() => { setNotificationsOpen(v => !v); setOpen(false) }} className="relative grid h-11 w-11 place-items-center rounded-full border border-sky-200 bg-sky-50 text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-300">
       <Bell size={19} />
       {unreadCount > 0 && <span aria-label={`${unreadCount} إشعارات غير مقروءة`} className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>}
