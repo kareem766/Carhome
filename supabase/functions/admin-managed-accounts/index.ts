@@ -65,6 +65,11 @@ Deno.serve(async(req:Request)=>{
    id:newUserId,display_name:displayName,phone:phone||null,contact_email:email,address:address||null,locale:"ar"
   },{onConflict:"id"});
   if(profileError){await rollback();return send({error:"تم إنشاء بيانات الدخول لكن تعذر إنشاء الملف الشخصي: "+profileError.message},500);}
+  const temporarySalt=crypto.getRandomValues(new Uint8Array(16));
+  const {error:passwordRecordError}=await db.from("admin_managed_account_passwords").upsert({
+   user_id:newUserId,temporary_password_hash:await hashPassword(password,temporarySalt),password_salt:enc(temporarySalt)
+  },{onConflict:"user_id"});
+  if(passwordRecordError){await rollback();return send({error:"تعذر إعداد تغيير كلمة المرور الإلزامي للحساب الجديد: "+passwordRecordError.message},500);}
   const {data:organization,error:organizationError}=await db.from("organizations").insert({
    name:organizationName,organization_type:role,created_by:newUserId,city:city||null,
    contact_name:displayName,phone:phone||null,contact_email:email,address:address||null,
