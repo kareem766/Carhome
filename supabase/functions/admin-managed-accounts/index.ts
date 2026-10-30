@@ -101,9 +101,9 @@ Deno.serve(async(req:Request)=>{
    const {data:otherMembers,error:memberError}=await db.from("organization_memberships").select("user_id").eq("organization_id",orgId).neq("user_id",userId);
    if(memberError)return send({error:"تعذر التحقق من أعضاء المؤسسة قبل الحذف."},500);
    if((otherMembers||[]).length){
-    if(target.id===userId){
-     await db.from("organizations").update({created_by:otherMembers![0].user_id}).eq("id",orgId).eq("created_by",userId);
-    }
+    const wasOwner=(memberships||[]).some(m=>m.organization_id===orgId&&m.role==="owner");
+    if(wasOwner)await db.from("organization_memberships").update({role:"owner"}).eq("organization_id",orgId).eq("user_id",otherMembers![0].user_id);
+    await db.from("organizations").update({created_by:otherMembers![0].user_id}).eq("id",orgId).eq("created_by",userId);
     await db.from("organization_memberships").delete().eq("organization_id",orgId).eq("user_id",userId);
     continue;
    }
