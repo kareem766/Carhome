@@ -60,7 +60,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
       setError('من فضلك أدخل رقم موبايل مصري صحيح مكوّن من 11 رقمًا ويبدأ بـ 01.')
       return
     }
-    if (values.password.length < 6) { setError('كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.'); return }
+    if (values.password.length < 8) { setError('كلمة المرور يجب أن تتكون من 8 أحرف على الأقل.'); return }
     if (!supabase) { setError('خدمة الحسابات غير مضبوطة حاليًا.'); return }
     setBusy(true)
     try {
@@ -116,7 +116,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
   const fieldClass = 'mt-2 min-h-12 w-full rounded-xl border border-slate-200/90 bg-white px-4 text-sm shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-100/80'
   const field = (key: FieldKey, label: string, required: boolean, type = 'text', placeholder = '') => (
     <label className="block text-sm font-bold text-slate-700" key={key}>{label}{required ? ' *' : ' (اختياري)'}
-      <input className={fieldClass} type={type} required={required} value={values[key]} onChange={(e) => update(key, e.target.value)} placeholder={placeholder} autoComplete={key === 'password' ? 'new-password' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'off'} dir={key === 'email' || key === 'phone' || key === 'password' ? 'ltr' : 'rtl'} minLength={key === 'password' ? 6 : undefined} />
+      <input className={fieldClass} type={type} required={required} value={values[key]} onChange={(e) => update(key, e.target.value)} placeholder={placeholder} autoComplete={key === 'password' ? 'new-password' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'off'} dir={key === 'email' || key === 'phone' || key === 'password' ? 'ltr' : 'rtl'} minLength={key === 'password' ? 8 : undefined} />
     </label>
   )
 
