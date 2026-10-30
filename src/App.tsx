@@ -154,6 +154,10 @@ export default function App() {
 
   const path = window.location.pathname
   useEffect(() => {
+    if (authUser?.app_metadata?.must_change_password === true) {
+      if (path !== '/first-login-password') window.location.replace('/first-login-password')
+      return
+    }
     if (!authUser) return
     // Authenticated users should never see sign-in/sign-up prompts or the registration chooser.
     setAuthOpen(false)
