@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowLeft, Building2, CarFront, Wrench, ClipboardList, FileText, ImagePlus, LogOut, MessageCircle, Plus, RefreshCw, X, CircleUserRound, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, Wrench, ClipboardList, FileText, ImagePlus, LogOut, MessageCircle, Plus, RefreshCw, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { vehicleCatalog } from '../data/vehicleCatalog'
 import PlatformBrand from './PlatformBrand'
@@ -47,7 +47,6 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const [paymentVehicle, setPaymentVehicle] = useState<string | null>(null)
   const [paymentSubmissions, setPaymentSubmissions] = useState<Record<string, string>>({})
   const [photoPreviews, setPhotoPreviews] = useState<{ file: File; url: string }[]>([])
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [selectedMake, setSelectedMake] = useState('')
   const [selectedModel, setSelectedModel] = useState('')
   const [inferredType, setInferredType] = useState('')
@@ -407,7 +406,10 @@ export default function WorkspacePage({ role }: { role: Role }) {
   return <main dir="rtl" className="mc-workspace-main min-h-screen bg-[#f3f6fb]">
     <aside className="mc-workspace-sidebar"><div className="mc-sidebar-brand"><PlatformBrand compact/><span className="mc-sidebar-tag">مساحة العمل</span></div>{sideNavigation}<div className="mc-sidebar-promo"><CarFront size={27}/><strong>كل خدمات السيارات في مكان واحد</strong><p>إدارة أسهل وفرص تشغيل أكثر مع CarHome.</p><a href="/workspace/catalog">استكشف الكتالوج ←</a></div></aside>
     <div className="mc-workspace-content min-w-0">
-      <header className="mc-workspace-topbar"><div><span className="text-xs font-bold text-slate-400">CarHome / مساحة العمل</span><h1 className="mt-1 text-lg font-extrabold text-slate-900">{names[role]}</h1></div><div className="flex items-center gap-2"><AccountNotifications/><a href="/messages" aria-label="المحادثات" className="mc-top-icon"><MessageCircle size={18}/></a><button onClick={()=>void loadWorkspace()} aria-label="تحديث البيانات" className="mc-top-icon"><RefreshCw size={17}/></button><div className="relative"><button type="button" aria-expanded={accountMenuOpen} aria-haspopup="menu" onClick={()=>setAccountMenuOpen(open=>!open)} className="mc-account-trigger"><span className="grid h-9 w-9 place-items-center rounded-full bg-blue-100 text-blue-800"><CircleUserRound size={19}/></span><span className="hidden text-right sm:block"><strong className="block text-sm">{accountLabel}</strong><small className="text-xs text-slate-500">{role==='company'?'حساب شركة':role==='supplier'?'مورد أسطول':'مالك سيارة'}</small></span><ChevronDown size={15}/></button>{accountMenuOpen&&<div role="menu" className="absolute left-0 top-full z-50 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-3 text-right shadow-2xl"><strong className="block truncate text-sm">{accountLabel}</strong><span className="mt-1 block truncate text-xs text-slate-500">{user.email}</span><button role="menuitem" onClick={()=>{setAccountMenuOpen(false);void signOut()}} className="mt-3 flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm font-bold text-red-700 hover:bg-red-50"><LogOut size={16}/> تسجيل الخروج</button></div>}</div></div></header>
+      <header className="mc-workspace-topbar">
+        <div className="mc-workspace-heading"><span className="text-xs font-bold text-slate-400">My Car / مساحة العمل</span><h1 className="mt-1 text-lg font-extrabold text-slate-900">{names[role]}</h1><p className="mc-workspace-subtitle">كل ما تحتاجه لإدارة سياراتك وطلباتك من مكان واحد.</p></div>
+        <div className="mc-workspace-header-actions"><a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-top-icon"><MessageCircle size={18}/><span>المحادثات</span></a><button type="button" onClick={()=>void loadWorkspace()} aria-label="تحديث البيانات" title="تحديث البيانات" className="mc-top-icon"><RefreshCw size={17}/><span>تحديث</span></button><AccountNotifications/></div>
+      </header>
       <div className="mc-workspace-mobile-nav">{sideNavigation}</div>
       <div className="mc-workspace-page">
     {dashboard}
