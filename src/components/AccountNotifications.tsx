@@ -20,6 +20,7 @@ export default function AccountNotifications() {
   const [notifications, setNotifications] = useState<PlatformNotification[]>([])
   const [notificationsLoading, setNotificationsLoading] = useState(false)
   const [notificationsError, setNotificationsError] = useState('')
+  const [incomingNotification, setIncomingNotification] = useState<PlatformNotification | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
   const [showEntryBanner, setShowEntryBanner] = useState(true)
@@ -83,6 +84,50 @@ export default function AccountNotifications() {
     if (notificationsOpen) void loadNotifications()
   }, [notificationsOpen, loadNotifications])
 
+  // Load the unread count as soon as the account menu mounts and keep it in sync
+  // with database-generated notifications while the user is signed in.
+  useEffect(() => {
+    if (!supabase) return
+    let active = true
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
+    async function connectNotifications() {
+      const { data: { user } } = await supabase!.auth.getUser()
+      if (!active || !user) return
+      void loadNotifications()
+      channel = supabase!
+        .channel(`account-notifications-${user.id}`)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'platform_notifications',
+          filter: `user_id=eq.${user.id}`
+        }, payload => {
+          if (!active) return
+          const notification = payload.new as PlatformNotification
+          setNotifications(items => [notification, ...items.filter(item => item.id !== notification.id)].slice(0, 10))
+          setIncomingNotification(notification)
+        })
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'platform_notifications',
+          filter: `user_id=eq.${user.id}`
+        }, payload => {
+          if (!active) return
+          const updated = payload.new as PlatformNotification
+          setNotifications(items => items.map(item => item.id === updated.id ? updated : item))
+        })
+        .subscribe()
+    }
+
+    void connectNotifications()
+    return () => {
+      active = false
+      if (channel) void supabase!.removeChannel(channel)
+    }
+  }, [loadNotifications])
+
   async function markAsRead(notification: PlatformNotification) {
     if (!supabase || notification.read_at) return
     const { data: { user } } = await supabase.auth.getUser()
@@ -110,6 +155,7 @@ export default function AccountNotifications() {
       <Bell size={19} />
       {unreadCount > 0 && <span aria-label={`${unreadCount} إشعارات غير مقروءة`} className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>}
     </button>
+    {incomingNotification && <div role="status" className="fixed left-1/2 top-16 z-[120] w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 rounded-2xl border border-sky-200 bg-white p-4 text-right text-slate-800 shadow-2xl sm:left-auto sm:right-5 sm:translate-x-0"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-black text-sky-900">{incomingNotification.title}</p>{incomingNotification.body && <p className="mt-1 text-xs leading-6 text-slate-600">{incomingNotification.body}</p>}</div><button type="button" aria-label="إغلاق التنبيه" onClick={() => setIncomingNotification(null)} className="rounded-lg p-1 text-slate-500 hover:bg-slate-100"><X size={16}/></button></div><button type="button" onClick={() => { void openNotification(incomingNotification); setIncomingNotification(null); setNotificationsOpen(true) }} className="mt-3 text-xs font-extrabold text-sky-800">عرض الإشعار</button></div>}
     <button ref={accountButtonRef} type="button" aria-expanded={open} aria-label="تفاصيل الحساب" onClick={() => { const rect = accountButtonRef.current?.getBoundingClientRect(); if (rect) setAccountMenuPosition({ top: rect.bottom + 8, right: Math.max(12, window.innerWidth - rect.right) }); setOpen(v => !v); setNotificationsOpen(false) }} className="flex items-center gap-2 rounded-full border border-cyan-200 bg-slate-950 px-2 py-1.5 text-white shadow-[0_0_16px_rgba(34,211,238,.18)] hover:border-cyan-300 sm:px-3">
       <span className="grid h-9 w-9 place-items-center rounded-full border-2 border-cyan-300 text-cyan-200 shadow-[0_0_10px_rgba(34,211,238,.45)]"><CircleUserRound size={19}/></span>
       <span className="hidden max-w-36 text-right sm:block"><span className="block truncate text-xs font-extrabold">{identity.name}</span><span className="block truncate text-[10px] text-cyan-100">{identity.organization || identity.role}</span></span><ChevronDown size={14} className="text-cyan-200"/>
