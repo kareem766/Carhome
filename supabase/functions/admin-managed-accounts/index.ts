@@ -40,7 +40,8 @@ Deno.serve(async(req:Request)=>{
   const phone=String(body.phone||"").trim();
   const city=String(body.city||"").trim();
   const address=String(body.address||"").trim();
-  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))return send({error:"البريد الإلكتروني غير صحيح."},400);
+  const emailParts=email.split("@");
+  if(emailParts.length!==2||!emailParts[0]||!emailParts[1].includes(".")||emailParts[1].startsWith(".")||emailParts[1].endsWith("."))return send({error:"البريد الإلكتروني غير صحيح."},400);
   if(!displayName||displayName.length>120)return send({error:"اسم المستخدم مطلوب وبحد أقصى 120 حرفًا."},400);
   if(!["individual_owner","company","fleet_supplier"].includes(role))return send({error:"نوع الحساب غير صحيح."},400);
   if(password.length<8)return send({error:"كلمة المرور المؤقتة يجب ألا تقل عن 8 أحرف."},400);
