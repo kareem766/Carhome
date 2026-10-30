@@ -13,6 +13,8 @@ const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
 const AutomotiveServicesPage = lazy(() => import('./components/AutomotiveServicesPage'))
 const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPlansAdminPage'))
 const PaymentInformationPage = lazy(() => import('./components/PaymentInformationPage'))
+const AdminManagedAccountsPage = lazy(() => import('./components/AdminManagedAccountsPage'))
+const FirstLoginPasswordPage = lazy(() => import('./components/FirstLoginPasswordPage'))
 const AdminCommunicationsPage = lazy(() => import('./components/AdminCommunicationsPage'))
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
@@ -172,9 +174,11 @@ export default function App() {
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/workspace' && !authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
   if (path === '/workspace') return <RouteLoading logoUrl={settings.logo_url} />
+  if (path === '/first-login-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><FirstLoginPasswordPage /></Suspense>
   if (path === '/reset-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ResetPasswordPage /></Suspense>
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AuthCallbackPage /></Suspense>
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PlatformSettingsPage /></Suspense>
+  if (path === '/workspace/admin/managed-accounts') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminManagedAccountsPage /></Suspense>
   if (path === '/workspace/admin/payment-information') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PaymentInformationPage /></Suspense>
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><SubscriptionPlansPage /></Suspense>
   if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdvertisingPlansAdminPage /></Suspense>
