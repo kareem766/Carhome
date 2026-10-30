@@ -94,7 +94,7 @@ Deno.serve(async(req:Request)=>{
  }
 
  if(body.action==="delete"){
-  const {data:memberships}=await db.from("organization_memberships").select("organization_id").eq("user_id",userId);
+  const {data:memberships}=await db.from("organization_memberships").select("organization_id,role").eq("user_id",userId);
   const {data:createdOrgs}=await db.from("organizations").select("id").eq("created_by",userId);
   const orgIds=[...new Set([...(memberships||[]).map(m=>m.organization_id),...(createdOrgs||[]).map(o=>o.id)])];
   for(const orgId of orgIds){
