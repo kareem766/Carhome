@@ -29,8 +29,8 @@ export default function PaymentInformationPage(){
   async function save(e:FormEvent<HTMLFormElement>){
     e.preventDefault()
     if(!supabase||!authorized)return
-    const clean=(v:string)=>v.replace(/[\\s-]/g,'')
-    if(!/^01\\d{9}$/.test(clean(instapay))||!/^01\\d{9}$/.test(clean(vodafone))){setError('أدخل رقم موبايل مصري صحيح مكوّن من 11 رقمًا لكل وسيلة دفع.');return}
+    const clean=(v:string)=>v.replace(/[\s-]/g,'')
+    if(!/^01\d{9}$/.test(clean(instapay))||!/^01\d{9}$/.test(clean(vodafone))){setError('أدخل رقم موبايل مصري صحيح مكوّن من 11 رقمًا لكل وسيلة دفع.');return}
     setSaving(true);setError('');setNotice('')
     const {data:auth}=await supabase.auth.getUser()
     const {error:e}=await supabase.from('platform_settings').update({instapay_number:clean(instapay),vodafone_cash_number:clean(vodafone),updated_at:new Date().toISOString(),updated_by:auth.user?.id||null}).eq('id',true)
