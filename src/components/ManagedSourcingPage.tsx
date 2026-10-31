@@ -31,7 +31,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   if(admin&&!ad){setError('غير مصرح لك بإدارة خدمة البحث.');setLoading(false);return}
   if(!admin&&ad){window.location.replace('/workspace/admin/managed-sourcing');return}
   if(!admin){
-   const {data:paymentSettings,error:paymentSettingsError}=await supabase.from('public_platform_settings').select('instapay_number,vodafone_cash_number').eq('id',true).maybeSingle()
+   const {data:paymentSettings,error:paymentSettingsError}=await supabase.from('platform_settings').select('instapay_number,vodafone_cash_number').eq('id',true).maybeSingle()
    if(paymentSettingsError)setError('تعذر تحميل بيانات الدفع المعتمدة: '+paymentSettingsError.message)
    else setPaymentDetails({instapay_number:paymentSettings?.instapay_number||'',vodafone_cash_number:paymentSettings?.vodafone_cash_number||''})
   }
