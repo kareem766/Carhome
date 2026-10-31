@@ -31,9 +31,16 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   if(admin&&!ad){setError('غير مصرح لك بإدارة خدمة البحث.');setLoading(false);return}
   if(!admin&&ad){window.location.replace('/workspace/admin/managed-sourcing');return}
   if(!admin){
-   const {data:paymentSettings,error:paymentSettingsError}=await supabase.rpc('get_public_payment_details').maybeSingle()
-   if(paymentSettingsError)setError('تعذر تحميل بيانات الدفع المعتمدة: '+paymentSettingsError.message)
-   else { const details=paymentSettings as unknown as {instapay_number?:string|null;vodafone_cash_number?:string|null}|null; setPaymentDetails({instapay_number:details?.instapay_number?.trim()||'',vodafone_cash_number:details?.vodafone_cash_number?.trim()||''}) }
+   const {data:paymentSettings,error:paymentSettingsError}=await supabase.rpc('get_public_payment_details')
+   if(paymentSettingsError){
+    setError('تعذر تحميل بيانات الدفع المعتمدة: '+paymentSettingsError.message)
+    setPaymentDetails({instapay_number:'',vodafone_cash_number:''})
+   } else {
+    const result=paymentSettings as unknown as {instapay_number?:string|null;vodafone_cash_number?:string|null}|Array<{instapay_number?:string|null;vodafone_cash_number?:string|null}>|null
+    const details=Array.isArray(result)?result[0]:result
+    setPaymentDetails({instapay_number:details?.instapay_number?.trim()||'',vodafone_cash_number:details?.vodafone_cash_number?.trim()||''})
+    if(!details?.instapay_number?.trim()&&!details?.vodafone_cash_number?.trim())setError('بيانات الدفع غير مسجلة في إعدادات المنصة. راجع إعدادات الدفع في لوحة التحكم.')
+   }
   }
   if(admin){
    const [r,p,k,s]=await Promise.all([
