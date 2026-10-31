@@ -7,6 +7,17 @@ import PlatformBrand from './PlatformBrand'
 type AccountType = 'individual_owner' | 'fleet_supplier' | 'company'
 type Props = { onClose: () => void; initialMode?: 'signin' | 'signup' }
 
+function normalizeEgyptianPhone(value: string) {
+  const compact = value.trim().replace(/[\\s().-]/g, '')
+  if (compact.startsWith('+')) return compact
+  const digits = compact.replace(/\\D/g, '')
+  if (digits.startsWith('0020')) return `+${digits.slice(2)}`
+  if (digits.startsWith('20')) return `+${digits}`
+  if (digits.startsWith('0')) return `+20${digits.slice(1)}`
+  if (digits.startsWith('1') && digits.length === 10) return `+20${digits}`
+  return compact
+}
+
 const accountTypes: { value: AccountType; label: string; detail: string }[] = [
   { value: 'individual_owner', label: 'مالك سيارة', detail: 'إدارة سياراتك واستقبال طلبات الشركات' },
   { value: 'fleet_supplier', label: 'مورد أسطول', detail: 'عرض سيارات الأسطول والتعامل مع الطلبات' },
@@ -125,7 +136,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     if (!normalizedEmail.includes('@')) { setError('اكتب البريد الإلكتروني الصحيح لاستعادة كلمة المرور.'); return }
     setLoading(true)
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo: `${window.location.origin}/?reset-password=1` })
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo: `${window.location.origin}/auth/callback?flow=password-reset` })
       if (resetError) throw resetError
       setNotice('إذا كان البريد مسجلًا، ستصلك رسالة تحتوي على رابط آمن لإعادة تعيين كلمة المرور.')
     } catch (caught) {
@@ -197,26 +208,37 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         }
         if (data.session && data.user) {
           await prepareAccount(data.user, name)
-          setSession(data.session)
-          setNotice('تم إنشاء الحساب وتجهيز الملف الشخصي والمؤسسة بنجاح.')
+          // Complete account setup through the shared callback, then open the role workspace.
+          window.location.replace('/auth/callback')
+          return
         } else {
           setNotice('تم إرسال طلب التسجيل. افتح رسالة تأكيد البريد الإلكتروني، ثم ارجع وسجّل الدخول لإكمال إعداد الحساب.')
           setMode('signin')
         }
       } else {
         const identifier = email.trim()
+        const isEmail = identifier.includes('@')
+        const phone = normalizeEgyptianPhone(identifier)
+        if (!isEmail && !/^\\+20\\d{10}$/.test(phone)) {
+          throw new Error('اكتب بريدًا إلكترونيًا صحيحًا أو رقم موبايل مصريًا مكوّنًا من 11 رقمًا.')
+        }
         const { data, error: signInError } = await supabase.auth.signInWithPassword(
-          identifier.includes('@') ? { email: identifier.toLowerCase(), password } : { phone: identifier, password }
+          isEmail ? { email: identifier.toLowerCase(), password } : { phone, password }
         )
         if (signInError) throw signInError
         if (!data.user || !data.session) throw new Error('تم تسجيل الدخول لكن لم يتم إنشاء جلسة صالحة. حاول مرة أخرى.')
+        // Admin-provisioned accounts must change their temporary password before any onboarding or workspace route.
+        if (data.user.app_metadata?.must_change_password === true) {
+          window.location.replace('/first-login-password')
+          return
+        }
         // Use the shared callback to recover incomplete accounts and route every role consistently.
         window.location.replace('/auth/callback')
         return
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع. حاول مرة أخرى.'
-      setError(message.includes('Invalid login credentials') ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : message)
+      setError(message.includes('Invalid login credentials') ? 'البريد الإلكتروني أو رقم الموبايل أو كلمة المرور غير صحيحة.' : message)
     } finally {
       setLoading(false)
     }
@@ -236,7 +258,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-navy/60 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-labelledby="auth-title" dir="rtl">
+    <div className="mc-auth-overlay fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-navy/60 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-labelledby="auth-title" dir="rtl">
       <div className="my-auto w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div className="flex items-start justify-between border-b border-slate-100 p-5 sm:p-7">
           <div>

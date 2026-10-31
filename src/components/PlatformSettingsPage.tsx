@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { ArrowRight, ImagePlus, LoaderCircle, Save, ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
+import AdminPageNavigation from './AdminPageNavigation'
 
 type PlatformSettings = {
   id: boolean
@@ -58,7 +59,7 @@ export default function PlatformSettingsPage() {
       if (!active) return
       if (adminError || !admin) { setError(adminError?.message || 'هذه الصفحة متاحة لصاحب المنصة فقط.'); setLoading(false); return }
       setAuthorized(true)
-      const { data, error: settingsError } = await supabase.from('platform_settings').select('*').eq('id', true).maybeSingle()
+      const { data, error: settingsError } = await supabase.from('platform_settings').select('id,platform_name,tagline,description,logo_url,favicon_url,support_email,website_url,address,footer_text,announcement_text,primary_color,secondary_color,registration_enabled,owner_registration_enabled,company_registration_enabled,supplier_registration_enabled,maintenance_mode,partner_logos,partner_ticker_seconds').eq('id', true).maybeSingle()
       if (!active) return
       if (settingsError) setError('تعذر تحميل إعدادات المنصة. تأكد من تطبيق Migration إعدادات المنصة. ' + settingsError.message)
       else if (data) { const loaded = { ...defaults, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings; setSettings(loaded); setPartnerLogosText((loaded.partner_logos || []).map(p => [p.name, p.logo_url, p.website_url || ''].join(' | ')).join('\n')) }
@@ -123,12 +124,13 @@ export default function PlatformSettingsPage() {
     setSettings(current => ({ ...current, [key]: value }))
   }
 
-  return <main dir="rtl" className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.10),_transparent_36%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-3 py-5 sm:px-6 sm:py-8">
+  return <main dir="rtl" className="mc-platform-settings-main min-h-screen bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.10),_transparent_36%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-3 py-5 sm:px-6 sm:py-8">
     <div className="mx-auto max-w-6xl">
       <header className="sticky top-3 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/80 bg-white/90 p-4 shadow-[0_18px_55px_-30px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-6">
         <div><PlatformBrand compact /><h1 className="mt-1 text-2xl font-extrabold text-slate-900">هوية المنصة وإعداداتها العامة</h1><p className="mt-2 text-sm leading-6 text-slate-500">تعديل الاسم والشعار ومعلومات التواصل ومظهر المنصة وخيارات التسجيل من مكان واحد.</p></div>
         <a href="/workspace/admin" className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold"><ArrowRight size={17}/> العودة للوحة الإدارة</a>
       </header>
+      <AdminPageNavigation />
       {error && <p role="alert" className="mt-5 rounded-2xl border border-red-100 bg-red-50/90 p-4 text-sm leading-7 text-red-800 shadow-sm">{error}</p>}
       {notice && <p role="status" className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50/90 p-4 text-sm leading-7 text-emerald-800 shadow-sm">{notice}</p>}
       {loading ? <div className="flex justify-center py-16 text-slate-500"><LoaderCircle className="animate-spin"/> جارٍ تحميل الإعدادات...</div> : authorized && <form onSubmit={save} className="mt-6 space-y-6">

@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { Bell, CircleUserRound, LogOut, MessageCircle, ChevronDown, X, ExternalLink } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import PlatformEntryBanner from './PlatformEntryBanner'
 
 type PlatformNotification = {
   id: string
@@ -19,6 +21,12 @@ export default function AccountNotifications() {
   const [notifications, setNotifications] = useState<PlatformNotification[]>([])
   const [notificationsLoading, setNotificationsLoading] = useState(false)
   const [notificationsError, setNotificationsError] = useState('')
+  const [incomingNotification, setIncomingNotification] = useState<PlatformNotification | null>(null)
+  const [authChecked, setAuthChecked] = useState(false)
+  const [authenticated, setAuthenticated] = useState(false)
+  const [showEntryBanner, setShowEntryBanner] = useState(true)
+  const accountButtonRef = useRef<HTMLButtonElement>(null)
+  const [accountMenuPosition, setAccountMenuPosition] = useState({ top: 0, right: 16 })
   const unreadCount = notifications.filter(item => !item.read_at).length
 
   const loadNotifications = useCallback(async () => {
@@ -48,9 +56,13 @@ export default function AccountNotifications() {
   useEffect(() => {
     let active = true
     async function loadIdentity() {
-      if (!supabase) return
+      if (!supabase) { setAuthChecked(true); return }
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user || !active) return
+      if (!active) return
+      if (!user) { setAuthenticated(false); setAuthChecked(true); return }
+      setAuthenticated(true)
+      const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle()
+      if (active) setShowEntryBanner(!adminRecord)
       const meta = user.user_metadata || {}
       const { data: membership } = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
       let organization = '', role = 'مستخدم'
@@ -60,7 +72,10 @@ export default function AccountNotifications() {
         const type = String(org?.organization_type || '')
         role = type === 'company' ? 'حساب شركة' : type === 'fleet_supplier' ? 'مورد أسطول' : type === 'individual_owner' ? 'مالك سيارة' : type === 'admin' ? 'مدير المنصة' : 'مستخدم'
       }
-      if (active) setIdentity({ name: String(meta.full_name || meta.name || user.email?.split('@')[0] || 'الحساب'), email: user.email || '', organization, role })
+      if (active) {
+        setIdentity({ name: String(meta.full_name || meta.name || user.email?.split('@')[0] || 'الحساب'), email: user.email || '', organization, role })
+        setAuthChecked(true)
+      }
     }
     void loadIdentity()
     return () => { active = false }
@@ -69,6 +84,50 @@ export default function AccountNotifications() {
   useEffect(() => {
     if (notificationsOpen) void loadNotifications()
   }, [notificationsOpen, loadNotifications])
+
+  // Load the unread count as soon as the account menu mounts and keep it in sync
+  // with database-generated notifications while the user is signed in.
+  useEffect(() => {
+    if (!supabase) return
+    let active = true
+    let channel: RealtimeChannel | null = null
+
+    async function connectNotifications() {
+      const { data: { user } } = await supabase!.auth.getUser()
+      if (!active || !user) return
+      void loadNotifications()
+      channel = supabase!
+        .channel(`account-notifications-${user.id}`)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'platform_notifications',
+          filter: `user_id=eq.${user.id}`
+        }, payload => {
+          if (!active) return
+          const notification = payload.new as PlatformNotification
+          setNotifications(items => [notification, ...items.filter(item => item.id !== notification.id)].slice(0, 10))
+          setIncomingNotification(notification)
+        })
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'platform_notifications',
+          filter: `user_id=eq.${user.id}`
+        }, payload => {
+          if (!active) return
+          const updated = payload.new as PlatformNotification
+          setNotifications(items => items.map(item => item.id === updated.id ? updated : item))
+        })
+        .subscribe()
+    }
+
+    void connectNotifications()
+    return () => {
+      active = false
+      if (channel) void supabase!.removeChannel(channel)
+    }
+  }, [loadNotifications])
 
   async function markAsRead(notification: PlatformNotification) {
     if (!supabase || notification.read_at) return
@@ -90,16 +149,19 @@ export default function AccountNotifications() {
     window.location.href = '/?login=1'
   }
 
-  return <div className="relative flex items-center gap-2" dir="rtl">
+  if (!authChecked || !authenticated) return null
+
+  return <div className="relative flex items-center gap-2" dir="rtl">{showEntryBanner && <PlatformEntryBanner/>}
     <button type="button" aria-label={unreadCount ? `الإشعارات، ${unreadCount} غير مقروءة` : 'فتح الإشعارات'} title="الإشعارات" aria-expanded={notificationsOpen} onClick={() => { setNotificationsOpen(v => !v); setOpen(false) }} className="relative grid h-11 w-11 place-items-center rounded-full border border-sky-200 bg-sky-50 text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-300">
       <Bell size={19} />
       {unreadCount > 0 && <span aria-label={`${unreadCount} إشعارات غير مقروءة`} className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>}
     </button>
-    <button type="button" aria-expanded={open} aria-label="تفاصيل الحساب" onClick={() => { setOpen(v => !v); setNotificationsOpen(false) }} className="flex items-center gap-2 rounded-full border border-cyan-200 bg-slate-950 px-2 py-1.5 text-white shadow-[0_0_16px_rgba(34,211,238,.18)] hover:border-cyan-300 sm:px-3">
+    {incomingNotification && <div role="status" className="fixed left-1/2 top-16 z-[120] w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 rounded-2xl border border-sky-200 bg-white p-4 text-right text-slate-800 shadow-2xl sm:left-auto sm:right-5 sm:translate-x-0"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-black text-sky-900">{incomingNotification.title}</p>{incomingNotification.body && <p className="mt-1 text-xs leading-6 text-slate-600">{incomingNotification.body}</p>}</div><button type="button" aria-label="إغلاق التنبيه" onClick={() => setIncomingNotification(null)} className="rounded-lg p-1 text-slate-500 hover:bg-slate-100"><X size={16}/></button></div><button type="button" onClick={() => { void openNotification(incomingNotification); setIncomingNotification(null); setNotificationsOpen(true) }} className="mt-3 text-xs font-extrabold text-sky-800">عرض الإشعار</button></div>}
+    <button ref={accountButtonRef} type="button" aria-expanded={open} aria-label="تفاصيل الحساب" onClick={() => { const rect = accountButtonRef.current?.getBoundingClientRect(); if (rect) setAccountMenuPosition({ top: rect.bottom + 8, right: Math.max(12, window.innerWidth - rect.right) }); setOpen(v => !v); setNotificationsOpen(false) }} className="flex items-center gap-2 rounded-full border border-cyan-200 bg-slate-950 px-2 py-1.5 text-white shadow-[0_0_16px_rgba(34,211,238,.18)] hover:border-cyan-300 sm:px-3">
       <span className="grid h-9 w-9 place-items-center rounded-full border-2 border-cyan-300 text-cyan-200 shadow-[0_0_10px_rgba(34,211,238,.45)]"><CircleUserRound size={19}/></span>
       <span className="hidden max-w-36 text-right sm:block"><span className="block truncate text-xs font-extrabold">{identity.name}</span><span className="block truncate text-[10px] text-cyan-100">{identity.organization || identity.role}</span></span><ChevronDown size={14} className="text-cyan-200"/>
     </button>
-    {notificationsOpen && <div className="absolute left-0 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-4 text-right text-slate-800 shadow-xl">
+    {notificationsOpen && <div className="fixed left-1/2 top-20 z-[100] w-[calc(100vw-2rem)] max-w-[22rem] -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-4 text-right text-slate-800 shadow-xl sm:absolute sm:left-0 sm:top-full sm:mt-2 sm:w-[min(22rem,calc(100vw-2rem))] sm:translate-x-0">
       <div className="flex items-center justify-between"><h3 className="font-black">الإشعارات {unreadCount > 0 && <span className="mr-1 text-xs font-bold text-red-600">({unreadCount} جديدة)</span>}</h3><button type="button" aria-label="إغلاق الإشعارات" onClick={() => setNotificationsOpen(false)} className="rounded-lg p-1 text-slate-500 hover:bg-slate-100"><X size={17}/></button></div>
       {notificationsLoading ? <p role="status" className="py-6 text-center text-sm text-slate-500">جارٍ تحميل الإشعارات...</p> : notificationsError ? <div className="py-4"><p role="alert" className="text-sm leading-6 text-red-700">{notificationsError}</p><button type="button" onClick={() => void loadNotifications()} className="mt-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold">إعادة المحاولة</button></div> : notifications.length === 0 ? <p className="py-6 text-center text-sm leading-6 text-slate-500">لا توجد إشعارات جديدة لحسابك حاليًا.</p> : <div className="mt-3 max-h-80 space-y-2 overflow-y-auto">
         {notifications.map(notification => <button key={notification.id} type="button" onClick={() => void openNotification(notification)} className={notification.read_at ? "block w-full rounded-xl border border-slate-100 bg-white p-3 text-right transition hover:border-sky-200 hover:bg-sky-50" : "block w-full rounded-xl border border-sky-100 bg-sky-50/70 p-3 text-right transition hover:border-sky-200 hover:bg-sky-50"}>
@@ -110,6 +172,6 @@ export default function AccountNotifications() {
       </div>}
       <a href="/workspace/messages" className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-sky-50 px-3 py-2.5 text-sm font-bold text-sky-800 hover:bg-sky-100"><MessageCircle size={16}/> الانتقال إلى المحادثات</a>
     </div>}
-    {open && <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-4 text-right text-slate-800 shadow-xl"><p className="font-black">{identity.name}</p><p className="mt-1 break-all text-xs text-slate-500">{identity.email}</p><p className="mt-2 text-sm font-bold text-sky-800">{identity.organization || 'لم يتم ربط مؤسسة'}</p><p className="mt-1 text-xs text-slate-500">{identity.role}</p><a href="/workspace/messages" className="mt-3 flex items-center gap-2 rounded-xl bg-sky-50 px-3 py-2 text-sm font-bold text-sky-800"><MessageCircle size={16}/> فتح المحادثات</a><button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold hover:bg-slate-50"><LogOut size={16}/> تسجيل الخروج</button></div>}
+    {open && <div style={{ position: 'fixed', top: accountMenuPosition.top, right: accountMenuPosition.right, width: 'min(18rem, calc(100vw - 1.5rem))', zIndex: 200 }} className="mc-account-menu rounded-2xl border border-sky-200 bg-white p-4 text-right text-slate-800 shadow-[0_12px_36px_rgba(15,23,42,.22),0_0_0_1px_rgba(56,139,253,.14)]"><p className="font-black">{identity.name}</p><p className="mt-1 break-all text-xs text-slate-500">{identity.email}</p><p className="mt-2 text-sm font-bold text-sky-800">{identity.organization || 'لم يتم ربط مؤسسة'}</p><p className="mt-1 text-xs text-slate-500">{identity.role}</p><a href="/workspace/messages" className="mt-3 flex items-center gap-2 rounded-xl bg-sky-50 px-3 py-2 text-sm font-bold text-sky-800"><MessageCircle size={16}/> فتح المحادثات</a><button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold hover:bg-slate-50"><LogOut size={16}/> تسجيل الخروج</button></div>}
   </div>
 }

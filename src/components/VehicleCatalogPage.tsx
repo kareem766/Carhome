@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CircleUserRound, ArrowLeft, BadgeCheck, Bot, CarFront, Check, ChevronDown, CircleHelp, Filter, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { CircleUserRound, ArrowLeft, BadgeCheck, Bot, CarFront, Check, ChevronDown, CircleHelp, Filter, Menu, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
@@ -38,10 +38,14 @@ export default function VehicleCatalogPage() {
   const [orgType, setOrgType] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [search, setSearch] = useState('')
-  const [type, setType] = useState('الكل')
-  const [city, setCity] = useState('الكل')
-  const [maxPrice, setMaxPrice] = useState('')
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
+  const [type, setType] = useState(() => {
+    const requested = new URLSearchParams(window.location.search).get('vehicle_type') || ''
+    const translated: Record<string, string> = { sedan: 'سيدان', suv: 'SUV', van: 'فان / ميكروباص', bus: 'أتوبيس', truck: 'نقل' }
+    return translated[requested.toLowerCase()] || requested || 'الكل'
+  })
+  const [city, setCity] = useState(() => new URLSearchParams(window.location.search).get('governorate') || 'الكل')
+  const [maxPrice, setMaxPrice] = useState(() => new URLSearchParams(window.location.search).get('max_price') || '')
   const [selected, setSelected] = useState<Vehicle | null>(null)
   const [showOffer, setShowOffer] = useState(false)
   const [offerText, setOfferText] = useState('')
@@ -52,6 +56,7 @@ export default function VehicleCatalogPage() {
   const [botMessages, setBotMessages] = useState<{ role: 'user' | 'assistant'; text: string }[]>([])
   const [botReplying, setBotReplying] = useState(false)
   const [showPlans, setShowPlans] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -61,8 +66,10 @@ export default function VehicleCatalogPage() {
       if (!auth.user) { window.location.replace('/?login=1'); return }
       const { data: membership, error: memberError } = await supabase.from('organization_memberships').select('organization_id').eq('user_id', auth.user.id).limit(1).maybeSingle()
       if (memberError || !membership?.organization_id) { if (active) { setError('أكمل إعداد حسابك وربطه بمؤسسة حتى تتمكن من استخدام الكتالوج.'); setLoading(false) } return }
-      const { data: org } = await supabase.from('organizations').select('organization_type').eq('id',membership.organization_id).maybeSingle()
+      const { data: org } = await supabase.from('organizations').select('organization_type,approval_status').eq('id',membership.organization_id).maybeSingle()
       if (!active) return
+      if (org?.organization_type !== 'company') { window.location.replace('/workspace'); return }
+      if (org.approval_status !== 'approved') { setError('الكتالوج متاح للشركات المعتمدة فقط. حساب شركتك ما زال قيد المراجعة.'); setLoading(false); return }
       setUserId(auth.user.id); setOrgId(membership.organization_id); setOrgType(String(org?.organization_type || ''))
       const { data, error: listError } = await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,monthly_price_egp,yearly_price_egp,with_driver,has_gps,notes,organization_id').eq('review_status','approved').in('payment_status',['verified','waived']).order('created_at',{ascending:false})
       if (listError) setError('تعذر تحميل الكتالوج: '+listError.message)
@@ -97,9 +104,10 @@ export default function VehicleCatalogPage() {
   const filtered = useMemo(() => vehicles.filter(v => {
     const term = search.trim().toLowerCase()
     const matchesTerm = !term || `${v.make} ${v.model} ${v.model_year} ${v.vehicle_type} ${v.governorate}`.toLowerCase().includes(term)
-    return matchesTerm && (type === 'الكل' || v.vehicle_type === type) && (city === 'الكل' || v.governorate === city) && (!maxPrice || v.monthly_price_egp <= Number(maxPrice))
+    const matchesType = type === 'الكل' || (type === 'فان / ميكروباص' ? ['فان','ميكروباص'].includes(v.vehicle_type) : type === 'نقل' ? v.vehicle_type.includes('نقل') : v.vehicle_type === type)
+    return matchesTerm && matchesType && (city === 'الكل' || v.governorate === city) && (!maxPrice || v.monthly_price_egp <= Number(maxPrice))
   }), [vehicles,search,type,city,maxPrice])
-  const types = useMemo(() => ['الكل',...Array.from(new Set(vehicles.map(v=>v.vehicle_type)))], [vehicles])
+  const types = useMemo(() => ['الكل',...Array.from(new Set([...vehicles.map(v=>v.vehicle_type),'فان / ميكروباص','نقل']))], [vehicles])
   const cities = useMemo(() => ['الكل',...Array.from(new Set(vehicles.map(v=>v.governorate)))], [vehicles])
 
   async function startConversation() {
@@ -220,14 +228,15 @@ export default function VehicleCatalogPage() {
     }, 250)
   }
 
-  return <main dir="rtl" className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_48%,#f8fafc_100%)] text-slate-900">
+  return <main dir="rtl" className="mc-catalog-main min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_48%,#f8fafc_100%)] text-slate-900">
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <PlatformBrand />
         <nav className="hidden items-center gap-2 md:flex"><a href="/messages" className="rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">المحادثات</a><a href="/services" className="rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">خدمات السيارات</a><a href={orgType==='company'?'/workspace/company':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100">مساحة عملك</a><a href="/workspace/advertising-plans" className="rounded-xl bg-blue-50 px-4 py-2 text-sm font-extrabold text-blue-800">باقات الظهور الإعلاني</a></nav>
-        <div className="flex items-center gap-2"><AccountNotifications/><a href={orgType==='company'?'/workspace/company':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="hidden items-center gap-2 rounded-xl border border-cyan-200 bg-slate-950 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_0_16px_rgba(34,211,238,.22)] sm:inline-flex"><span className="grid h-7 w-7 place-items-center rounded-full border border-cyan-300 text-cyan-200"><CircleUserRound size={16}/></span>مساحة عملك</a></div>
+        <div className="flex items-center gap-2"><button type="button" onClick={()=>setMobileNavOpen(value=>!value)} aria-label={mobileNavOpen?"إغلاق القائمة":"فتح القائمة"} aria-expanded={mobileNavOpen} aria-controls="catalog-mobile-navigation" className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 md:hidden">{mobileNavOpen?<X size={19}/>:<Menu size={19}/>}</button><AccountNotifications/><a href={orgType==='company'?'/workspace/company':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="hidden items-center gap-2 rounded-xl border border-cyan-200 bg-slate-950 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_0_16px_rgba(34,211,238,.22)] sm:inline-flex"><span className="grid h-7 w-7 place-items-center rounded-full border border-cyan-300 text-cyan-200"><CircleUserRound size={16}/></span>مساحة عملك</a></div>
       </div>
     </header>
+    {mobileNavOpen&&<nav id="catalog-mobile-navigation" aria-label="التنقل الرئيسي للهاتف" className="sticky top-[65px] z-20 mx-3 mt-2 grid gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl md:hidden"><a onClick={()=>setMobileNavOpen(false)} href="/" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">الرئيسية</a><a onClick={()=>setMobileNavOpen(false)} href="#catalog" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">السيارات المتاحة</a><a onClick={()=>setMobileNavOpen(false)} href="/messages" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">المحادثات</a><a onClick={()=>setMobileNavOpen(false)} href="/services" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">خدمات السيارات</a><a onClick={()=>setMobileNavOpen(false)} href="/workspace/advertising-plans" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">باقات الظهور الإعلاني</a></nav>}
     <section className="relative overflow-hidden bg-slate-950 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(37,99,235,.35),transparent_38%),radial-gradient(circle_at_85%_80%,rgba(16,185,129,.18),transparent_30%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[1.1fr_.9fr]">
@@ -237,7 +246,7 @@ export default function VehicleCatalogPage() {
     </section>
     <section id="catalog" className="mx-auto max-w-7xl px-4 py-9 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-bold text-blue-700">اختيار أسرع</p><h2 className="mt-1 text-2xl font-black">السيارات المتاحة</h2><p className="mt-2 text-sm text-slate-500">تظهر هنا السيارات المعتمدة والمستوفية لشروط الإتاحة فقط.</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-200" aria-live="polite">{filtered.length} سيارة</span>{(search || type !== 'الكل' || city !== 'الكل' || maxPrice) && <button type="button" onClick={() => { setSearch(''); setType('الكل'); setCity('الكل'); setMaxPrice('') }} className="min-h-10 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-blue-400 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">مسح الفلاتر</button>}</div></div>
-      <div className="mt-5 grid gap-3 rounded-3xl border border-white bg-white/95 p-4 shadow-lg shadow-slate-200/60 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <div className="mc-catalog-filters mt-5 grid gap-3 rounded-3xl border border-white bg-white/95 p-4 shadow-lg shadow-slate-200/60 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <label className="relative block"><Search size={17} className="absolute right-3 top-4 text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 pe-10 ps-3 text-sm outline-none focus:border-blue-600" placeholder="ابحث عن ماركة أو موديل أو مدينة"/></label>
         <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3"><Filter size={16} className="text-slate-400"/><select value={type} onChange={e=>setType(e.target.value)} className="min-h-12 w-full bg-transparent text-sm outline-none">{types.map(t=><option key={t}>{t}</option>)}</select></label>
         <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3"><ChevronDown size={16} className="text-slate-400"/><select value={city} onChange={e=>setCity(e.target.value)} className="min-h-12 w-full bg-transparent text-sm outline-none">{cities.map(t=><option key={t}>{t}</option>)}</select></label>

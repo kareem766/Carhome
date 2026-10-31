@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, Check, LoaderCircle, Plus, Save, Star, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
+import AdminPageNavigation from './AdminPageNavigation'
 
 type Plan = {
   id: string; name: string; slug: string; description: string; monthly_price: number; yearly_price: number;
@@ -85,11 +86,12 @@ export default function SubscriptionPlansPage() {
     await loadPlans()
   }
   const set=<K extends keyof PlanForm>(key:K,value:PlanForm[K])=>setForm(current=>({...current,[key]:value}))
-  return <main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-7 sm:px-6"><div className="mx-auto max-w-6xl">
+  return <main dir="rtl" className="mc-subscription-admin-main min-h-screen bg-slate-50 px-4 py-7 sm:px-6"><div className="mx-auto max-w-6xl">
     <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-5">
       <div><PlatformBrand compact /><h1 className="mt-1 text-2xl font-extrabold text-slate-900">إدارة أسعار وباقات الاشتراك</h1><p className="mt-2 text-sm leading-6 text-slate-500">تحكم في السعر الشهري والسنوي، التجربة المجانية، المميزات، الحدود، وترتيب وظهور كل باقة.</p></div>
       <a href="/workspace/admin" className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold"><ArrowRight size={17}/> العودة للإدارة</a>
     </header>
+    <AdminPageNavigation />
     {error&&<p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}
     {notice&&<p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">{notice}</p>}
     {authorized&&<form onSubmit={e=>void save(e)} className="mt-5 rounded-2xl border bg-white p-5 sm:p-6">
