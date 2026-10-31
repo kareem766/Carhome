@@ -44,34 +44,13 @@ const defaults: PlatformSettings = {
   supplier_registration_enabled: true, maintenance_mode: false
 }
 function RouteLoading(_props: { logoUrl?: string | null }) {
-  return <main dir="rtl" className="grid min-h-screen place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_42%,#09275b_0%,#061a40_58%,#03112d_100%)] px-5 text-white">
-    <div className="flex flex-col items-center gap-7" role="status" aria-label="جارٍ تحميل منصة My Car">
-      <div className="relative grid h-56 w-56 place-items-center">
-        <span aria-hidden="true" className="absolute inset-1 rounded-full border border-blue-200/10 shadow-[0_0_70px_rgba(20,150,255,.12)]" />
-        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[5px] border-transparent border-t-[#28c8ff] border-r-[#1677f8] border-b-white/80" style={{ animationDuration: "2.2s" }} />
-        <span aria-hidden="true" className="absolute inset-5 rounded-full bg-cyan-400/[0.04] blur-xl" />
-        <svg viewBox="0 0 240 240" role="img" aria-label="رمز تحميل My Car" className="relative h-48 w-48 drop-shadow-[0_0_22px_rgba(35,155,255,.45)]" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="loaderCar" x1="48" y1="78" x2="190" y2="164" gradientUnits="userSpaceOnUse"><stop stopColor="#f8fbff"/><stop offset=".48" stopColor="#4dbdff"/><stop offset="1" stopColor="#0875e8"/></linearGradient>
-            <linearGradient id="loaderRoad" x1="68" y1="184" x2="178" y2="151" gradientUnits="userSpaceOnUse"><stop stopColor="#ff9d24"/><stop offset=".48" stopColor="#fff"/><stop offset="1" stopColor="#21baff"/></linearGradient>
-            <filter id="loaderGlow"><feGaussianBlur stdDeviation="4"/></filter>
-          </defs>
-          <path d="M45 120a75 75 0 0 1 150 0" fill="none" stroke="#1b8dff" strokeOpacity=".18" strokeWidth="9"/>
-          <path d="M48 130 55 104c3-11 10-18 21-20l15-2 17-21c4-5 9-8 16-8h20c7 0 12 3 16 8l17 21 15 2c11 2 18 9 21 20l7 26v25H48z" fill="#0a2b60" stroke="url(#loaderCar)" strokeWidth="3.5"/>
-          <path d="m94 83 18-22c3-4 7-6 12-6h16c5 0 9 2 12 6l18 22z" fill="#071a3c" stroke="#d9f4ff" strokeWidth="2.8"/>
-          <path d="m56 116 37 7 18 17-47-4zM184 116l-37 7-18 17 47-4z" fill="#25b9ff" opacity=".24" filter="url(#loaderGlow)"/>
-          <path d="m57 115 35 7 17 13-45-5zM183 115l-35 7-17 13 45-5z" fill="#dff8ff" stroke="#38c5ff" strokeWidth="2"/>
-          <path d="M105 141h30l17-7h-64z" fill="#061735" stroke="#2f9dff" strokeWidth="2"/>
-          <path d="M52 164c32-23 76-37 136-43-43 12-73 27-94 47-13 12-25 21-42 27 9-11 9-20 0-31Z" fill="url(#loaderRoad)" opacity=".95"/>
-          <path d="M82 184c31-22 64-37 108-48-27 13-47 27-65 44-12 11-25 19-43 25 8-8 8-14 0-21Z" fill="#0d4d9a" opacity=".75"/>
-          <path d="M57 157h126" stroke="#fff" strokeOpacity=".24" strokeWidth="1.5"/>
-        </svg>
+  return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5 text-slate-800">
+    <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل منصة My Car">
+      <div className="relative grid h-24 w-24 place-items-center">
+        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[4px] border-orange-100 border-t-orange-500" style={{ animationDuration: "1.4s" }} />
+        <span className="whitespace-nowrap text-[22px] font-black tracking-tight"><span className="text-blue-700">My</span><span className="text-orange-500"> Car</span></span>
       </div>
-      <p className="text-xl font-extrabold tracking-wide text-white">جارٍ تحميل الصفحة...</p>
-      <div className="h-2 w-64 max-w-[78vw] overflow-hidden rounded-full border border-blue-300/40 bg-blue-950/70 shadow-[0_0_20px_rgba(20,160,255,.18)]">
-        <span className="block h-full w-3/5 animate-pulse rounded-full bg-gradient-to-l from-[#16b9ff] via-[#1689ff] to-white shadow-[0_0_14px_#159dff]" />
-      </div>
-      <span className="text-xs font-semibold tracking-[.28em] text-blue-100/70">MY CAR</span>
+      <span className="text-xs font-semibold text-slate-500">جارٍ تحميل الصفحة...</span>
     </div>
   </main>
 }
@@ -248,7 +227,7 @@ export default function App() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#071b31]/80 via-[#0b2743]/40 to-[#071b31]"/>
         <header className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-4 sm:px-8 sm:py-6">
           {authUser && <button aria-label={mobileNavOpen ? "إغلاق القائمة" : "فتح القائمة"} aria-expanded={mobileNavOpen} aria-controls="mobile-main-navigation" onClick={()=>setMobileNavOpen(value=>!value)} className="order-3 grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/20 text-white hover:bg-white/10 sm:hidden">{mobileNavOpen ? <X size={23}/> : <Menu size={23}/>}</button>}
-          <div className="order-1 flex min-w-0 items-center gap-2 sm:order-1"><div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#ffad0a]/70 bg-white/10 p-1 sm:h-16 sm:w-16">{settings.logo_url ? <img src={settings.logo_url} alt={`${settings.platform_name} logo`} className="h-full w-full object-contain" /> : <img src="/carhome-icon.svg" alt="My Car" className="h-full w-full object-contain" />}</div><div className="text-right"><div className="text-2xl font-black leading-none text-[#ffad0a] sm:text-4xl">{settings.platform_name || "My Car"}</div><div className="mt-1 text-[10px] font-bold text-white/85 sm:text-xs">{settings.tagline || "منصة تأجير السيارات"}</div></div></div>
+          <div className="order-1 flex min-w-0 items-center gap-2 sm:order-1"><div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#ffad0a]/70 bg-white/10 p-1 sm:h-16 sm:w-16">{<img src={settings.logo_url || "https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png"} alt={`${settings.platform_name || "My Car"} logo`} className="h-full w-full object-contain" onError={event => { event.currentTarget.style.display = "none" }} />}</div><div className="text-right"><div className="text-2xl font-black leading-none text-[#ffad0a] sm:text-4xl">{settings.platform_name || "My Car"}</div><div className="mt-1 text-[10px] font-bold text-white/85 sm:text-xs">{settings.tagline || "منصة تأجير السيارات"}</div></div></div>
           {authUser && <nav aria-label="التنقل الرئيسي" className="order-2 hidden items-center gap-5 text-sm font-bold text-white/90 lg:flex"><a href="/" className="hover:text-[#ffad0a]">الرئيسية</a><a href="/workspace" className="hover:text-[#ffad0a]">مساحة العمل</a>{authUser.user_metadata?.organization_type === 'company' && <a href="/workspace/catalog" className="hover:text-[#ffad0a]">استكشف السيارات</a>}<a href="/services" className="hover:text-[#ffad0a]">خدماتنا</a><a href="/workspace/advertising-plans" className="hover:text-[#ffad0a]">باقات الإعلانات</a></nav>}
           <div className="order-2 flex items-center gap-2 sm:order-3">{authUser ? <><a aria-label={isPlatformAdmin ? 'لوحة الإدارة' : 'مساحة العمل'} href={isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-3 text-xs font-black text-[#142b43] shadow-lg hover:bg-amber-300 sm:min-h-12 sm:px-5 sm:text-sm"><UserRound size={17}/><span className="hidden sm:inline">{isPlatformAdmin ? 'لوحة الإدارة' : 'مساحة العمل'}</span></a><AccountNotifications/></> : <><button aria-label="تسجيل الدخول" onClick={()=>openAuth('signin')} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/80 bg-[#102c49]/60 px-3 text-xs font-extrabold text-white hover:bg-white/10 sm:min-h-12 sm:px-5 sm:text-sm"><UserRound size={17}/><span className="hidden sm:inline">تسجيل الدخول</span></button>{settings.registration_enabled&&<a aria-label="إنشاء حساب" href="/register" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-3 text-xs font-black text-[#142b43] shadow-lg hover:bg-amber-300 sm:min-h-12 sm:px-5 sm:text-sm"><UserRoundPlus size={17}/><span className="hidden sm:inline">إنشاء حساب</span></a>}</>}</div>
         </header>
