@@ -133,6 +133,21 @@ export default function VehicleCatalogPage() {
     setError('')
     setNotice('')
     try {
+      if (sendOffer) {
+        // A single database transaction creates the formal offer, conversation and first message.
+        const { data, error: submitError } = await supabase.rpc('submit_company_vehicle_offer', {
+          p_vehicle_id: selected.id,
+          p_message: messageBody
+        })
+        if (submitError) throw new Error('تعذر تسجيل العرض وإرساله: ' + submitError.message)
+        const result = data as { offer_id?: string; conversation_id?: string } | null
+        if (!result?.offer_id || !result?.conversation_id) {
+          throw new Error('لم يؤكد النظام تسجيل العرض. لم يتم تحويلك إلى المحادثة.')
+        }
+        window.location.href = '/messages?conversation=' + result.conversation_id
+        return
+      }
+
       const { data: existing, error: lookupError } = await supabase
         .from('conversations')
         .select('id')
@@ -141,7 +156,6 @@ export default function VehicleCatalogPage() {
         .eq('provider_organization_id', selected.organization_id)
         .eq('status', 'open')
         .maybeSingle()
-
       if (lookupError) throw new Error('تعذر التحقق من محادثة السيارة: ' + lookupError.message)
 
       let conversationId = existing?.id
@@ -154,48 +168,19 @@ export default function VehicleCatalogPage() {
           created_by: userId,
           status: 'open'
         }).select('id').single()
-
-        if (createError) {
-          // Recover safely if another member created the same direct conversation concurrently.
-          if (createError.code === '23505') {
-            const { data: raced, error: raceError } = await supabase
-              .from('conversations')
-              .select('id')
-              .eq('vehicle_id', selected.id)
-              .eq('company_organization_id', orgId)
-              .eq('provider_organization_id', selected.organization_id)
-              .eq('status', 'open')
-              .maybeSingle()
-            if (raceError) throw new Error('تم إنشاء محادثة بالتزامن، لكن تعذر فتحها: ' + raceError.message)
-            conversationId = raced?.id
-          } else {
-            throw new Error('تعذر إنشاء محادثة للسيارة: ' + createError.message)
-          }
-        } else {
-          conversationId = data?.id
-        }
+        if (createError) throw new Error('تعذر إنشاء محادثة للسيارة: ' + createError.message)
+        conversationId = data?.id
       }
-
       if (!conversationId) throw new Error('لم يتم إنشاء المحادثة. حاول مرة أخرى.')
-
-      const initialMessage = sendOffer
-        ? messageBody
-        : existing?.id
-          ? ''
-          : `مرحبًا، أود الاستفسار عن السيارة ${selected.make} ${selected.model} ${selected.model_year}.`
-
-      if (initialMessage) {
+      if (!existing?.id) {
         const { error: messageError } = await supabase.from('messages').insert({
           conversation_id: conversationId,
           sender_organization_id: orgId,
           sender_id: userId,
-          body: initialMessage
+          body: `مرحبًا، أود الاستفسار عن السيارة ${selected.make} ${selected.model} ${selected.model_year}.`
         })
-        if (messageError) {
-          throw new Error('تعذر إرسال نص العرض: ' + messageError.message + ' — تم الاحتفاظ بالمحادثة ويمكنك فتحها وإعادة إرسال رسالتك.')
-        }
+        if (messageError) throw new Error('تعذر إرسال رسالة بدء المحادثة: ' + messageError.message)
       }
-
       window.location.href = '/messages?conversation=' + conversationId
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع أثناء إرسال العرض.')
