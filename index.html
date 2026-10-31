@@ -12,39 +12,7 @@
     <title>My Car | منصة السيارات للشركات والأساطيل في مصر</title>
   </head>
   <body>
-    <div id="root">
-      <main dir="rtl" aria-label="جارٍ تحميل منصة My Car" style="min-height:100vh;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 42%,#09275b 0%,#061a40 58%,#03112d 100%);font-family:Arial,sans-serif;color:#fff">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:28px">
-          <div style="width:224px;height:224px;position:relative;display:grid;place-items:center">
-            <span style="position:absolute;inset:0;border:5px solid transparent;border-top-color:#28c8ff;border-right-color:#1677f8;border-bottom-color:rgba(255,255,255,.8);border-radius:50%;animation:mycar-spin 2.2s linear infinite"></span>
-            <svg viewBox="0 0 240 240" width="192" height="192" role="img" aria-label="رمز تحميل My Car" style="filter:drop-shadow(0 0 22px rgba(35,155,255,.45))">
-              <defs>
-                <linearGradient id="loaderCar" x1="48" y1="78" x2="190" y2="164" gradientUnits="userSpaceOnUse"><stop stop-color="#f8fbff"/><stop offset=".48" stop-color="#4dbdff"/><stop offset="1" stop-color="#0875e8"/></linearGradient>
-                <linearGradient id="loaderRoad" x1="68" y1="184" x2="178" y2="151" gradientUnits="userSpaceOnUse"><stop stop-color="#ff9d24"/><stop offset=".48" stop-color="#fff"/><stop offset="1" stop-color="#21baff"/></linearGradient>
-                <filter id="loaderGlow"><feGaussianBlur stdDeviation="4"/></filter>
-              </defs>
-              <path d="M45 120a75 75 0 0 1 150 0" fill="none" stroke="#1b8dff" stroke-opacity=".18" stroke-width="9"/>
-              <path d="M48 130 55 104c3-11 10-18 21-20l15-2 17-21c4-5 9-8 16-8h20c7 0 12 3 16 8l17 21 15 2c11 2 18 9 21 20l7 26v25H48z" fill="#0a2b60" stroke="url(#loaderCar)" stroke-width="3.5"/>
-              <path d="m94 83 18-22c3-4 7-6 12-6h16c5 0 9 2 12 6l18 22z" fill="#071a3c" stroke="#d9f4ff" stroke-width="2.8"/>
-              <path d="m56 116 37 7 18 17-47-4zM184 116l-37 7-18 17 47-4z" fill="#25b9ff" opacity=".24" filter="url(#loaderGlow)"/>
-              <path d="m57 115 35 7 17 13-45-5zM183 115l-35 7-17 13 45-5z" fill="#dff8ff" stroke="#38c5ff" stroke-width="2"/>
-              <path d="M105 141h30l17-7h-64z" fill="#061735" stroke="#2f9dff" stroke-width="2"/>
-              <path d="M52 164c32-23 76-37 136-43-43 12-73 27-94 47-13 12-25 21-42 27 9-11 9-20 0-31Z" fill="url(#loaderRoad)" opacity=".95"/>
-              <path d="M82 184c31-22 64-37 108-48-27 13-47 27-65 44-12 11-25 19-43 25 8-8 8-14 0-21Z" fill="#0d4d9a" opacity=".75"/>
-              <path d="M57 157h126" stroke="#fff" stroke-opacity=".24" stroke-width="1.5"/>
-            </svg>
-          </div>
-          <strong style="font-size:21px;font-weight:800">جارٍ تحميل الصفحة...</strong>
-          <span style="width:256px;max-width:78vw;height:8px;border:1px solid rgba(147,197,253,.4);border-radius:99px;background:rgba(8,30,70,.8);overflow:hidden"><span style="display:block;width:60%;height:100%;border-radius:99px;background:linear-gradient(90deg,#16b9ff,#1689ff,#fff);box-shadow:0 0 14px #159dff;animation:mycar-pulse 1.15s ease-in-out infinite alternate"></span></span>
-          <span style="font-size:11px;font-weight:700;letter-spacing:.28em;color:rgba(219,234,254,.7)">MY CAR</span>
-        </div>
-      </main>
-      <style>
-        @keyframes mycar-spin{to{transform:rotate(360deg)}}
-        @keyframes mycar-pulse{from{opacity:.55;transform:translateX(-18%)}to{opacity:1;transform:translateX(28%)}}
-        @media(prefers-reduced-motion:reduce){#root span{animation:none!important}}
-      </style>
-    </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
