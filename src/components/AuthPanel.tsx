@@ -346,7 +346,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                   </>
                 )}
                 <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني
-                  <input type="text" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني أو رقم الهاتف" dir="ltr" />
+                  <input type="text" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" />
                 </label>
                 <label className="block text-sm font-bold text-slate-700">كلمة المرور
                   <span className="relative mt-2 block">
