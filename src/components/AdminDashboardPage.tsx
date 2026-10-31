@@ -43,6 +43,7 @@ export default function AdminDashboardPage() {
    const values = await Promise.all([
     count('profiles'),
     count('organizations'),
+    count('organizations', [['organization_type', 'company']]),
     count('organizations', [['approval_status', 'approved']]),
     count('organizations', [['approval_status', 'pending']]),
     count('vehicles'),
