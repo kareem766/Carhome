@@ -101,7 +101,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  }
  async function saveCatalog(e:FormEvent<HTMLFormElement>,table:'managed_sourcing_pricing'|'managed_sourcing_packages'){
   e.preventDefault();if(!supabase)return;const f=new FormData(e.currentTarget);const n=String(f.get('name'))
-  const values=table==='managed_sourcing_pricing'?{name:n,min_vehicles:Number(f.get('min')),max_vehicles:f.get('max')?Number(f.get('max')):null,service_fee_egp:Number(f.get('price')),urgency_multiplier:Number(f.get('multiplier')||1),description:String(f.get('description')||''),is_active:f.get('active')==='on'}:{name:n,description:String(f.get('description')||''),monthly_price_egp:Number(f.get('price')),included_requests:Number(f.get('requests')),included_vehicles_per_request:Number(f.get('vehicles')),is_active:f.get('active')==='on'}
+  const values:any=table==='managed_sourcing_pricing'?{name:n,min_vehicles:Number(f.get('min')),max_vehicles:f.get('max')?Number(f.get('max')):null,service_fee_egp:Number(f.get('price')),urgency_multiplier:Number(f.get('multiplier')||1),description:String(f.get('description')||''),is_active:f.get('active')==='on'}:{name:n,description:String(f.get('description')||''),monthly_price_egp:Number(f.get('price')),included_requests:Number(f.get('requests')),included_vehicles_per_request:Number(f.get('vehicles')),is_active:f.get('active')==='on'}
   setSaving(true);const {error:e1}=editing?.id?await supabase.from(table).update(values).eq('id',editing.id):await supabase.from(table).insert(values)
   setSaving(false);if(e1)setError(e1.message);else{setEditing(null);setNotice('تم حفظ إعدادات التسعير.');await load()}
  }
