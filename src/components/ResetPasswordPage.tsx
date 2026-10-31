@@ -50,14 +50,30 @@ export default function ResetPasswordPage() {
     try {
       const { data: sessionData, error: sessionError } = await client.auth.getSession()
       if (sessionError || !sessionData.session?.user) throw new Error('جلسة الاستعادة غير موجودة أو انتهت صلاحيتها. اطلب رابطًا جديدًا.')
+      const user = sessionData.session.user
       const { error: updateError } = await client.auth.updateUser({ password })
       if (updateError) throw updateError
-      setSuccess(true)
-      const user = sessionData.session.user
-      const { data: adminRecord } = await client.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle()
-      const role = user.user_metadata?.organization_type
+
+      // Admin-created accounts must also complete the one-time password guard.
+      if (user.app_metadata?.must_change_password === true) {
+        const { data: completion, error: completionError } = await client.functions.invoke('admin-managed-accounts', {
+          body: { action: 'complete', password }
+        })
+        if (completionError) throw completionError
+        if (completion?.error) throw new Error(String(completion.error))
+      }
+
+      const { data: refreshed, error: refreshError } = await client.auth.refreshSession()
+      if (refreshError || !refreshed.session?.user) {
+        throw new Error('تم تغيير كلمة المرور، لكن تعذر تحديث الجلسة. سجّل الدخول مرة أخرى.')
+      }
+      const currentUser = refreshed.session.user
+      const { data: adminRecord, error: adminLookupError } = await client.from('platform_admins').select('user_id').eq('user_id', currentUser.id).maybeSingle()
+      if (adminLookupError) throw adminLookupError
+      const role = currentUser.user_metadata?.organization_type
       const destination = adminRecord ? '/workspace/admin' : role === 'company' ? '/workspace/company' : role === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
-      window.setTimeout(() => window.location.replace(destination), 1300)
+      setSuccess(true)
+      window.setTimeout(() => window.location.replace(destination), 900)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'تعذر حفظ كلمة المرور الجديدة. اطلب رابط استعادة جديدًا.')
     } finally { setSaving(false) }
