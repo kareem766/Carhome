@@ -147,15 +147,15 @@ export default function AuthCallbackPage() {
         if (!data.session?.user) {
           throw new Error('لم نتمكن من استلام جلسة التحقق. افتح أحدث رسالة تأكيد، أو اطلب رسالة جديدة ثم جرّب مرة أخرى.')
         }
+        // A recovery link must always land on the dedicated password form,
+        // including accounts that were originally created with a temporary password.
+        if (params.get('flow') === 'password-reset') {
+          window.location.replace('/reset-password')
+          return
+        }
         // A platform-admin-created account must set a permanent password before setup or workspace access.
         if (data.session.user.app_metadata?.must_change_password === true) {
           window.location.replace('/first-login-password')
-          return
-        }
-        // A recovery link must always land on the dedicated password form.
-        // Never route a recovery session directly into the user's workspace.
-        if (params.get('flow') === 'password-reset') {
-          window.location.replace('/reset-password')
           return
         }
         const role = await finishAccount(data.session.user)
