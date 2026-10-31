@@ -6,6 +6,7 @@ import PlatformEntryBanner from './components/PlatformEntryBanner'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import LegalPages from './components/LegalPages'
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
+const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'))
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const AdminAnalyticsPage = lazy(() => import('./components/AdminAnalyticsPage'))
 const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'))
@@ -179,6 +180,8 @@ export default function App() {
   if (path === '/first-login-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><FirstLoginPasswordPage /></Suspense>
   if (path === '/reset-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ResetPasswordPage /></Suspense>
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AuthCallbackPage /></Suspense>
+  if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ManagedSourcingPage admin /></Suspense>
+  if (path === '/workspace/company/managed-sourcing') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ManagedSourcingPage /></Suspense>
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PlatformSettingsPage /></Suspense>
   if (path === '/workspace/admin/managed-accounts') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminManagedAccountsPage /></Suspense>
   if (path === '/workspace/admin/payment-information') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PaymentInformationPage /></Suspense>
