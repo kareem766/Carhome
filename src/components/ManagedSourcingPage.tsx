@@ -33,7 +33,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   if(!admin){
    const {data:paymentSettings,error:paymentSettingsError}=await supabase.rpc('get_public_payment_details').maybeSingle()
    if(paymentSettingsError)setError('تعذر تحميل بيانات الدفع المعتمدة: '+paymentSettingsError.message)
-   else setPaymentDetails({instapay_number:paymentSettings?.instapay_number?.trim()||'',vodafone_cash_number:paymentSettings?.vodafone_cash_number?.trim()||''})
+   else { const details=paymentSettings as unknown as {instapay_number?:string|null;vodafone_cash_number?:string|null}|null; setPaymentDetails({instapay_number:details?.instapay_number?.trim()||'',vodafone_cash_number:details?.vodafone_cash_number?.trim()||''}) }
   }
   if(admin){
    const [r,p,k,s]=await Promise.all([
