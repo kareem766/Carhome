@@ -110,76 +110,97 @@ export default function VehicleCatalogPage() {
   const types = useMemo(() => ['الكل',...Array.from(new Set([...vehicles.map(v=>v.vehicle_type),'فان / ميكروباص','نقل']))], [vehicles])
   const cities = useMemo(() => ['الكل',...Array.from(new Set(vehicles.map(v=>v.governorate)))], [vehicles])
 
-  async function startConversation() {
-    if (!supabase || !selected || !orgId || !userId) return
-    if (orgType !== 'company') { setError('بدء محادثة مباشرة مع مالك السيارة متاح لحسابات الشركات.'); return }
-    if (selected.organization_id === orgId) { setError('لا يمكنك بدء محادثة مع مؤسستك نفسها.'); return }
-    setSending(true); setError('')
-    const { data: existing, error: lookupError } = await supabase
-      .from('conversations')
-      .select('id')
-      .eq('vehicle_id', selected.id)
-      .eq('company_organization_id', orgId)
-      .eq('provider_organization_id', selected.organization_id)
-      .eq('status', 'open')
-      .maybeSingle()
-    if (lookupError) {
-      setError('تعذر التحقق من المحادثة الحالية. تأكد من تحديث قاعدة البيانات ثم حاول مجددًا.')
-      setSending(false)
+  async function startConversation(sendOffer = false) {
+    if (!supabase || !selected || !orgId || !userId) {
+      setError('تعذر التحقق من جلسة الدخول أو بيانات الشركة. حدّث الصفحة ثم حاول مرة أخرى.')
       return
     }
-    let conversationId = existing?.id
-    let isNewConversation = false
-    if (!conversationId) {
-      const { data, error: createError } = await supabase.from('conversations').insert({
-        request_id: null,
-        vehicle_id: selected.id,
-        company_organization_id: orgId,
-        provider_organization_id: selected.organization_id,
-        created_by: userId,
-        status: 'open'
-      }).select('id').single()
-      if (createError) {
-        // A second company member may have created this conversation at the same time.
-        if (createError.code === '23505') {
-          const { data: raced } = await supabase
-            .from('conversations')
-            .select('id')
-            .eq('vehicle_id', selected.id)
-            .eq('company_organization_id', orgId)
-            .eq('provider_organization_id', selected.organization_id)
-      .eq('status', 'open')
-            .maybeSingle()
-          conversationId = raced?.id
-        }
-        if (!conversationId) {
-          setError('تعذر بدء المحادثة. تأكد من تحديث قاعدة البيانات ثم حاول مجددًا.')
-          setSending(false)
-          return
-        }
-      } else {
-        conversationId = data.id
-        isNewConversation = true
-      }
+    if (orgType !== 'company') {
+      setError('إرسال العروض والتواصل المباشر متاحان لحسابات الشركات فقط.')
+      return
     }
-    const initial = offerText.trim() || (isNewConversation
-      ? `مرحبًا، أود الاستفسار عن السيارة ${selected.make} ${selected.model} ${selected.model_year}.`
-      : '')
-    if (initial) {
-      const { error: messageError } = await supabase.from('messages').insert({
-        conversation_id: conversationId,
-        sender_organization_id: orgId,
-        sender_id: userId,
-        body: initial
-      })
-      if (messageError) {
-        setSending(false)
-        setError('تم فتح المحادثة لكن تعذر إرسال الرسالة الأولى: ' + messageError.message)
-        return
-      }
+    if (selected.organization_id === orgId) {
+      setError('لا يمكنك إرسال عرض على سيارة تابعة لمؤسستك.')
+      return
     }
-    setSending(false)
-    window.location.href = '/messages?conversation=' + conversationId
+    const messageBody = offerText.trim()
+    if (sendOffer && !messageBody) {
+      setError('اكتب تفاصيل العرض أو احتياج شركتك أولًا قبل الإرسال.')
+      return
+    }
+
+    setSending(true)
+    setError('')
+    setNotice('')
+    try {
+      const { data: existing, error: lookupError } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('vehicle_id', selected.id)
+        .eq('company_organization_id', orgId)
+        .eq('provider_organization_id', selected.organization_id)
+        .eq('status', 'open')
+        .maybeSingle()
+
+      if (lookupError) throw new Error('تعذر التحقق من محادثة السيارة: ' + lookupError.message)
+
+      let conversationId = existing?.id
+      if (!conversationId) {
+        const { data, error: createError } = await supabase.from('conversations').insert({
+          request_id: null,
+          vehicle_id: selected.id,
+          company_organization_id: orgId,
+          provider_organization_id: selected.organization_id,
+          created_by: userId,
+          status: 'open'
+        }).select('id').single()
+
+        if (createError) {
+          // Recover safely if another member created the same direct conversation concurrently.
+          if (createError.code === '23505') {
+            const { data: raced, error: raceError } = await supabase
+              .from('conversations')
+              .select('id')
+              .eq('vehicle_id', selected.id)
+              .eq('company_organization_id', orgId)
+              .eq('provider_organization_id', selected.organization_id)
+              .eq('status', 'open')
+              .maybeSingle()
+            if (raceError) throw new Error('تم إنشاء محادثة بالتزامن، لكن تعذر فتحها: ' + raceError.message)
+            conversationId = raced?.id
+          } else {
+            throw new Error('تعذر إنشاء محادثة للسيارة: ' + createError.message)
+          }
+        } else {
+          conversationId = data?.id
+        }
+      }
+
+      if (!conversationId) throw new Error('لم يتم إنشاء المحادثة. حاول مرة أخرى.')
+
+      const initialMessage = sendOffer
+        ? messageBody
+        : existing?.id
+          ? ''
+          : `مرحبًا، أود الاستفسار عن السيارة ${selected.make} ${selected.model} ${selected.model_year}.`
+
+      if (initialMessage) {
+        const { error: messageError } = await supabase.from('messages').insert({
+          conversation_id: conversationId,
+          sender_organization_id: orgId,
+          sender_id: userId,
+          body: initialMessage
+        })
+        if (messageError) {
+          throw new Error('تعذر إرسال نص العرض: ' + messageError.message + ' — تم الاحتفاظ بالمحادثة ويمكنك فتحها وإعادة إرسال رسالتك.')
+        }
+      }
+
+      window.location.href = '/messages?conversation=' + conversationId
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع أثناء إرسال العرض.')
+      setSending(false)
+    }
   }
 
   async function requestPromotion() {
@@ -259,7 +280,7 @@ export default function VehicleCatalogPage() {
       </article>)}</div>}
     </section>
     <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6"><div className="relative overflow-hidden rounded-3xl border border-cyan-200/70 bg-[linear-gradient(120deg,#eaf5ff_0%,#ffffff_58%,#eefbff_100%)] p-6 shadow-sm shadow-blue-100 sm:p-8"><div className="pointer-events-none absolute -left-10 -top-12 h-44 w-44 rounded-full border-[18px] border-cyan-100/60"/><div className="relative grid gap-5 sm:grid-cols-[1fr_auto] sm:items-center"><div><span className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-extrabold text-blue-800"><Bot size={15}/> خدمة مخصصة للشركات</span><h2 className="mt-3 text-xl font-black text-slate-950">خلّي My Car تبحث عن السيارات نيابةً عن شركتك</h2><p className="mt-2 max-w-3xl text-sm leading-7 text-slate-600">بدل ما تضيّع وقتك في البحث، حدّد احتياج شركتك وفوّض فريق My Car للبحث لدى الملاك وموردي الأساطيل وتجهيز اختيارات وعروض مقارنة تساعدك على اتخاذ القرار.</p></div><a href="/workspace/company/managed-sourcing" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-800 px-5 font-extrabold text-white shadow-lg shadow-blue-900/15 transition hover:bg-blue-700"><Search size={17}/> اطلب خدمة البحث نيابةً عنك</a></div></div></section>
-    {selected&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/65 p-0 backdrop-blur-sm sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label="تفاصيل السيارة"><div className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl border border-white bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-7"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-blue-700">تفاصيل السيارة المعتمدة</p><h2 className="mt-1 text-2xl font-black">{selected.make} {selected.model} · {selected.model_year}</h2></div><button onClick={()=>setSelected(null)} aria-label="إغلاق" className="rounded-xl border p-2"><X size={19}/></button></div><div className="mt-5 grid gap-3 sm:grid-cols-2"><div className="overflow-hidden rounded-2xl bg-slate-100 sm:col-span-2">{selected.images[0]&&<img src={selected.images[0].url} alt={selected.images[0].alt_text||'صورة السيارة'} className="h-64 w-full object-cover"/>}</div>{[['نوع السيارة',selected.vehicle_type],['المحافظة',selected.governorate],['سنة الصنع',String(selected.model_year)],['ناقل الحركة',selected.transmission],['عدد المقاعد',String(selected.seats)],['السائق',selected.with_driver?'متاح بسائق':'بدون سائق'],['نظام GPS',selected.has_gps===null?'لم يتم تحديده بعد':selected.has_gps?'مزودة بجهاز GPS':'غير مزودة بجهاز GPS']].map(([k,val])=><div key={k} className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">{k}</p><p className="mt-1 font-bold">{val}</p></div>)}</div>{selected.notes&&<p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-600">{selected.notes}</p>}<div className="mt-5 rounded-2xl bg-blue-50 p-4"><p className="text-sm text-slate-600">السعر الشهري</p><p className="mt-1 text-2xl font-black text-blue-800">{money(Number(selected.monthly_price_egp))} جنيه</p>{selected.yearly_price_egp&&<p className="mt-1 text-sm font-bold text-slate-600">السعر السنوي: {money(Number(selected.yearly_price_egp))} جنيه</p>}</div><p className="mt-4 flex items-center gap-2 text-xs leading-6 text-slate-500"><ShieldCheck size={16}/> بيانات مالك السيارة ووسائل الاتصال الشخصية مخفية. التواصل متاح من خلال المحادثات داخل My Car فقط.</p>{showOffer&&<label className="mt-4 block text-sm font-bold">رسالتك أو تفاصيل العرض<textarea rows={3} maxLength={2000} value={offerText} onChange={e=>setOfferText(e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal" placeholder="اكتب المدة المطلوبة، عدد السيارات، أو السعر المقترح..."/></label>}<div className="mt-5 flex flex-col gap-3 sm:flex-row">{orgType==='company'&&<><button disabled={sending} onClick={()=>showOffer?void startConversation():setShowOffer(true)} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 font-extrabold text-white disabled:opacity-50"><Send size={17}/>{sending?'جارٍ الإرسال...':showOffer?'إرسال العرض وبدء المحادثة':'إرسال عرض'}</button><button disabled={sending} onClick={()=>{setOfferText('');void startConversation()}} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 font-extrabold"><MessageCircle size={17}/> بدء محادثة</button></>}{orgType!=='company'&&<a href={orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 font-extrabold text-white">إدارة سياراتك والترويج لها</a>}</div></div></div>}
+    {selected&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/65 p-0 backdrop-blur-sm sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label="تفاصيل السيارة"><div className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl border border-white bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-7"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-blue-700">تفاصيل السيارة المعتمدة</p><h2 className="mt-1 text-2xl font-black">{selected.make} {selected.model} · {selected.model_year}</h2></div><button onClick={()=>setSelected(null)} aria-label="إغلاق" className="rounded-xl border p-2"><X size={19}/></button></div><div className="mt-5 grid gap-3 sm:grid-cols-2"><div className="overflow-hidden rounded-2xl bg-slate-100 sm:col-span-2">{selected.images[0]&&<img src={selected.images[0].url} alt={selected.images[0].alt_text||'صورة السيارة'} className="h-64 w-full object-cover"/>}</div>{[['نوع السيارة',selected.vehicle_type],['المحافظة',selected.governorate],['سنة الصنع',String(selected.model_year)],['ناقل الحركة',selected.transmission],['عدد المقاعد',String(selected.seats)],['السائق',selected.with_driver?'متاح بسائق':'بدون سائق'],['نظام GPS',selected.has_gps===null?'لم يتم تحديده بعد':selected.has_gps?'مزودة بجهاز GPS':'غير مزودة بجهاز GPS']].map(([k,val])=><div key={k} className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">{k}</p><p className="mt-1 font-bold">{val}</p></div>)}</div>{selected.notes&&<p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-600">{selected.notes}</p>}<div className="mt-5 rounded-2xl bg-blue-50 p-4"><p className="text-sm text-slate-600">السعر الشهري</p><p className="mt-1 text-2xl font-black text-blue-800">{money(Number(selected.monthly_price_egp))} جنيه</p>{selected.yearly_price_egp&&<p className="mt-1 text-sm font-bold text-slate-600">السعر السنوي: {money(Number(selected.yearly_price_egp))} جنيه</p>}</div><p className="mt-4 flex items-center gap-2 text-xs leading-6 text-slate-500"><ShieldCheck size={16}/> بيانات مالك السيارة ووسائل الاتصال الشخصية مخفية. التواصل متاح من خلال المحادثات داخل My Car فقط.</p>{showOffer&&<label className="mt-4 block text-sm font-bold">رسالتك أو تفاصيل العرض<textarea rows={3} maxLength={2000} value={offerText} onChange={e=>setOfferText(e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal" placeholder="اكتب المدة المطلوبة، عدد السيارات، أو السعر المقترح..."/></label>}<div className="mt-5 flex flex-col gap-3 sm:flex-row">{orgType==='company'&&<><button disabled={sending} onClick={()=>showOffer?void startConversation(true):setShowOffer(true)} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 font-extrabold text-white disabled:opacity-50"><Send size={17}/>{sending?'جارٍ الإرسال...':showOffer?'إرسال العرض وبدء المحادثة':'إرسال عرض'}</button><button disabled={sending} onClick={()=>{setOfferText('');void startConversation()}} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 font-extrabold"><MessageCircle size={17}/> بدء محادثة</button></>}{orgType!=='company'&&<a href={orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 font-extrabold text-white">إدارة سياراتك والترويج لها</a>}</div></div></div>}
     {showPlans&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/65 p-0 backdrop-blur-sm sm:items-center sm:p-5"><div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-white p-5 sm:rounded-3xl sm:p-7"><div className="flex items-center justify-between"><div><h2 className="text-2xl font-black">باقات الظهور الإعلاني</h2><p className="mt-2 text-sm text-slate-500">خيارات مدفوعة لإبراز السيارات في بداية الكتالوج.</p></div><button onClick={()=>setShowPlans(false)} className="rounded-xl border p-2"><X size={18}/></button></div>{plans.length===0?<div className="mt-5 rounded-2xl bg-slate-50 p-6 text-center"><p className="font-bold">لا توجد باقات إعلانية متاحة حاليًا.</p><p className="mt-2 text-sm text-slate-500">سيتم عرض الباقات بعد اعتمادها من إدارة المنصة.</p></div>:<div className="mt-5 grid gap-4 sm:grid-cols-2">{plans.map(p=><article key={p.id} className="rounded-2xl border p-5"><h3 className="text-lg font-extrabold">{p.name}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{p.description}</p><p className="mt-4 text-2xl font-black text-blue-800">{money(p.price_egp)} جنيه</p><p className="mt-1 text-sm text-slate-500">لمدة {p.duration_days} يومًا</p><ul className="mt-3 space-y-2">{(p.features||[]).map(f=><li key={f} className="flex gap-2 text-sm"><Check size={16} className="text-emerald-600"/>{f}</li>)}</ul><button onClick={()=>setSelectedPlanId(p.id)} className="mt-5 min-h-11 w-full rounded-xl bg-slate-950 px-4 font-bold text-white">طلب ترويج سيارة</button>{selectedPlanId===p.id&&<div className="mt-3 space-y-3 rounded-xl bg-slate-50 p-3">{myVehicles.length===0?<p className="text-sm leading-6 text-slate-600">لا توجد سيارة معتمدة في حسابك حاليًا. أضف سيارة وانتظر اعتمادها أولًا.</p>:<><label className="block text-sm font-bold">اختر السيارة<select value={selectedPromotionVehicle} onChange={e=>setSelectedPromotionVehicle(e.target.value)} className="mt-2 min-h-11 w-full rounded-xl border bg-white px-3"><option value="">اختر سيارة</option>{myVehicles.map(v=><option key={v.id} value={v.id}>{v.make} {v.model} · {v.model_year}</option>)}</select></label><button disabled={!selectedPromotionVehicle||submittingPromotion} onClick={()=>void requestPromotion()} className="min-h-11 w-full rounded-xl bg-blue-700 px-4 font-bold text-white disabled:opacity-50">{submittingPromotion?'جارٍ إرسال الطلب...':'إرسال طلب الترويج للمراجعة'}</button></>}</div>}</article>)}</div>}</div></div>}
     {botOpen&&<div className="fixed bottom-24 left-4 z-50 w-[min(92vw,390px)] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
       <div className="flex items-center justify-between bg-slate-950 p-4 text-white"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-600"><Bot size={22}/></span><div><p className="font-extrabold">مساعد My Car</p><p className="text-xs text-slate-300">اسأل أولًا وسأساعدك في الخطوة التالية</p></div></div><button onClick={()=>setBotOpen(false)} aria-label="إغلاق المساعد"><X size={18}/></button></div>
