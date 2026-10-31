@@ -20,7 +20,7 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/carhome-icon.svg',
+            src: '/carhome-icon.svg?v=20261031-2',
             sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any maskable'
