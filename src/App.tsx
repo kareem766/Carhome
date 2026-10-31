@@ -44,27 +44,34 @@ const defaults: PlatformSettings = {
   supplier_registration_enabled: true, maintenance_mode: false
 }
 function RouteLoading(_props: { logoUrl?: string | null }) {
-  return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(32,190,220,0.12),transparent_48%),#f4f7fc] px-5 text-slate-600">
-    <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل منصة My Car">
-      <div className="relative grid h-32 w-32 place-items-center">
-        <span aria-hidden="true" className="absolute inset-0 rounded-full border-[3px] border-[#dce8f4] shadow-[0_0_36px_rgba(20,45,78,0.10)]" />
-        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-[#f5a623] border-l-[#23c5df]" />
-        <span aria-hidden="true" className="absolute inset-2 animate-pulse rounded-full bg-[#20bdd8]/10" />
-        <span className="relative grid h-24 w-24 place-items-center overflow-hidden rounded-[28px] border border-white bg-gradient-to-br from-[#173c61] to-[#0b2039] shadow-[0_12px_30px_rgba(12,38,67,0.25)]">
-          <svg viewBox="0 0 96 96" role="img" aria-label="My Car" className="h-[82px] w-[82px]" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17 53.5 23.5 37c1.8-4.5 5.3-7 10.2-7h28.6c4.8 0 8.3 2.4 10.2 7L79 53.5v17H17z" fill="#f5a623"/>
-            <path d="m29 39-4.5 11h47L67 39c-.8-2-2.2-3-5-3H34c-2.8 0-4.2 1-5 3Z" fill="#eaf7ff"/>
-            <path d="M12 59h72" stroke="#23c5df" strokeWidth="3.5" strokeLinecap="round"/>
-            <circle cx="31" cy="70" r="7" fill="#eaf7ff" stroke="#23c5df" strokeWidth="2"/>
-            <circle cx="65" cy="70" r="7" fill="#eaf7ff" stroke="#23c5df" strokeWidth="2"/>
-            <path d="M31 17h34" stroke="#23c5df" strokeWidth="4" strokeLinecap="round"/>
-            <path d="M36 24h24" stroke="#f5a623" strokeWidth="3" strokeLinecap="round"/>
-          </svg>
-          <span className="absolute bottom-1.5 text-[9px] font-black tracking-[.18em] text-white">MY CAR</span>
-        </span>
+  return <main dir="rtl" className="grid min-h-screen place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_42%,#09275b_0%,#061a40_58%,#03112d_100%)] px-5 text-white">
+    <div className="flex flex-col items-center gap-7" role="status" aria-label="جارٍ تحميل منصة My Car">
+      <div className="relative grid h-56 w-56 place-items-center">
+        <span aria-hidden="true" className="absolute inset-1 rounded-full border border-blue-200/10 shadow-[0_0_70px_rgba(20,150,255,.12)]" />
+        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[5px] border-transparent border-t-[#28c8ff] border-r-[#1677f8] border-b-white/80" style={{ animationDuration: "2.2s" }} />
+        <span aria-hidden="true" className="absolute inset-5 rounded-full bg-cyan-400/[0.04] blur-xl" />
+        <svg viewBox="0 0 240 240" role="img" aria-label="رمز تحميل My Car" className="relative h-48 w-48 drop-shadow-[0_0_22px_rgba(35,155,255,.45)]" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="loaderCar" x1="48" y1="78" x2="190" y2="164" gradientUnits="userSpaceOnUse"><stop stopColor="#f8fbff"/><stop offset=".48" stopColor="#4dbdff"/><stop offset="1" stopColor="#0875e8"/></linearGradient>
+            <linearGradient id="loaderRoad" x1="68" y1="184" x2="178" y2="151" gradientUnits="userSpaceOnUse"><stop stopColor="#ff9d24"/><stop offset=".48" stopColor="#fff"/><stop offset="1" stopColor="#21baff"/></linearGradient>
+            <filter id="loaderGlow"><feGaussianBlur stdDeviation="4"/></filter>
+          </defs>
+          <path d="M45 120a75 75 0 0 1 150 0" fill="none" stroke="#1b8dff" strokeOpacity=".18" strokeWidth="9"/>
+          <path d="M48 130 55 104c3-11 10-18 21-20l15-2 17-21c4-5 9-8 16-8h20c7 0 12 3 16 8l17 21 15 2c11 2 18 9 21 20l7 26v25H48z" fill="#0a2b60" stroke="url(#loaderCar)" strokeWidth="3.5"/>
+          <path d="m94 83 18-22c3-4 7-6 12-6h16c5 0 9 2 12 6l18 22z" fill="#071a3c" stroke="#d9f4ff" strokeWidth="2.8"/>
+          <path d="m56 116 37 7 18 17-47-4zM184 116l-37 7-18 17 47-4z" fill="#25b9ff" opacity=".24" filter="url(#loaderGlow)"/>
+          <path d="m57 115 35 7 17 13-45-5zM183 115l-35 7-17 13 45-5z" fill="#dff8ff" stroke="#38c5ff" strokeWidth="2"/>
+          <path d="M105 141h30l17-7h-64z" fill="#061735" stroke="#2f9dff" strokeWidth="2"/>
+          <path d="M52 164c32-23 76-37 136-43-43 12-73 27-94 47-13 12-25 21-42 27 9-11 9-20 0-31Z" fill="url(#loaderRoad)" opacity=".95"/>
+          <path d="M82 184c31-22 64-37 108-48-27 13-47 27-65 44-12 11-25 19-43 25 8-8 8-14 0-21Z" fill="#0d4d9a" opacity=".75"/>
+          <path d="M57 157h126" stroke="#fff" strokeOpacity=".24" strokeWidth="1.5"/>
+        </svg>
       </div>
-      <p className="text-sm font-extrabold tracking-wide text-[#173653]">جارٍ تجهيز تجربتك على My Car...</p>
-      <span className="h-1 w-32 overflow-hidden rounded-full bg-[#dce8f4]"><span className="block h-full w-1/2 animate-pulse rounded-full bg-gradient-to-l from-[#f5a623] to-[#23c5df]" /></span>
+      <p className="text-xl font-extrabold tracking-wide text-white">جارٍ تحميل الصفحة...</p>
+      <div className="h-2 w-64 max-w-[78vw] overflow-hidden rounded-full border border-blue-300/40 bg-blue-950/70 shadow-[0_0_20px_rgba(20,160,255,.18)]">
+        <span className="block h-full w-3/5 animate-pulse rounded-full bg-gradient-to-l from-[#16b9ff] via-[#1689ff] to-white shadow-[0_0_14px_#159dff]" />
+      </div>
+      <span className="text-xs font-semibold tracking-[.28em] text-blue-100/70">MY CAR</span>
     </div>
   </main>
 }
