@@ -43,19 +43,28 @@ const defaults: PlatformSettings = {
   registration_enabled: true, owner_registration_enabled: true, company_registration_enabled: true,
   supplier_registration_enabled: true, maintenance_mode: false
 }
-function RouteLoading({ logoUrl }: { logoUrl?: string | null }) {
-  return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(249,115,22,0.12),transparent_48%),#f8fafc] px-5 text-slate-600">
+function RouteLoading(_props: { logoUrl?: string | null }) {
+  return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top,rgba(32,190,220,0.12),transparent_48%),#f4f7fc] px-5 text-slate-600">
     <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل منصة My Car">
-      <div className="relative grid h-28 w-28 place-items-center">
-        <span aria-hidden="true" className="absolute inset-0 rounded-full border-[4px] border-orange-100 shadow-[0_0_35px_rgba(249,115,22,0.16)]" />
-        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[4px] border-transparent border-t-orange-500 border-l-amber-400" />
-        <span aria-hidden="true" className="absolute inset-2 animate-pulse rounded-full bg-orange-500/10" />
-        <span className="relative grid h-[4.5rem] w-[4.5rem] place-items-center overflow-hidden rounded-full border-2 border-orange-400 bg-white shadow-[0_0_22px_rgba(249,115,22,0.25)]">
-          <img src={logoUrl || "/carhome-icon.svg"} alt="My Car" onError={event => { event.currentTarget.src = "/carhome-icon.svg" }} className="h-14 w-14 object-contain" />
+      <div className="relative grid h-32 w-32 place-items-center">
+        <span aria-hidden="true" className="absolute inset-0 rounded-full border-[3px] border-[#dce8f4] shadow-[0_0_36px_rgba(20,45,78,0.10)]" />
+        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-[#f5a623] border-l-[#23c5df]" />
+        <span aria-hidden="true" className="absolute inset-2 animate-pulse rounded-full bg-[#20bdd8]/10" />
+        <span className="relative grid h-24 w-24 place-items-center overflow-hidden rounded-[28px] border border-white bg-gradient-to-br from-[#173c61] to-[#0b2039] shadow-[0_12px_30px_rgba(12,38,67,0.25)]">
+          <svg viewBox="0 0 96 96" role="img" aria-label="My Car" className="h-[82px] w-[82px]" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 53.5 23.5 37c1.8-4.5 5.3-7 10.2-7h28.6c4.8 0 8.3 2.4 10.2 7L79 53.5v17H17z" fill="#f5a623"/>
+            <path d="m29 39-4.5 11h47L67 39c-.8-2-2.2-3-5-3H34c-2.8 0-4.2 1-5 3Z" fill="#eaf7ff"/>
+            <path d="M12 59h72" stroke="#23c5df" strokeWidth="3.5" strokeLinecap="round"/>
+            <circle cx="31" cy="70" r="7" fill="#eaf7ff" stroke="#23c5df" strokeWidth="2"/>
+            <circle cx="65" cy="70" r="7" fill="#eaf7ff" stroke="#23c5df" strokeWidth="2"/>
+            <path d="M31 17h34" stroke="#23c5df" strokeWidth="4" strokeLinecap="round"/>
+            <path d="M36 24h24" stroke="#f5a623" strokeWidth="3" strokeLinecap="round"/>
+          </svg>
+          <span className="absolute bottom-1.5 text-[9px] font-black tracking-[.18em] text-white">MY CAR</span>
         </span>
       </div>
-      <p className="text-sm font-extrabold tracking-wide text-slate-700">جارٍ تجهيز تجربتك على My Car...</p>
-      <span className="h-1 w-28 overflow-hidden rounded-full bg-orange-100"><span className="block h-full w-1/2 animate-pulse rounded-full bg-orange-500" /></span>
+      <p className="text-sm font-extrabold tracking-wide text-[#173653]">جارٍ تجهيز تجربتك على My Car...</p>
+      <span className="h-1 w-32 overflow-hidden rounded-full bg-[#dce8f4]"><span className="block h-full w-1/2 animate-pulse rounded-full bg-gradient-to-l from-[#f5a623] to-[#23c5df]" /></span>
     </div>
   </main>
 }
