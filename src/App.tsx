@@ -50,7 +50,7 @@ function RouteLoading({ logoUrl }: { logoUrl?: string | null }) {
         <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[4px] border-transparent border-t-orange-500 border-l-amber-400" />
         <span aria-hidden="true" className="absolute inset-2 animate-pulse rounded-full bg-orange-500/10" />
         <span className="relative grid h-[4.5rem] w-[4.5rem] place-items-center overflow-hidden rounded-full border-2 border-orange-400 bg-white shadow-[0_0_22px_rgba(249,115,22,0.25)]">
-          {logoUrl ? <img src={logoUrl} alt="" className="h-14 w-14 object-contain" /> : <span aria-hidden="true" className="h-8 w-8 rounded-full border-2 border-orange-200 border-t-orange-500 animate-spin" />}
+          <img src={logoUrl || "/carhome-icon.svg"} alt="My Car" onError={event => { event.currentTarget.src = "/carhome-icon.svg" }} className="h-14 w-14 object-contain" />
         </span>
       </div>
       <p className="text-sm font-extrabold tracking-wide text-slate-700">جارٍ تجهيز تجربتك على My Car...</p>
