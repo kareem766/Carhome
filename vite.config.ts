@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['carhome-icon.svg'],
       manifest: {
-        name: 'Carhome',
-        short_name: 'Carhome',
-        description: 'منصة تأجير السيارات طويل الأجل للشركات في مصر',
+        name: 'My Car',
+        short_name: 'My Car',
+        description: 'منصة السيارات للشركات والأساطيل في مصر',
         lang: 'ar',
         dir: 'rtl',
         theme_color: '#142D4E',
