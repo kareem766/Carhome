@@ -147,6 +147,9 @@ Deno.serve(async(req:Request)=>{
  }
 
  if(body.action==="delete"){
+  return send({error:"تم إيقاف الحذف النهائي مؤقتًا لحماية بيانات المستخدمين والمؤسسات. لم يتم حذف أي بيانات. استخدم إيقاف الحساب لحجب الوصول، وسيُتاح الحذف بعد استكمال آلية حذف آمنة تشمل جميع السجلات والملفات المرتبطة."},409);
+ }
+ if(body.action==="delete"){
   const {data:memberships}=await db.from("organization_memberships").select("organization_id,role").eq("user_id",userId);
   const {data:createdOrgs}=await db.from("organizations").select("id").eq("created_by",userId);
   const orgIds=[...new Set([...(memberships||[]).map(m=>m.organization_id),...(createdOrgs||[]).map(o=>o.id)])];
