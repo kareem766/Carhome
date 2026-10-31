@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 type Brand = { platform_name: string; tagline: string; logo_url: string | null }
-const fallback: Brand = { platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر', logo_url: null }
+const fallback: Brand = { platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر', logo_url: 'https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png' }
 
 export default function PlatformBrand({ compact = false }: { compact?: boolean }) {
   const [brand, setBrand] = useState<Brand>(fallback)
@@ -18,7 +18,7 @@ export default function PlatformBrand({ compact = false }: { compact?: boolean }
     return () => { active = false; window.removeEventListener('platform-settings-updated', load) }
   }, [])
   if (compact) return <span className="inline-flex items-center gap-2 text-sm font-bold text-blue-700">
-    {<img src={brand.logo_url || '/carhome-icon.svg'} alt="" className="h-6 w-6 rounded object-contain" onError={event => { event.currentTarget.src = '/carhome-icon.svg' }}/>}
+    {<img src={brand.logo_url || 'https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png'} alt="" className="h-6 w-6 rounded object-contain" onError={event => { event.currentTarget.style.display = 'none' }}/>}
     {brand.platform_name}
   </span>
   return <span className="inline-flex items-center gap-3">
