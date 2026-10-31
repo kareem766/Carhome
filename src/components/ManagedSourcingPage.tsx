@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { ArrowLeft, BriefcaseBusiness, CheckCircle2, ClipboardList, Clock3, Plus, RefreshCw, Search, ShieldCheck, Wallet } from 'lucide-react'
+import { BriefcaseBusiness, CheckCircle2, Plus, RefreshCw, Search, ShieldCheck, Wallet } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
@@ -62,6 +62,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   e.preventDefault();if(!supabase||!user||!org)return
   setSaving(true);setError('');const f=new FormData(e.currentTarget)
   const governorates=f.getAll('governorates').map(String)
+  if(!governorates.length){setSaving(false);setError('اختر محافظة واحدة على الأقل لمناطق التشغيل.');return}
   const paymentModel=String(f.get('payment_model'))
   const activeSub=subscriptions.find(x=>x.id===String(f.get('subscription_id')||''))
   const payload={company_organization_id:org.id,created_by:user.id,title:String(f.get('title')),service_type:String(f.get('service_type')),quantity:Number(f.get('quantity')),vehicle_type:String(f.get('vehicle_type')),makes_models:String(f.get('makes_models')).split(',').map(x=>x.trim()).filter(Boolean),model_year_min:f.get('model_year_min')?Number(f.get('model_year_min)):null,model_year_max:f.get('model_year_max')?Number(f.get('model_year_max')):null,governorates,duration_type:String(f.get('duration_type')),duration_months:Number(f.get('duration_months')),start_date:f.get('start_date')||null,budget_per_vehicle_egp:f.get('budget_per_vehicle_egp')?Number(f.get('budget_per_vehicle_egp')):null,total_budget_egp:f.get('total_budget_egp')?Number(f.get('total_budget_egp')):null,requirements:String(f.get('requirements')||''),delegation_level:String(f.get('delegation_level')),urgency:String(f.get('urgency')),payment_model:paymentModel,package_id:paymentModel==='subscription'?(activeSub?.package_id||null):null,subscription_id:paymentModel==='subscription'?(activeSub?.id||null):null}
@@ -78,7 +79,8 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  }
  async function companyAction(r:Row,action:string,offerId?:string){
   if(!supabase||!user)return;setSaving(true)
-  const {error:e}=await supabase.from('managed_sourcing_actions').insert({request_id:r.id,offer_id:offerId||null,created_by:user.id,action_type:action,message:action==='select_offer'?'اختارت الشركة هذا العرض':'طلبت الشركة بديلًا'})
+  const actionType=action==='request_alternative'?'request_alternatives':action
+  const {error:e}=await supabase.from('managed_sourcing_actions').insert({request_id:r.id,offer_id:offerId||null,created_by:user.id,action_type:actionType,message:action==='select_offer'?'اختارت الشركة هذا العرض':action==='approve_quote'?'وافقت الشركة على عرض السعر':'طلبت بديلًا'})
   setSaving(false);if(e)setError(e.message);else{setNotice('تم تسجيل اختيارك وإبلاغ فريق My Car.');await load()}
  }
  async function adminUpdateRequest(e:FormEvent<HTMLFormElement>,r:Row){
