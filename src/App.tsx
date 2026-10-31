@@ -194,7 +194,11 @@ export default function App() {
     return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><VehicleCatalogPage /></Suspense>
   }
   if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AutomotiveServicesPage /></Suspense>
-  if (path === '/workspace/advertising-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdvertisingPlansPage /></Suspense>
+  if (path === '/workspace/advertising-plans') {
+    if (!authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
+    if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ManagedSourcingPage /></Suspense>
+    return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdvertisingPlansPage /></Suspense>
+  }
   if (path === '/workspace/admin') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminDashboardPage /></Suspense>
   if (path === '/workspace/admin/analytics') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminAnalyticsPage /></Suspense>
   if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminReviewPage /></Suspense>
