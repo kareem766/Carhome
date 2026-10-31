@@ -45,33 +45,27 @@ const defaults: PlatformSettings = {
 }
 function RouteLoading(_props: { logoUrl?: string | null }) {
   return <main dir="rtl" className="grid min-h-screen place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_42%,#09275b_0%,#061a40_58%,#03112d_100%)] px-5 text-white">
-    <div className="flex flex-col items-center gap-7" role="status" aria-label="جارٍ تحميل منصة My Car">
-      <div className="relative grid h-56 w-56 place-items-center">
-        <span aria-hidden="true" className="absolute inset-1 rounded-full border border-blue-200/10 shadow-[0_0_70px_rgba(20,150,255,.12)]" />
-        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[5px] border-transparent border-t-[#28c8ff] border-r-[#1677f8] border-b-white/80" style={{ animationDuration: "2.2s" }} />
-        <span aria-hidden="true" className="absolute inset-5 rounded-full bg-cyan-400/[0.04] blur-xl" />
-        <svg viewBox="0 0 240 240" role="img" aria-label="رمز تحميل My Car" className="relative h-48 w-48 drop-shadow-[0_0_22px_rgba(35,155,255,.45)]" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="loaderCar" x1="48" y1="78" x2="190" y2="164" gradientUnits="userSpaceOnUse"><stop stopColor="#f8fbff"/><stop offset=".48" stopColor="#4dbdff"/><stop offset="1" stopColor="#0875e8"/></linearGradient>
-            <linearGradient id="loaderRoad" x1="68" y1="184" x2="178" y2="151" gradientUnits="userSpaceOnUse"><stop stopColor="#ff9d24"/><stop offset=".48" stopColor="#fff"/><stop offset="1" stopColor="#21baff"/></linearGradient>
-            <filter id="loaderGlow"><feGaussianBlur stdDeviation="4"/></filter>
-          </defs>
-          <path d="M45 120a75 75 0 0 1 150 0" fill="none" stroke="#1b8dff" strokeOpacity=".18" strokeWidth="9"/>
-          <path d="M48 130 55 104c3-11 10-18 21-20l15-2 17-21c4-5 9-8 16-8h20c7 0 12 3 16 8l17 21 15 2c11 2 18 9 21 20l7 26v25H48z" fill="#0a2b60" stroke="url(#loaderCar)" strokeWidth="3.5"/>
-          <path d="m94 83 18-22c3-4 7-6 12-6h16c5 0 9 2 12 6l18 22z" fill="#071a3c" stroke="#d9f4ff" strokeWidth="2.8"/>
-          <path d="m56 116 37 7 18 17-47-4zM184 116l-37 7-18 17 47-4z" fill="#25b9ff" opacity=".24" filter="url(#loaderGlow)"/>
-          <path d="m57 115 35 7 17 13-45-5zM183 115l-35 7-17 13 45-5z" fill="#dff8ff" stroke="#38c5ff" strokeWidth="2"/>
-          <path d="M105 141h30l17-7h-64z" fill="#061735" stroke="#2f9dff" strokeWidth="2"/>
-          <path d="M52 164c32-23 76-37 136-43-43 12-73 27-94 47-13 12-25 21-42 27 9-11 9-20 0-31Z" fill="url(#loaderRoad)" opacity=".95"/>
-          <path d="M82 184c31-22 64-37 108-48-27 13-47 27-65 44-12 11-25 19-43 25 8-8 8-14 0-21Z" fill="#0d4d9a" opacity=".75"/>
-          <path d="M57 157h126" stroke="#fff" strokeOpacity=".24" strokeWidth="1.5"/>
+    <div className="flex flex-col items-center gap-5" role="status" aria-label="جارٍ تحميل منصة My Car">
+      <div className="relative grid h-44 w-44 place-items-center">
+        <span aria-hidden="true" className="absolute inset-0 rounded-full border border-blue-200/10" />
+        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-[#28c8ff] border-r-[#1677f8]" style={{ animationDuration: "2.4s" }} />
+        <svg viewBox="0 0 160 160" role="img" aria-label="رمز تحميل My Car" className="relative h-32 w-32" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="carBody" x1="35" y1="50" x2="126" y2="115" gradientUnits="userSpaceOnUse"><stop stopColor="#f8fcff"/><stop offset=".55" stopColor="#62caff"/><stop offset="1" stopColor="#1683e9"/></linearGradient></defs>
+          <path d="M25 91 34 66Q38 55 51 53l13-2 13-17q4-5 11-5h15q7 0 11 5l13 17 13 2q13 2 17 13l9 25v24H25z" fill="#0a2b60" stroke="url(#carBody)" strokeWidth="3.5" strokeLinejoin="round"/>
+          <path d="m57 54 12-16q3-4 8-4h18q5 0 8 4l12 16z" fill="#071a3c" stroke="#d9f4ff" strokeWidth="2.5" strokeLinejoin="round"/>
+          <path d="m34 78 26 4 12 13-43-3zM126 82l26-4 5 14-43 3z" fill="#dff8ff" stroke="#38c5ff" strokeWidth="2" strokeLinejoin="round"/>
+          <path d="M68 101h24" stroke="#bdeeff" strokeWidth="3" strokeLinecap="round"/>
+          <path d="M53 113h54" stroke="#1683e9" strokeWidth="3" strokeLinecap="round"/>
+          <rect x="34" y="105" width="18" height="24" rx="8" fill="#061735" stroke="#42bfff" strokeWidth="3"/>
+          <rect x="118" y="105" width="18" height="24" rx="8" fill="#061735" stroke="#42bfff" strokeWidth="3"/>
+          <path d="M20 139h120" stroke="#f5a623" strokeWidth="3" strokeLinecap="round" opacity=".9"/>
         </svg>
       </div>
-      <p className="text-xl font-extrabold tracking-wide text-white">جارٍ تحميل الصفحة...</p>
-      <div className="h-2 w-64 max-w-[78vw] overflow-hidden rounded-full border border-blue-300/40 bg-blue-950/70 shadow-[0_0_20px_rgba(20,160,255,.18)]">
-        <span className="block h-full w-3/5 animate-pulse rounded-full bg-gradient-to-l from-[#16b9ff] via-[#1689ff] to-white shadow-[0_0_14px_#159dff]" />
+      <p className="text-base font-bold tracking-wide text-white">جارٍ تحميل الصفحة...</p>
+      <div className="h-1.5 w-48 max-w-[70vw] overflow-hidden rounded-full bg-blue-950/80">
+        <span className="block h-full w-3/5 animate-pulse rounded-full bg-gradient-to-l from-[#16b9ff] to-[#1689ff]" />
       </div>
-      <span className="text-xs font-semibold tracking-[.28em] text-blue-100/70">MY CAR</span>
+      <span className="text-[10px] font-semibold tracking-[.24em] text-blue-100/65">MY CAR</span>
     </div>
   </main>
 }
