@@ -1,8 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="30" fill="#142D4E"/>
-  <path d="M28 70 37 47c2-5 6-8 12-8h30c6 0 10 3 12 8l9 23v21H28Z" fill="#2474E8"/>
-  <path d="m42 50-6 16h56l-6-16c-1-3-3-4-7-4H49c-4 0-6 1-7 4Z" fill="#F4F7FB"/>
-  <circle cx="44" cy="88" r="9" fill="#F4F7FB"/>
-  <circle cx="84" cy="88" r="9" fill="#F4F7FB"/>
-  <path d="M48 88h32" stroke="#142D4E" stroke-width="4" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">My Car</title>
+  <defs>
+    <linearGradient id="bg" x1="22" y1="18" x2="234" y2="238" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D527D"/>
+      <stop offset="1" stop-color="#091E36"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="48" y1="50" x2="210" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#55E5F2"/>
+      <stop offset="1" stop-color="#18AFCB"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="64" y1="80" x2="193" y2="172" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD16B"/>
+      <stop offset="1" stop-color="#F29B21"/>
+    </linearGradient>
+    <filter id="glow" x="20" y="35" width="216" height="180" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="58" fill="url(#bg)"/>
+  <circle cx="128" cy="111" r="82" fill="none" stroke="#FFFFFF" stroke-opacity=".08" stroke-width="2"/>
+  <path d="M50 145 69 98c5-13 15-20 30-20h58c15 0 25 7 30 20l19 47v31H50z" fill="#18B7D2" opacity=".35" filter="url(#glow)"/>
+  <path d="m50 145 19-47c5-13 15-20 30-20h58c15 0 25 7 30 20l19 47v31H50z" fill="url(#gold)"/>
+  <path d="m83 105-12 29h112l-12-29c-2-5-6-8-13-8H96c-7 0-11 3-13 8Z" fill="#EAF8FF"/>
+  <path d="M44 151h168" stroke="url(#cyan)" stroke-width="9" stroke-linecap="round"/>
+  <path d="M53 163h150" stroke="#FFFFFF" stroke-opacity=".2" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="88" cy="177" r="17" fill="#0A2039" stroke="url(#cyan)" stroke-width="6"/>
+  <circle cx="168" cy="177" r="17" fill="#0A2039" stroke="url(#cyan)" stroke-width="6"/>
+  <circle cx="88" cy="177" r="5" fill="#EAF8FF"/>
+  <circle cx="168" cy="177" r="5" fill="#EAF8FF"/>
+  <path d="M86 48h84" stroke="url(#cyan)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M101 61h54" stroke="url(#gold)" stroke-width="5" stroke-linecap="round"/>
+  <text x="128" y="224" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="25" font-weight="800" letter-spacing="3" text-anchor="middle">MY CAR</text>
 </svg>
