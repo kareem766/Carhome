@@ -91,6 +91,19 @@ export default function AdminReviewPage() {
     setProfileForm({ display_name: row.display_name || '', phone: row.phone || '', contact_email: row.contact_email || '', address: row.address || '' })
     setError(''); setNotice('')
   }
+  async function deleteAccount(profile: ProfileRow) {
+    if (!supabase) return
+    const confirmed = window.confirm('حذف حساب الدخول نهائيًا للمستخدم "' + profile.display_name + '"؟ سيتم حذف الحساب من نظام تسجيل الدخول ولا يمكن التراجع عن ذلك. احتفظ بأي بيانات مطلوبة قبل المتابعة.')
+    if (!confirmed) return
+    setBusyId(profile.id); setError(''); setNotice('')
+    const { error: deleteError } = await supabase.functions.invoke('admin-delete-user', { body: { user_id: profile.id } })
+    setBusyId('')
+    if (deleteError) { setError('تعذر حذف حساب الدخول: ' + deleteError.message); return }
+    setNotice('تم حذف حساب المستخدم نهائيًا.')
+    if (editingProfileId === profile.id) { setEditingProfileId(null); setProfileForm(emptyProfile) }
+    await load()
+  }
+
   async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!supabase || !editingProfileId || !profileForm.display_name.trim()) return
@@ -247,7 +260,7 @@ export default function AdminReviewPage() {
               <div className="flex gap-2 sm:col-span-2"><button disabled={savingProfile} className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{savingProfile ? 'جارٍ الحفظ...' : 'حفظ بيانات الحساب'}</button><button type="button" onClick={()=>{setEditingProfileId(null);setProfileForm(emptyProfile)}} className="rounded-lg border px-4 py-2 text-sm font-bold">إلغاء</button></div>
             </form> : <div className="flex flex-wrap items-center justify-between gap-3">
               <div><h3 className="font-extrabold">{profile.display_name}</h3><p className="mt-1 text-sm text-slate-600">{profile.contact_email || 'لا يوجد بريد تواصل'} · {profile.phone || 'لا يوجد هاتف'}</p><p className="mt-1 text-xs text-slate-500">{profile.address || 'لا يوجد عنوان'} · تاريخ إنشاء الملف: {new Date(profile.created_at).toLocaleDateString('ar-EG')}</p><p className="mt-1 break-all text-[11px] text-slate-400">معرّف الحساب: {profile.id}</p></div>
-              <button onClick={()=>startProfileEdit(profile)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-bold"><Pencil size={15}/> تعديل البيانات</button>
+              <div className="flex flex-wrap gap-2"><button onClick={()=>startProfileEdit(profile)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-bold"><Pencil size={15}/> تعديل البيانات</button><button disabled={busyId===profile.id} onClick={()=>void deleteAccount(profile)} className="inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-bold text-red-800 disabled:opacity-50"><Trash2 size={15}/> {busyId===profile.id ? "جارٍ الحذف..." : "حذف الحساب نهائيًا"}</button></div>
             </div>}
           </article>)}
           {profiles.length===0 && <p className="rounded-xl border border-dashed p-5 text-sm text-slate-500">لا توجد ملفات شخصية ظاهرة.</p>}
