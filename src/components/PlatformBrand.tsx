@@ -22,7 +22,7 @@ export default function PlatformBrand({ compact = false }: { compact?: boolean }
     {brand.platform_name}
   </span>
   return <span className="inline-flex items-center gap-3">
-    {<img src={brand.logo_url || '/carhome-icon.svg'} alt={brand.platform_name} className="h-10 w-10 rounded-lg object-contain" onError={event => { event.currentTarget.src = '/carhome-icon.svg' }}/>}
+    {<img src={brand.logo_url || 'https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png'} alt={brand.platform_name} className="h-10 w-10 rounded-lg object-contain" onError={event => { event.currentTarget.style.display = 'none' }}/>}
     <span><span className="block font-extrabold">{brand.platform_name}</span><span className="block text-xs font-medium text-slate-500">{brand.tagline}</span></span>
   </span>
 }
