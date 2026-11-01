@@ -155,7 +155,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       if (result.error) setError(result.error.message); else {
         const openRequests = (result.data || []) as RentalRequest[]
         setRequests(openRequests)
-        if (role !== 'company' && openRequests.length) {
+        if (openRequests.length) {
           const offerResult = await client.from('rental_offers').select('request_id').eq('organization_id', member.organization_id).in('request_id', openRequests.map(request => request.id))
           if (offerResult.error) setError('تعذر التحقق من العروض السابقة: ' + offerResult.error.message)
           else setOfferedRequestIds(new Set((offerResult.data || []).map((offer: { request_id: string }) => offer.request_id)))
