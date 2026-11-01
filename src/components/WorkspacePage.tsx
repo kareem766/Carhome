@@ -284,24 +284,25 @@ export default function WorkspacePage({ role }: { role: Role }) {
     setDeletingVehicle(true); setError(''); setNotice('')
     try {
       const vehicleId = deleteVehicleTarget.id
-      const imageRows = await supabase.from('vehicle_images').select('storage_path').eq('vehicle_id', vehicleId)
+      // Keep the parent row available while Storage RLS validates ownership of its image paths.
+      const imageRows = await supabase.from('vehicle_images').select('storage_path').eq('vehicle_id', vehicleId).eq('organization_id', organization.id)
       if (imageRows.error) throw new Error('تعذر تجهيز ملفات السيارة للحذف: ' + imageRows.error.message)
       const paths = (imageRows.data || []).map(row => row.storage_path).filter(Boolean)
-      const imageDelete = await supabase.from('vehicle_images').delete().eq('vehicle_id', vehicleId)
-      if (imageDelete.error) throw new Error('تعذر حذف صور السيارة: ' + imageDelete.error.message)
-      const paymentDelete = await supabase.from('vehicle_payment_submissions').delete().eq('vehicle_id', vehicleId)
-      if (paymentDelete.error) throw new Error('تعذر حذف سجلات الدفع المرتبطة بالسيارة: ' + paymentDelete.error.message)
+      if (paths.length) {
+        const storageResult = await supabase.storage.from('vehicle-images').remove(paths)
+        if (storageResult.error) throw new Error('تعذر حذف صور السيارة من التخزين: ' + storageResult.error.message + '. لم يتم حذف سجل السيارة؛ حاول مرة أخرى.')
+      }
+      // Related image/payment rows are configured with ON DELETE CASCADE; deleting them
+      // individually is blocked by their intentionally restricted RLS policies.
       const result = await supabase.from('vehicles').delete().eq('id', vehicleId).eq('organization_id', organization.id).select('id').maybeSingle()
-      if (result.error) throw new Error('تعذر حذف السيارة. قد لا تسمح صلاحيات الحساب بالحذف: ' + result.error.message)
+      if (result.error) throw new Error('تعذر حذف السيارة: ' + result.error.message)
       if (!result.data?.id) throw new Error('لم يتم حذف السيارة. تأكد أن السيارة تابعة لحسابك وأن لديك صلاحية حذفها.')
-      let storageWarning = false
-      if (paths.length) { const storageResult = await supabase.storage.from('vehicle-images').remove(paths); storageWarning = !!storageResult.error }
       setVehicles(current => current.filter(vehicle => vehicle.id !== vehicleId))
       setPaymentSubmissions(current => { const next = { ...current }; delete next[vehicleId]; return next })
       if (paymentVehicle === vehicleId) setPaymentVehicle(null)
       const reason = deleteVehicleReason
       setDeleteVehicleTarget(null); setDeleteVehicleReason('')
-      setNotice(storageWarning ? 'تم حذف السيارة من حسابك، لكن تعذر حذف بعض الصور المخزنة. يرجى إبلاغ الدعم الفني.' : 'تم حذف السيارة من حسابك بنجاح. سبب الحذف: ' + reason + '.')
+      setNotice('تم حذف السيارة وملفاتها المرتبطة بنجاح. سبب الحذف: ' + reason + '.')
     } catch (caught) { setError(caught instanceof Error ? caught.message : 'حدث خطأ أثناء حذف السيارة. حاول مرة أخرى.') }
     finally { setDeletingVehicle(false) }
   }
