@@ -62,7 +62,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [offerRequest, setOfferRequest] = useState<string | null>(null)
-  const [paymentVehicle, setPaymentVehicle] = useState<string | null>(null)
+  const [paymentVehicle, setPaymentVehicle] = useState<string | null>(() => new URLSearchParams(window.location.search).get('paymentVehicle'))
   const [paymentSubmissions, setPaymentSubmissions] = useState<Record<string, string>>({})
   const [photoPreviews, setPhotoPreviews] = useState<{ file: File; url: string }[]>([])
   const [selectedMake, setSelectedMake] = useState('')
@@ -226,12 +226,13 @@ export default function WorkspacePage({ role }: { role: Role }) {
         new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('تم حفظ بيانات السيارة ورفع الصور، لكن تأخر ربط الصور بالسجل. حدّث الصفحة قبل أي محاولة جديدة.')), 30000))
       ])
       if (imageInsert.error) throw new Error('تم حفظ بيانات السيارة، لكن تعذر ربط الصور بها: ' + imageInsert.error.message)
-      setNotice('تم حفظ السيارة ورفع ' + photos.length + ' صور بنجاح. السيارة قيد مراجعة الإدارة وحالة الدفع معلّقة؛ لم يتم تحصيل أي مبلغ من خلال المنصة. المبلغ المطلوب مقابل الاشتراك وعرض السيارة أمام الشركات فقط، ولا تضمن المنصة تشغيل السيارة أو الحصول على عقد تأجير.')
+      setNotice('تم حفظ بيانات السيارة وصورها. الخطوة التالية: استكمال بيانات دفع رسوم التسجيل حتى يتم إرسال ملف السيارة والدفع معًا للمراجعة.')
       formElement.reset()
       photoPreviews.forEach(photo => URL.revokeObjectURL(photo.url))
       setPhotoPreviews([])
       setSelectedMake(''); setSelectedModel(''); setInferredType(''); setInferredSeats(5); setProfileConfidence('low')
-      await loadWorkspace()
+      window.location.href = (role === 'supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles') + '?paymentVehicle=' + encodeURIComponent(savedVehicleId)
+      return
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع أثناء حفظ السيارة.'
       if (savedVehicleId) {
@@ -338,7 +339,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     }
     setPaymentVehicle(null)
     setPaymentSubmissions(current => ({ ...current, [vehicle.id]: 'pending' }))
-    setNotice('تم إرسال بيانات التحويل بنجاح، وحاليًا في انتظار المراجعة. المبلغ مقابل الاشتراك وعرض السيارة أمام الشركات فقط، ولا تضمن المنصة تشغيل السيارة أو الحصول على عقد تأجير.')
+    setNotice('تم إرسال طلب تسجيل السيارة وبيانات الدفع معًا بنجاح. الملف الآن قيد مراجعة واحدة لدى الإدارة. رسوم التسجيل مقابل الاشتراك وعرض السيارة أمام الشركات فقط، ولا تضمن المنصة تشغيل السيارة أو الحصول على عقد تأجير.')
   }
 
   if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
