@@ -69,7 +69,7 @@ export default function VehicleCatalogPage() {
       const { data: org } = await supabase.from('organizations').select('organization_type,approval_status').eq('id',membership.organization_id).maybeSingle()
       if (!active) return
       if (!['company','fleet_supplier'].includes(String(org?.organization_type || ''))) { window.location.replace('/workspace'); return }
-      if (org.approval_status !== 'approved') { setError('الكتالوج متاح للشركات المعتمدة فقط. حساب شركتك ما زال قيد المراجعة.'); setLoading(false); return }
+      if (!org || org.approval_status !== 'approved') { setError('الكتالوج متاح للشركات وموردي الأساطيل المعتمدين فقط. حسابك ما زال قيد المراجعة أو لم يكتمل إعداد المؤسسة.'); setLoading(false); return }
       setUserId(auth.user.id); setOrgId(membership.organization_id); setOrgType(String(org?.organization_type || ''))
       const { data, error: listError } = await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,monthly_price_egp,yearly_price_egp,with_driver,has_gps,notes,organization_id').eq('review_status','approved').in('payment_status',['verified','waived']).order('created_at',{ascending:false})
       if (listError) setError('تعذر تحميل الكتالوج: '+listError.message)
