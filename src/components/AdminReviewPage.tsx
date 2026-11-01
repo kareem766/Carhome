@@ -176,15 +176,6 @@ export default function AdminReviewPage() {
     await load()
   }
 
-  async function reviewVehicle(id: string, status: 'approved' | 'rejected') {
-    if (!supabase) return
-    setBusyId(id); setError(''); setNotice('')
-    const { error: updateError } = await supabase.from('vehicles').update({ review_status: status }).eq('id',id)
-    setBusyId('')
-    if (updateError) { setError(updateError.message); return }
-    setNotice(status === 'approved' ? 'تم اعتماد بيانات السيارة.' : 'تم رفض السيارة وإعادتها للتعديل.')
-    await load()
-  }
   async function reviewPayment(row: PaymentRow, status: 'approved' | 'rejected') {
     if (!supabase || row.review_status !== 'pending') return
     const note = window.prompt(status === 'rejected' ? 'اكتب سبب رفض التحويل ليظهر في سجل المراجعة:' : 'ملاحظات الإدارة (اختياري):', '')
@@ -257,7 +248,7 @@ export default function AdminReviewPage() {
   return <main dir="rtl" className="mc-admin-main min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/60 px-4 py-6 sm:px-6 sm:py-8"><div className="mx-auto max-w-6xl">
     <header className="mc-admin-header flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white bg-white/95 p-5 shadow-md shadow-slate-200/50"><div><div className="flex items-center gap-2"><PlatformBrand compact /><span className="text-sm font-bold text-slate-500">· الإدارة</span></div><h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">مراجعة السيارات والتحويلات</h1><p className="mt-2 text-sm text-slate-500">لا يتم اعتماد السيارة أو تأكيد الدفع إلا بمراجعة المسؤول.</p></div><div className="mc-admin-actions flex flex-wrap items-center gap-2"><AccountNotifications/><a href="/workspace/admin/platform-settings" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> إعدادات المنصة</a><a href="/workspace/admin/subscription-plans" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> أسعار الاشتراكات</a><a href="/workspace/admin/advertising-plans" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> باقات الإعلانات</a><button onClick={() => void load()} className="rounded-xl border p-3" aria-label="تحديث"><RefreshCw size={17}/></button><button onClick={signOut} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold"><LogOut size={16}/> خروج</button></div></header>
     <AdminPageNavigation />
-    <nav aria-label="أقسام لوحة الإدارة" className="mc-admin-anchor-nav sticky top-2 z-20 mt-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-sm backdrop-blur">{[{href:"#admin-accounts",label:"الحسابات"},{href:"#admin-organizations",label:"المؤسسات"},{href:"#admin-rental-requests",label:"طلبات التأجير"},{href:"#admin-rental-offers",label:"العروض"},{href:"#admin-vehicles",label:"السيارات"},{href:"#admin-payments",label:"التحويلات"}].map(item=><a key={item.href} href={item.href} className="inline-flex min-h-10 items-center rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800">{item.label}</a>)}</nav>
+    <nav aria-label="أقسام لوحة الإدارة" className="mc-admin-anchor-nav sticky top-2 z-20 mt-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-sm backdrop-blur">{[{href:"#admin-accounts",label:"الحسابات"},{href:"#admin-organizations",label:"المؤسسات"},{href:"#admin-rental-requests",label:"طلبات التأجير"},{href:"#admin-rental-offers",label:"العروض"},{href:"#admin-vehicles",label:"السيارات"},{href:"#admin-payments",label:"طلبات تسجيل السيارات والدفع"}].map(item=><a key={item.href} href={item.href} className="inline-flex min-h-10 items-center rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800">{item.label}</a>)}</nav>
     {error && <p role="alert" className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}{notice && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">{notice}</p>}
     {loading ? <p className="py-12 text-center text-slate-500">جارٍ تحميل المراجعات...</p> : authorized && <>
 
