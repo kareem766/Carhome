@@ -20,6 +20,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  const [tab,setTab]=useState('requests')
  const [editing,setEditing]=useState<Row|null>(null)
  const [newOffer,setNewOffer]=useState(false)
+ const [reuseDraft,setReuseDraft]=useState<Row|null>(null)
  const load=useCallback(async()=>{
   if(!supabase){window.location.replace('/?login=1');return}
   setLoading(true);setError('')
@@ -126,7 +127,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   {error&&<div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</div>}{notice&&<div role="status" className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{notice}</div>}
   <div className="mt-5 flex flex-wrap gap-2">{(admin?['requests','subscriptions','pricing','packages']:['requests','packages','new']).map(t=><button key={t} onClick={()=>{setTab(t);setSelected('')}} className={'rounded-xl px-4 py-2.5 text-sm font-extrabold '+(tab===t?'bg-blue-700 text-white':'border bg-white text-slate-600')}>{({requests:'طلبات البحث',subscriptions:'الاشتراكات',pricing:'تسعير الطلبات',packages:'الاشتراك الشهري',new:'طلب تفويض جديد'} as Record<string,string>)[t]}</button>)}<button onClick={()=>void load()} className="mr-auto inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-bold"><RefreshCw size={15}/> تحديث</button></div>
   {loading?<div className="mt-6 rounded-2xl border bg-white p-8 text-center text-slate-500">جارٍ تحميل بيانات الخدمة...</div>:tab==='new'&&!admin?<form onSubmit={submitRequest} className="mt-5 rounded-2xl border bg-white p-5 shadow-sm sm:p-7"><h2 className="text-xl font-black">تفاصيل طلب التفويض</h2><p className="mt-1 text-sm text-slate-500">املأ البيانات بدقة، وسيراجع الفريق الطلب ويرسل عرض رسوم مستقل قبل بدء العمل.</p><div className="mt-5 grid gap-4 sm:grid-cols-2">
-  <label className="text-sm font-bold sm:col-span-2">عنوان الطلب *<input name="title" required minLength={4} maxLength={180} className={input} placeholder="مثال: توفير 12 سيارة سيدان لفريق المبيعات"/></label>
+  <label className="text-sm font-bold sm:col-span-2">عنوان الطلب *<input name="title" required minLength={4} maxLength={180} defaultValue={reuseDraft?.title||''} className={input} placeholder="مثال: توفير 12 سيارة سيدان لفريق المبيعات"/></label>
   <label className="text-sm font-bold">نوع الخدمة<select name="service_type" className={input}><option value="search_and_coordinate">بحث وتنسيق شامل</option><option value="standard">بحث أساسي</option><option value="fleet">توفير أسطول</option><option value="staff_transport">نقل موظفين</option><option value="delivery">توصيل / توزيع</option><option value="urgent">طلب عاجل</option></select></label>
   <label className="text-sm font-bold">عدد السيارات *<input name="quantity" type="number" min="1" max="1000" required defaultValue="1" className={input}/></label>
   <label className="text-sm font-bold">نوع السيارات<select name="vehicle_type" className={input}>{['أي نوع مناسب','سيدان','SUV','فان','ميكروباص','ميني باص','أتوبيس','نقل خفيف','نقل ثقيل'].map(x=><option>{x}</option>)}</select></label>
