@@ -266,7 +266,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           ) : settingNewPassword ? (
             <form onSubmit={handleSetNewPassword} className="space-y-4">
               <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور قوية تحتوي على 8 أحرف على الأقل وحروف وأرقام ورمزًا خاصًا.</p>
-              <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="6 أحرف على الأقل" dir="ltr" /></label>
+              <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="8 أحرف على الأقل" dir="ltr" /></label>
               <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة المرور الجديدة</button>
             </form>
           ) : forgotPassword ? (
@@ -296,8 +296,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
               </div>
               {settingNewPassword ? (
                 <form onSubmit={handleSetNewPassword} className="space-y-4">
-                  <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور جديدة لا تقل عن 6 أحرف.</p>
-                  <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="6 أحرف على الأقل" dir="ltr" /></label>
+                  <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور جديدة تحتوي على 8 أحرف على الأقل وحروف وأرقام ورمز خاص.</p>
+                  <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="8 أحرف على الأقل" dir="ltr" /></label>
                   <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة المرور الجديدة</button>
                 </form>
               ) : forgotPassword ? (
@@ -336,7 +336,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                 </label>
                 <label className="block text-sm font-bold text-slate-700">كلمة المرور
                   <span className="relative mt-2 block">
-                    <input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pl-12 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="8 أحرف على الأقل" dir="ltr" />
+                    <input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={mode === 'signup' ? 8 : undefined} required value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pl-12 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="8 أحرف على الأقل" dir="ltr" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="absolute left-3 top-3 rounded-md p-1 text-slate-400">{showPassword ? <EyeOff size={19} /> : <Eye size={19} />}</button>
                   </span>
                 </label>
