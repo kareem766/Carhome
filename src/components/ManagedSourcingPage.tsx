@@ -73,8 +73,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  async function submitPayment(e:FormEvent<HTMLFormElement>,r:Row){
   e.preventDefault();if(!supabase||!user)return;const f=new FormData(e.currentTarget);setSaving(true)
   const ref=String(f.get('reference')||'').trim()
-  const {error:up}=await supabase.from('managed_sourcing_requests').update({payment_reference:ref,payment_submitted_at:new Date().toISOString()}).eq('id',r.id)
-  if(!up)await supabase.from('managed_sourcing_actions').insert({request_id:r.id,created_by:user.id,action_type:'submit_payment_reference',payment_reference:ref,message:'تم إرسال بيانات التحويل من الشركة'})
+  const {error:up}=await supabase.rpc('managed_sourcing_submit_payment',{p_request_id:r.id,p_reference:ref})
   setSaving(false);if(up)setError(up.message);else{setNotice('تم إرسال بيانات التحويل، والطلب الآن بانتظار مراجعة الإدارة.');await load()}
  }
  async function companyAction(r:Row,action:string,offerId?:string){
@@ -91,8 +90,9 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   if(status==='completed')patch.completed_at=new Date().toISOString()
   if(status==='awaiting_payment')patch.payment_status='awaiting_payment'
   const {error:e1}=await supabase.from('managed_sourcing_requests').update(patch).eq('id',r.id)
-  if(!e1){await supabase.from('managed_sourcing_updates').insert({request_id:r.id,created_by:user.id,visibility:'company',title:String(f.get('update_title')||'تحديث حالة الطلب'),body:String(f.get('update_body')||''),status_from:r.status,status_to:status})}
-  setSaving(false);if(e1)setError(e1.message);else{setNotice('تم تحديث الطلب وإرسال التحديث للشركة.');await load()}
+  let auditError:any=null
+  if(!e1){const result=await supabase.from('managed_sourcing_updates').insert({request_id:r.id,created_by:user.id,visibility:'company',title:String(f.get('update_title')||'تحديث حالة الطلب'),body:String(f.get('update_body')||''),status_from:r.status,status_to:status});auditError=result.error}
+  setSaving(false);if(e1||auditError)setError((e1||auditError).message);else{setNotice('تم تحديث الطلب وإرسال التحديث للشركة.');await load()}
  }
  async function addOffer(e:FormEvent<HTMLFormElement>,r:Row){
   e.preventDefault();if(!supabase||!user)return;const f=new FormData(e.currentTarget);setSaving(true)
