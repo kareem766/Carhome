@@ -200,8 +200,8 @@ export default function App() {
     if (!authUser || !['company','fleet_supplier'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للشركات وموردي الأساطيل" message="سجّل الدخول بحساب شركة أو مورد أسطول لاستعراض السيارات المعتمدة." />
     return <Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense>
   }
-  if (path === '/services/provider/register') return <Suspense fallback={<PlatformLoading />}><ServiceProviderRegistrationPage /></Suspense>
-  if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense>
+  if (path === '/services/provider/register') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<Suspense fallback={<PlatformLoading />}><ServiceProviderRegistrationPage /></Suspense></>
+  if (path === '/services' || path === '/automotive-services') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense></>
   if (path === '/workspace/advertising-plans') {
     if (!authLoaded) return <PlatformLoading />
     if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense>
