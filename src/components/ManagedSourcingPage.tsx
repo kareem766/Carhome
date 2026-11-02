@@ -67,7 +67,8 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  }
  useEffect(()=>{
   if(admin||!supabase||!requests.length)return
-  const channel=supabase.channel('managed-sourcing-smart-alerts').on('postgres_changes',{event:'INSERT',schema:'public',table:'managed_sourcing_offers'},payload=>{
+  const client=supabase
+  const channel=client.channel('managed-sourcing-smart-alerts').on('postgres_changes',{event:'INSERT',schema:'public',table:'managed_sourcing_offers'},payload=>{
    const offer=payload.new as Row
    const match=requests.find(r=>r.id===offer.request_id)
    if(!match)return
@@ -76,7 +77,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
    const makeMatch=!(match.makes_models||[]).length||(match.makes_models||[]).some((x:string)=>((offer.make||'')+' '+(offer.model||'')).toLowerCase().includes(x.toLowerCase()))
    if(locationMatch&&typeMatch&&makeMatch){setNotice('تنبيه ذكي: ظهر عرض جديد مناسب لطلبك «'+match.title+'». افتح الطلب لمراجعة العرض.');setSelected(match.id);void load()}
   }).subscribe()
-  return()=>{void supabase.removeChannel(channel)}
+  return()=>{void client.removeChannel(channel)}
  },[admin,requests,load])
  async function submitRequest(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(!supabase||!user||!org)return
