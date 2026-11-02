@@ -171,7 +171,7 @@ export default function AuthCallbackPage() {
         setMessage(adminRecord
           ? 'تم تأكيد الحساب بنجاح. جارٍ فتح لوحة الإدارة...'
           : 'تم تجهيز حسابك بنجاح. جارٍ فتح مساحة العمل الخاصة بك...')
-        window.setTimeout(() => { if (active) window.location.replace(destination) }, 700)
+        window.location.replace(destination)
       } catch (caught) {
         if (!active) return
         const detail = caught && typeof caught === 'object' && 'message' in caught
