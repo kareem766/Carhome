@@ -174,5 +174,18 @@ export default function AuthCallbackPage() {
     return () => { active = false }
   }, [])
 
-  return error ? error ? <section className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-7 text-center shadow-sm sm:p-10"><div className="mb-6 flex justify-center"><PlatformBrand /></div><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><ShieldAlert size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">تعذر تأكيد البريد</h1><p role="alert" className="mt-4 break-words text-sm leading-7 text-red-700">{error}</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="/register" className="rounded-xl bg-blue-700 px-5 py-3 font-bold text-white">العودة للتسجيل</a><a href="/?login=1" className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700">تسجيل الدخول</a></div></section> : <PlatformLoading />
+  return error ? (
+    <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5">
+      <section className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-7 text-center shadow-sm sm:p-10">
+        <div className="mb-6 flex justify-center"><PlatformBrand /></div>
+        <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><ShieldAlert size={28}/></span>
+        <h1 className="mt-5 text-2xl font-extrabold text-slate-950">تعذر تأكيد البريد</h1>
+        <p role="alert" className="mt-4 break-words text-sm leading-7 text-red-700">{error}</p>
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <a href="/register" className="rounded-xl bg-blue-700 px-5 py-3 font-bold text-white">العودة للتسجيل</a>
+          <a href="/?login=1" className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700">تسجيل الدخول</a>
+        </div>
+      </section>
+    </main>
+  ) : <PlatformLoading />
 }
