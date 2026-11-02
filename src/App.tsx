@@ -11,6 +11,7 @@ const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const AdminAnalyticsPage = lazy(() => import('./components/AdminAnalyticsPage'))
 const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'))
+const DiscountCodesPage = lazy(() => import('./components/DiscountCodesPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
@@ -173,6 +174,7 @@ export default function App() {
   if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage admin /></Suspense>
   if (path === '/workspace/company/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense>
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<PlatformLoading />}><PlatformSettingsPage /></Suspense>
+  if (path === '/workspace/admin/discount-codes') return <Suspense fallback={<PlatformLoading />}><DiscountCodesPage /></Suspense>
   if (path === '/workspace/admin/managed-accounts') return <Suspense fallback={<PlatformLoading />}><AdminManagedAccountsPage /></Suspense>
   if (path === '/workspace/admin/payment-information') return <Suspense fallback={<PlatformLoading />}><PaymentInformationPage /></Suspense>
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<PlatformLoading />}><SubscriptionPlansPage /></Suspense>
