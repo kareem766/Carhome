@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
 import { ArrowLeft, Building2, CarFront, ShieldCheck, Users, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, Building, UsersRound } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
+import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
 import PlatformEntryBanner from './components/PlatformEntryBanner'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
@@ -44,18 +45,6 @@ const defaults: PlatformSettings = {
   registration_enabled: true, owner_registration_enabled: true, company_registration_enabled: true,
   supplier_registration_enabled: true, maintenance_mode: false
 }
-function RouteLoading(_props: { logoUrl?: string | null }) {
-  return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5 text-slate-800">
-    <div className="flex flex-col items-center gap-4" role="status" aria-label="جارٍ تحميل منصة My Car">
-      <div className="relative grid h-24 w-24 place-items-center">
-        <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[4px] border-orange-100 border-t-orange-500" style={{ animationDuration: "1.4s" }} />
-        <span className="whitespace-nowrap text-[22px] font-black tracking-tight"><span className="text-blue-700">My</span><span className="text-orange-500"> Car</span></span>
-      </div>
-      <span className="text-xs font-semibold text-slate-500">جارٍ تحميل الصفحة...</span>
-    </div>
-  </main>
-}
-
 function pathIsHome(path: string) { return path === '/' || path === '' }
 
 function ServiceNotice({ title, message, settings }: { title: string; message: string; settings: PlatformSettings }) {
@@ -169,47 +158,47 @@ export default function App() {
   }, [authLoaded, authUser, path])
   // Wait for saved platform identity to load before painting any route.
   // This prevents a default-theme flash before persisted brand colors are applied.
-  if (!settingsLoaded) return <RouteLoading logoUrl={settings.logo_url} />
+  if (!settingsLoaded) return <PlatformLoading />
   // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
-  if (pathIsHome(window.location.pathname) && !authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
-  if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><FirstLoginPasswordPage /></Suspense>
+  if (pathIsHome(window.location.pathname) && !authLoaded) return <PlatformLoading />
+  if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
-  if (path === '/workspace' && !authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
-  if (path === '/workspace') return <RouteLoading logoUrl={settings.logo_url} />
-  if (path === '/first-login-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><FirstLoginPasswordPage /></Suspense>
-  if (path === '/reset-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ResetPasswordPage /></Suspense>
-  if (path === '/auth/callback') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AuthCallbackPage /></Suspense>
-  if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ManagedSourcingPage admin /></Suspense>
-  if (path === '/workspace/company/managed-sourcing') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ManagedSourcingPage /></Suspense>
-  if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PlatformSettingsPage /></Suspense>
-  if (path === '/workspace/admin/managed-accounts') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminManagedAccountsPage /></Suspense>
-  if (path === '/workspace/admin/payment-information') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PaymentInformationPage /></Suspense>
-  if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><SubscriptionPlansPage /></Suspense>
-  if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdvertisingPlansAdminPage /></Suspense>
-  if (path === '/workspace/admin/communications') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminCommunicationsPage /></Suspense>
+  if (path === '/workspace' && !authLoaded) return <PlatformLoading />
+  if (path === '/workspace') return <PlatformLoading />
+  if (path === '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
+  if (path === '/reset-password') return <Suspense fallback={<PlatformLoading />}><ResetPasswordPage /></Suspense>
+  if (path === '/auth/callback') return <Suspense fallback={<PlatformLoading />}><AuthCallbackPage /></Suspense>
+  if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage admin /></Suspense>
+  if (path === '/workspace/company/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense>
+  if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<PlatformLoading />}><PlatformSettingsPage /></Suspense>
+  if (path === '/workspace/admin/managed-accounts') return <Suspense fallback={<PlatformLoading />}><AdminManagedAccountsPage /></Suspense>
+  if (path === '/workspace/admin/payment-information') return <Suspense fallback={<PlatformLoading />}><PaymentInformationPage /></Suspense>
+  if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<PlatformLoading />}><SubscriptionPlansPage /></Suspense>
+  if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<PlatformLoading />}><AdvertisingPlansAdminPage /></Suspense>
+  if (path === '/workspace/admin/communications') return <Suspense fallback={<PlatformLoading />}><AdminCommunicationsPage /></Suspense>
   if (path === '/workspace/catalog') {
-    if (!authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
+    if (!authLoaded) return <PlatformLoading />
     if (authUser?.user_metadata?.organization_type === 'individual_owner') {
       window.location.replace('/workspace/owner/vehicles')
-      return <RouteLoading logoUrl={settings.logo_url} />
+      return <PlatformLoading />
     }
     if (!authUser || !['company','fleet_supplier'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للشركات وموردي الأساطيل" message="سجّل الدخول بحساب شركة أو مورد أسطول لاستعراض السيارات المعتمدة." />
-    return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><VehicleCatalogPage /></Suspense>
+    return <Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense>
   }
-  if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AutomotiveServicesPage /></Suspense>
+  if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense>
   if (path === '/workspace/advertising-plans') {
-    if (!authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
-    if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ManagedSourcingPage /></Suspense>
-    return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdvertisingPlansPage /></Suspense>
+    if (!authLoaded) return <PlatformLoading />
+    if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense>
+    return <Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense>
   }
-  if (path === '/workspace/admin') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminDashboardPage /></Suspense>
-  if (path === '/workspace/admin/analytics') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminAnalyticsPage /></Suspense>
-  if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminReviewPage /></Suspense>
-  if (path.includes('/messages')) return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><MessagingPage /></Suspense>
-  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><WorkspacePage role="company" /></Suspense>
-  if (path.startsWith('/workspace/owner')) return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><WorkspacePage role="owner" /></Suspense>
-  if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><WorkspacePage role="supplier" /></Suspense>
+  if (path === '/workspace/admin') return <Suspense fallback={<PlatformLoading />}><AdminDashboardPage /></Suspense>
+  if (path === '/workspace/admin/analytics') return <Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense>
+  if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense>
+  if (path.includes('/messages')) return <Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense>
+  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense>
+  if (path.startsWith('/workspace/owner')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="owner" /></Suspense>
+  if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense>
 
   if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
   if (settings.maintenance_mode && (path === '/' || path === '/register' || path.startsWith('/register/'))) {
