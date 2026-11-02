@@ -49,10 +49,17 @@ const defaults: PlatformSettings = {
 function pathIsHome(path: string) { return path === '/' || path === '' }
 
 function OwnerPersistentBar() {
+  const links = [
+    { href: '/workspace/owner/vehicles', label: 'سياراتي', icon: <CarFront size={17}/> },
+    { href: '/services', label: 'خدمات السيارات', icon: <Wrench size={17}/> },
+    { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
+    { href: '/messages', label: 'المراسلات', icon: <MessageCircle size={17}/> },
+    { href: '/workspace/owner/account', label: 'الحساب', icon: <UserRound size={17}/> },
+  ]
   return <header dir="rtl" className="mc-owner-persistent-bar">
     <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car</strong><small>مساحة مالك السيارة</small></span></a>
+    <nav aria-label="التنقل الرئيسي" className="mc-owner-main-links">{links.map(link => <a key={link.href} href={link.href} className="mc-owner-main-link">{link.icon}<span>{link.label}</span></a>)}</nav>
     <div className="mc-owner-bar-actions">
-      <a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-owner-bar-action"><MessageCircle size={19}/><span>المحادثات</span></a>
       <button type="button" aria-label="تحديث الصفحة" title="تحديث الصفحة" onClick={()=>window.location.reload()} className="mc-owner-bar-action"><RefreshCw size={18}/><span>تحديث</span></button>
       <AccountNotifications/>
     </div>
@@ -213,7 +220,7 @@ export default function App() {
   if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense>
   if (path.includes('/messages')) return <><Suspense fallback={<PlatformLoading />}>{authUser && authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<MessagingPage /></Suspense></>
   if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense>
-  if (path.startsWith('/workspace/owner')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="owner" /></Suspense>
+  if (path.startsWith('/workspace/owner')) return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="owner" /></Suspense></>
   if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense>
 
   if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
