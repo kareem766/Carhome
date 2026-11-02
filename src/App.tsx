@@ -152,6 +152,8 @@ export default function App() {
     const destination = isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
     if (path === '/register' || path.startsWith('/register/')) window.location.replace(destination)
     if (path === '/workspace') window.location.replace(destination)
+    // Owners land directly on their vehicle portfolio after every successful sign-in.
+    if ((path === '/' || pathIsHome(path)) && !isPlatformAdmin && authUser.user_metadata?.organization_type !== 'company' && authUser.user_metadata?.organization_type !== 'fleet_supplier') window.location.replace('/workspace/owner/vehicles')
   }, [authUser, isPlatformAdmin, path])
 
   useEffect(() => {
