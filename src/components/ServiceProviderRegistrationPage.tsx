@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { ArrowRight, BadgeCheck, Building2, CheckCircle2, ChevronDown, ExternalLink, FileCheck2, Globe2, Mail, MapPin, Phone, ShieldCheck, Wrench } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
@@ -22,7 +23,7 @@ export default function ServiceProviderRegistrationPage() {
   const [submitted,setSubmitted] = useState(false)
   const [error,setError] = useState('')
   const change = (key: keyof typeof initial, value: string) => setForm(current=>({...current,[key]:value}))
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
+  async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
     if (!supabase) { setError('تعذر الاتصال بالخدمة حاليًا. حاول مرة أخرى لاحقًا.'); return }
