@@ -94,7 +94,10 @@ export default function WorkspacePage({ role }: { role: Role }) {
     const authUser = authData.user
     setUser({ id: authUser.id, name: String(authUser.user_metadata?.display_name || authUser.user_metadata?.organization_name || 'مستخدم My Car'), email: authUser.email || authUser.phone || '' })
     const welcomePending = localStorage.getItem('mycar_welcome_banner') === '1'
-    if (welcomePending) {
+    const vehiclePaymentPending = localStorage.getItem('mycar_vehicle_payment_banner') === '1'
+    if (vehiclePaymentPending) {
+      setNotice('تم استلام بيانات السيارة والتحويل بنجاح. طلبك الآن قيد مراجعة الإدارة، وستظهر حالة السيارة هنا حتى اكتمال المراجعة.')
+    } else if (welcomePending) {
       setNotice('أهلًا بك في My Car! تم تأكيد بريدك وتجهيز حسابك بنجاح. نتمنى لك تجربة موفقة.')
     }
     const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations(id,name,organization_type)').eq('user_id', authUser.id).limit(1)
@@ -110,6 +113,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     }
     setOrganization({ ...org, id: member.organization_id })
     if (welcomePending) localStorage.removeItem('mycar_welcome_banner')
+    if (vehiclePaymentPending) localStorage.removeItem('mycar_vehicle_payment_banner')
     if (role === 'company') {
       if (isCompanyVehicles) {
         const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('review_status','approved').eq('payment_status','verified').order('created_at',{ascending:false})
@@ -399,8 +403,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
     }
     setPaymentVehicle(null)
     setPaymentSubmissions(current => ({ ...current, [vehicle.id]: 'pending' }))
-    setNotice('شكراً لاستخدامك منصة My Car. تم إرسال طلبك للإدارة لمراجعة السيارة وبيانات الدفع. ستظهر حالة السيارة في صفحة سياراتي.')
-    window.setTimeout(() => { window.location.href = role === 'supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles' }, 3200)
+    localStorage.setItem('mycar_vehicle_payment_banner', '1')
+    window.location.replace(role === 'supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles')
   }
 
   if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
