@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CircleUserRound, ArrowLeft, BadgeCheck, Bot, CarFront, Check, ChevronDown, CircleHelp, Filter, Menu, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { CircleUserRound, ArrowLeft, BadgeCheck, Heart, Bot, CarFront, Check, ChevronDown, CircleHelp, Filter, Menu, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
@@ -57,6 +57,8 @@ export default function VehicleCatalogPage() {
   const [botReplying, setBotReplying] = useState(false)
   const [showPlans, setShowPlans] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([])
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -71,6 +73,10 @@ export default function VehicleCatalogPage() {
       if (!['company','fleet_supplier'].includes(String(org?.organization_type || ''))) { window.location.replace('/workspace'); return }
       if (!org || org.approval_status !== 'approved') { setError('الكتالوج متاح للشركات وموردي الأساطيل المعتمدين فقط. حسابك ما زال قيد المراجعة أو لم يكتمل إعداد المؤسسة.'); setLoading(false); return }
       setUserId(auth.user.id); setOrgId(membership.organization_id); setOrgType(String(org?.organization_type || ''))
+      try {
+        const savedFavorites = JSON.parse(localStorage.getItem(`mycar:favorites:${membership.organization_id}`) || '[]')
+        setFavoriteIds(Array.isArray(savedFavorites) ? savedFavorites.filter((id): id is string => typeof id === 'string') : [])
+      } catch { setFavoriteIds([]) }
       const { data, error: listError } = await supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,monthly_price_egp,yearly_price_egp,with_driver,has_gps,notes,organization_id').eq('review_status','approved').in('payment_status',['verified','waived']).order('created_at',{ascending:false})
       if (listError) setError('تعذر تحميل الكتالوج: '+listError.message)
       const rows = (data || []) as Omit<Vehicle,'images'>[]
@@ -105,10 +111,16 @@ export default function VehicleCatalogPage() {
     const term = search.trim().toLowerCase()
     const matchesTerm = !term || `${v.make} ${v.model} ${v.model_year} ${v.vehicle_type} ${v.governorate}`.toLowerCase().includes(term)
     const matchesType = type === 'الكل' || (type === 'فان / ميكروباص' ? ['فان','ميكروباص'].includes(v.vehicle_type) : type === 'نقل' ? v.vehicle_type.includes('نقل') : v.vehicle_type === type)
-    return matchesTerm && matchesType && (city === 'الكل' || v.governorate === city) && (!maxPrice || v.monthly_price_egp <= Number(maxPrice))
-  }), [vehicles,search,type,city,maxPrice])
+    return matchesTerm && matchesType && (city === 'الكل' || v.governorate === city) && (!maxPrice || v.monthly_price_egp <= Number(maxPrice)) && (!favoritesOnly || favoriteIds.includes(v.id))
+  }), [vehicles,search,type,city,maxPrice,favoritesOnly,favoriteIds])
   const types = useMemo(() => ['الكل',...Array.from(new Set([...vehicles.map(v=>v.vehicle_type),'فان / ميكروباص','نقل']))], [vehicles])
   const cities = useMemo(() => ['الكل',...Array.from(new Set(vehicles.map(v=>v.governorate)))], [vehicles])
+
+  function toggleFavorite(vehicleId: string) {
+    const next = favoriteIds.includes(vehicleId) ? favoriteIds.filter(id => id !== vehicleId) : [...favoriteIds, vehicleId]
+    setFavoriteIds(next)
+    if (orgId) localStorage.setItem(`mycar:favorites:${orgId}`, JSON.stringify(next))
+  }
 
   async function startConversation(sendOffer = false) {
     if (!supabase || !selected || !orgId || !userId) {
@@ -251,7 +263,7 @@ export default function VehicleCatalogPage() {
       </div>
     </section>
     <section id="catalog" className="mx-auto max-w-7xl px-4 py-9 sm:px-6">
-      <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-bold text-blue-700">اختيار أسرع</p><h2 className="mt-1 text-2xl font-black">السيارات المتاحة</h2><p className="mt-2 text-sm text-slate-500">تظهر هنا السيارات المعتمدة والمستوفية لشروط الإتاحة فقط.</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-200" aria-live="polite">{filtered.length} سيارة</span>{(search || type !== 'الكل' || city !== 'الكل' || maxPrice) && <button type="button" onClick={() => { setSearch(''); setType('الكل'); setCity('الكل'); setMaxPrice('') }} className="min-h-10 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-blue-400 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">مسح الفلاتر</button>}</div></div>
+      <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-bold text-blue-700">اختيار أسرع</p><h2 className="mt-1 text-2xl font-black">السيارات المتاحة</h2><p className="mt-2 text-sm text-slate-500">تظهر هنا السيارات المعتمدة والمستوفية لشروط الإتاحة فقط.</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-200" aria-live="polite">{filtered.length} سيارة</span><button type="button" onClick={()=>setFavoritesOnly(value=>!value)} aria-pressed={favoritesOnly} className={"inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 py-2 text-sm font-extrabold transition "+(favoritesOnly?"border-rose-200 bg-rose-50 text-rose-700":"border-slate-200 bg-white text-slate-600 hover:border-rose-200 hover:text-rose-700")}><Heart size={16} fill={favoritesOnly?"currentColor":"none"}/> المفضلة ({favoriteIds.length})</button>{(search || type !== 'الكل' || city !== 'الكل' || maxPrice) && <button type="button" onClick={() => { setSearch(''); setType('الكل'); setCity('الكل'); setMaxPrice('') }} className="min-h-10 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-blue-400 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">مسح الفلاتر</button>}</div></div>
       <div className="mc-catalog-filters mt-5 grid gap-3 rounded-3xl border border-white bg-white/95 p-4 shadow-lg shadow-slate-200/60 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <label className="relative block"><Search size={17} className="absolute right-3 top-4 text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 pe-10 ps-3 text-sm outline-none focus:border-blue-600" placeholder="ابحث عن ماركة أو موديل أو مدينة"/></label>
         <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3"><Filter size={16} className="text-slate-400"/><select value={type} onChange={e=>setType(e.target.value)} className="min-h-12 w-full bg-transparent text-sm outline-none">{types.map(t=><option key={t}>{t}</option>)}</select></label>
@@ -260,7 +272,8 @@ export default function VehicleCatalogPage() {
       </div>
       {error&&<p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-700">{error}</p>}
       {notice&&<p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">{notice}</p>}
-      {loading?<div className="py-16 text-center text-slate-500">جارٍ تحميل السيارات المعتمدة...</div>:filtered.length===0?<div className="mt-5 rounded-2xl border border-dashed bg-white p-10 text-center"><CarFront size={34} className="mx-auto text-slate-300"/><h3 className="mt-3 font-extrabold">لا توجد سيارات مطابقة</h3><p className="mt-2 text-sm text-slate-500">غيّر خيارات البحث أو ارجع لاحقًا عند إضافة سيارات معتمدة.</p><button onClick={()=>{setSearch('');setType('الكل');setCity('الكل');setMaxPrice('')}} className="mt-4 rounded-xl border px-4 py-2 text-sm font-bold">مسح الفلاتر</button></div>:<div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{filtered.map(v=><article key={v.id} className="group overflow-hidden rounded-3xl border border-white bg-white shadow-md shadow-slate-200/60 transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl hover:shadow-blue-950/10">
+      {loading?<div className="py-16 text-center text-slate-500">جارٍ تحميل السيارات المعتمدة...</div>:filtered.length===0?<div className="mt-5 rounded-2xl border border-dashed bg-white p-10 text-center"><CarFront size={34} className="mx-auto text-slate-300"/><h3 className="mt-3 font-extrabold">لا توجد سيارات مطابقة</h3><p className="mt-2 text-sm text-slate-500">غيّر خيارات البحث أو ارجع لاحقًا عند إضافة سيارات معتمدة.</p><button onClick={()=>{setSearch('');setType('الكل');setCity('الكل');setMaxPrice('')}} className="mt-4 rounded-xl border px-4 py-2 text-sm font-bold">مسح الفلاتر</button></div>:<div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{filtered.map(v=><article key={v.id} className="group relative overflow-hidden rounded-3xl border border-white bg-white shadow-md shadow-slate-200/60 transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-xl hover:shadow-blue-950/10">
+        <button type="button" aria-label={favoriteIds.includes(v.id)?"إزالة السيارة من المفضلة":"إضافة السيارة إلى المفضلة"} aria-pressed={favoriteIds.includes(v.id)} onClick={()=>toggleFavorite(v.id)} className={"absolute left-3 top-3 z-20 grid h-10 w-10 place-items-center rounded-full shadow-md ring-1 ring-black/5 transition "+(favoriteIds.includes(v.id)?"bg-rose-50 text-rose-600":"bg-white/95 text-slate-600 hover:bg-rose-50 hover:text-rose-600")}><Heart size={19} fill={favoriteIds.includes(v.id)?"currentColor":"none"}/></button>
         <button onClick={()=>{setSelected(v);setShowOffer(false);setOfferText('');setError('')}} className="block w-full text-right"><div className="relative h-52 bg-slate-100">{promotedIds.includes(v.id)&&<span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1.5 text-xs font-black text-slate-950"><Sparkles size={13}/> إعلان مميز</span>}{v.images[0]?<img src={v.images[0].url} alt={v.images[0].alt_text||v.make+' '+v.model} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"/>:<div className="grid h-full place-items-center text-slate-300"><CarFront size={42}/><span className="text-xs">الصورة غير متاحة</span></div>}<span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-extrabold text-emerald-800"><BadgeCheck size={14}/> معتمدة</span></div><div className="p-5"><div className="flex items-start justify-between gap-2"><h3 className="text-lg font-extrabold">{v.make} {v.model}</h3><span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold">{v.model_year}</span></div><p className="mt-2 text-sm text-slate-500">{v.vehicle_type} · {v.governorate} · {v.seats} مقاعد</p><p className="mt-4 text-xl font-black text-blue-800">{money(Number(v.monthly_price_egp))} <span className="text-xs font-bold text-slate-500">جنيه / شهر</span></p><p className="mt-3 text-sm font-bold text-blue-700">عرض التفاصيل <ArrowLeft size={14} className="inline"/></p></div></button>
       </article>)}</div>}
     </section>
