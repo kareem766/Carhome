@@ -47,7 +47,8 @@ const defaults: PlatformSettings = {
   supplier_registration_enabled: true, maintenance_mode: false
 }
 function pathIsHome(path: string) { return path === '/' || path === '' }
-\nfunction OwnerPersistentBar() {
+
+function OwnerPersistentBar() {
   return <header dir="rtl" className="mc-owner-persistent-bar">
     <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car</strong><small>مساحة مالك السيارة</small></span></a>
     <div className="mc-owner-bar-actions">
