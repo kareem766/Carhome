@@ -190,6 +190,10 @@ export default function App() {
   if (path === '/workspace/admin/communications') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminCommunicationsPage /></Suspense>
   if (path === '/workspace/catalog') {
     if (!authLoaded) return <RouteLoading logoUrl={settings.logo_url} />
+    if (authUser?.user_metadata?.organization_type === 'individual_owner') {
+      window.location.replace('/workspace/owner/vehicles')
+      return <RouteLoading logoUrl={settings.logo_url} />
+    }
     if (!authUser || !['company','fleet_supplier'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للشركات وموردي الأساطيل" message="سجّل الدخول بحساب شركة أو مورد أسطول لاستعراض السيارات المعتمدة." />
     return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><VehicleCatalogPage /></Suspense>
   }
