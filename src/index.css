@@ -739,3 +739,13 @@ main.min-h-screen :is(input, select, textarea):disabled {
 
 @media(min-width:761px){.mc-workspace-topbar{position:sticky;top:0;z-index:80;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);box-shadow:0 8px 24px rgba(15,35,65,.05)}}
 .mc-account-menu a:focus-visible,.mc-account-menu button:focus-visible{outline:3px solid #38bdf8;outline-offset:2px}
+
+.mc-owner-persistent-bar{position:sticky;top:0;z-index:90;display:flex;min-height:76px;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid #dce8f5;background:rgba(255,255,255,.96);padding:.65rem clamp(.75rem,3vw,2rem);backdrop-filter:blur(18px);box-shadow:0 8px 24px rgba(15,35,65,.08)}
+.mc-owner-bar-brand{display:flex;align-items:center;gap:.65rem;color:#102b49;text-decoration:none}
+.mc-owner-bar-brand strong{display:block;font-size:1rem;font-weight:950;letter-spacing:.01em}
+.mc-owner-bar-brand small{display:block;margin-top:.12rem;color:#71839a;font-size:.68rem;font-weight:700}
+.mc-owner-bar-mark{display:grid;height:42px;width:42px;place-items:center;border:1px solid #53a8ff;border-radius:14px;background:linear-gradient(145deg,#092744,#145b91);color:#a8efff;box-shadow:0 0 16px rgba(56,139,253,.22)}
+.mc-owner-bar-actions{display:flex;align-items:center;gap:.55rem}
+.mc-owner-bar-action{display:inline-flex;min-height:44px;min-width:44px;align-items:center;justify-content:center;gap:.45rem;border:1px solid #60a5fa;border-radius:13px;background:linear-gradient(180deg,#fff,#f0f7ff);padding:.55rem .75rem;color:#124caa;font-size:.75rem;font-weight:850;box-shadow:0 0 12px rgba(56,139,253,.14)}
+.mc-owner-bar-action:focus-visible{outline:3px solid #38bdf8;outline-offset:3px}
+@media(max-width:760px){.mc-owner-persistent-bar{min-height:66px;padding:calc(.45rem + env(safe-area-inset-top)) .7rem .55rem;gap:.35rem}.mc-owner-bar-mark{height:38px;width:38px}.mc-owner-bar-brand strong{font-size:.9rem}.mc-owner-bar-brand small{font-size:.6rem}.mc-owner-bar-actions{gap:.35rem}.mc-owner-bar-action{min-width:42px;min-height:42px;padding:.5rem}.mc-owner-bar-action span{display:none}}
