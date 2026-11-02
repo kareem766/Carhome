@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { ArrowRight, BadgeCheck, Building2, CheckCircle2, ChevronDown, ExternalLink, FileCheck2, Globe2, Mail, MapPin, Phone, ShieldCheck, Wrench } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Building2, CheckCircle2, ChevronDown, FileCheck2, Phone, ShieldCheck, Wrench } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
