@@ -15,6 +15,7 @@ const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPag
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
 const AutomotiveServicesPage = lazy(() => import('./components/AutomotiveServicesPage'))
+const ServiceProviderRegistrationPage = lazy(() => import('./components/ServiceProviderRegistrationPage'))
 const AdvertisingPlansAdminPage = lazy(() => import('./components/AdvertisingPlansAdminPage'))
 const PaymentInformationPage = lazy(() => import('./components/PaymentInformationPage'))
 const AdminManagedAccountsPage = lazy(() => import('./components/AdminManagedAccountsPage'))
@@ -186,6 +187,7 @@ export default function App() {
     if (!authUser || !['company','fleet_supplier'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للشركات وموردي الأساطيل" message="سجّل الدخول بحساب شركة أو مورد أسطول لاستعراض السيارات المعتمدة." />
     return <Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense>
   }
+  if (path === '/services/provider/register') return <Suspense fallback={<PlatformLoading />}><ServiceProviderRegistrationPage /></Suspense>
   if (path === '/services' || path === '/automotive-services') return <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense>
   if (path === '/workspace/advertising-plans') {
     if (!authLoaded) return <PlatformLoading />
