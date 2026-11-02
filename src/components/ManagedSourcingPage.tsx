@@ -67,7 +67,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  }
  useEffect(()=>{
   if(admin||!supabase||!requests.length)return
-  const client=supabase
+  const client=supabase!
   const channel=client.channel('managed-sourcing-smart-alerts').on('postgres_changes',{event:'INSERT',schema:'public',table:'managed_sourcing_offers'},payload=>{
    const offer=payload.new as Row
    const match=requests.find(r=>r.id===offer.request_id)
