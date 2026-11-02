@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
-import { ArrowLeft, Building2, CarFront, ShieldCheck, Users, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, Building, UsersRound } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, ShieldCheck, Users, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, Building, UsersRound, RefreshCw, MessageCircle } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
@@ -47,6 +47,17 @@ const defaults: PlatformSettings = {
   supplier_registration_enabled: true, maintenance_mode: false
 }
 function pathIsHome(path: string) { return path === '/' || path === '' }
+\nfunction OwnerPersistentBar() {
+  return <header dir="rtl" className="mc-owner-persistent-bar">
+    <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car</strong><small>مساحة مالك السيارة</small></span></a>
+    <div className="mc-owner-bar-actions">
+      <a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-owner-bar-action"><MessageCircle size={19}/><span>المحادثات</span></a>
+      <button type="button" aria-label="تحديث الصفحة" title="تحديث الصفحة" onClick={()=>window.location.reload()} className="mc-owner-bar-action"><RefreshCw size={18}/><span>تحديث</span></button>
+      <AccountNotifications/>
+    </div>
+  </header>
+}
+
 
 function ServiceNotice({ title, message, settings }: { title: string; message: string; settings: PlatformSettings }) {
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5">
@@ -194,12 +205,12 @@ export default function App() {
   if (path === '/workspace/advertising-plans') {
     if (!authLoaded) return <PlatformLoading />
     if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense>
-    return <Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense>
+    return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense></>
   }
   if (path === '/workspace/admin') return <Suspense fallback={<PlatformLoading />}><AdminDashboardPage /></Suspense>
   if (path === '/workspace/admin/analytics') return <Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense>
   if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense>
-  if (path.includes('/messages')) return <Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense>
+  if (path.includes('/messages')) return <><Suspense fallback={<PlatformLoading />}>{authUser && authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<MessagingPage /></Suspense></>
   if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense>
   if (path.startsWith('/workspace/owner')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="owner" /></Suspense>
   if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense>
