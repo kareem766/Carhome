@@ -636,6 +636,8 @@ main.min-h-screen :is(input, select, textarea):disabled {
 
 /* CarHome workspace v2 — persistent desktop sidebar and application-style dashboard */
 .mc-workspace-main{display:grid;grid-template-columns:260px minmax(0,1fr);direction:rtl;background:#f3f6fb!important;color:#10233f}
+.mc-owner-workspace-main{grid-template-columns:minmax(0,1fr)!important}
+.mc-owner-workspace-main>.mc-workspace-content{grid-column:1/-1;min-width:0}
 .mc-workspace-sidebar{position:sticky;top:0;display:flex;height:100vh;flex-direction:column;gap:1.5rem;overflow-y:auto;background:linear-gradient(180deg,#0b1d36 0%,#102b4c 100%);padding:1.5rem 1rem;color:#fff}
 .mc-sidebar-brand{display:flex;min-height:3.5rem;align-items:center;justify-content:space-between;gap:.5rem;padding:0 .5rem 1rem;border-bottom:1px solid rgba(255,255,255,.12)}
 .mc-sidebar-brand [class*=brand]{color:#fff}
