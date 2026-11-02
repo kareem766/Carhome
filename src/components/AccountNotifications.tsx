@@ -140,6 +140,11 @@ export default function AccountNotifications() {
 
   async function openNotification(notification: PlatformNotification) {
     await markAsRead(notification)
+    const approvedVehicleNotice = /تم اعتماد سيارتك|اعتماد السيارة|تم اعتماد السيارة/.test([notification.title, notification.body || ''].join(' '))
+    if (identity.role === 'مالك سيارة' && approvedVehicleNotice) {
+      window.location.href = '/workspace/owner/vehicles'
+      return
+    }
     if (notification.action_url) window.location.href = notification.action_url
   }
 
