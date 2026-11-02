@@ -9,17 +9,6 @@ type Props = { onClose: () => void; initialMode?: 'signin' | 'signup' }
 
 function isStrongPassword(value: string) { return value.length >= 8 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value) }
 
-function normalizeEgyptianPhone(value: string) {
-  const compact = value.trim().replace(/[\\s().-]/g, '')
-  if (compact.startsWith('+')) return compact
-  const digits = compact.replace(/\\D/g, '')
-  if (digits.startsWith('0020')) return `+${digits.slice(2)}`
-  if (digits.startsWith('20')) return `+${digits}`
-  if (digits.startsWith('0')) return `+20${digits.slice(1)}`
-  if (digits.startsWith('1') && digits.length === 10) return `+20${digits}`
-  return compact
-}
-
 const accountTypes: { value: AccountType; label: string; detail: string }[] = [
   { value: 'individual_owner', label: 'مالك سيارة', detail: 'إدارة سياراتك واستقبال طلبات الشركات' },
   { value: 'fleet_supplier', label: 'مورد أسطول', detail: 'عرض سيارات الأسطول والتعامل مع الطلبات' },
@@ -235,7 +224,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع. حاول مرة أخرى.'
-      setError(message.includes('Invalid login credentials') ? 'البريد الإلكتروني أو رقم الموبايل أو كلمة المرور غير صحيحة.' : message)
+      setError(message.includes('Invalid login credentials') ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : message)
     } finally {
       setLoading(false)
     }
@@ -283,7 +272,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           ) : forgotPassword ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <p className="text-sm leading-6 text-slate-600">اكتب بريدك الإلكتروني وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة المرور إذا كان الحساب مسجلًا.</p>
-              <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني<input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" /></label>
+              <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني<input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="name@example.com" dir="ltr" /></label>
               <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}إرسال رابط الاستعادة</button>
               <button type="button" onClick={() => { setForgotPassword(false); setError(''); setNotice('') }} className="w-full py-2 text-sm font-bold text-blue-700">العودة لتسجيل الدخول</button>
             </form>
