@@ -78,7 +78,6 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  }
  async function companyAction(r:Row,action:string,offerId?:string){
   if(!supabase||!user)return;setSaving(true)
-  const actionType=action==='request_alternative'?'request_alternatives':action
   const {error:e}=await supabase.rpc('managed_sourcing_company_action',{p_request_id:r.id,p_action:action==='request_alternative'?'request_alternatives':action,p_offer_id:offerId||null})
   setSaving(false);if(e)setError(e.message);else{setNotice('تم تسجيل اختيارك وإبلاغ فريق My Car.');await load()}
  }
