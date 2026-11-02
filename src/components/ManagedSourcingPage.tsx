@@ -59,6 +59,25 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   setLoading(false)
  },[admin,selected])
  useEffect(()=>{void load()},[load])
+ function exportCsv(rows:Row[],filename:string){
+  const columns=[['title','اسم الطلب'],['status','الحالة'],['quantity','عدد السيارات'],['vehicle_type','نوع السيارة'],['governorates','المحافظات'],['duration_months','مدة الإيجار بالشهور'],['quoted_fee_egp','رسوم الخدمة'],['payment_status','حالة الدفع'],['created_at','تاريخ الطلب']]
+  const cell=(v:any)=>{const value=Array.isArray(v)?v.join('، '):String(v??'');return '"'+value.replace(/"/g,'""')+'"'}
+  const csv='\uFEFF'+[columns.map(x=>cell(x[1])).join(','),...rows.map(row=>columns.map(([key])=>cell(row[key])).join(','))].join('\r\n')
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url)
+ }
+ useEffect(()=>{
+  if(admin||!supabase||!requests.length)return
+  const channel=supabase.channel('managed-sourcing-smart-alerts').on('postgres_changes',{event:'INSERT',schema:'public',table:'managed_sourcing_offers'},payload=>{
+   const offer=payload.new as Row
+   const match=requests.find(r=>r.id===offer.request_id)
+   if(!match)return
+   const locationMatch=(match.governorates||[]).includes(offer.governorate)
+   const typeMatch=!match.vehicle_type||match.vehicle_type==='أي نوع مناسب'||match.vehicle_type===offer.vehicle_type
+   const makeMatch=!(match.makes_models||[]).length||(match.makes_models||[]).some((x:string)=>((offer.make||'')+' '+(offer.model||'')).toLowerCase().includes(x.toLowerCase()))
+   if(locationMatch&&typeMatch&&makeMatch){setNotice('تنبيه ذكي: ظهر عرض جديد مناسب لطلبك «'+match.title+'». افتح الطلب لمراجعة العرض.');setSelected(match.id);void load()}
+  }).subscribe()
+  return()=>{void supabase.removeChannel(channel)}
+ },[admin,requests,load])
  async function submitRequest(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(!supabase||!user||!org)return
   setSaving(true);setError('');const f=new FormData(e.currentTarget)
