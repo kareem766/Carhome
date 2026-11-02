@@ -110,6 +110,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
   const [error, setError] = useState('')
   const [session, setSession] = useState<Session | null>(null)
   const [sessionLoading, setSessionLoading] = useState(true)
+  const [redirecting, setRedirecting] = useState(false)
 
   useEffect(() => {
     if (!supabase) {
@@ -122,6 +123,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     })
     const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession)
+      if (event === 'SIGNED_IN' && nextSession) setRedirecting(true)
       if (event === 'PASSWORD_RECOVERY') { setSettingNewPassword(true); setForgotPassword(false); setNotice('أدخل كلمة المرور الجديدة لحسابك.'); setError('') }
     })
     return () => listener.subscription.unsubscribe()
@@ -290,6 +292,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
               <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}إرسال رابط الاستعادة</button>
               <button type="button" onClick={() => { setForgotPassword(false); setError(''); setNotice('') }} className="w-full py-2 text-sm font-bold text-blue-700">العودة لتسجيل الدخول</button>
             </form>
+          ) : redirecting ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-10 text-slate-600" role="status"><LoaderCircle className="animate-spin text-blue-700" size={30}/><span className="text-sm font-bold">جارٍ فتح مساحة عملك...</span></div>
           ) : session ? (
             <div>
               <div className="rounded-2xl bg-blue-50 p-4">
