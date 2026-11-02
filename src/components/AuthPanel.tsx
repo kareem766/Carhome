@@ -7,6 +7,8 @@ import PlatformBrand from './PlatformBrand'
 type AccountType = 'individual_owner' | 'fleet_supplier' | 'company'
 type Props = { onClose: () => void; initialMode?: 'signin' | 'signup' }
 
+function isStrongPassword(value: string) { return value.length >= 8 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value) }
+
 function normalizeEgyptianPhone(value: string) {
   const compact = value.trim().replace(/[\\s().-]/g, '')
   if (compact.startsWith('+')) return compact
@@ -148,7 +150,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     event.preventDefault()
     setError(''); setNotice('')
     if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
-    if (password.length < 6) { setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل.'); return }
+    if (!isStrongPassword(password)) { setError('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وحرف صغير ورقم ورمز خاص.'); return }
     setLoading(true)
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password })
@@ -172,6 +174,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
       setError('الاتصال بخدمة الحسابات غير مضبوط بعد. راجع إعدادات Supabase في Vercel.')
       return
     }
+    if (mode === 'signup' && !isStrongPassword(password)) { setError('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وحرف صغير ورقم ورمز خاص.'); return }
     setLoading(true)
     try {
       if (mode === 'signup') {
@@ -216,23 +219,17 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           setMode('signin')
         }
       } else {
-        const identifier = email.trim()
-        const isEmail = identifier.includes('@')
-        const phone = normalizeEgyptianPhone(identifier)
-        if (!isEmail && !/^\\+20\\d{10}$/.test(phone)) {
-          throw new Error('اكتب بريدًا إلكترونيًا صحيحًا أو رقم موبايل مصريًا مكوّنًا من 11 رقمًا.')
+        const identifier = email.trim().toLowerCase()
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
+          throw new Error('اكتب بريدًا إلكترونيًا صحيحًا لتسجيل الدخول.')
         }
-        const { data, error: signInError } = await supabase.auth.signInWithPassword(
-          isEmail ? { email: identifier.toLowerCase(), password } : { phone, password }
-        )
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: identifier, password })
         if (signInError) throw signInError
         if (!data.user || !data.session) throw new Error('تم تسجيل الدخول لكن لم يتم إنشاء جلسة صالحة. حاول مرة أخرى.')
-        // Admin-provisioned accounts must change their temporary password before any onboarding or workspace route.
         if (data.user.app_metadata?.must_change_password === true) {
           window.location.replace('/first-login-password')
           return
         }
-        // Use the shared callback to recover incomplete accounts and route every role consistently.
         window.location.replace('/auth/callback')
         return
       }
@@ -279,8 +276,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
             <div className="flex items-center justify-center gap-2 py-8 text-slate-500"><LoaderCircle className="animate-spin" size={20} /> جارٍ التحقق من الجلسة...</div>
           ) : settingNewPassword ? (
             <form onSubmit={handleSetNewPassword} className="space-y-4">
-              <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور جديدة لا تقل عن 6 أحرف.</p>
-              <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="6 أحرف على الأقل" dir="ltr" /></label>
+              <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور قوية تحتوي على 8 أحرف على الأقل وحروف وأرقام ورمزًا خاصًا.</p>
+              <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="6 أحرف على الأقل" dir="ltr" /></label>
               <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة المرور الجديدة</button>
             </form>
           ) : forgotPassword ? (
@@ -346,11 +343,11 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                   </>
                 )}
                 <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني
-                  <input type="text" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" />
+                  <input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" />
                 </label>
                 <label className="block text-sm font-bold text-slate-700">كلمة المرور
                   <span className="relative mt-2 block">
-                    <input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pl-12 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="٦ أحرف على الأقل" dir="ltr" />
+                    <input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pl-12 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="8 أحرف على الأقل" dir="ltr" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="absolute left-3 top-3 rounded-md p-1 text-slate-400">{showPassword ? <EyeOff size={19} /> : <Eye size={19} />}</button>
                   </span>
                 </label>
