@@ -716,7 +716,7 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-workspace-page :is(a,button).border-white\/30{border-color:#69b7ff!important;color:#fff!important}
 .mc-workspace-page :is(a,button):focus-visible{outline:3px solid #38bdf8;outline-offset:3px}
 @media(max-width:760px){
- .mc-workspace-topbar{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:.75rem!important;width:calc(100% + 1.5rem);margin:0 -.75rem;padding:.9rem .85rem 1rem;overflow:visible}
+ .mc-workspace-topbar{position:sticky!important;top:0!important;z-index:80!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:.75rem!important;width:calc(100% + 1.5rem);margin:0 -.75rem;padding:calc(.65rem + env(safe-area-inset-top)) .85rem .8rem;overflow:visible;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);box-shadow:0 8px 24px rgba(15,35,65,.07)}
  .mc-workspace-heading{width:100%;min-width:0}
  .mc-workspace-heading>span{display:block!important;line-height:1.6}
  .mc-workspace-heading h1{font-size:1.1rem!important;line-height:1.55!important;margin-top:.25rem!important}
@@ -736,3 +736,6 @@ main.min-h-screen :is(input, select, textarea):disabled {
 @media(max-width:760px){
  .mc-account-menu{left:50%!important;right:auto!important;transform:translateX(-50%);width:min(20rem,calc(100vw - 24px))!important;max-width:calc(100vw - 24px);max-height:calc(100svh - 110px);overflow-y:auto;overscroll-behavior:contain}
 }
+
+@media(min-width:761px){.mc-workspace-topbar{position:sticky;top:0;z-index:80;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);box-shadow:0 8px 24px rgba(15,35,65,.05)}}
+.mc-account-menu a:focus-visible,.mc-account-menu button:focus-visible{outline:3px solid #38bdf8;outline-offset:2px}
