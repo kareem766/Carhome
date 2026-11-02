@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { vehicleCatalog } from '../data/vehicleCatalog'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
+import AccountProfilePage from './AccountProfilePage'
 
 type Role = 'company' | 'owner' | 'supplier'
 type Organization = { id: string; name: string; organization_type: string }
