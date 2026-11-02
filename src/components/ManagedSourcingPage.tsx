@@ -66,7 +66,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   const paymentModel=String(f.get('payment_model'))
   const activeSub=subscriptions.find(x=>x.id===String(f.get('subscription_id')||''))
   const payload={company_organization_id:org.id,created_by:user.id,title:String(f.get('title')),service_type:String(f.get('service_type')),quantity:Number(f.get('quantity')),vehicle_type:String(f.get('vehicle_type')),makes_models:String(f.get('makes_models')).split(',').map(x=>x.trim()).filter(Boolean),model_year_min:f.get('model_year_min')?Number(f.get('model_year_min')):null,model_year_max:f.get('model_year_max')?Number(f.get('model_year_max')):null,governorates,duration_type:String(f.get('duration_type')),duration_months:Number(f.get('duration_months')),start_date:f.get('start_date')||null,budget_per_vehicle_egp:f.get('budget_per_vehicle_egp')?Number(f.get('budget_per_vehicle_egp')):null,total_budget_egp:f.get('total_budget_egp')?Number(f.get('total_budget_egp')):null,requirements:String(f.get('requirements')||''),delegation_level:String(f.get('delegation_level')),urgency:String(f.get('urgency')),payment_model:paymentModel,package_id:paymentModel==='subscription'?(activeSub?.package_id||null):null,subscription_id:paymentModel==='subscription'?(activeSub?.id||null):null}
-  const {error:se}=await supabase.from('managed_sourcing_requests').insert(payload)
+  const {error:se}=await supabase.rpc('managed_sourcing_submit_request',{p_payload:payload})
   setSaving(false);if(se){setError(se.message);return}
   setNotice('تم إرسال طلب التفويض بنجاح. سيراجع فريق My Car الاحتياج ويرسل عرض السعر قبل بدء البحث.');e.currentTarget.reset();setTab('requests');await load()
  }
@@ -80,7 +80,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  async function companyAction(r:Row,action:string,offerId?:string){
   if(!supabase||!user)return;setSaving(true)
   const actionType=action==='request_alternative'?'request_alternatives':action
-  const {error:e}=await supabase.from('managed_sourcing_actions').insert({request_id:r.id,offer_id:offerId||null,created_by:user.id,action_type:actionType,message:action==='select_offer'?'اختارت الشركة هذا العرض':action==='approve_quote'?'وافقت الشركة على عرض السعر':'طلبت بديلًا'})
+  const {error:e}=await supabase.rpc('managed_sourcing_company_action',{p_request_id:r.id,p_action:action==='request_alternative'?'request_alternatives':action,p_offer_id:offerId||null})
   setSaving(false);if(e)setError(e.message);else{setNotice('تم تسجيل اختيارك وإبلاغ فريق My Car.');await load()}
  }
  async function adminUpdateRequest(e:FormEvent<HTMLFormElement>,r:Row){
@@ -107,8 +107,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  }
  async function adminPayment(r:Row,verified:boolean){
   if(!supabase||!user)return;setSaving(true)
-  const {error:e}=await supabase.from('managed_sourcing_requests').update({payment_status:verified?'verified':'rejected',payment_verified_at:verified?new Date().toISOString():null,status:verified?'searching':'awaiting_payment'}).eq('id',r.id)
-  if(!e)await supabase.from('managed_sourcing_updates').insert({request_id:r.id,created_by:user.id,visibility:'company',title:verified?'تم تأكيد رسوم الخدمة':'تعذر تأكيد رسوم الخدمة',body:verified?'تم تأكيد السداد وبدأ فريق My Car تنفيذ البحث.':'يرجى مراجعة بيانات التحويل والتواصل مع الإدارة.'})
+  const {error:e}=await supabase.rpc('managed_sourcing_admin_verify_payment',{p_request_id:r.id,p_verified:verified})
   setSaving(false);if(e)setError(e.message);else await load()
  }
  async function submitSubscription(e:FormEvent<HTMLFormElement>,p:Row){
@@ -117,7 +116,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   setSaving(false);if(e1)setError(e1.message);else{setNotice('تم إرسال طلب الاشتراك وبيانات التحويل للمراجعة. سيتم تفعيل الباقة بعد تأكيد الإدارة.');await load()}
  }
  async function subscriptionAction(s:Row,active:boolean){
-  if(!supabase)return;const now=new Date();const {error:e}=await supabase.from('managed_sourcing_subscriptions').update({status:active?'active':'rejected',payment_status:active?'verified':'rejected',starts_at:active?now.toISOString():null,ends_at:active?new Date(now.getTime()+30*86400000).toISOString():null}).eq('id',s.id)
+  if(!supabase)return;const {error:e}=await supabase.rpc('managed_sourcing_admin_subscription_action',{p_subscription_id:s.id,p_activate:active})
   if(e)setError(e.message);else await load()
  }
  const current=requests.find(r=>r.id===selected)
