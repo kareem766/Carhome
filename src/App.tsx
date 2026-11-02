@@ -54,7 +54,6 @@ function OwnerPersistentBar() {
     { href: '/services', label: 'خدمات السيارات', icon: <Wrench size={17}/> },
     { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
     { href: '/messages', label: 'المراسلات', icon: <MessageCircle size={17}/> },
-    { href: '/workspace/owner/account', label: 'الحساب', icon: <UserRound size={17}/> },
   ]
   return <header dir="rtl" className="mc-owner-persistent-bar">
     <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car</strong><small>مساحة مالك السيارة</small></span></a>
