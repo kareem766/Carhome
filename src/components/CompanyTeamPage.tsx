@@ -35,10 +35,12 @@ export default function CompanyTeamPage(){
   if(invitationId){
    const {data:preview,error:previewError}=await supabase.rpc('company_get_invitation',{p_invitation_id:invitationId})
    const row=Array.isArray(preview)?preview[0]:preview
-   if(!previewError&&row&&String(row.email).toLowerCase()===String(user.email||'').toLowerCase())setIncoming(row as IncomingInvite)
-   else {setIncoming(null);setError('الدعوة غير متاحة لهذا الحساب أو انتهت صلاحيتها. تأكد من الدخول بالبريد الإلكتروني المدعو.')}
+   if(!previewError&&row&&String(row.email).toLowerCase()===String(user.email||'').toLowerCase()){
+    setIncoming(row as IncomingInvite)
+    setLoading(false)
+    return
+   } else {setIncoming(null);setError('الدعوة غير متاحة لهذا الحساب أو انتهت صلاحيتها. تأكد من الدخول بالبريد الإلكتروني المدعو.')}
   } else setIncoming(null)
-  if(invitationId && incoming){setLoading(false);return}
   const {data:membership,error:memberError}=await supabase.from('organization_memberships').select('organization_id,role,organizations!inner(organization_type)').eq('user_id',user.id).eq('organizations.organization_type','company').limit(1).maybeSingle()
   if(memberError||!membership?.organization_id){setError('لم نتمكن من تحديد الشركة المرتبطة بحسابك.');setLoading(false);return}
   setMyRole(membership.role)
