@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { LoaderCircle, ShieldCheck, KeyRound, Sparkles, LockKeyhole } from "lucide-react";
+import { LoaderCircle, ShieldCheck, Sparkles, LockKeyhole } from "lucide-react";
 import PlatformBrand from "./PlatformBrand";
 import { supabase } from "../lib/supabase";
 
