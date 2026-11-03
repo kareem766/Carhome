@@ -31,6 +31,13 @@ export default function CompanyTeamPage(){
   setLoading(true);setError('')
   const {data:{user},error:userError}=await supabase.auth.getUser()
   if(userError||!user){window.location.replace('/?login=1');return}
+  const invitationId=new URLSearchParams(window.location.search).get('invitation')
+  if(invitationId){
+   const {data:preview,error:previewError}=await supabase.rpc('company_get_invitation',{p_invitation_id:invitationId})
+   const row=Array.isArray(preview)?preview[0]:preview
+   if(!previewError&&row&&String(row.email).toLowerCase()===String(user.email||'').toLowerCase())setIncoming(row as IncomingInvite)
+   else {setIncoming(null);setError('الدعوة غير متاحة لهذا الحساب أو انتهت صلاحيتها. تأكد من الدخول بالبريد الإلكتروني المدعو.')}
+  } else setIncoming(null)
   const {data:membership,error:memberError}=await supabase.from('organization_memberships').select('organization_id,role,organizations!inner(organization_type)').eq('user_id',user.id).eq('organizations.organization_type','company').limit(1).maybeSingle()
   if(memberError||!membership?.organization_id){setError('لم نتمكن من تحديد الشركة المرتبطة بحسابك.');setLoading(false);return}
   setMyRole(membership.role)
@@ -58,8 +65,9 @@ export default function CompanyTeamPage(){
  async function runRpc(name:string,args:Record<string,unknown>,success:string):Promise<boolean>{
   if(!supabase)return false
   setError('');setNotice('')
-  const {error:rpcError}=await supabase.rpc(name,args)
+  const {data,error:rpcError}=await supabase.rpc(name,args)
   if(rpcError){setError(rpcError.message);return false}
+  if(data===false){setError('لم يتم تنفيذ الإجراء. قد لا تملك الصلاحية أو أن حالة الدعوة/العضوية تغيرت.');return false}
   setNotice(success);setRefresh(v=>v+1);return true
  }
  async function accept(id:string){
