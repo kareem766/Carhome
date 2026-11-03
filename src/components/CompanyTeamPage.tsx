@@ -5,7 +5,8 @@ import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 
 type Member = { user_id:string; role:'owner'|'manager'|'member'; created_at:string; profiles:{display_name:string;contact_email:string|null}|null }
-type Invite = { id:string; email:string; role:'manager'|'member'; status:string; created_at:string; expires_at:string }\ntype IncomingInvite = { email:string; role:'manager'|'member'; expires_at:string }
+type Invite = { id:string; email:string; role:'manager'|'member'; status:string; created_at:string; expires_at:string }
+type IncomingInvite = { email:string; role:'manager'|'member'; expires_at:string }
 
 const roleLabel:Record<string,string>={owner:'مالك الشركة',manager:'مدير',member:'موظف'}
 const field='mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
@@ -13,7 +14,8 @@ const btn='inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-
 
 export default function CompanyTeamPage(){
  const [members,setMembers]=useState<Member[]>([])
- const [invites,setInvites]=useState<Invite[]>([])\n const [incoming,setIncoming]=useState<IncomingInvite|null>(null)
+ const [invites,setInvites]=useState<Invite[]>([])
+ const [incoming,setIncoming]=useState<IncomingInvite|null>(null)
  const [orgId,setOrgId]=useState('')
  const [myRole,setMyRole]=useState('')
  const [email,setEmail]=useState('')
