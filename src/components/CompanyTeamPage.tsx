@@ -5,7 +5,7 @@ import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 
 type Member = { user_id:string; role:'owner'|'manager'|'member'; created_at:string; profiles:{display_name:string;contact_email:string|null}|null }
-type Invite = { id:string; email:string; role:'manager'|'member'; status:string; created_at:string; expires_at:string }
+type Invite = { id:string; email:string; role:'manager'|'member'; status:string; created_at:string; expires_at:string }\ntype IncomingInvite = { email:string; role:'manager'|'member'; expires_at:string }
 
 const roleLabel:Record<string,string>={owner:'مالك الشركة',manager:'مدير',member:'موظف'}
 const field='mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
@@ -13,7 +13,7 @@ const btn='inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-
 
 export default function CompanyTeamPage(){
  const [members,setMembers]=useState<Member[]>([])
- const [invites,setInvites]=useState<Invite[]>([])
+ const [invites,setInvites]=useState<Invite[]>([])\n const [incoming,setIncoming]=useState<IncomingInvite|null>(null)
  const [orgId,setOrgId]=useState('')
  const [myRole,setMyRole]=useState('')
  const [email,setEmail]=useState('')
@@ -64,19 +64,19 @@ export default function CompanyTeamPage(){
  async function accept(id:string){
   if(!supabase)return
   setSaving(true);await runRpc('company_accept_invitation',{p_invitation_id:id},'تم قبول الدعوة وإضافتك إلى الشركة بنجاح.');setSaving(false)
-  const url=new URL(window.location.href);url.searchParams.delete('invitation');window.history.replaceState({},'',url.toString())
+  setIncoming(null);const url=new URL(window.location.href);url.searchParams.delete('invitation');window.history.replaceState({},'',url.toString())
  }
  async function copy(){if(inviteUrl){await navigator.clipboard.writeText(inviteUrl);setNotice('تم نسخ رابط الدعوة.')}}
  const incomingId=new URLSearchParams(window.location.search).get('invitation')
- const incoming=invites.find(i=>i.id===incomingId&&i.status==='pending')
+ const validIncoming=Boolean(incomingId&&incoming)
  return <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
   <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3"><a href="/workspace/company" className="flex items-center gap-2 text-sm font-extrabold text-slate-700"><ArrowRight size={18}/> مساحة الشركة</a><div className="flex items-center gap-3"><PlatformBrand/><AccountNotifications/></div></div></header>
   <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
    <div><p className="text-sm font-bold text-blue-700">إدارة الفريق</p><h1 className="mt-1 text-3xl font-black">موظفو الشركة وصلاحياتهم</h1><p className="mt-2 text-sm text-slate-500">أضف أعضاء فريقك وحدد صلاحياتهم داخل مساحة الشركة.</p></div>
    {error&&<div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
    {notice&&<div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{notice}</div>}
-   {incomingId&&!incoming&&<section className="rounded-2xl border bg-white p-5"><p className="font-bold">جارٍ التحقق من الدعوة أو أنها غير متاحة لهذا الحساب.</p><p className="mt-2 text-sm text-slate-500">تأكد من تسجيل الدخول بالبريد الإلكتروني الذي استقبل الدعوة وأنها لم تنتهِ أو تُلغَ.</p></section>}
-   {incoming&&<section className="rounded-2xl border border-blue-200 bg-blue-50 p-5"><h2 className="font-black">لديك دعوة للانضمام إلى فريق شركة</h2><p className="mt-2 text-sm">البريد: {incoming.email} · الصلاحية: {roleLabel[incoming.role]}</p><button className={btn+' mt-4'} disabled={saving} onClick={()=>void accept(incoming.id)}>قبول الدعوة والانضمام</button></section>}
+   {incomingId&&!validIncoming&&<section className="rounded-2xl border bg-white p-5"><p className="font-bold">جارٍ التحقق من الدعوة أو أنها غير متاحة لهذا الحساب.</p><p className="mt-2 text-sm text-slate-500">تأكد من تسجيل الدخول بالبريد الإلكتروني الذي استقبل الدعوة وأنها لم تنتهِ أو تُلغَ.</p></section>}
+   {validIncoming&&incoming&&<section className="rounded-2xl border border-blue-200 bg-blue-50 p-5"><h2 className="font-black">لديك دعوة للانضمام إلى فريق شركة</h2><p className="mt-2 text-sm">البريد: {incoming.email} · الصلاحية: {roleLabel[incoming.role]}</p><button className={btn+' mt-4'} disabled={saving} onClick={()=>void accept(incoming.id)}>قبول الدعوة والانضمام</button></section>}
    {myRole==='owner'||myRole==='manager'?<section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,.8fr)]">
     <form onSubmit={invite} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><UserPlus/></span><div><h2 className="font-black">دعوة موظف جديد</h2><p className="text-xs text-slate-500">الدعوة مرتبطة بالبريد الإلكتروني المحدد وتنتهي خلال 7 أيام.</p></div></div><label className="mt-5 block text-sm font-bold">البريد الإلكتروني<input required type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="employee@company.com" className={field}/></label><label className="mt-4 block text-sm font-bold">الصلاحية<select value={role} onChange={e=>setRole(e.target.value as 'member'|'manager')} className={field}><option value="member">موظف</option>{myRole==='owner'&&<option value="manager">مدير</option>}</select></label><button disabled={saving} className={btn+' mt-5 w-full'}><Mail size={17}/>{saving?'جارٍ إنشاء الدعوة...':'إنشاء رابط الدعوة'}</button>{inviteUrl&&<div className="mt-4 rounded-xl bg-slate-50 p-3"><p className="break-all text-xs text-slate-600">{inviteUrl}</p><button type="button" onClick={()=>void copy()} className="mt-3 inline-flex items-center gap-2 text-sm font-extrabold text-blue-700"><Copy size={16}/> نسخ الرابط</button></div>}</form>
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="font-black">قواعد الصلاحيات</h2><ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600"><li><b className="text-slate-900">مالك الشركة:</b> إدارة الفريق وتعيين المديرين والموظفين.</li><li><b className="text-slate-900">المدير:</b> دعوة الموظفين وإزالة الموظف، دون ترقية مدير أو تعديل صلاحياته.</li><li><b className="text-slate-900">الموظف:</b> استخدام مساحة الشركة وفق صلاحيات العضوية.</li><li>لا يمكن إزالة مالك الشركة أو تغيير دوره.</li></ul></div>
