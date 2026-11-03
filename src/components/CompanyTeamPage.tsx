@@ -30,7 +30,7 @@ export default function CompanyTeamPage(){
   if(!supabase){setError('تعذر الاتصال بالمنصة.');setLoading(false);return}
   setLoading(true);setError('')
   const {data:{user},error:userError}=await supabase.auth.getUser()
-  if(userError||!user){window.location.replace('/?login=1');return}
+  if(userError||!user){const pendingInvitation=new URLSearchParams(window.location.search).get('invitation');window.location.replace('/?login=1'+(pendingInvitation?'&invitation='+encodeURIComponent(pendingInvitation):''));return}
   const invitationId=new URLSearchParams(window.location.search).get('invitation')
   if(invitationId){
    const {data:preview,error:previewError}=await supabase.rpc('company_get_invitation',{p_invitation_id:invitationId})
@@ -38,6 +38,7 @@ export default function CompanyTeamPage(){
    if(!previewError&&row&&String(row.email).toLowerCase()===String(user.email||'').toLowerCase())setIncoming(row as IncomingInvite)
    else {setIncoming(null);setError('الدعوة غير متاحة لهذا الحساب أو انتهت صلاحيتها. تأكد من الدخول بالبريد الإلكتروني المدعو.')}
   } else setIncoming(null)
+  if(invitationId && incoming){setLoading(false);return}
   const {data:membership,error:memberError}=await supabase.from('organization_memberships').select('organization_id,role,organizations!inner(organization_type)').eq('user_id',user.id).eq('organizations.organization_type','company').limit(1).maybeSingle()
   if(memberError||!membership?.organization_id){setError('لم نتمكن من تحديد الشركة المرتبطة بحسابك.');setLoading(false);return}
   setMyRole(membership.role)
@@ -86,7 +87,7 @@ export default function CompanyTeamPage(){
   const accepted=await runRpc('company_accept_invitation',{p_invitation_id:id},'تم قبول الدعوة وإضافتك إلى الشركة بنجاح.')
   setSaving(false)
   if(!accepted)return
-  setIncoming(null);const url=new URL(window.location.href);url.searchParams.delete('invitation');window.history.replaceState({},'',url.toString())
+  window.location.replace('/workspace/company')
  }
  async function copy(){if(inviteUrl){await navigator.clipboard.writeText(inviteUrl);setNotice('تم نسخ رابط الدعوة.')}}
  const incomingId=new URLSearchParams(window.location.search).get('invitation')
