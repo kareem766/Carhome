@@ -6,7 +6,8 @@ import PlatformEntryBanner from './components/PlatformEntryBanner'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import LegalPages from './components/LegalPages'
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
-const CompanyInsightsPage = lazy(() => import('./components/CompanyInsightsPage'))\nconst CompanyTeamPage = lazy(() => import('./components/CompanyTeamPage'))
+const CompanyInsightsPage = lazy(() => import('./components/CompanyInsightsPage'))
+const CompanyTeamPage = lazy(() => import('./components/CompanyTeamPage'))
 const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'))
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const AdminAnalyticsPage = lazy(() => import('./components/AdminAnalyticsPage'))
