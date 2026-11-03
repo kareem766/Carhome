@@ -369,12 +369,13 @@ export default function WorkspacePage({ role }: { role: Role }) {
   async function respondToRentalOffer(offerId: string, requestId: string, status: 'accepted' | 'rejected') {
     if (!supabase || !organization || saving) return
     setSaving(true); setError(''); setNotice('')
-    const { data, error: updateError } = await supabase.from('rental_offers')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', offerId).eq('status', 'submitted').select('id').maybeSingle()
+    const { data, error: updateError } = await supabase.rpc('company_respond_to_rental_offer', {
+      p_offer_id: offerId,
+      p_status: status
+    })
     setSaving(false)
     if (updateError) { setError('تعذر تحديث حالة العرض: ' + updateError.message); return }
-    if (!data?.id) { setError('العرض لم يعد متاحًا للتحديث. حدّث الصفحة لمراجعة حالته الحالية.'); return }
+    if (data !== true) { setError('لم يتم تأكيد تحديث العرض. حدّث الصفحة لمراجعة حالته الحالية.'); return }
     setRequests(current => current.map(request => request.id !== requestId ? request : {
       ...request,
       rental_offers: (request.rental_offers || []).map(offer => offer.id === offerId ? { ...offer, status } : offer)
