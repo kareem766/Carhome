@@ -147,6 +147,15 @@ export default function AuthCallbackPage() {
           window.location.replace('/first-login-password')
           return
         }
+        const invitationId = params.get('invitation')
+        if (invitationId) {
+          const { error: acceptError } = await supabase.rpc('company_accept_invitation', { p_invitation_id: invitationId })
+          if (acceptError) throw new Error('تم تأكيد الحساب، لكن تعذر قبول دعوة الشركة: ' + acceptError.message)
+          if (!active) return
+          setMessage('تم قبول الدعوة بنجاح. جارٍ فتح مساحة الشركة...')
+          window.location.replace('/workspace/company')
+          return
+        }
         const role = await finishAccount(data.session.user)
         if (!active) return
         // Send every newly registered or authenticated user straight to their own workspace.
