@@ -130,3 +130,38 @@ begin
   return true;
 end;
 $function$;
+
+-- Membership rows are intentionally not readable through the base table RLS.
+-- Expose only the current company's roster through a tightly scoped RPC.
+create or replace function public.company_list_members()
+returns table(user_id uuid, role public.organization_member_role, created_at timestamptz, email text)
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_org uuid;
+begin
+  if auth.uid() is null then raise exception 'يجب تسجيل الدخول'; end if;
+
+  select m.organization_id into v_org
+  from public.organization_memberships m
+  join public.organizations o on o.id = m.organization_id
+  where m.user_id = auth.uid()
+    and o.organization_type = 'company'::public.organization_type
+  order by m.created_at
+  limit 1;
+
+  if v_org is null then raise exception 'حساب شركة فقط يمكنه عرض أعضاء الفريق'; end if;
+
+  return query
+  select m.user_id, m.role, m.created_at, u.email::text
+  from public.organization_memberships m
+  join auth.users u on u.id = m.user_id
+  where m.organization_id = v_org
+  order by m.created_at;
+end;
+$function$;
+
+revoke all on function public.company_list_members() from public;
+grant execute on function public.company_list_members() to authenticated;
