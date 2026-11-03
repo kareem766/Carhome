@@ -24,7 +24,7 @@ export default function CompanyInsightsPage() {
   setLoading(true);setError('')
   const {data:{user},error:userError}=await supabase.auth.getUser()
   if(userError||!user){window.location.replace('/?login=1');return}
-  const {data:membership,error:membershipError}=await supabase.from('organization_memberships').select('organization_id,organizations(name,organization_type)').eq('user_id',user.id).limit(1).maybeSingle()
+  const {data:membership,error:membershipError}=await supabase.from('organization_memberships').select('organization_id,organizations!inner(name,organization_type)').eq('user_id',user.id).eq('organizations.organization_type','company').limit(1).maybeSingle()
   if(membershipError||!membership?.organization_id){if(alive){setError('تعذر تحديد الشركة المرتبطة بالحساب.');setLoading(false)}return}
   const org=Array.isArray(membership.organizations)?membership.organizations[0]:membership.organizations
   if(org?.organization_type!=='company'){window.location.replace('/workspace');return}
