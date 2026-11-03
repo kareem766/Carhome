@@ -53,7 +53,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
    setRequests(r.data||[]);setPricing(p.data||[]);setPackages(k.data||[]);setSubscriptions(s.data||[])
    if(selected){const [o,u2]=await Promise.all([supabase.from('managed_sourcing_offers').select('*').eq('request_id',selected).order('recommendation_rank'),supabase.from('managed_sourcing_updates').select('*').eq('request_id',selected).order('created_at',{ascending:false})]);setOffers(o.data||[]);setUpdates(u2.data||[])}
   }else{
-   const {data:m,error:me}=await supabase.from('organization_memberships').select('organization_id,organizations(id,name,organization_type)').eq('user_id',u.id).limit(1).maybeSingle()
+   const {data:m,error:me}=await supabase.from('organization_memberships').select('organization_id,organizations!inner(id,name,organization_type)').eq('user_id',u.id).eq('organizations.organization_type','company').limit(1).maybeSingle()
    if(me||!m){setError(me?.message||'لم يتم ربط حسابك بالشركة.');setLoading(false);return}
    const o=Array.isArray(m.organizations)?m.organizations[0]:m.organizations
    if(o?.organization_type!=='company'){setError('الخدمة متاحة لحسابات الشركات فقط.');setLoading(false);return}
