@@ -342,6 +342,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="text-lg font-extrabold text-slate-950">اختصارات سريعة</h3><p className="mt-1 text-sm text-slate-500">انتقل مباشرةً إلى أهم المهام في حسابك</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">مساحة عملك</span></div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {(role === 'company' ? [
+          {href:'/workspace/company/insights',title:'تقارير ومؤشرات الشركة',desc:'تابع أداء الطلبات والعروض وصدّر تقاريرك',icon:BarChart3},
           {href:'/workspace/company/managed-sourcing',title:'فوّض My Car للبحث عن السيارات',desc:'دع فريق المنصة يبحث ويتواصل ويجهز عروضًا مقارنة نيابةً عن شركتك',icon:Wrench},
           {href:'/workspace/company/requests/new',title:'طلب سيارات جديد',desc:'حدد احتياج شركتك واستقبل عروضًا مناسبة',icon:Plus},
           {href:'/workspace/company/requests',title:'متابعة طلباتي',desc:'راجع الطلبات والعروض الواردة',icon:ClipboardList},
