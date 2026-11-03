@@ -183,7 +183,8 @@ export default function App() {
   if (path === '/reset-password') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ResetPasswordPage /></Suspense>
   if (path === '/auth/callback') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AuthCallbackPage /></Suspense>
   if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ManagedSourcingPage admin /></Suspense>
-  if (path === '/workspace/company/team') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><CompanyTeamPage /></Suspense>\n  if (path === '/workspace/company/insights') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><CompanyInsightsPage /></Suspense>
+  if (path === '/workspace/company/team') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><CompanyTeamPage /></Suspense>
+  if (path === '/workspace/company/insights') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><CompanyInsightsPage /></Suspense>
   if (path === '/workspace/company/managed-sourcing') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><ManagedSourcingPage /></Suspense>
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><PlatformSettingsPage /></Suspense>
   if (path === '/workspace/admin/managed-accounts') return <Suspense fallback={<RouteLoading logoUrl={settings.logo_url} />}><AdminManagedAccountsPage /></Suspense>
