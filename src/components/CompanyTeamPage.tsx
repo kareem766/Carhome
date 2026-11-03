@@ -70,10 +70,23 @@ export default function CompanyTeamPage(){
  async function copy(){if(inviteUrl){await navigator.clipboard.writeText(inviteUrl);setNotice('تم نسخ رابط الدعوة.')}}
  const incomingId=new URLSearchParams(window.location.search).get('invitation')
  const validIncoming=Boolean(incomingId&&incoming)
- return <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
-  <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3"><a href="/workspace/company" className="flex items-center gap-2 text-sm font-extrabold text-slate-700"><ArrowRight size={18}/> مساحة الشركة</a><div className="flex items-center gap-3"><PlatformBrand/><AccountNotifications/></div></div></header>
-  <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-   <div><p className="text-sm font-bold text-blue-700">إدارة الفريق</p><h1 className="mt-1 text-3xl font-black">موظفو الشركة وصلاحياتهم</h1><p className="mt-2 text-sm text-slate-500">أضف أعضاء فريقك وحدد صلاحياتهم داخل مساحة الشركة.</p></div>
+ return <main dir="rtl" className="min-h-screen bg-[linear-gradient(180deg,#f4f8ff_0%,#f8fbff_42%,#eef4fc_100%)] text-slate-900">
+  <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 shadow-[0_8px_30px_rgba(20,55,95,.06)] backdrop-blur-xl">
+   <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
+    <div className="flex min-w-0 items-center justify-between gap-3">
+     <a href="/workspace/company" aria-label="العودة لمساحة الشركة" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-extrabold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 sm:text-sm"><ArrowRight size={17}/> <span>مساحة الشركة</span></a>
+     <div className="min-w-0"><PlatformBrand/></div>
+    </div>
+    <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-2 sm:border-0 sm:pt-0"><span className="hidden text-xs font-bold text-slate-400 sm:inline">حسابك وإشعاراتك</span><AccountNotifications/></div>
+   </div>
+  </header>
+  <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:py-9">
+   <section className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-l from-[#0b2545] via-[#123b68] to-[#176b9a] px-5 py-7 text-white shadow-[0_22px_55px_-30px_rgba(10,45,85,.55)] sm:px-8 sm:py-9">
+    <div className="pointer-events-none absolute -left-12 -top-16 h-52 w-52 rounded-full border-[26px] border-cyan-300/10"></div>
+    <p className="relative text-sm font-extrabold text-cyan-200">إدارة الفريق</p>
+    <h1 className="relative mt-2 text-3xl font-black leading-tight sm:text-4xl">موظفين الشركة وصلاحياتهم</h1>
+    <p className="relative mt-3 max-w-2xl text-sm leading-7 text-blue-100 sm:text-base">أضف أعضاء فريقك وحدد صلاحياتهم داخل مساحة الشركة، وتابع الدعوات والعضويات من مكان واحد.</p>
+   </section>
    {error&&<div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
    {notice&&<div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{notice}</div>}
    {incomingId&&!validIncoming&&<section className="rounded-2xl border bg-white p-5"><p className="font-bold">جارٍ التحقق من الدعوة أو أنها غير متاحة لهذا الحساب.</p><p className="mt-2 text-sm text-slate-500">تأكد من تسجيل الدخول بالبريد الإلكتروني الذي استقبل الدعوة وأنها لم تنتهِ أو تُلغَ.</p></section>}
