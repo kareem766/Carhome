@@ -94,7 +94,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
   const [fullName, setFullName] = useState('')
   const [organizationName, setOrganizationName] = useState('')
   const [acceptedLegal, setAcceptedLegal] = useState(false)
-  const [accountType, setAccountType] = useState<AccountType>('individual_owner')
+  const invitationId = new URLSearchParams(window.location.search).get('invitation')
+  const [accountType, setAccountType] = useState<AccountType>(invitationId ? 'company' : 'individual_owner')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [notice, setNotice] = useState('')
@@ -176,7 +177,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           password,
           options: {
             // Explicitly return confirmation links to the deployed app's callback, not Supabase's default URL.
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: `${window.location.origin}/auth/callback${invitationId ? `?invitation=${encodeURIComponent(invitationId)}` : ''}`,
             data: {
               display_name: name,
               organization_name: orgName,
@@ -199,9 +200,9 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           throw new Error('هذا البريد الإلكتروني لديه حساب بالفعل في قاعدة بيانات My Car. برجاء تسجيل الدخول أو استخدام «نسيت كلمة السر».')
         }
         if (data.session && data.user) {
-          await prepareAccount(data.user, name)
-          // Complete account setup through the shared callback, then open the role workspace.
-          window.location.replace('/auth/callback')
+          if (!invitationId) await prepareAccount(data.user, name)
+          // Invitation signups must join the inviting company, never create a separate organization.
+          window.location.replace(`/auth/callback${invitationId ? `?invitation=${encodeURIComponent(invitationId)}` : ''}`)
           return
         } else {
           setNotice('تم إرسال طلب التسجيل. افتح رسالة تأكيد البريد الإلكتروني، ثم ارجع وسجّل الدخول لإكمال إعداد الحساب.')
@@ -219,7 +220,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           window.location.replace('/first-login-password')
           return
         }
-        window.location.replace('/auth/callback')
+        window.location.replace(invitationId ? `/workspace/company/team?invitation=${encodeURIComponent(invitationId)}` : '/auth/callback')
         return
       }
     } catch (caught) {
@@ -292,7 +293,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
             <>
               <div className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
                 <button type="button" onClick={() => { setMode('signin'); setError(''); setNotice('') }} className={`rounded-lg px-3 py-2.5 text-sm font-bold transition ${mode === 'signin' ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>تسجيل الدخول</button>
-                <button type="button" onClick={() => { window.location.href = '/register' }} className="rounded-lg px-3 py-2.5 text-sm font-bold text-slate-500 transition">حساب جديد</button>
+                <button type="button" onClick={() => { if (invitationId) { setMode('signup'); setError(''); setNotice('') } else window.location.href = '/register' }} className="rounded-lg px-3 py-2.5 text-sm font-bold text-slate-500 transition">حساب جديد</button>
               </div>
               {settingNewPassword ? (
                 <form onSubmit={handleSetNewPassword} className="space-y-4">
@@ -315,7 +316,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                     <label className="block text-sm font-bold text-slate-700">الاسم الكامل
                       <input autoComplete="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="اكتب اسمك" />
                     </label>
-                    <fieldset>
+                    {!invitationId && <fieldset>
                       <legend className="mb-2 text-sm font-bold text-slate-700">نوع الحساب</legend>
                       <div className="grid gap-2">
                         {accountTypes.map((type) => (
@@ -325,10 +326,11 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                           </label>
                         ))}
                       </div>
-                    </fieldset>
-                    <label className="block text-sm font-bold text-slate-700">اسم المؤسسة أو النشاط
+                    </fieldset>}
+                    {invitationId && <p className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-blue-900">أنت بصدد إنشاء حساب موظف للانضمام إلى الشركة التي أرسلت لك الدعوة. استخدم نفس البريد الإلكتروني الذي استلم الدعوة.</p>}
+                    {!invitationId && <label className="block text-sm font-bold text-slate-700">اسم المؤسسة أو النشاط
                       <input required value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder={accountType === 'company' ? 'اسم الشركة' : accountType === 'fleet_supplier' ? 'اسم المورد أو الشركة' : 'اسمك أو اسم النشاط (يمكن أن يكون اسمك)'} />
-                    </label>
+                    </label>}
                   </>
                 )}
                 <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني
