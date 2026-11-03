@@ -46,6 +46,20 @@ export default function VehicleCatalogPage() {
   })
   const [city, setCity] = useState(() => new URLSearchParams(window.location.search).get('governorate') || 'الكل')
   const [maxPrice, setMaxPrice] = useState(() => new URLSearchParams(window.location.search).get('max_price') || '')
+  const [makeFilter, setMakeFilter] = useState('الكل')
+  const [minYear, setMinYear] = useState('')
+  const [maxYear, setMaxYear] = useState('')
+  const [minSeats, setMinSeats] = useState('')
+  const [gpsFilter, setGpsFilter] = useState('الكل')
+  const [sortBy, setSortBy] = useState('featured')
+  const [page, setPage] = useState(1)
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [pageSize, setPageSize] = useState(() => window.innerWidth < 640 ? 12 : 18)
+  useEffect(() => {
+    const updatePageSize = () => setPageSize(window.innerWidth < 640 ? 12 : 18)
+    window.addEventListener('resize', updatePageSize)
+    return () => window.removeEventListener('resize', updatePageSize)
+  }, [])
   const [selected, setSelected] = useState<Vehicle | null>(null)
   const [showOffer, setShowOffer] = useState(false)
   const [offerText, setOfferText] = useState('')
@@ -109,12 +123,32 @@ export default function VehicleCatalogPage() {
     return () => { active = false }
   }, [])
 
-  const filtered = useMemo(() => vehicles.filter(v => {
+  const makes = useMemo(() => ['الكل', ...Array.from(new Set(vehicles.map(v => v.make))).sort((a,b) => a.localeCompare(b,'ar'))], [vehicles])
+  const years = useMemo(() => Array.from(new Set(vehicles.map(v => v.model_year))).sort((a,b) => b-a), [vehicles])
+  const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
-    const matchesTerm = !term || `${v.make} ${v.model} ${v.model_year} ${v.vehicle_type} ${v.governorate}`.toLowerCase().includes(term)
-    const matchesType = type === 'الكل' || (type === 'فان / ميكروباص' ? ['فان','ميكروباص'].includes(v.vehicle_type) : type === 'نقل' ? v.vehicle_type.includes('نقل') : v.vehicle_type === type)
-    return matchesTerm && matchesType && (city === 'الكل' || v.governorate === city) && (!maxPrice || v.monthly_price_egp <= Number(maxPrice)) && (!favoritesOnly || favoriteIds.includes(v.id))
-  }), [vehicles,search,type,city,maxPrice,favoritesOnly,favoriteIds])
+    const result = vehicles.filter(v => {
+      const matchesTerm = !term || `${v.make} ${v.model} ${v.model_year} ${v.vehicle_type} ${v.governorate}`.toLowerCase().includes(term)
+      const matchesType = type === 'الكل' || (type === 'فان / ميكروباص' ? ['فان','ميكروباص'].includes(v.vehicle_type) : type === 'نقل' ? v.vehicle_type.includes('نقل') : v.vehicle_type === type)
+      return matchesTerm && matchesType && (city === 'الكل' || v.governorate === city) &&
+        (!maxPrice || v.monthly_price_egp <= Number(maxPrice)) &&
+        (makeFilter === 'الكل' || v.make === makeFilter) &&
+        (!minYear || v.model_year >= Number(minYear)) && (!maxYear || v.model_year <= Number(maxYear)) &&
+        (!minSeats || v.seats >= Number(minSeats)) &&
+        (gpsFilter === 'الكل' || (gpsFilter === 'yes' ? v.has_gps === true : v.has_gps === false)) &&
+        (!favoritesOnly || favoriteIds.includes(v.id))
+    })
+    return result.sort((a,b) => sortBy === 'price_asc' ? a.monthly_price_egp-b.monthly_price_egp :
+      sortBy === 'price_desc' ? b.monthly_price_egp-a.monthly_price_egp :
+      sortBy === 'year_desc' ? b.model_year-a.model_year :
+      sortBy === 'seats_desc' ? b.seats-a.seats :
+      Number(promotedIds.includes(b.id))-Number(promotedIds.includes(a.id)))
+  }, [vehicles,search,type,city,maxPrice,makeFilter,minYear,maxYear,minSeats,gpsFilter,favoritesOnly,favoriteIds,sortBy,promotedIds])
+  useEffect(() => { setPage(1) }, [search,type,city,maxPrice,makeFilter,minYear,maxYear,minSeats,gpsFilter,favoritesOnly,sortBy])
+  const featuredVehicles = filtered.filter(v => promotedIds.includes(v.id))
+  const regularVehicles = filtered.filter(v => !promotedIds.includes(v.id))
+  const totalPages = Math.max(1, Math.ceil(regularVehicles.length / pageSize))
+  const visibleRegularVehicles = regularVehicles.slice((page-1)*pageSize, page*pageSize)
   const types = useMemo(() => ['الكل',...Array.from(new Set([...vehicles.map(v=>v.vehicle_type),'فان / ميكروباص','نقل']))], [vehicles])
   const cities = useMemo(() => ['الكل',...Array.from(new Set(vehicles.map(v=>v.governorate)))], [vehicles])
 
