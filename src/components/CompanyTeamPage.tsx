@@ -55,16 +55,19 @@ export default function CompanyTeamPage(){
   setInviteUrl(url.toString());setNotice('تم إنشاء الدعوة. شارك الرابط مع الموظف، ويجب أن يسجل أو يدخل بالبريد نفسه.')
   setEmail('');setSaving(false);setRefresh(v=>v+1)
  }
- async function runRpc(name:string,args:Record<string,unknown>,success:string){
-  if(!supabase)return
+ async function runRpc(name:string,args:Record<string,unknown>,success:string):Promise<boolean>{
+  if(!supabase)return false
   setError('');setNotice('')
   const {error:rpcError}=await supabase.rpc(name,args)
-  if(rpcError){setError(rpcError.message);return}
-  setNotice(success);setRefresh(v=>v+1)
+  if(rpcError){setError(rpcError.message);return false}
+  setNotice(success);setRefresh(v=>v+1);return true
  }
  async function accept(id:string){
-  if(!supabase)return
-  setSaving(true);await runRpc('company_accept_invitation',{p_invitation_id:id},'تم قبول الدعوة وإضافتك إلى الشركة بنجاح.');setSaving(false)
+  if(!supabase||saving)return
+  setSaving(true)
+  const accepted=await runRpc('company_accept_invitation',{p_invitation_id:id},'تم قبول الدعوة وإضافتك إلى الشركة بنجاح.')
+  setSaving(false)
+  if(!accepted)return
   setIncoming(null);const url=new URL(window.location.href);url.searchParams.delete('invitation');window.history.replaceState({},'',url.toString())
  }
  async function copy(){if(inviteUrl){await navigator.clipboard.writeText(inviteUrl);setNotice('تم نسخ رابط الدعوة.')}}
