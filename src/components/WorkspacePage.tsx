@@ -343,7 +343,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {(role === 'company' ? [
           {href:'/workspace/company/insights',title:'تقارير ومؤشرات الشركة',desc:'تابع أداء الطلبات والعروض وصدّر تقاريرك',icon:BarChart3},
-          {href:'/workspace/company/team',title:'إدارة موظفي الشركة',desc:'ادعُ فريقك وحدد أدوار المالك والمدير والموظف',icon:UsersRound},
+          {href:'/workspace/company/team',title:'إدارة موظفي الشركة',desc:'ادعُ فريقك وحدد أدوار المالك والمدير والموظف',icon:Building2},
           {href:'/workspace/company/managed-sourcing',title:'فوّض My Car للبحث عن السيارات',desc:'دع فريق المنصة يبحث ويتواصل ويجهز عروضًا مقارنة نيابةً عن شركتك',icon:Wrench},
           {href:'/workspace/company/requests/new',title:'طلب سيارات جديد',desc:'حدد احتياج شركتك واستقبل عروضًا مناسبة',icon:Plus},
           {href:'/workspace/company/requests',title:'متابعة طلباتي',desc:'راجع الطلبات والعروض الواردة',icon:ClipboardList},
