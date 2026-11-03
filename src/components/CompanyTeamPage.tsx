@@ -16,7 +16,6 @@ export default function CompanyTeamPage(){
  const [members,setMembers]=useState<Member[]>([])
  const [invites,setInvites]=useState<Invite[]>([])
  const [incoming,setIncoming]=useState<IncomingInvite|null>(null)
- const [orgId,setOrgId]=useState('')
  const [myRole,setMyRole]=useState('')
  const [email,setEmail]=useState('')
  const [role,setRole]=useState<'member'|'manager'>('member')
@@ -34,7 +33,7 @@ export default function CompanyTeamPage(){
   if(userError||!user){window.location.replace('/?login=1');return}
   const {data:membership,error:memberError}=await supabase.from('organization_memberships').select('organization_id,role,organizations!inner(organization_type)').eq('user_id',user.id).eq('organizations.organization_type','company').limit(1).maybeSingle()
   if(memberError||!membership?.organization_id){setError('لم نتمكن من تحديد الشركة المرتبطة بحسابك.');setLoading(false);return}
-  setOrgId(membership.organization_id);setMyRole(membership.role)
+  setMyRole(membership.role)
   const [membersResult,invitesResult]=await Promise.all([
    supabase.from('organization_memberships').select('user_id,role,created_at,profiles(display_name,contact_email)').eq('organization_id',membership.organization_id).order('created_at'),
    supabase.from('organization_invitations').select('id,email,role,status,created_at,expires_at').eq('organization_id',membership.organization_id).order('created_at',{ascending:false})
@@ -78,7 +77,7 @@ export default function CompanyTeamPage(){
    {error&&<div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
    {notice&&<div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{notice}</div>}
    {incomingId&&!validIncoming&&<section className="rounded-2xl border bg-white p-5"><p className="font-bold">جارٍ التحقق من الدعوة أو أنها غير متاحة لهذا الحساب.</p><p className="mt-2 text-sm text-slate-500">تأكد من تسجيل الدخول بالبريد الإلكتروني الذي استقبل الدعوة وأنها لم تنتهِ أو تُلغَ.</p></section>}
-   {validIncoming&&incoming&&<section className="rounded-2xl border border-blue-200 bg-blue-50 p-5"><h2 className="font-black">لديك دعوة للانضمام إلى فريق شركة</h2><p className="mt-2 text-sm">البريد: {incoming.email} · الصلاحية: {roleLabel[incoming.role]}</p><button className={btn+' mt-4'} disabled={saving} onClick={()=>void accept(incoming.id)}>قبول الدعوة والانضمام</button></section>}
+   {validIncoming&&incoming&&<section className="rounded-2xl border border-blue-200 bg-blue-50 p-5"><h2 className="font-black">لديك دعوة للانضمام إلى فريق شركة</h2><p className="mt-2 text-sm">البريد: {incoming.email} · الصلاحية: {roleLabel[incoming.role]}</p><button className={btn+' mt-4'} disabled={saving} onClick={()=>void accept(incomingId!)}>قبول الدعوة والانضمام</button></section>}
    {myRole==='owner'||myRole==='manager'?<section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,.8fr)]">
     <form onSubmit={invite} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><UserPlus/></span><div><h2 className="font-black">دعوة موظف جديد</h2><p className="text-xs text-slate-500">الدعوة مرتبطة بالبريد الإلكتروني المحدد وتنتهي خلال 7 أيام.</p></div></div><label className="mt-5 block text-sm font-bold">البريد الإلكتروني<input required type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="employee@company.com" className={field}/></label><label className="mt-4 block text-sm font-bold">الصلاحية<select value={role} onChange={e=>setRole(e.target.value as 'member'|'manager')} className={field}><option value="member">موظف</option>{myRole==='owner'&&<option value="manager">مدير</option>}</select></label><button disabled={saving} className={btn+' mt-5 w-full'}><Mail size={17}/>{saving?'جارٍ إنشاء الدعوة...':'إنشاء رابط الدعوة'}</button>{inviteUrl&&<div className="mt-4 rounded-xl bg-slate-50 p-3"><p className="break-all text-xs text-slate-600">{inviteUrl}</p><button type="button" onClick={()=>void copy()} className="mt-3 inline-flex items-center gap-2 text-sm font-extrabold text-blue-700"><Copy size={16}/> نسخ الرابط</button></div>}</form>
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="font-black">قواعد الصلاحيات</h2><ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600"><li><b className="text-slate-900">مالك الشركة:</b> إدارة الفريق وتعيين المديرين والموظفين.</li><li><b className="text-slate-900">المدير:</b> دعوة الموظفين وإزالة الموظف، دون ترقية مدير أو تعديل صلاحياته.</li><li><b className="text-slate-900">الموظف:</b> استخدام مساحة الشركة وفق صلاحيات العضوية.</li><li>لا يمكن إزالة مالك الشركة أو تغيير دوره.</li></ul></div>
