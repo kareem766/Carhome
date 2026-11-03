@@ -41,15 +41,25 @@ export default function CompanyTeamPage(){
   const {data:membership,error:memberError}=await supabase.from('organization_memberships').select('organization_id,role,organizations!inner(organization_type)').eq('user_id',user.id).eq('organizations.organization_type','company').limit(1).maybeSingle()
   if(memberError||!membership?.organization_id){setError('لم نتمكن من تحديد الشركة المرتبطة بحسابك.');setLoading(false);return}
   setMyRole(membership.role)
-  const [membersResult,invitesResult]=await Promise.all([
-   supabase.rpc('company_list_members'),
-   supabase.from('organization_invitations').select('id,email,role,status,created_at,expires_at').eq('organization_id',membership.organization_id).order('created_at',{ascending:false})
-  ])
-  if(membersResult.error)setError('تعذر تحميل أعضاء الشركة: '+membersResult.error.message)
-  else setMembers((membersResult.data||[]) as Member[])
-  if(invitesResult.error)setError(v=>v||'تعذر تحميل الدعوات: '+invitesResult.error!.message)
-  else setInvites((invitesResult.data||[]) as Invite[])
-  setLoading(false)
+  try {
+   let membersResult = await supabase.rpc('company_list_members')
+   // iOS Safari may intermittently reject a fetch before it reaches Supabase.
+   // Retry only transport-level failures; preserve real SQL/RLS errors.
+   if (membersResult.error && /load failed|failed to fetch|networkerror|fetch failed/i.test(membersResult.error.message)) {
+    await new Promise(resolve => window.setTimeout(resolve, 800))
+    membersResult = await supabase.rpc('company_list_members')
+   }
+   const invitesResult = await supabase.from('organization_invitations').select('id,email,role,status,created_at,expires_at').eq('organization_id',membership.organization_id).order('created_at',{ascending:false})
+   if(membersResult.error)setError('تعذر تحميل أعضاء الشركة: '+membersResult.error.message+' — اضغط تحديث للمحاولة مرة أخرى.')
+   else setMembers((membersResult.data||[]) as Member[])
+   if(invitesResult.error)setError(v=>v||'تعذر تحميل الدعوات: '+invitesResult.error!.message)
+   else setInvites((invitesResult.data||[]) as Invite[])
+  } catch (loadError) {
+   const message = loadError instanceof Error ? loadError.message : String(loadError)
+   setError('تعذر الاتصال بخدمة أعضاء الشركة: '+message+' — تحقق من الاتصال ثم اضغط تحديث.')
+  } finally {
+   setLoading(false)
+  }
  },[])
  useEffect(()=>{void load()},[load,refresh])
 
