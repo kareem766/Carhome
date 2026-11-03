@@ -104,12 +104,12 @@ export default function WorkspacePage({ role }: { role: Role }) {
     } else if (welcomePending) {
       setNotice('أهلًا بك في My Car! تم تأكيد بريدك وتجهيز حسابك بنجاح. نتمنى لك تجربة موفقة.')
     }
-    const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations(id,name,organization_type)').eq('user_id', authUser.id).limit(1)
+    const expectedType = role === 'owner' ? 'individual_owner' : role === 'supplier' ? 'fleet_supplier' : 'company'
+    const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations!inner(id,name,organization_type)').eq('user_id', authUser.id).eq('organizations.organization_type', expectedType).limit(1)
     if (membershipError) { setError(membershipError.message); setLoading(false); return }
     const member = memberships?.[0] as unknown as { organization_id: string; organizations: Organization | Organization[] | null } | undefined
     const org = Array.isArray(member?.organizations) ? member?.organizations[0] : member?.organizations
-    if (!member?.organization_id || !org) { setError('لم يتم ربط حسابك بمؤسسة بعد. سجّل الخروج ثم ادخل مجددًا، أو أعد إكمال التسجيل.'); setLoading(false); return }
-    const expectedType = role === 'owner' ? 'individual_owner' : role === 'supplier' ? 'fleet_supplier' : 'company'
+    if (!member?.organization_id || !org) { setError('لم يتم ربط حسابك بمؤسسة من النوع الصحيح بعد. سجّل الخروج ثم ادخل مجددًا، أو أعد إكمال التسجيل.'); setLoading(false); return }
     if (org.organization_type !== expectedType) {
       const correctPath = org.organization_type === 'company' ? '/workspace/company' : org.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
       window.location.replace(correctPath)
