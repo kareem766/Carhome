@@ -171,7 +171,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         if (!acceptedLegal) throw new Error('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية قبل إنشاء الحساب.')
         const name = fullName.trim()
         const orgName = organizationName.trim()
-        if (!name || !orgName) throw new Error('اكتب الاسم واسم المؤسسة لإكمال التسجيل.')
+        if (!name || (!invitationId && !orgName)) throw new Error(invitationId ? 'اكتب اسمك لإكمال قبول الدعوة.' : 'اكتب الاسم واسم المؤسسة لإكمال التسجيل.')
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim().toLowerCase(),
           password,
