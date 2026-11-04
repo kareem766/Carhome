@@ -105,11 +105,64 @@ export default function WorkspacePage({ role }: { role: Role }) {
       setNotice('أهلًا بك في My Car! تم تأكيد بريدك وتجهيز حسابك بنجاح. نتمنى لك تجربة موفقة.')
     }
     const expectedType = role === 'owner' ? 'individual_owner' : role === 'supplier' ? 'fleet_supplier' : 'company'
-    const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations!inner(id,name,organization_type)').eq('user_id', authUser.id).eq('organizations.organization_type', expectedType).limit(1)
-    if (membershipError) { setError(membershipError.message); setLoading(false); return }
+    const metadataRole = String(authUser.user_metadata?.organization_type || '')
+    if (metadataRole && ['individual_owner', 'fleet_supplier', 'company'].includes(metadataRole) && metadataRole !== expectedType) {
+      const destination = metadataRole === 'company' ? '/workspace/company' : metadataRole === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
+      window.location.replace(destination)
+      return
+    }
+
+    let membershipResult = await client.from('organization_memberships')
+      .select('organization_id, organizations!inner(id,name,organization_type)')
+      .eq('user_id', authUser.id)
+      .eq('organizations.organization_type', expectedType)
+      .limit(1)
+
+    if (membershipResult.error) { setError(membershipResult.error.message); setLoading(false); return }
+
+    // Older owner accounts can have a profile but no matching organization membership.
+    // Repair only the owner's own organization; never attach the user to a company or supplier.
+    if (!membershipResult.data?.length && role === 'owner' && (!metadataRole || metadataRole === expectedType)) {
+      const existingOwnerOrg = await client.from('organizations')
+        .select('id')
+        .eq('created_by', authUser.id)
+        .eq('organization_type', expectedType)
+        .limit(1)
+        .maybeSingle()
+      if (existingOwnerOrg.error) { setError('تعذر التحقق من بيانات مؤسسة حسابك: ' + existingOwnerOrg.error.message); setLoading(false); return }
+
+      let ownerOrganizationId = existingOwnerOrg.data?.id as string | undefined
+      if (!ownerOrganizationId) {
+        const displayName = String(authUser.user_metadata?.display_name || authUser.user_metadata?.organization_name || authUser.email || 'مالك سيارة').trim()
+        const createdOrg = await client.from('organizations').insert({
+          name: String(authUser.user_metadata?.organization_name || displayName).trim(),
+          organization_type: expectedType,
+          created_by: authUser.id,
+          city: String(authUser.user_metadata?.governorate || '').trim() || null
+        }).select('id').single()
+        if (createdOrg.error) { setError('تعذر استكمال ربط حساب مالك السيارة: ' + createdOrg.error.message); setLoading(false); return }
+        ownerOrganizationId = createdOrg.data.id
+      }
+
+      const linked = await client.from('organization_memberships').insert({
+        organization_id: ownerOrganizationId,
+        user_id: authUser.id,
+        role: 'owner'
+      })
+      if (linked.error && linked.error.code !== '23505') { setError('تعذر إنشاء عضوية حساب مالك السيارة: ' + linked.error.message); setLoading(false); return }
+
+      membershipResult = await client.from('organization_memberships')
+        .select('organization_id, organizations!inner(id,name,organization_type)')
+        .eq('user_id', authUser.id)
+        .eq('organizations.organization_type', expectedType)
+        .limit(1)
+      if (membershipResult.error) { setError(membershipResult.error.message); setLoading(false); return }
+    }
+
+    const memberships = membershipResult.data
     const member = memberships?.[0] as unknown as { organization_id: string; organizations: Organization | Organization[] | null } | undefined
     const org = Array.isArray(member?.organizations) ? member?.organizations[0] : member?.organizations
-    if (!member?.organization_id || !org) { setError('لم يتم ربط حسابك بمؤسسة من النوع الصحيح بعد. سجّل الخروج ثم ادخل مجددًا، أو أعد إكمال التسجيل.'); setLoading(false); return }
+    if (!member?.organization_id || !org) { setError('لم يتم العثور على مؤسسة مرتبطة بنوع حسابك. أعد المحاولة، وإذا استمرت المشكلة تواصل مع الدعم مع الاحتفاظ بحسابك الحالي.'); setLoading(false); return }
     if (org.organization_type !== expectedType) {
       const correctPath = org.organization_type === 'company' ? '/workspace/company' : org.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
       window.location.replace(correctPath)
