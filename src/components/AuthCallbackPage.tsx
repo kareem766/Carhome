@@ -53,7 +53,12 @@ async function finishAccount(user: User) {
     if (legacy.error) throw legacy.error
   }
 
-  const membership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
+  const membership = await supabase.from('organization_memberships')
+    .select('organization_id, organizations!inner(organization_type)')
+    .eq('user_id', user.id)
+    .eq('organizations.organization_type', role)
+    .limit(1)
+    .maybeSingle()
   if (membership.error) throw membership.error
   if (membership.data) {
     if (logoPath) {
@@ -63,7 +68,7 @@ async function finishAccount(user: User) {
     return role
   }
 
-  const existing = await supabase.from('organizations').select('id').eq('created_by', user.id).limit(1).maybeSingle()
+  const existing = await supabase.from('organizations').select('id').eq('created_by', user.id).eq('organization_type', role).limit(1).maybeSingle()
   if (existing.error) throw existing.error
   let organizationId = existing.data?.id as string | undefined
   if (!organizationId) {
