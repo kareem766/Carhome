@@ -41,7 +41,19 @@ export default function CompanyTeamPage(){
   e.preventDefault();if(!supabase||saving)return
   setSaving(true);setError('');setNotice('');setTemporaryPassword('')
   const {data,error:invokeError}=await supabase.functions.invoke('admin-managed-accounts',{body:{action:'create_company_member',display_name:displayName.trim(),email:email.trim().toLowerCase(),role}})
-  if(invokeError||data?.error){setError(data?.error||invokeError?.message||'تعذر إنشاء حساب الموظف.');setSaving(false);return}
+  if(invokeError||data?.error){
+   let serverMessage=String(data?.error||'')
+   if(!serverMessage&&invokeError?.context){
+    try{
+     const payload=await invokeError.context.clone().json()
+     serverMessage=String(payload?.error||payload?.message||'')
+    }catch{/* Keep the SDK error as a fallback. */}
+   }
+   if(!serverMessage&&invokeError?.status===409)serverMessage='هذا البريد الإلكتروني مسجل بالفعل. استخدم بريدًا جديدًا، أو راجع قائمة أعضاء الفريق إذا كنت قد أنشأت هذا الموظف من قبل.'
+   setError(serverMessage||invokeError?.message||'تعذر إنشاء حساب الموظف.')
+   setSaving(false)
+   return
+  }
   setTemporaryPassword(String(data.temporary_password||''))
   setNotice('تم إنشاء حساب الموظف وربطه بالشركة. انسخ كلمة المرور المؤقتة وشاركها معه؛ لن تظهر مرة أخرى بعد مغادرة هذه الصفحة.')
   setDisplayName('');setEmail('');setRole('member');setSaving(false);setRefresh(v=>v+1)
