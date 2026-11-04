@@ -55,7 +55,7 @@ export default function CompanyTeamPage(){
    return
   }
   setTemporaryPassword(String(data.temporary_password||''))
-  setNotice('تم إنشاء حساب الموظف وربطه بالشركة. انسخ كلمة المرور المؤقتة وشاركها معه؛ لن تظهر مرة أخرى بعد مغادرة هذه الصفحة.')
+  setNotice(String(data.message||'تم إنشاء حساب الموظف وربطه بالشركة. انسخ كلمة المرور المؤقتة وشاركها معه؛ لن تظهر مرة أخرى بعد مغادرة هذه الصفحة.'))
   setDisplayName('');setEmail('');setRole('member');setSaving(false);setRefresh(v=>v+1)
  }
  async function copyPassword(){
