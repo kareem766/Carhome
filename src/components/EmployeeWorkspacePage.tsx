@@ -4,9 +4,11 @@ import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 
-type RequestRow={id:string;title:string;vehicle_type:string;governorate:string;duration_months:number;start_date:string;status:string;created_at:string}\ntype OfferRow={id:string;request_id:string;monthly_price_egp:number;status:string;message:string|null;organizations:{name:string}|{name:string}[]|null;vehicles:{make:string;model:string;model_year:number}|{make:string;model:string;model_year:number}[]|null}
+type RequestRow={id:string;title:string;vehicle_type:string;governorate:string;duration_months:number;start_date:string;status:string;created_at:string}
+type OfferRow={id:string;request_id:string;monthly_price_egp:number;status:string;message:string|null;organizations:{name:string}|{name:string}[]|null;vehicles:{make:string;model:string;model_year:number}|{make:string;model:string;model_year:number}[]|null}
 const field='mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
-const statusLabel:Record<string,string>={pending_review:'قيد مراجعة الإدارة',open:'تم النشر واستقبال العروض',rejected:'مرفوض',closed:'مغلق',cancelled:'ملغي'}\nconst offerStatus:Record<string,string>={submitted:'عرض جديد',accepted:'مقبول',rejected:'مرفوض',withdrawn:'مسحوب'}
+const statusLabel:Record<string,string>={pending_review:'قيد مراجعة الإدارة',open:'تم النشر واستقبال العروض',rejected:'مرفوض',closed:'مغلق',cancelled:'ملغي'}
+const offerStatus:Record<string,string>={submitted:'عرض جديد',accepted:'مقبول',rejected:'مرفوض',withdrawn:'مسحوب'}
 export default function EmployeeWorkspacePage(){
  const [userId,setUserId]=useState('');const [accountType,setAccountType]=useState('independent');const [rows,setRows]=useState<RequestRow[]>([]);const [offers,setOffers]=useState<OfferRow[]>([])
  const [form,setForm]=useState({title:'',vehicle_type:'سيدان',seats:'4',governorate:'القاهرة',pickup_address:'',duration_months:'1',start_date:'',work_days_per_week:'5',daily_hours:'8',budget_min_egp:'',budget_max_egp:'',details:''})
