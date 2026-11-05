@@ -219,6 +219,9 @@ export default function App() {
       return
     }
     if (!authUser) return
+    // Wait until the platform-admin lookup finishes before choosing a workspace.
+    // Otherwise the initial false admin state can redirect the owner to the car-owner area.
+    if (!authLoaded) return
     // Authenticated users should never see sign-in/sign-up prompts or the registration chooser.
     setAuthOpen(false)
     const destination = isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'employee' ? '/workspace/employee' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
@@ -226,7 +229,7 @@ export default function App() {
     if (path === '/workspace') window.location.replace(destination)
     // Owners land directly on their vehicle portfolio after every successful sign-in.
     if ((path === '/' || pathIsHome(path)) && !isPlatformAdmin && authUser.user_metadata?.organization_type !== 'company' && authUser.user_metadata?.organization_type !== 'fleet_supplier' && authUser.user_metadata?.organization_type !== 'employee') window.location.replace('/workspace/owner/vehicles')
-  }, [authUser, isPlatformAdmin, path])
+  }, [authLoaded, authUser, isPlatformAdmin, path])
 
   useEffect(() => {
     if (path === '/workspace' && authLoaded && !authUser) window.location.replace('/?login=1')
