@@ -172,9 +172,11 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         if (!acceptedLegal) throw new Error('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية قبل إنشاء الحساب.')
         const name = fullName.trim()
         const orgName = organizationName.trim()
+        const normalizedEmail = normalizeEmailAddress(email)
+        if (!isValidEmailAddress(normalizedEmail)) throw new Error('اكتب بريدًا إلكترونيًا صحيحًا لإكمال إنشاء الحساب.')
         if (!name || (!invitationId && !orgName)) throw new Error(invitationId ? 'اكتب اسمك لإكمال قبول الدعوة.' : 'اكتب الاسم واسم المؤسسة لإكمال التسجيل.')
         const { data, error: signUpError } = await supabase.auth.signUp({
-          email: normalizeEmailAddress(email),
+          email: normalizedEmail,
           password,
           options: {
             // Explicitly return confirmation links to the deployed app's callback, not Supabase's default URL.
@@ -210,7 +212,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           setMode('signin')
         }
       } else {
-        const identifier = email.trim().toLowerCase()
+        const identifier = normalizeEmailAddress(email)
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
           throw new Error('اكتب بريدًا إلكترونيًا صحيحًا لتسجيل الدخول.')
         }
