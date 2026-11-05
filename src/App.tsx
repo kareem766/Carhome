@@ -109,6 +109,7 @@ export default function App() {
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [authLoaded, setAuthLoaded] = useState(false)
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
+  const [adminLookupError, setAdminLookupError] = useState<string | null>(null)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [homeImageUrls, setHomeImageUrls] = useState<string[]>([])
   const [homeImagesReady, setHomeImagesReady] = useState(false)
@@ -116,24 +117,36 @@ export default function App() {
   useEffect(() => {
     if (!supabase) { setAuthLoaded(true); return }
     let active = true
+    let syncSequence = 0
     async function syncSession(user: User | null) {
+      const sequence = ++syncSequence
       if (!active) return
       setAuthUser(user)
+      setAdminLookupError(null)
       if (!user) {
         setIsPlatformAdmin(false)
         setAuthLoaded(true)
         return
       }
-      const { data } = await supabase!.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle()
-      if (!active) return
-      setIsPlatformAdmin(Boolean(data))
+      setAuthLoaded(false)
+      // Resolve the trusted admin roster only after the auth event has released its internal lock.
+      const { data, error } = await supabase!.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle()
+      if (!active || sequence !== syncSequence) return
+      if (error) {
+        console.error('Platform admin role lookup failed:', error)
+        setIsPlatformAdmin(false)
+        setAdminLookupError('تعذر التحقق من صلاحيات مدير المنصة. لم يتم تحويلك إلى مساحة مالك السيارة حفاظًا على صلاحيات الحساب.')
+      } else {
+        setIsPlatformAdmin(Boolean(data))
+      }
       setAuthLoaded(true)
     }
     void supabase.auth.getSession().then(({ data }) => syncSession(data.session?.user ?? null))
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      void syncSession(session?.user ?? null)
+      // Supabase recommends deferring follow-up client calls outside the auth callback.
+      window.setTimeout(() => { void syncSession(session?.user ?? null) }, 0)
     })
-    return () => { active = false; listener.subscription.unsubscribe() }
+    return () => { active = false; syncSequence++; listener.subscription.unsubscribe() }
   }, [])
 
   useEffect(() => {
@@ -222,9 +235,12 @@ export default function App() {
     // Wait until the platform-admin lookup finishes before choosing a workspace.
     // Otherwise the initial false admin state can redirect the owner to the car-owner area.
     if (!authLoaded) return
+    // Never guess an admin's business role when the trusted admin lookup fails.
+    if (adminLookupError) return
     // Authenticated users should never see sign-in/sign-up prompts or the registration chooser.
     setAuthOpen(false)
     const destination = isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'employee' ? '/workspace/employee' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
+    if (isPlatformAdmin && path.startsWith('/workspace/') && !path.startsWith('/workspace/admin')) window.location.replace('/workspace/admin')
     if (path === '/register' || path.startsWith('/register/')) window.location.replace(destination)
     if (path === '/workspace') window.location.replace(destination)
     // Owners land directly on their vehicle portfolio after every successful sign-in.
@@ -242,6 +258,7 @@ export default function App() {
   // Keep the public homepage behind the branded loader until every hero vehicle visual has decoded.
   if (pathIsHome(window.location.pathname) && !homeImagesReady) return <PlatformLoading />
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
+  if (authUser && adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات لوحة التحكم</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/workspace' && !authLoaded) return <PlatformLoading />
