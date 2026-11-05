@@ -36,8 +36,8 @@ export default function EmployeeRegistrationPage() {
       setError('يرجى إدخال الاسم بالكامل بشكل صحيح.')
       return
     }
-    if(phoneDigits.length !== 11){
-      setError('رقم الموبايل يجب أن يتكون من 11 رقمًا بالضبط.')
+    if(phoneDigits.length < 11){
+      setError('رقم الموبايل يجب ألا يقل عن 11 رقمًا.')
       return
     }
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)){
