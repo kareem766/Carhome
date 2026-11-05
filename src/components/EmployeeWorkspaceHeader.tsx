@@ -22,8 +22,8 @@ export default function EmployeeWorkspaceHeader({active='home'}:{active?:ActiveP
  return <header dir="rtl" className="sticky top-0 z-40 border-b border-slate-200/90 bg-white/95 shadow-[0_8px_28px_rgba(15,35,65,.07)] backdrop-blur-xl">
   <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-5 gap-y-3 px-3 py-3 sm:px-5 lg:flex-nowrap lg:py-3.5">
    <a href="/workspace/employee" aria-label="My Car عربيتي - مساحة الموظف" className="group flex min-w-0 items-center gap-3 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#123456] to-[#176b9a] p-1 shadow-md shadow-blue-950/15 ring-1 ring-white"><span className="grid h-full w-full place-items-center overflow-hidden rounded-xl bg-white"><PlatformBrand compact/></span></span>
-    <span className="min-w-0"><span className="block truncate text-sm font-black tracking-tight text-slate-900 sm:text-base">مساحة الموظف</span><span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-500 sm:text-xs">My Car عربيتي · خدمات السيارات للشركات</span></span>
+    <PlatformBrand/>
+    <span className="hidden rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-[10px] font-extrabold text-blue-800 xl:inline-flex">مساحة الموظف</span>
    </a>
    <div className="order-3 flex w-full items-center gap-1 overflow-x-auto border-t border-slate-100 pt-2 lg:order-2 lg:w-auto lg:flex-1 lg:justify-center lg:border-0 lg:pt-0">
     {links.map(({key,href,label,icon:Icon})=><a key={key} href={href} aria-current={active===key?'page':undefined} className={'inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-xs font-extrabold transition sm:px-4 sm:text-sm '+(active===key?'bg-[#123456] text-white shadow-md shadow-blue-950/15':'text-slate-600 hover:bg-blue-50 hover:text-blue-800')}><Icon size={16}/>{label}</a>)}
