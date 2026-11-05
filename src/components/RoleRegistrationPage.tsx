@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react'
 import { ArrowRight, Building2, CarFront, CheckCircle2, ChevronDown, ShieldCheck, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { isValidEmailAddress, normalizeEmailAddress } from '../lib/email'
 import PlatformBrand from './PlatformBrand'
 
 type Role = 'individual_owner' | 'company' | 'fleet_supplier' | 'employee'
@@ -127,12 +128,12 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     } finally { setBusy(false) }
   }
 
-  if (confirmationSent) { return <main dir="rtl" className="grid min-h-screen place-items-center bg-blue-50 p-4"><section className="w-full max-w-xl rounded-3xl bg-white p-8 text-center shadow-xl"><div className="mb-5 flex justify-center"><PlatformBrand /></div><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-blue-50 text-blue-700"><CheckCircle2 size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">أكد بريدك الإلكتروني</h1><p className="mt-4 text-sm leading-7 text-slate-600">أرسلنا رسالة تأكيد إلى بريدك. افتح الرسالة واضغط على رابط التأكيد للعودة إلى My Car وإكمال إعداد حسابك.</p><p dir="ltr" className="mt-4 break-all rounded-xl bg-blue-50 p-3 font-bold text-blue-900">{values.email.trim().toLowerCase()}</p><p className="mt-4 text-right text-sm leading-7 text-slate-600">افحص صندوق الوارد ومجلد الرسائل غير المرغوب فيها. احتفظ بهذه الصفحة مفتوحة حتى تؤكد بريدك.</p><button onClick={() => { setConfirmationSent(false); setNotice(''); setError('') }} className="mt-6 rounded-xl border px-5 py-3 text-sm font-bold text-slate-600">العودة لبيانات التسجيل</button></section></main> }
+  if (confirmationSent) { return <main dir="rtl" className="grid min-h-screen place-items-center bg-blue-50 p-4"><section className="w-full max-w-xl rounded-3xl bg-white p-8 text-center shadow-xl"><div className="mb-5 flex justify-center"><PlatformBrand /></div><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-blue-50 text-blue-700"><CheckCircle2 size={28}/></span><h1 className="mt-5 text-2xl font-extrabold text-slate-950">أكد بريدك الإلكتروني</h1><p className="mt-4 text-sm leading-7 text-slate-600">أرسلنا رسالة تأكيد إلى بريدك. افتح الرسالة واضغط على رابط التأكيد للعودة إلى My Car وإكمال إعداد حسابك.</p><p dir="ltr" className="mt-4 break-all rounded-xl bg-blue-50 p-3 font-bold text-blue-900">{normalizeEmailAddress(values.email)}</p><p className="mt-4 text-right text-sm leading-7 text-slate-600">افحص صندوق الوارد ومجلد الرسائل غير المرغوب فيها. احتفظ بهذه الصفحة مفتوحة حتى تؤكد بريدك.</p><button onClick={() => { setConfirmationSent(false); setNotice(''); setError('') }} className="mt-6 rounded-xl border px-5 py-3 text-sm font-bold text-slate-600">العودة لبيانات التسجيل</button></section></main> }
 
   const fieldClass = 'mt-2 min-h-12 w-full rounded-xl border border-slate-200/90 bg-white px-4 text-sm shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-100/80'
   const field = (key: FieldKey, label: string, required: boolean, type = 'text', placeholder = '') => (
     <label className="block text-sm font-bold text-slate-700" key={key}>{label}{required ? ' *' : ' (اختياري)'}
-      <input className={fieldClass} type={type} required={required} value={values[key]} onChange={(e) => update(key, e.target.value)} placeholder={placeholder} autoComplete={key === 'password' ? 'new-password' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'off'} dir={key === 'email' || key === 'phone' || key === 'password' ? 'ltr' : 'rtl'} minLength={key === 'password' ? 8 : undefined} />
+      <input className={fieldClass} type={type} required={required} value={values[key]} onChange={(e) => update(key, e.target.value)} onBlur={key === 'email' ? (e) => update('email', normalizeEmailAddress(e.target.value)) : undefined} placeholder={placeholder} autoComplete={key === 'password' ? 'new-password' : key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'off'} dir={key === 'email' || key === 'phone' || key === 'password' ? 'ltr' : 'rtl'} minLength={key === 'password' ? 8 : undefined} />
     </label>
   )
 
