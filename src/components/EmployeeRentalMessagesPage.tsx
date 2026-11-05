@@ -13,6 +13,7 @@ export default function EmployeeRentalMessagesPage() {
   const [offer, setOffer] = useState<Offer | null>(null)
   const [requestTitle, setRequestTitle] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
+  const [inboxOffers, setInboxOffers] = useState<Offer[]>([])
   const [body, setBody] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
@@ -25,9 +26,26 @@ export default function EmployeeRentalMessagesPage() {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) { window.location.replace('/?login=1'); return }
     setUserId(user.id)
-    if (!offerId) { setError('رابط المحادثة غير مكتمل. افتح المحادثة من تفاصيل العرض.'); setLoading(false); return }
     const { data: account } = await supabase.from('employee_accounts').select('account_status').eq('user_id', user.id).maybeSingle()
     const isEmployee = account?.account_status === 'active'
+    if (!offerId) {
+      setRole(isEmployee ? 'employee' : 'provider')
+      if (isEmployee) {
+        const { data: requests } = await supabase.from('employee_rental_requests').select('id').eq('employee_user_id', user.id)
+        const requestIds = (requests || []).map((request: { id: string }) => request.id)
+        if (requestIds.length) {
+          const { data: rows, error: inboxError } = await supabase.from('employee_rental_offers').select('id,request_id,status,monthly_price_egp,created_by').in('request_id', requestIds).order('created_at', { ascending: false })
+          if (inboxError) setError('تعذر تحميل المحادثات: ' + inboxError.message)
+          setInboxOffers((rows || []) as Offer[])
+        }
+      } else {
+        const { data: rows, error: inboxError } = await supabase.from('employee_rental_offers').select('id,request_id,status,monthly_price_egp,created_by').eq('created_by', user.id).order('created_at', { ascending: false })
+        if (inboxError) setError('تعذر تحميل المحادثات: ' + inboxError.message)
+        setInboxOffers((rows || []) as Offer[])
+      }
+      setLoading(false)
+      return
+    }
     const { data: selectedOffer, error: offerError } = await supabase
       .from('employee_rental_offers')
       .select('id,request_id,status,monthly_price_egp,created_by')
@@ -110,7 +128,7 @@ export default function EmployeeRentalMessagesPage() {
       </section>
       {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}
       {notice && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p>}
-      {loading ? <div className="rounded-2xl border bg-white p-10 text-center text-slate-500">جارٍ تحميل المحادثة...</div> : offer && <>
+      {loading ? <div className="rounded-2xl border bg-white p-10 text-center text-slate-500">جارٍ تحميل المحادثة...</div> : !offerId ? <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="mb-4"><h2 className="text-lg font-black">محادثاتي</h2><p className="mt-1 text-sm text-slate-500">اختر عرضًا لفتح المحادثة المرتبطة به.</p></div>{inboxOffers.length === 0 ? <p className="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">لا توجد محادثات مرتبطة بعروض حتى الآن.</p> : <div className="space-y-3">{inboxOffers.map(item => <a key={item.id} href={(role === 'employee' ? '/workspace/employee/messages?offer=' : '/workspace/provider/employee-messages?offer=') + item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-blue-300 hover:bg-blue-50/50"><div><p className="font-bold">محادثة بخصوص عرض سيارة شهرية بسائق</p><p className="mt-1 text-xs text-slate-500">{Number(item.monthly_price_egp).toLocaleString('ar-EG')} جنيه شهريًا · رقم العرض: {item.id.slice(0, 8)}</p></div><span className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-bold text-white">فتح المحادثة</span></a>)}</div>}</section> : offer && <>
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div><p className="text-xs text-slate-500">موضوع المحادثة</p><h2 className="mt-1 font-black">{requestTitle}</h2><p className="mt-1 text-sm text-slate-600">قيمة العرض: {Number(offer.monthly_price_egp).toLocaleString('ar-EG')} جنيه شهريًا</p></div>
           <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800"><ShieldCheck size={16}/> {role === 'employee' ? 'حساب الموظف' : 'مقدم العرض'}</div>
