@@ -17,9 +17,9 @@ create or replace function public.employee_republish_cancelled_request(
   p_start_date date,
   p_work_days_per_week integer,
   p_daily_hours numeric,
-  p_budget_min_egp numeric default null,
-  p_budget_max_egp numeric default null,
-  p_details text default null
+  p_budget_min_egp numeric,
+  p_budget_max_egp numeric,
+  p_details text
 )
 returns uuid
 language plpgsql
@@ -27,43 +27,27 @@ security invoker
 set search_path = ''
 as $function$
 declare
-  v_uid uuid := auth.uid();
+  v_uid uuid := (select auth.uid());
   v_new_request_id uuid;
-  v_fee_enabled boolean;
 begin
   if v_uid is null then
     raise exception 'يجب تسجيل الدخول لإعادة نشر الطلب.' using errcode = '42501';
   end if;
 
   if not exists (
-    select 1
-    from public.employee_accounts e
+    select 1 from public.employee_accounts e
     where e.user_id = v_uid and e.account_status = 'active'
   ) then
     raise exception 'حساب الموظف غير نشط.' using errcode = '42501';
   end if;
 
   if not exists (
-    select 1
-    from public.employee_rental_requests r
+    select 1 from public.employee_rental_requests r
     where r.id = p_request_id
       and r.employee_user_id = v_uid
       and r.status = 'cancelled'
   ) then
     raise exception 'لا يمكن إعادة نشر هذا الطلب؛ تأكد أنه طلب ملغي تابع لحسابك.' using errcode = '42501';
-  end if;
-
-  if p_start_date is null or p_start_date < current_date then
-    raise exception 'يجب اختيار تاريخ بداية اليوم أو تاريخ لاحق.' using errcode = '22007';
-  end if;
-
-  select coalesce(s.request_fee_enabled, false)
-    into v_fee_enabled
-  from public.employee_service_settings s
-  where s.id = true;
-
-  if coalesce(v_fee_enabled, false) then
-    raise exception 'إعادة نشر الطلب متوقفة مؤقتًا لحين تفعيل إجراءات الدفع.' using errcode = '55000';
   end if;
 
   insert into public.employee_rental_requests (
