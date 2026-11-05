@@ -102,6 +102,31 @@ create table if not exists public.employee_rental_requests (
   updated_at timestamptz not null default now(),
   check (budget_min_egp is null or budget_max_egp is null or budget_max_egp >= budget_min_egp)
 );
+
+create or replace function app_private.guard_employee_request_fee()
+returns trigger language plpgsql security definer set search_path = '' as $
+declare
+  fee_enabled boolean;
+  fee_amount numeric(12,2);
+begin
+  select coalesce(request_fee_enabled,false), coalesce(request_fee_egp,0)
+    into fee_enabled, fee_amount
+  from public.employee_service_settings where id = true;
+  if fee_enabled then
+    raise exception 'Employee request fee payment workflow is not enabled yet; request submission is temporarily paused.'
+      using errcode = '55000';
+  end if;
+  new.fee_enabled_snapshot := false;
+  new.fee_amount_egp := 0;
+  new.fee_status := 'not_required';
+  return new;
+end;
+$;
+drop trigger if exists employee_request_fee_guard on public.employee_rental_requests;
+create trigger employee_request_fee_guard
+before insert on public.employee_rental_requests
+for each row execute function app_private.guard_employee_request_fee();
+
 create index if not exists employee_requests_owner_created_idx on public.employee_rental_requests(employee_user_id, created_at desc);
 create index if not exists employee_requests_provider_feed_idx on public.employee_rental_requests(status, governorate, vehicle_type, created_at desc);
 alter table public.employee_rental_requests enable row level security;
@@ -209,6 +234,69 @@ drop trigger if exists employee_request_notifications on public.employee_rental_
 create trigger employee_request_notifications
 after insert or update of status on public.employee_rental_requests
 for each row execute function app_private.notify_employee_request_events();
+
+
+create or replace function public.employee_respond_to_offer(p_offer_id uuid, p_accept boolean)
+returns boolean language plpgsql security definer set search_path = '' as $
+declare
+  v_request_id uuid;
+  v_employee_user_id uuid;
+begin
+  select o.request_id, r.employee_user_id
+    into v_request_id, v_employee_user_id
+  from public.employee_rental_offers o
+  join public.employee_rental_requests r on r.id = o.request_id
+  where o.id = p_offer_id and r.status = 'open'
+  for update of r;
+  if v_request_id is null or v_employee_user_id <> (select auth.uid()) then
+    raise exception 'You are not allowed to respond to this employee offer.' using errcode = '42501';
+  end if;
+  if p_accept then
+    update public.employee_rental_offers set status = 'accepted', updated_at = now()
+    where id = p_offer_id and status = 'submitted';
+    if not found then raise exception 'This offer is no longer available.' using errcode = '55000'; end if;
+    update public.employee_rental_requests set status = 'closed', updated_at = now()
+    where id = v_request_id and employee_user_id = (select auth.uid());
+    update public.employee_rental_offers set status = 'rejected', updated_at = now()
+    where request_id = v_request_id and id <> p_offer_id and status = 'submitted';
+  else
+    update public.employee_rental_offers set status = 'rejected', updated_at = now()
+    where id = p_offer_id and status = 'submitted';
+    if not found then raise exception 'This offer is no longer available.' using errcode = '55000'; end if;
+  end if;
+  return true;
+end;
+$;
+revoke all on function public.employee_respond_to_offer(uuid,boolean) from public, anon;
+grant execute on function public.employee_respond_to_offer(uuid,boolean) to authenticated;
+
+create or replace function app_private.notify_employee_offer_events()
+returns trigger language plpgsql security definer set search_path = '' as $
+declare
+  v_employee_user_id uuid;
+  member record;
+begin
+  if tg_op = 'INSERT' then
+    select r.employee_user_id into v_employee_user_id
+    from public.employee_rental_requests r where r.id = new.request_id;
+    insert into public.platform_notifications(user_id,title,body,notification_type,action_url,created_by)
+    values (v_employee_user_id,'وصلك عرض جديد لطلب سيارتك','أرسل أحد ملاك السيارات أو موردي الأساطيل عرضًا شهريًا شامل السائق.','general','/workspace/employee?request=' || new.request_id::text,new.created_by);
+  elsif tg_op = 'UPDATE' and old.status = 'submitted' and new.status in ('accepted','rejected') then
+    for member in select m.user_id from public.organization_memberships m where m.organization_id = new.organization_id loop
+      insert into public.platform_notifications(user_id,title,body,notification_type,action_url,created_by)
+      values (member.user_id,
+        case when new.status = 'accepted' then 'تم اختيار عرضك' else 'تم إغلاق طلب الموظف' end,
+        case when new.status = 'accepted' then 'اختار الموظف عرضك المقدم للسيارة الشهرية بالسائق.' else 'تم إغلاق الطلب أو اختيار عرض آخر.' end,
+        'general','/workspace/provider-employee-requests',new.created_by);
+    end loop;
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists employee_offer_notifications on public.employee_rental_offers;
+create trigger employee_offer_notifications
+after insert or update of status on public.employee_rental_offers
+for each row execute function app_private.notify_employee_offer_events();
 
 comment on table public.employee_service_settings is 'Employee request pricing configuration. Fee collection is intentionally disabled until a complete payment/review workflow is released.';
 comment on column public.employee_service_settings.request_fee_enabled is 'Keep false until employee request payment flow is implemented and tested.';
