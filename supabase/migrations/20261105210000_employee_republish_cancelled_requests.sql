@@ -23,7 +23,7 @@ create or replace function public.employee_republish_cancelled_request(
 )
 returns uuid
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $function$
 declare
