@@ -5,7 +5,7 @@ import PlatformBrand from './PlatformBrand'
 import PlatformLoading from './PlatformLoading'
 import type { EmailOtpType, User } from '@supabase/supabase-js'
 
-type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company'
+type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company' | 'employee'
 
 async function finishAccount(user: User) {
   if (!supabase) throw new Error('خدمة الحسابات غير متاحة حاليًا.')
@@ -17,7 +17,7 @@ async function finishAccount(user: User) {
   }
   const metadata = user.user_metadata ?? {}
   const displayName = String(metadata.display_name || user.email || user.phone || 'مستخدم Carhome').trim()
-  const role = (['individual_owner', 'fleet_supplier', 'company'].includes(String(metadata.organization_type))
+  const role = (['individual_owner', 'fleet_supplier', 'company', 'employee'].includes(String(metadata.organization_type))
     ? metadata.organization_type
     : 'individual_owner') as AccountRole
   const organizationName = String(metadata.organization_name || displayName).trim()
@@ -53,7 +53,7 @@ async function finishAccount(user: User) {
     if (legacy.error) throw legacy.error
   }
 
-  const membership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
+  if (role === 'employee') return role\n\n  const membership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
   if (membership.error) throw membership.error
   if (membership.data) {
     if (logoPath) {
