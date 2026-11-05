@@ -8,7 +8,7 @@ import AccountProfilePage from './AccountProfilePage'
 
 type Role = 'company' | 'owner' | 'supplier'
 type Organization = { id: string; name: string; organization_type: string }
-type Vehicle = { id: string; make: string; model: string; model_year: number; vehicle_type: string; governorate: string; license_expiry_date: string; monthly_price_egp: number; review_status: string; payment_status: string; images?: { url: string; alt_text: string }[] }
+type Vehicle = { id: string; make: string; model: string; model_year: number; vehicle_type: string; governorate: string; license_expiry_date: string | null; monthly_price_egp: number; review_status: string; payment_status: string; images?: { url: string; alt_text: string }[] }
 type RentalOffer = { id: string; monthly_price_egp: number; yearly_price_egp: number | null; vehicle_count: number; message: string | null; status: string; organizations: { id: string; name: string } | { id: string; name: string }[] | null }
 type RentalRequest = { id: string; title: string; details: string | null; vehicle_type: string; quantity: number; duration_type: string; duration_months: number; governorate: string; with_driver: boolean; status: string; created_at: string; rental_offers?: RentalOffer[] }
 type SubmittedOffer = { id: string; monthly_price_egp: number; yearly_price_egp: number | null; vehicle_count: number; message: string | null; status: 'submitted' | 'accepted' | 'rejected' | 'withdrawn' | string; created_at: string; updated_at: string; rental_requests: { id: string; title: string; vehicle_type: string; quantity: number; governorate: string; status: string } | null }
