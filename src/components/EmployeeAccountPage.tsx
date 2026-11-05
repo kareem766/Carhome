@@ -31,11 +31,10 @@ export default function EmployeeAccountPage() {
         window.location.replace('/workspace')
         return
       }
-      const { data: account, error: accountError } = await supabase
-        .from('employee_accounts')
-        .select('employment_type,account_status')
-        .eq('user_id', user.id)
-        .maybeSingle()
+      const [{ data: account, error: accountError }, { data: profile }] = await Promise.all([
+        supabase.from('employee_accounts').select('employment_type,account_status').eq('user_id', user.id).maybeSingle(),
+        supabase.from('profiles').select('display_name,phone,contact_email').eq('id', user.id).maybeSingle()
+      ])
       if (!active) return
       if (accountError || !account) {
         setError('لم نتمكن من تحميل بيانات حساب الموظف. حدّث الصفحة أو تواصل مع الدعم.')
@@ -43,9 +42,9 @@ export default function EmployeeAccountPage() {
         setEmploymentType(account.employment_type || 'independent')
         setStatus(account.account_status || 'unknown')
       }
-      setName(String(user.user_metadata?.display_name || user.user_metadata?.full_name || ''))
-      setPhone(String(user.user_metadata?.phone || ''))
-      setEmail(user.email || '')
+      setName(String(profile?.display_name || user.user_metadata?.display_name || user.user_metadata?.full_name || ''))
+      setPhone(String(profile?.phone || user.user_metadata?.phone || ''))
+      setEmail(user.email || profile?.contact_email || '')
       setLoading(false)
     }
     void load()
@@ -60,11 +59,22 @@ export default function EmployeeAccountPage() {
     if (cleanName.length < 2) { setError('يرجى إدخال الاسم بالكامل بشكل صحيح.'); return }
     if (cleanPhone.length !== 11) { setError('رقم الموبايل يجب أن يتكون من 11 رقمًا.'); return }
     setSaving(true); setError(''); setNotice('')
+    const { error: profileError } = await supabase.from('profiles').upsert({
+      id: (await supabase.auth.getUser()).data.user?.id,
+      display_name: cleanName,
+      phone: cleanPhone,
+      contact_email: email || null
+    }, { onConflict: 'id' })
+    if (profileError) {
+      setSaving(false)
+      setError('تعذر حفظ بيانات الملف الشخصي: ' + profileError.message)
+      return
+    }
     const { error: updateError } = await supabase.auth.updateUser({
       data: { display_name: cleanName, phone: cleanPhone, email_contact: email }
     })
     setSaving(false)
-    if (updateError) setError('تعذر حفظ البيانات: ' + updateError.message)
+    if (updateError) setError('تم حفظ بيانات الملف الشخصي، لكن تعذر تحديث بيانات الجلسة: ' + updateError.message)
     else setNotice('تم تحديث بيانات الملف الشخصي بنجاح.')
   }
 
