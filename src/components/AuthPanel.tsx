@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { CheckCircle2, Eye, EyeOff, LoaderCircle, LogOut, ShieldCheck, X, CircleUserRound } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { isValidEmailAddress, normalizeEmailAddress } from '../lib/email'
 import PlatformBrand from './PlatformBrand'
 
 type AccountType = 'individual_owner' | 'fleet_supplier' | 'company'
@@ -124,8 +125,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     setError('')
     setNotice('')
     if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
-    const normalizedEmail = email.trim().toLowerCase()
-    if (!normalizedEmail.includes('@')) { setError('اكتب البريد الإلكتروني الصحيح لاستعادة كلمة المرور.'); return }
+    const normalizedEmail = normalizeEmailAddress(email)
+    if (!isValidEmailAddress(normalizedEmail)) { setError('اكتب البريد الإلكتروني الصحيح لاستعادة كلمة المرور.'); return }
     setLoading(true)
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo: `${window.location.origin}/auth/callback?flow=password-reset` })
@@ -173,7 +174,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         const orgName = organizationName.trim()
         if (!name || (!invitationId && !orgName)) throw new Error(invitationId ? 'اكتب اسمك لإكمال قبول الدعوة.' : 'اكتب الاسم واسم المؤسسة لإكمال التسجيل.')
         const { data, error: signUpError } = await supabase.auth.signUp({
-          email: email.trim().toLowerCase(),
+          email: normalizeEmailAddress(email),
           password,
           options: {
             // Explicitly return confirmation links to the deployed app's callback, not Supabase's default URL.
