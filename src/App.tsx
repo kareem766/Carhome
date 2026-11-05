@@ -61,7 +61,7 @@ const HOME_CAR_IMAGES = [
   ],
   [
     'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1100&q=90',
-    'https://images.unsplash.com/photo-150373cean?auto=format&fit=crop&w=1100&q=85',
+    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1100&q=85',
     'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1100&q=85'
   ],
   [
@@ -185,6 +185,7 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
     const loadImage = (sources: string[]) => new Promise<string>((resolve) => {
       let index = 0
@@ -196,7 +197,7 @@ export default function App() {
           return
         }
         const image = new Image()
-        image.onload = () => resolve(source)
+        image.onload = () => { void image.decode().catch(() => undefined).then(() => resolve(source)) }
         image.onerror = tryNext
         image.src = source
       }
