@@ -213,7 +213,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
         }
       } else {
         const identifier = normalizeEmailAddress(email)
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
+        if (!isValidEmailAddress(identifier)) {
           throw new Error('اكتب بريدًا إلكترونيًا صحيحًا لتسجيل الدخول.')
         }
         const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: identifier, password })
