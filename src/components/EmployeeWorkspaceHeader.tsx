@@ -1,0 +1,31 @@
+import { LayoutDashboard, ClipboardList, MessageCircle, UserRound, CarFront } from 'lucide-react'
+import PlatformBrand from './PlatformBrand'
+import AccountNotifications from './AccountNotifications'
+
+type ActivePage = 'home' | 'requests' | 'messages' | 'account'
+const links = [
+ {key:'home',href:'/workspace/employee',label:'الرئيسية',icon:LayoutDashboard},
+ {key:'requests',href:'/workspace/employee/requests',label:'طلباتي والعروض',icon:ClipboardList},
+ {key:'messages',href:'/workspace/employee/messages',label:'المراسلات',icon:MessageCircle},
+ {key:'account',href:'/workspace/employee/account',label:'بيانات الحساب',icon:UserRound}
+] as const
+
+export default function EmployeeWorkspaceHeader({active='home'}:{active?:ActivePage}){
+ return <header dir="rtl" className="sticky top-0 z-40 border-b border-slate-200/90 bg-white/95 shadow-[0_8px_28px_rgba(15,35,65,.07)] backdrop-blur-xl">
+  <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-5 gap-y-3 px-3 py-3 sm:px-5 lg:flex-nowrap lg:py-3.5">
+   <a href="/workspace/employee" aria-label="My Car عربيتي - مساحة الموظف" className="group flex min-w-0 items-center gap-3 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+    <PlatformBrand/>
+    <span className="hidden rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-[10px] font-extrabold text-blue-800 xl:inline-flex">مساحة الموظف</span>
+   </a>
+   <div className="order-3 flex w-full items-center gap-1 overflow-x-auto border-t border-slate-100 pt-2 lg:order-2 lg:w-auto lg:flex-1 lg:justify-center lg:border-0 lg:pt-0">
+    {links.map(({key,href,label,icon:Icon})=><a key={key} href={href} aria-current={active===key?'page':undefined} className={'inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-xs font-extrabold transition sm:px-4 sm:text-sm '+(active===key?'bg-[#123456] text-white shadow-md shadow-blue-950/15':'text-slate-600 hover:bg-blue-50 hover:text-blue-800')}><Icon size={16}/>{label}</a>)}
+    {active==='home'&&<a href="#new-request" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-3 text-xs font-extrabold text-orange-800 hover:bg-orange-100 sm:px-4 sm:text-sm"><CarFront size={16}/> طلب سيارة</a>}
+   </div>
+   <div className="order-2 flex shrink-0 items-center gap-2 lg:order-3">
+    <span className="hidden h-8 w-px bg-slate-200 sm:block"/>
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-0.5"><AccountNotifications/></div>
+
+   </div>
+  </div>
+ </header>
+}
