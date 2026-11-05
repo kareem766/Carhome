@@ -60,7 +60,9 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
       ? [values.authorizedName, values.companyName, values.phone, values.email, values.companyType, values.governorate, values.address]
       : isOwner
         ? [values.fullName, values.phone, values.email, values.governorate, values.address]
-        : [values.fullName, values.companyName, values.phone, values.email, values.governorate, values.address, fleetVehicleCount]
+        : role === 'fleet_supplier'
+        ? [values.fullName, values.companyName, values.phone, values.email, values.governorate, values.address, fleetVehicleCount]
+        : [values.fullName, values.phone, values.email, values.governorate, values.address]
     if (requiredValues.some((value) => !value.trim())) { setError('من فضلك أكمل جميع الحقول المطلوبة قبل إنشاء الحساب. لا يمكن ترك أي حقل مطلوب فارغًا.'); return }
     const email = values.email.trim().toLowerCase()
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا.'); return }
