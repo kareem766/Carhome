@@ -776,3 +776,16 @@ main.min-h-screen :is(input, select, textarea):disabled {
  .mc-home-benefits>div>strong{font-size:.82rem}
  .mc-home-benefits>div>span:last-child{font-size:.69rem}
 }
+
+/* Brand lockup: keep the platform name and its descriptor visually separate. */
+.mc-brand-group{min-width:0;flex-shrink:1;gap:.7rem}
+.mc-brand-lockup{display:flex;min-width:0;max-width:min(62vw,34rem);flex-direction:column;align-items:flex-start;gap:.55rem}
+.mc-brand-name{display:flex;flex-wrap:nowrap;align-items:baseline;gap:.5rem;color:#ffad0a;font-size:clamp(1.25rem,2.5vw,2.35rem);font-weight:950;line-height:1.2;letter-spacing:-.035em;white-space:nowrap}
+.mc-brand-arabic{color:#fff;font-weight:950}
+.mc-brand-tagline{display:block;max-width:100%;margin:0;padding-top:.1rem;color:rgba(255,255,255,.88);font-size:clamp(.62rem,.9vw,.78rem);font-weight:750;line-height:1.75;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:640px){
+ .mc-brand-group{gap:.55rem}
+ .mc-brand-lockup{max-width:calc(100vw - 10.5rem);gap:.45rem}
+ .mc-brand-name{gap:.38rem;font-size:clamp(1.12rem,5.6vw,1.45rem);line-height:1.25}
+ .mc-brand-tagline{font-size:.62rem;line-height:1.7}
+}
