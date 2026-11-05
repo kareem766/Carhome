@@ -150,6 +150,24 @@ export default function AccountNotifications() {
       window.location.href = offerId ? `${offersPath}?offer=${encodeURIComponent(offerId)}` : offersPath
       return
     }
+    const employeeApprovedRequestNotice = /تم اعتماد طلب السيارة|تم اعتماد طلبك|اعتماد طلب السيارة|تمت الموافقة على طلب السيارة/.test([notification.title, notification.body || ''].join(' '))
+    if (identity.role === 'حساب موظف' && employeeApprovedRequestNotice) {
+      let requestId: string | null = null
+      if (notification.action_url) {
+        try {
+          const target = new URL(notification.action_url, window.location.origin)
+          requestId = target.searchParams.get('request') || target.searchParams.get('request_id') || target.searchParams.get('id')
+          if (!requestId) {
+            const pathId = target.pathname.match(/[0-9a-f]{8}-[0-9a-f-]{27,}/i)?.[0]
+            if (pathId) requestId = pathId
+          }
+        } catch { /* open the employee requests list as a safe fallback */ }
+      }
+      window.location.href = requestId
+        ? `/workspace/employee/requests?request=${encodeURIComponent(requestId)}`
+        : '/workspace/employee/requests'
+      return
+    }
     const approvedVehicleNotice = /تم اعتماد سيارتك|اعتماد السيارة|تم اعتماد السيارة/.test([notification.title, notification.body || ''].join(' '))
     if (identity.role === 'مالك سيارة' && approvedVehicleNotice) {
       window.location.href = '/workspace/owner/vehicles'
