@@ -159,6 +159,7 @@ for insert to authenticated with check (
       and o.approval_status = 'approved'
       and v.review_status = 'approved'
       and v.with_driver = true
+      and (o.organization_type = 'fleet_supplier' or (v.payment_status in ('verified','waived') and (v.registration_expires_at is null or v.registration_expires_at > now())))
       and r.status = 'open'
       and r.governorate = v.governorate
   )
@@ -178,6 +179,36 @@ for update to authenticated using (
 create policy "admins manage employee offers" on public.employee_rental_offers
 for all to authenticated using (exists (select 1 from public.platform_admins a where a.user_id = (select auth.uid())))
 with check (exists (select 1 from public.platform_admins a where a.user_id = (select auth.uid())));
+
+
+create or replace function app_private.notify_employee_request_events()
+returns trigger language plpgsql security definer set search_path = '' as $
+declare
+  admin_user record;
+begin
+  if tg_op = 'INSERT' then
+    for admin_user in select a.user_id from public.platform_admins a loop
+      insert into public.platform_notifications(user_id,title,body,notification_type,action_url,created_by)
+      values (admin_user.user_id,'طلب موظف جديد للمراجعة','يوجد طلب سيارة شهري بسائق جديد ينتظر مراجعة الإدارة.','general','/workspace/admin/employee-requests',new.employee_user_id);
+    end loop;
+  elsif tg_op = 'UPDATE' and old.status = 'pending_review' and new.status in ('open','rejected') then
+    insert into public.platform_notifications(user_id,title,body,notification_type,action_url,created_by)
+    values (
+      new.employee_user_id,
+      case when new.status = 'open' then 'تم اعتماد طلب السيارة' else 'لم تتم الموافقة على طلب السيارة' end,
+      case when new.status = 'open' then 'تمت مراجعة طلبك ونشره لملاك السيارات وموردي الأساطيل.' else coalesce(new.admin_notes,'يرجى مراجعة تفاصيل الطلب أو التواصل مع الدعم.') end,
+      'general',
+      '/workspace/employee?request=' || new.id::text,
+      new.reviewed_by
+    );
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists employee_request_notifications on public.employee_rental_requests;
+create trigger employee_request_notifications
+after insert or update of status on public.employee_rental_requests
+for each row execute function app_private.notify_employee_request_events();
 
 comment on table public.employee_service_settings is 'Employee request pricing configuration. Fee collection is intentionally disabled until a complete payment/review workflow is released.';
 comment on column public.employee_service_settings.request_fee_enabled is 'Keep false until employee request payment flow is implemented and tested.';
