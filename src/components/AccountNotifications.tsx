@@ -140,6 +140,16 @@ export default function AccountNotifications() {
 
   async function openNotification(notification: PlatformNotification) {
     await markAsRead(notification)
+    const offerStatusNotice = /تم تحديث حالة عرضك/.test([notification.title, notification.body || ''].join(' '))
+    if (offerStatusNotice) {
+      let offerId: string | null = null
+      if (notification.action_url) {
+        try { offerId = new URL(notification.action_url, window.location.origin).searchParams.get('offer') } catch { /* use the role-based fallback */ }
+      }
+      const offersPath = identity.role === 'مالك سيارة' ? '/workspace/owner/offers' : '/workspace/supplier/offers'
+      window.location.href = offerId ? `${offersPath}?offer=${encodeURIComponent(offerId)}` : offersPath
+      return
+    }
     const approvedVehicleNotice = /تم اعتماد سيارتك|اعتماد السيارة|تم اعتماد السيارة/.test([notification.title, notification.body || ''].join(' '))
     if (identity.role === 'مالك سيارة' && approvedVehicleNotice) {
       window.location.href = '/workspace/owner/vehicles'
