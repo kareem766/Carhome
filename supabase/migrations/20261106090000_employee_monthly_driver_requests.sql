@@ -186,9 +186,7 @@ for select to authenticated using (
       and (o.organization_type = 'fleet_supplier' or (v.payment_status in ('verified','waived') and (v.registration_expires_at is null or v.registration_expires_at > now())))
   ))
 );
-create policy "employees update own pending requests" on public.employee_rental_requests
-for update to authenticated using (employee_user_id = (select auth.uid()) and status = 'pending_review')
-with check (employee_user_id = (select auth.uid()) and status = 'pending_review');
+drop policy if exists "employees update own pending requests" on public.employee_rental_requests;
 
 create table if not exists public.employee_rental_offers (
   id uuid primary key default gen_random_uuid(),
@@ -234,12 +232,7 @@ for select to authenticated using (
   or exists (select 1 from public.employee_rental_requests r where r.id = employee_rental_offers.request_id and r.employee_user_id = (select auth.uid()))
   or exists (select 1 from public.platform_admins a where a.user_id = (select auth.uid()))
 );
-create policy "providers update own employee offers" on public.employee_rental_offers
-for update to authenticated using (
-  created_by = (select auth.uid()) and exists (select 1 from public.organization_memberships m where m.organization_id = employee_rental_offers.organization_id and m.user_id = (select auth.uid()))
-) with check (
-  created_by = (select auth.uid()) and exists (select 1 from public.organization_memberships m where m.organization_id = employee_rental_offers.organization_id and m.user_id = (select auth.uid()))
-);
+drop policy if exists "providers update own employee offers" on public.employee_rental_offers;
 create policy "admins manage employee offers" on public.employee_rental_offers
 for all to authenticated using (exists (select 1 from public.platform_admins a where a.user_id = (select auth.uid())))
 with check (exists (select 1 from public.platform_admins a where a.user_id = (select auth.uid())));
