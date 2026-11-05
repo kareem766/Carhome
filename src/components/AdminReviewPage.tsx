@@ -110,7 +110,18 @@ export default function AdminReviewPage() {
     setBusyId(profile.id); setError(''); setNotice('')
     const { error: deleteError } = await supabase.functions.invoke('admin-delete-user', { body: { user_id: profile.id } })
     setBusyId('')
-    if (deleteError) { setError('تعذر حذف حساب الدخول: ' + deleteError.message); return }
+    if (deleteError) {
+      let detail = deleteError.message
+      try {
+        const response = (deleteError as any).context as Response | undefined
+        if (response) {
+          const payload = await response.clone().json()
+          if (typeof payload?.error === 'string' && payload.error.trim()) detail = payload.error
+        }
+      } catch { /* Keep the SDK message when no structured response is available. */ }
+      setError('تعذر حذف حساب الدخول: ' + detail)
+      return
+    }
     setNotice('تم حذف حساب المستخدم نهائيًا.')
     if (editingProfileId === profile.id) { setEditingProfileId(null); setProfileForm(emptyProfile) }
     await load()
