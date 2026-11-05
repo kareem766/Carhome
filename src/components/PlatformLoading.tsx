@@ -6,7 +6,7 @@ export default function PlatformLoading() {
       style={{ background: 'radial-gradient(ellipse at 50% 44%, #173b69 0%, #0b2343 43%, #06152b 100%)' }}
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(249,115,22,.10), transparent 34%)' }} />
-      <div className="relative flex flex-col items-center gap-9" role="status" aria-label="جارٍ فتح مساحة عمل My Car">
+      <div className="relative flex flex-col items-center gap-9" role="status" aria-label="جارٍ فتح مساحة عمل My Car عربيتي">
         <div className="relative grid h-56 w-56 place-items-center sm:h-64 sm:w-64">
           <span aria-hidden="true" className="absolute inset-0 rounded-full border border-orange-300/25" style={{ boxShadow: '0 0 55px rgba(249,115,22,.16), inset 0 0 28px rgba(249,115,22,.06)' }} />
           <span aria-hidden="true" className="absolute inset-2 animate-[spin_4s_linear_infinite] rounded-full border-[4px] border-transparent border-t-orange-400 border-r-orange-500" style={{ filter: 'drop-shadow(0 0 7px rgba(249,115,22,.8))' }} />
@@ -17,8 +17,10 @@ export default function PlatformLoading() {
             dir="ltr"
             style={{ background: 'linear-gradient(145deg, #12345b, #071a32)', boxShadow: 'inset 0 2px 18px rgba(255,255,255,.08), 0 10px 35px rgba(0,0,0,.28)' }}
           >
-            <span className="text-[42px] font-black leading-none tracking-[-0.055em] text-white sm:text-5xl">My</span>
-            <span className="text-[42px] font-black leading-none tracking-[-0.055em] text-orange-400 sm:text-5xl">Car</span>
+            <span className="flex flex-col items-center gap-2">
+              <span className="text-[38px] font-black leading-none tracking-[-0.055em] text-white sm:text-5xl">My <span className="text-cyan-300">Car</span></span>
+              <span dir="rtl" className="text-2xl font-black leading-none tracking-normal text-cyan-300 sm:text-3xl">عربيتي</span>
+            </span>
           </div>
           <span aria-hidden="true" className="absolute right-0 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-orange-300" style={{ boxShadow: '0 0 8px 3px rgba(251,146,60,.75), 0 0 24px 8px rgba(249,115,22,.35)' }} />
         </div>

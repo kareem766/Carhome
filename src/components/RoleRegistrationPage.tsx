@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react'
-import { ArrowRight, Building2, CarFront, CheckCircle2, ChevronDown, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Building2, CarFront, CheckCircle2, ChevronDown, ShieldCheck, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 
@@ -24,6 +24,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
   const [logoPreview, setLogoPreview] = useState('')
   const [fleetVehicleCount, setFleetVehicleCount] = useState('')
   const [acceptedLegal, setAcceptedLegal] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const isCompany = role === 'company'
   const isOwner = role === 'individual_owner'
   const info = roleInfo[role]
@@ -52,15 +53,25 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     setError('')
     setNotice('')
     if (!acceptedLegal) { setError('يجب الموافقة على سياسة الخصوصية وشروط الاستخدام قبل إنشاء الحساب.'); return }
+    const requiredValues = isCompany
+      ? [values.authorizedName, values.companyName, values.phone, values.email, values.companyType, values.governorate, values.address]
+      : isOwner
+        ? [values.fullName, values.phone, values.email, values.governorate, values.address]
+        : [values.fullName, values.companyName, values.email]
+    if (requiredValues.some((value) => !value.trim())) { setError('من فضلك أكمل جميع الحقول المطلوبة قبل إنشاء الحساب. لا يمكن ترك أي حقل مطلوب فارغًا.'); return }
     const email = values.email.trim().toLowerCase()
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا، فالبريد الإلكتروني إلزامي لإنشاء الحساب.'); return }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا.'); return }
     const phone = values.phone.replace(/\D/g, '')
     const phoneRequired = role !== 'fleet_supplier'
     if ((phoneRequired || phone.length > 0) && !/^01[0-9]{9}$/.test(phone)) {
       setError('من فضلك أدخل رقم موبايل مصري صحيح مكوّن من 11 رقمًا ويبدأ بـ 01.')
       return
     }
-    if (values.password.length < 8) { setError('كلمة المرور يجب أن تتكون من 8 أحرف على الأقل.'); return }
+    const password = values.password
+    if (password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+      setError('كلمة المرور غير قوية. يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وحرف صغير ورقم ورمز خاص.')
+      return
+    }
     if (!supabase) { setError('خدمة الحسابات غير مضبوطة حاليًا.'); return }
     setBusy(true)
     try {
@@ -79,7 +90,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         onboarding_version: 2,
         legal_acceptance: { terms_version: '2026-10-25', privacy_version: '2026-10-25', accepted_at: new Date().toISOString() }
       }
-      const { data, error: signUpError } = await supabase.auth.signUp({ email, password: values.password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
+      const { data, error: signUpError } = await supabase.auth.signUp({ email, password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       if (signUpError) throw signUpError
       if (data.session && data.user) {
         if ((isCompany || role === 'fleet_supplier') && companyLogo) {
@@ -143,7 +154,23 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
             {isCompany && <label className="block text-sm font-bold text-slate-700">نوع الشركة *<span className="relative block"><select required className={fieldClass} value={values.companyType} onChange={(e) => update('companyType',e.target.value)}><option value="">اختر نشاط الشركة</option>{companyTypes.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>}
             <label className="block text-sm font-bold text-slate-700">المحافظة {role === 'fleet_supplier' ? '(اختياري)' : '*'}<span className="relative block"><select required={role !== 'fleet_supplier'} className={fieldClass} value={values.governorate} onChange={(e) => update('governorate',e.target.value)}><option value="">اختر المحافظة</option>{governorates.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>
             {field('address',isCompany ? 'عنوان الشركة' : 'العنوان',role !== 'fleet_supplier','text','المركز / الشارع / رقم العقار')}
-            {field('password','كلمة المرور',true,'password','٦ أحرف على الأقل')}
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-bold text-slate-700">كلمة المرور *
+                <span className="relative mt-2 block">
+                  <input className={fieldClass + ' pl-12'} type={showPassword ? 'text' : 'password'} required autoComplete="new-password" value={values.password} onChange={(e) => update('password', e.target.value)} placeholder="أنشئ كلمة مرور قوية" dir="ltr" minLength={8} />
+                  <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="absolute left-3 top-3 rounded-lg p-2 text-slate-500 hover:bg-slate-100">{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>
+                </span>
+              </label>
+              <div className="mt-3 grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs sm:grid-cols-2">
+                {[
+                  ['8 أحرف على الأقل', values.password.length >= 8],
+                  ['حرف كبير وحرف صغير (A-Z / a-z)', /[a-z]/.test(values.password) && /[A-Z]/.test(values.password)],
+                  ['رقم واحد على الأقل (0-9)', /[0-9]/.test(values.password)],
+                  ['رمز خاص مثل ! @ # $ %', /[^A-Za-z0-9]/.test(values.password)]
+                ].map(([label, valid]) => <span key={String(label)} className={'flex items-center gap-2 ' + (valid ? 'font-bold text-emerald-700' : 'text-slate-500')}><CheckCircle2 size={15} className={valid ? 'text-emerald-600' : 'text-slate-300'}/>{label}</span>)}
+              </div>
+              <p className="mt-2 text-xs leading-5 text-slate-500">لن يُقبل التسجيل إلا بعد استيفاء جميع شروط كلمة المرور.</p>
+            </div>
           </div>
           <div className="rounded-2xl border border-blue-100 bg-gradient-to-l from-blue-50 to-white p-4 text-sm leading-7 text-blue-950"><p className="flex items-center gap-2 font-extrabold"><ShieldCheck size={18}/> حماية بياناتك</p><p className="mt-1">تُستخدم البيانات لإعداد حسابك والتواصل بشأن طلبات التأجير. لا تتم أي مدفوعات بين أطراف التأجير عبر المنصة.</p></div>
           <div className="rounded-2xl border border-blue-200 bg-gradient-to-l from-blue-50 to-white p-4 text-sm leading-7 text-slate-700"><label className="flex cursor-pointer items-start gap-3"><input type="checkbox" required checked={acceptedLegal} onChange={(event) => setAcceptedLegal(event.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-blue-700"/><span>قرأت ووافقت على <a href="/terms" target="_blank" rel="noreferrer" className="font-extrabold text-blue-700 underline underline-offset-4">شروط الاستخدام</a> و<a href="/privacy" target="_blank" rel="noreferrer" className="font-extrabold text-blue-700 underline underline-offset-4">سياسة الخصوصية</a>. أوافق على معالجة بياناتي وفق السياسة الموضحة، وأفهم أن الموافقة شرط لإنشاء الحساب.</span></label><p className="mt-2 text-xs text-slate-500">سيُسجّل وقت الموافقة وإصدار الوثيقتين ضمن بيانات التسجيل.</p></div>

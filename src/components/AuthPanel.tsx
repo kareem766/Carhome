@@ -7,16 +7,7 @@ import PlatformBrand from './PlatformBrand'
 type AccountType = 'individual_owner' | 'fleet_supplier' | 'company'
 type Props = { onClose: () => void; initialMode?: 'signin' | 'signup' }
 
-function normalizeEgyptianPhone(value: string) {
-  const compact = value.trim().replace(/[\\s().-]/g, '')
-  if (compact.startsWith('+')) return compact
-  const digits = compact.replace(/\\D/g, '')
-  if (digits.startsWith('0020')) return `+${digits.slice(2)}`
-  if (digits.startsWith('20')) return `+${digits}`
-  if (digits.startsWith('0')) return `+20${digits.slice(1)}`
-  if (digits.startsWith('1') && digits.length === 10) return `+20${digits}`
-  return compact
-}
+function isStrongPassword(value: string) { return value.length >= 8 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value) }
 
 const accountTypes: { value: AccountType; label: string; detail: string }[] = [
   { value: 'individual_owner', label: 'مالك سيارة', detail: 'إدارة سياراتك واستقبال طلبات الشركات' },
@@ -103,7 +94,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
   const [fullName, setFullName] = useState('')
   const [organizationName, setOrganizationName] = useState('')
   const [acceptedLegal, setAcceptedLegal] = useState(false)
-  const [accountType, setAccountType] = useState<AccountType>('individual_owner')
+  const invitationId = new URLSearchParams(window.location.search).get('invitation')
+  const [accountType, setAccountType] = useState<AccountType>(invitationId ? 'company' : 'individual_owner')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [notice, setNotice] = useState('')
@@ -148,7 +140,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     event.preventDefault()
     setError(''); setNotice('')
     if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
-    if (password.length < 6) { setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل.'); return }
+    if (!isStrongPassword(password)) { setError('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وحرف صغير ورقم ورمز خاص.'); return }
     setLoading(true)
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password })
@@ -172,19 +164,20 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
       setError('الاتصال بخدمة الحسابات غير مضبوط بعد. راجع إعدادات Supabase في Vercel.')
       return
     }
+    if (mode === 'signup' && !isStrongPassword(password)) { setError('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وحرف صغير ورقم ورمز خاص.'); return }
     setLoading(true)
     try {
       if (mode === 'signup') {
         if (!acceptedLegal) throw new Error('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية قبل إنشاء الحساب.')
         const name = fullName.trim()
         const orgName = organizationName.trim()
-        if (!name || !orgName) throw new Error('اكتب الاسم واسم المؤسسة لإكمال التسجيل.')
+        if (!name || (!invitationId && !orgName)) throw new Error(invitationId ? 'اكتب اسمك لإكمال قبول الدعوة.' : 'اكتب الاسم واسم المؤسسة لإكمال التسجيل.')
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim().toLowerCase(),
           password,
           options: {
             // Explicitly return confirmation links to the deployed app's callback, not Supabase's default URL.
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: `${window.location.origin}/auth/callback${invitationId ? `?invitation=${encodeURIComponent(invitationId)}` : ''}`,
             data: {
               display_name: name,
               organization_name: orgName,
@@ -207,38 +200,32 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           throw new Error('هذا البريد الإلكتروني لديه حساب بالفعل في قاعدة بيانات My Car. برجاء تسجيل الدخول أو استخدام «نسيت كلمة السر».')
         }
         if (data.session && data.user) {
-          await prepareAccount(data.user, name)
-          // Complete account setup through the shared callback, then open the role workspace.
-          window.location.replace('/auth/callback')
+          if (!invitationId) await prepareAccount(data.user, name)
+          // Invitation signups must join the inviting company, never create a separate organization.
+          window.location.replace(`/auth/callback${invitationId ? `?invitation=${encodeURIComponent(invitationId)}` : ''}`)
           return
         } else {
           setNotice('تم إرسال طلب التسجيل. افتح رسالة تأكيد البريد الإلكتروني، ثم ارجع وسجّل الدخول لإكمال إعداد الحساب.')
           setMode('signin')
         }
       } else {
-        const identifier = email.trim()
-        const isEmail = identifier.includes('@')
-        const phone = normalizeEgyptianPhone(identifier)
-        if (!isEmail && !/^\\+20\\d{10}$/.test(phone)) {
-          throw new Error('اكتب بريدًا إلكترونيًا صحيحًا أو رقم موبايل مصريًا مكوّنًا من 11 رقمًا.')
+        const identifier = email.trim().toLowerCase()
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
+          throw new Error('اكتب بريدًا إلكترونيًا صحيحًا لتسجيل الدخول.')
         }
-        const { data, error: signInError } = await supabase.auth.signInWithPassword(
-          isEmail ? { email: identifier.toLowerCase(), password } : { phone, password }
-        )
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: identifier, password })
         if (signInError) throw signInError
         if (!data.user || !data.session) throw new Error('تم تسجيل الدخول لكن لم يتم إنشاء جلسة صالحة. حاول مرة أخرى.')
-        // Admin-provisioned accounts must change their temporary password before any onboarding or workspace route.
         if (data.user.app_metadata?.must_change_password === true) {
           window.location.replace('/first-login-password')
           return
         }
-        // Use the shared callback to recover incomplete accounts and route every role consistently.
-        window.location.replace('/auth/callback')
+        window.location.replace(invitationId ? `/workspace/company/team?invitation=${encodeURIComponent(invitationId)}` : '/auth/callback')
         return
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع. حاول مرة أخرى.'
-      setError(message.includes('Invalid login credentials') ? 'البريد الإلكتروني أو رقم الموبايل أو كلمة المرور غير صحيحة.' : message)
+      setError(message.includes('Invalid login credentials') ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : message)
     } finally {
       setLoading(false)
     }
@@ -279,14 +266,14 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
             <div className="flex items-center justify-center gap-2 py-8 text-slate-500"><LoaderCircle className="animate-spin" size={20} /> جارٍ التحقق من الجلسة...</div>
           ) : settingNewPassword ? (
             <form onSubmit={handleSetNewPassword} className="space-y-4">
-              <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور جديدة لا تقل عن 6 أحرف.</p>
-              <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="6 أحرف على الأقل" dir="ltr" /></label>
+              <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور قوية تحتوي على 8 أحرف على الأقل وحروف وأرقام ورمزًا خاصًا.</p>
+              <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="8 أحرف على الأقل" dir="ltr" /></label>
               <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة المرور الجديدة</button>
             </form>
           ) : forgotPassword ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <p className="text-sm leading-6 text-slate-600">اكتب بريدك الإلكتروني وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة المرور إذا كان الحساب مسجلًا.</p>
-              <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني<input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" /></label>
+              <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني<input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="name@example.com" dir="ltr" /></label>
               <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}إرسال رابط الاستعادة</button>
               <button type="button" onClick={() => { setForgotPassword(false); setError(''); setNotice('') }} className="w-full py-2 text-sm font-bold text-blue-700">العودة لتسجيل الدخول</button>
             </form>
@@ -306,12 +293,12 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
             <>
               <div className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
                 <button type="button" onClick={() => { setMode('signin'); setError(''); setNotice('') }} className={`rounded-lg px-3 py-2.5 text-sm font-bold transition ${mode === 'signin' ? 'bg-white text-navy shadow-sm' : 'text-slate-500'}`}>تسجيل الدخول</button>
-                <button type="button" onClick={() => { window.location.href = '/register' }} className="rounded-lg px-3 py-2.5 text-sm font-bold text-slate-500 transition">حساب جديد</button>
+                <button type="button" onClick={() => { if (invitationId) { setMode('signup'); setError(''); setNotice('') } else window.location.href = '/register' }} className="rounded-lg px-3 py-2.5 text-sm font-bold text-slate-500 transition">حساب جديد</button>
               </div>
               {settingNewPassword ? (
                 <form onSubmit={handleSetNewPassword} className="space-y-4">
-                  <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور جديدة لا تقل عن 6 أحرف.</p>
-                  <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="6 أحرف على الأقل" dir="ltr" /></label>
+                  <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور جديدة تحتوي على 8 أحرف على الأقل وحروف وأرقام ورمز خاص.</p>
+                  <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="8 أحرف على الأقل" dir="ltr" /></label>
                   <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة المرور الجديدة</button>
                 </form>
               ) : forgotPassword ? (
@@ -329,7 +316,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                     <label className="block text-sm font-bold text-slate-700">الاسم الكامل
                       <input autoComplete="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="اكتب اسمك" />
                     </label>
-                    <fieldset>
+                    {!invitationId && <fieldset>
                       <legend className="mb-2 text-sm font-bold text-slate-700">نوع الحساب</legend>
                       <div className="grid gap-2">
                         {accountTypes.map((type) => (
@@ -339,18 +326,19 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                           </label>
                         ))}
                       </div>
-                    </fieldset>
-                    <label className="block text-sm font-bold text-slate-700">اسم المؤسسة أو النشاط
+                    </fieldset>}
+                    {invitationId && <p className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-blue-900">أنت بصدد إنشاء حساب موظف للانضمام إلى الشركة التي أرسلت لك الدعوة. استخدم نفس البريد الإلكتروني الذي استلم الدعوة.</p>}
+                    {!invitationId && <label className="block text-sm font-bold text-slate-700">اسم المؤسسة أو النشاط
                       <input required value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder={accountType === 'company' ? 'اسم الشركة' : accountType === 'fleet_supplier' ? 'اسم المورد أو الشركة' : 'اسمك أو اسم النشاط (يمكن أن يكون اسمك)'} />
-                    </label>
+                    </label>}
                   </>
                 )}
                 <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني
-                  <input type="text" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" />
+                  <input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" />
                 </label>
                 <label className="block text-sm font-bold text-slate-700">كلمة المرور
                   <span className="relative mt-2 block">
-                    <input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pl-12 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="٦ أحرف على الأقل" dir="ltr" />
+                    <input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={mode === 'signup' ? 8 : undefined} required value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pl-12 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="8 أحرف على الأقل" dir="ltr" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="absolute left-3 top-3 rounded-md p-1 text-slate-400">{showPassword ? <EyeOff size={19} /> : <Eye size={19} />}</button>
                   </span>
                 </label>

@@ -28,7 +28,7 @@ type PlatformSettings = {
   partner_ticker_seconds: number
 }
 const defaults: PlatformSettings = {
-  id: true, platform_name: 'My Car', tagline: 'منصة السيارات للشركات والأساطيل في مصر',
+  id: true, platform_name: 'My Car عربيتي', tagline: 'منصة السيارات للشركات والأساطيل في مصر',
   description: 'منصة تجمع الشركات وملاك السيارات وموردي الأساطيل لتسهيل التأجير طويل الأجل.',
   logo_url: null, favicon_url: null, support_email: '', support_phone: '', website_url: '', address: '',
   footer_text: 'جميع الحقوق محفوظة.', announcement_text: '', primary_color: '#1d4ed8',
@@ -62,7 +62,7 @@ export default function PlatformSettingsPage() {
       const { data, error: settingsError } = await supabase.from('platform_settings').select('id,platform_name,tagline,description,logo_url,favicon_url,support_email,website_url,address,footer_text,announcement_text,primary_color,secondary_color,registration_enabled,owner_registration_enabled,company_registration_enabled,supplier_registration_enabled,maintenance_mode,partner_logos,partner_ticker_seconds').eq('id', true).maybeSingle()
       if (!active) return
       if (settingsError) setError('تعذر تحميل إعدادات المنصة. تأكد من تطبيق Migration إعدادات المنصة. ' + settingsError.message)
-      else if (data) { const loaded = { ...defaults, ...data, platform_name: data.platform_name === 'Carhome' ? 'My Car' : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings; setSettings(loaded); setPartnerLogosText((loaded.partner_logos || []).map(p => [p.name, p.logo_url, p.website_url || ''].join(' | ')).join('\n')) }
+      else if (data) { const loaded = { ...defaults, ...data, platform_name: ['Carhome', 'My Car'].includes(data.platform_name) ? defaults.platform_name : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings; setSettings(loaded); setPartnerLogosText((loaded.partner_logos || []).map(p => [p.name, p.logo_url, p.website_url || ''].join(' | ')).join('\n')) }
       setLoading(false)
     }
     void load()
