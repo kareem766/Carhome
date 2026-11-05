@@ -75,6 +75,25 @@ create trigger organization_membership_register_employee
 after insert or update of role, organization_id on public.organization_memberships
 for each row execute function app_private.register_company_employee_account();
 
+
+create or replace function app_private.suspend_employee_after_company_membership_removal()
+returns trigger language plpgsql security definer set search_path = '' as $
+begin
+  if old.role in ('member','manager') and exists (
+    select 1 from public.organizations o where o.id = old.organization_id and o.organization_type = 'company'
+  ) then
+    update public.employee_accounts e
+    set employment_type = 'independent', organization_id = null, account_status = 'suspended', updated_at = now()
+    where e.user_id = old.user_id and e.employment_type = 'company_member' and e.organization_id = old.organization_id;
+  end if;
+  return old;
+end;
+$;
+drop trigger if exists organization_membership_suspend_employee on public.organization_memberships;
+create trigger organization_membership_suspend_employee
+after delete on public.organization_memberships
+for each row execute function app_private.suspend_employee_after_company_membership_removal();
+
 create table if not exists public.employee_rental_requests (
   id uuid primary key default gen_random_uuid(),
   employee_user_id uuid not null references auth.users(id) on delete cascade,
@@ -147,6 +166,26 @@ for select to authenticated using (
 create policy "admins manage employee requests" on public.employee_rental_requests
 for all to authenticated using (exists (select 1 from public.platform_admins a where a.user_id = (select auth.uid())))
 with check (exists (select 1 from public.platform_admins a where a.user_id = (select auth.uid())));
+
+drop policy if exists "employees read own requests" on public.employee_rental_requests;
+create policy "employees and eligible providers read employee requests" on public.employee_rental_requests
+for select to authenticated using (
+  employee_user_id = (select auth.uid())
+  or exists (select 1 from public.platform_admins a where a.user_id = (select auth.uid()))
+  or (status = 'open' and exists (
+    select 1
+    from public.organization_memberships m
+    join public.organizations o on o.id = m.organization_id
+    join public.vehicles v on v.organization_id = m.organization_id
+    where m.user_id = (select auth.uid())
+      and o.organization_type in ('individual_owner','fleet_supplier')
+      and o.approval_status = 'approved'
+      and v.review_status = 'approved'
+      and v.with_driver = true
+      and v.governorate = employee_rental_requests.governorate
+      and (o.organization_type = 'fleet_supplier' or (v.payment_status in ('verified','waived') and (v.registration_expires_at is null or v.registration_expires_at > now())))
+  ))
+);
 create policy "employees update own pending requests" on public.employee_rental_requests
 for update to authenticated using (employee_user_id = (select auth.uid()) and status = 'pending_review')
 with check (employee_user_id = (select auth.uid()) and status = 'pending_review');
