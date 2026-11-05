@@ -1,6 +1,7 @@
 import { ArrowRight, FileText, ShieldCheck } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 
+// Deployment trigger: keep the legal pages build in sync with the production branch.
 type LegalKind = 'privacy' | 'terms'
 
 const documents = {
