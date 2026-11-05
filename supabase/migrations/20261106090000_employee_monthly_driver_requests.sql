@@ -185,6 +185,8 @@ for select to authenticated using (
       and o.approval_status = 'approved'
       and v.review_status = 'approved'
       and v.with_driver = true
+      and lower(btrim(v.vehicle_type)) = lower(btrim(employee_rental_requests.vehicle_type))
+      and v.seats >= employee_rental_requests.seats
       and v.governorate = employee_rental_requests.governorate
       and (o.organization_type = 'fleet_supplier' or (v.payment_status in ('verified','waived') and (v.registration_expires_at is null or v.registration_expires_at > now())))
   ))
@@ -224,6 +226,8 @@ for insert to authenticated with check (
       and o.approval_status = 'approved'
       and v.review_status = 'approved'
       and v.with_driver = true
+      and lower(btrim(v.vehicle_type)) = lower(btrim(r.vehicle_type))
+      and v.seats >= r.seats
       and (o.organization_type = 'fleet_supplier' or (v.payment_status in ('verified','waived') and (v.registration_expires_at is null or v.registration_expires_at > now())))
       and r.status = 'open'
       and r.governorate = v.governorate
