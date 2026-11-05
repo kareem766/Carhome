@@ -77,7 +77,7 @@ for each row execute function app_private.register_company_employee_account();
 
 
 create or replace function app_private.suspend_employee_after_company_membership_removal()
-returns trigger language plpgsql security definer set search_path = '' as $
+returns trigger language plpgsql security definer set search_path = '' as $employee_fn$
 begin
   if old.role in ('member','manager') and exists (
     select 1 from public.organizations o where o.id = old.organization_id and o.organization_type = 'company'
