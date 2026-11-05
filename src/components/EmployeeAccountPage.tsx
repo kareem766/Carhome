@@ -1,8 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, BadgeCheck, CircleUserRound, LogOut, Save, ShieldCheck } from 'lucide-react'
+import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
 import { supabase } from '../lib/supabase'
-import PlatformBrand from './PlatformBrand'
-import AccountNotifications from './AccountNotifications'
 
 const field = 'mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
 
@@ -88,12 +87,7 @@ export default function EmployeeAccountPage() {
   const statusText = status === 'active' ? 'نشط' : status === 'pending' ? 'قيد المراجعة' : status === 'suspended' ? 'موقوف' : status === 'unknown' ? 'غير محدد' : status || 'غير محدد'
 
   return <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
-        <a href="/workspace/employee" className="font-black"><PlatformBrand/></a>
-        <div className="flex items-center gap-2"><AccountNotifications/><a href="/workspace/employee/requests" className="inline-flex min-h-10 items-center rounded-xl border px-3 text-xs font-bold">طلباتي والعروض</a><a href="/workspace/employee/messages" className="inline-flex min-h-10 items-center rounded-xl border px-3 text-xs font-bold">المراسلات</a><a href="/workspace/employee" className="inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-bold"><ArrowRight size={16}/> مساحة الموظف</a></div>
-      </div>
-    </header>
+    <EmployeeWorkspaceHeader active="account"/>
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-7">
       <section className="overflow-hidden rounded-3xl bg-gradient-to-l from-[#102b47] to-[#176b9a] p-6 text-white sm:p-8">
         <div className="flex items-center gap-4"><span className="grid h-14 w-14 place-items-center rounded-2xl border border-white/20 bg-white/10"><CircleUserRound size={30}/></span><div><p className="text-sm font-bold text-cyan-200">إعدادات حسابك</p><h1 className="mt-1 text-2xl font-black sm:text-3xl">البيانات الشخصية</h1></div></div>
