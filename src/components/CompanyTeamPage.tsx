@@ -66,7 +66,7 @@ export default function CompanyTeamPage(){
      <a href="/workspace/company" aria-label="العودة لمساحة الشركة" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-extrabold text-slate-700 shadow-sm sm:text-sm"><ArrowRight size={17}/> <span>مساحة الشركة</span></a>
      <div className="min-w-0"><PlatformBrand/></div>
     </div>
-    <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-2 sm:border-0 sm:pt-0"><span className="hidden text-xs font-bold text-slate-400 sm:inline">حسابك وإشعاراتك</span><AccountNotifications/></div>
+    <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-2 sm:border-0 sm:pt-0">{(myRole==='member'||myRole==='manager')&&<a href="/workspace/employee" className="rounded-xl bg-blue-700 px-3 py-2 text-xs font-black text-white">طلبات الموظفين</a>}<span className="hidden text-xs font-bold text-slate-400 sm:inline">حسابك وإشعاراتك</span><AccountNotifications/></div>
    </div>
   </header>
   <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:py-9">
