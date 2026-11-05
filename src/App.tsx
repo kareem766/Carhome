@@ -186,7 +186,7 @@ export default function App() {
   useEffect(() => {
     if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
-    const loadImage = (sources: string[]) => new Promise<string>((resolve) => {
+    const loadImage = (sources: string[]) => new Promise<string>((resolve, reject) => {
       let index = 0
       const tryNext = () => {
         const source = sources[index++]
