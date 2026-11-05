@@ -53,7 +53,23 @@ const defaults: PlatformSettings = {
   supplier_registration_enabled: true, maintenance_mode: false
 }
 function pathIsHome(path: string) { return path === '/' || path === '' }
-
+const HOME_CAR_IMAGES = [
+  [
+    'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg',
+    'https://corporate.autovermietung-arndt.de/fileadmin/corporate-page/img/arndt_corporate23.jpg',
+    'https://phoenixrentalcars.com/phoenix-car-rental-vehicle-lineup.webp'
+  ],
+  [
+    'https://bmkltsly13vb.compat.objectstorage.ap-mumbai-1.oraclecloud.com/cdn.ft.lk/assets/uploads/image_e2653488f5.jpg',
+    'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg',
+    'https://corporate.autovermietung-arndt.de/fileadmin/corporate-page/img/arndt_corporate23.jpg'
+  ],
+  [
+    'https://ireland.apollo.olxcdn.com/v1/files/bjh0fmv4qbah1-PT/image',
+    'https://phoenixrentalcars.com/phoenix-car-rental-vehicle-lineup.webp',
+    'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg'
+  ]
+]
 function OwnerPersistentBar() {
   const links = [
     { href: '/workspace/owner/vehicles', label: 'سياراتي', icon: <CarFront size={17}/> },
@@ -94,6 +110,8 @@ export default function App() {
   const [authLoaded, setAuthLoaded] = useState(false)
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [homeImageUrls, setHomeImageUrls] = useState<string[]>([])
+  const [homeImagesReady, setHomeImagesReady] = useState(false)
 
   useEffect(() => {
     if (!supabase) { setAuthLoaded(true); return }
@@ -165,6 +183,35 @@ export default function App() {
     setAuthOpen(true)
   }
 
+  useEffect(() => {
+    if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
+    let active = true
+    const loadImage = (sources: string[]) => new Promise<string>((resolve, reject) => {
+      let index = 0
+      const tryNext = () => {
+        const source = sources[index++]
+        if (!source) {
+          reject(new Error('Homepage vehicle photography could not be loaded.'))
+          return
+        }
+        const image = new Image()
+        image.onload = () => { void image.decode().catch(() => undefined).then(() => resolve(source)) }
+        image.onerror = tryNext
+        image.src = source
+      }
+      tryNext()
+    })
+    void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
+      if (!active) return
+      setHomeImageUrls(urls)
+      setHomeImagesReady(true)
+    }).catch((error) => {
+      // Fail closed: the homepage stays on its branded loader instead of showing empty or broken vehicle cards.
+      console.error(error)
+    })
+    return () => { active = false }
+  }, [])
+
   const path = window.location.pathname
   useEffect(() => {
     if (authUser?.app_metadata?.must_change_password === true) {
@@ -189,6 +236,8 @@ export default function App() {
   if (!settingsLoaded) return <PlatformLoading />
   // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
   if (pathIsHome(window.location.pathname) && !authLoaded) return <PlatformLoading />
+  // Keep the public homepage behind the branded loader until every hero vehicle visual has decoded.
+  if (pathIsHome(window.location.pathname) && !homeImagesReady) return <PlatformLoading />
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
@@ -268,8 +317,14 @@ export default function App() {
         </header>
         {authUser && mobileNavOpen && <nav id="mobile-main-navigation" aria-label="التنقل الرئيسي للهاتف" className="mx-4 mb-2 grid gap-1 rounded-2xl border border-white/15 bg-[#0b223b]/95 p-2 shadow-xl backdrop-blur-xl sm:mx-8 lg:hidden"><a onClick={()=>setMobileNavOpen(false)} href="/" className="rounded-xl px-4 py-3 text-sm font-bold text-white hover:bg-white/10">الرئيسية</a><a onClick={()=>setMobileNavOpen(false)} href="/workspace" className="rounded-xl px-4 py-3 text-sm font-bold text-white hover:bg-white/10">مساحة العمل</a>{['company','fleet_supplier'].includes(String(authUser.user_metadata?.organization_type || '')) && <a onClick={()=>setMobileNavOpen(false)} href="/workspace/catalog" className="rounded-xl px-4 py-3 text-sm font-bold text-white hover:bg-white/10">استكشف السيارات</a>}<a onClick={()=>setMobileNavOpen(false)} href="/services" className="rounded-xl px-4 py-3 text-sm font-bold text-white hover:bg-white/10">خدمات السيارات</a>{authUser.user_metadata?.organization_type === 'company' ? <a onClick={()=>setMobileNavOpen(false)} href="/workspace/company/managed-sourcing" className="rounded-xl px-4 py-3 text-sm font-bold text-white hover:bg-white/10">خدمة البحث نيابةً عنك</a> : <a onClick={()=>setMobileNavOpen(false)} href="/workspace/advertising-plans" className="rounded-xl px-4 py-3 text-sm font-bold text-white hover:bg-white/10">باقات الإعلانات</a>}<a onClick={()=>setMobileNavOpen(false)} href="/privacy" className="rounded-xl px-4 py-3 text-sm font-bold text-white hover:bg-white/10">سياسة الخصوصية</a></nav>}
         <div className="mx-auto max-w-[1400px] px-4 pb-10 pt-8 sm:px-8 sm:pt-12">
-          <div className="mr-0 w-full max-w-3xl text-right"><p className="text-sm font-bold text-white/90 sm:text-lg">منصة <span className="text-[#ffad0a]">My Car عربيتي</span></p><h1 className="mt-3 text-4xl font-black leading-[1.35] tracking-tight sm:text-6xl lg:text-7xl">نربطك بأفضل<br/><span className="text-[#ffad0a]">السيارات في مصر</span></h1><p className="mt-5 max-w-2xl text-sm font-semibold leading-8 text-white/90 sm:text-lg">سواء كنت شركة تبحث عن سيارات تناسب تشغيلك، أو مالكًا يريد الوصول إلى فرص تأجير طويلة الأجل، أو موردًا يدير أسطولًا كاملًا؛ My Car عربيتي تجمع احتياجات سوق تأجير السيارات للشركات في مكان واحد.</p></div>
-          <div className="mx-auto mt-8 flex w-full max-w-5xl items-end justify-center gap-2 sm:mt-6 sm:gap-4"><img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=90" alt="سيارة حديثة" className="h-28 min-w-0 flex-1 rounded-xl object-cover shadow-xl sm:h-44 sm:rounded-2xl lg:h-52"/><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1100&q=90" alt="سيارة مناسبة للأعمال" className="h-36 min-w-0 flex-[1.2] rounded-xl object-cover shadow-2xl sm:h-52 sm:rounded-2xl lg:h-60"/><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1000&q=90" alt="سيارة فاخرة" className="h-28 min-w-0 flex-1 rounded-xl object-cover shadow-xl sm:h-44 sm:rounded-2xl lg:h-52"/></div>
+          <div className="mc-home-copy mr-0 w-full max-w-3xl text-right"><p className="text-sm font-bold text-white/90 sm:text-lg">منصة <span className="text-[#ffad0a]">My Car عربيتي</span></p><h1 className="mt-3 text-4xl font-black leading-[1.35] tracking-tight sm:text-6xl lg:text-7xl">نربطك بأفضل<br/><span className="text-[#ffad0a]">السيارات في مصر</span></h1><p className="mt-5 max-w-2xl text-sm font-semibold leading-8 text-white/90 sm:text-lg">سواء كنت شركة تبحث عن سيارات تناسب تشغيلك، أو مالكًا يريد الوصول إلى فرص تأجير طويلة الأجل، أو موردًا يدير أسطولًا كاملًا؛ My Car عربيتي تجمع احتياجات سوق تأجير السيارات للشركات في مكان واحد.</p></div>
+          <div className="mc-home-vehicle-gallery mx-auto mt-10 grid w-full max-w-6xl grid-cols-3 gap-3 sm:mt-12 sm:gap-5" aria-label="نماذج من السيارات المتاحة عبر المنصة">
+            {homeImageUrls.map((src, index) => <figure key={src + index} className="mc-home-vehicle-card group relative isolate h-32 overflow-hidden rounded-2xl border border-white/15 bg-[#102b47] shadow-[0_18px_45px_rgba(0,0,0,.24)] sm:h-52 lg:h-64">
+              <img src={src} alt={['سيدان تنفيذية لاحتياجات الشركات','سيارات SUV لتشغيل الأساطيل','فان ومركبات نقل الركاب'][index]} loading="eager" decoding="async" fetchPriority="high" width="1200" height="800" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"/>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06172a]/95 via-[#06172a]/15 to-transparent"/>
+              <figcaption className="absolute inset-x-0 bottom-0 px-2 pb-3 text-right text-[11px] font-black text-white sm:px-4 sm:pb-4 sm:text-base">{['سيدان للشركات','سيارات SUV','فان ونقل ركاب'][index]}<span className="mt-1 block text-[9px] font-semibold text-white/70 sm:text-xs">حلول نقل وتشغيل تناسب نشاطك</span></figcaption>
+            </figure>)}
+          </div>
           {authUser?.user_metadata?.organization_type === 'company' && <form onSubmit={(event)=>{event.preventDefault();const data=new FormData(event.currentTarget);const params=new URLSearchParams();['governorate','vehicle_type','duration'].forEach(key=>{const value=String(data.get(key)||'');if(value)params.set(key,value)});window.location.href='/workspace/catalog'+(params.toString()?'?'+params.toString():'')}} className="relative z-20 mx-auto mt-7 max-w-5xl rounded-3xl border border-white/70 bg-white p-3 text-slate-700 shadow-2xl sm:mt-8 sm:p-4">
             <div className="grid gap-2 sm:grid-cols-3">
               <label className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4"><MapPin className="shrink-0 text-[#173553]" size={21}/><span className="flex-1"><span className="block text-xs text-slate-500">المحافظة</span><select name="governorate" defaultValue="" className="w-full bg-transparent text-sm font-extrabold outline-none"><option value="">كل المحافظات</option>{['القاهرة','الجيزة','الإسكندرية','الشرقية','الغربية','الدقهلية','البحيرة','المنوفية','القليوبية','بورسعيد','السويس','أسيوط'].map(x=><option key={x} value={x}>{x}</option>)}</select></span></label>
@@ -277,14 +332,14 @@ export default function App() {
               <label className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4"><CalendarDays className="shrink-0 text-[#173553]" size={21}/><span className="flex-1"><span className="block text-xs text-slate-500">مدة الإيجار</span><select name="duration" defaultValue="" className="w-full bg-transparent text-sm font-extrabold outline-none"><option value="">كل المدد</option><option value="monthly">شهري</option><option value="yearly">سنوي</option><option value="long-term">طويل الأجل</option></select></span></label>
             </div><button type="submit" className="mt-2 flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-[#ffad0a] px-5 text-base font-black text-[#172d45] hover:bg-amber-300 sm:mt-3"><Search size={22}/> ابحث عن سيارة</button>
           </form>}
-          <div className="mx-auto mt-8 grid max-w-5xl grid-cols-2 gap-4 text-center sm:grid-cols-4 sm:gap-5">{[{icon:Star,title:'خيارات متعددة',desc:'بأسعار تنافسية'},{icon:HandCoins,title:'شركاء معتمدون',desc:'ملاك وموردون موثوقون'},{icon:Headset,title:'دعم مستمر',desc:'على مدار الساعة'},{icon:ShieldCheck,title:'مصداقية وأمان',desc:'تعامل موثوق'}].map(({icon:Icon,title,desc})=><div key={title} className="flex flex-col items-center border-white/15 px-2 sm:border-l"><span className="grid h-12 w-12 place-items-center rounded-full bg-white/10 text-[#ffad0a] ring-1 ring-white/10 sm:h-14 sm:w-14"><Icon size={25}/></span><strong className="mt-2 text-sm font-extrabold sm:text-base">{title}</strong><span className="mt-1 text-xs text-white/70 sm:text-sm">{desc}</span></div>)}</div>
+          <div className="mc-home-benefits mx-auto mt-9 grid max-w-6xl grid-cols-2 gap-3 text-center sm:mt-12 sm:grid-cols-4 sm:gap-4">{[{icon:Star,title:'خيارات متعددة',desc:'بأسعار تنافسية'},{icon:HandCoins,title:'شركاء معتمدون',desc:'ملاك وموردون موثوقون'},{icon:Headset,title:'دعم مستمر',desc:'على مدار الساعة'},{icon:ShieldCheck,title:'مصداقية وأمان',desc:'تعامل موثوق'}].map(({icon:Icon,title,desc})=><div key={title} className="flex flex-col items-center border-white/15 px-2 sm:border-l"><span className="grid h-12 w-12 place-items-center rounded-full bg-white/10 text-[#ffad0a] ring-1 ring-white/10 sm:h-14 sm:w-14"><Icon size={25}/></span><strong className="mt-2 text-sm font-extrabold sm:text-base">{title}</strong><span className="mt-1 text-xs text-white/70 sm:text-sm">{desc}</span></div>)}</div>
         </div>
       </section>
       <section id="services" className="relative rounded-t-[2.5rem] bg-[#f7f9fc] px-4 pb-16 pt-12 sm:px-8 sm:pt-16"><div className="mx-auto max-w-7xl">
         <div className="text-right"><p className="font-extrabold text-[#f5a400]">منظومة واحدة لاحتياجات السيارات</p><h2 className="mt-2 text-3xl font-black text-[#102b47] sm:text-4xl">كل ما تحتاجه شركتك أو أسطولك في مكان واحد</h2><span className="mt-3 block h-1.5 w-20 rounded-full bg-[#ffad0a]"></span><p className="mt-4 max-w-3xl text-sm leading-8 text-slate-600 sm:text-base">My Car عربيتي منصة متخصصة في ربط الشركات بملاك السيارات وموردي الأساطيل، وتنظيم رحلة البحث عن السيارات والتواصل وتبادل العروض، مع أدوات تساعد كل طرف على إدارة احتياجه بسهولة.</p></div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[{icon:Search,title:'كتالوج سيارات للشركات',desc:'استكشف السيارات المعتمدة وابحث حسب المحافظة ونوع السيارة ومدة الإيجار، من سيارة واحدة إلى احتياج أسطول.'},{icon:MessageCircle,title:'طلبات وعروض مباشرة',desc:'أرسل طلبك أو عرضك، وتابع التواصل والتفاصيل مع الطرف الآخر من خلال مراسلات المنصة.'},{icon:Building2,title:'البحث نيابةً عن شركتك',desc:'بدل ما تضيع وقتك في البحث، أرسل احتياج شركتك ودع فريق My Car يساعدك في الوصول إلى اختيارات مناسبة ومتابعة الطلب.'},{icon:CarFront,title:'إدارة سياراتك وأساطيلك',desc:'أضف سياراتك وبياناتها وصورها، وتابع حالة كل سيارة وطلبات الشركات من مساحة عمل منظمة.'},{icon:Megaphone,title:'باقات إعلانية لزيادة الظهور',desc:'روّج لسياراتك من خلال باقات إعلانية تساعد على إبرازها أمام الشركات الباحثة عن سيارات.'},{icon:Wrench,title:'دليل خدمات السيارات',desc:'اكتشف خدمات ومقدمي خدمات السيارات مثل الصيانة والتأمين وقطع الغيار وخدمات الأساطيل.'}].map(({icon:Icon,title,desc})=><article key={title} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg sm:p-6"><span className="grid h-12 w-12 place-items-center rounded-xl bg-[#eaf2ff] text-[#174a82] ring-1 ring-blue-100 transition group-hover:bg-[#102b47] group-hover:text-[#ffad0a]"><Icon size={24}/></span><h3 className="mt-4 text-lg font-black text-[#102b47]">{title}</h3><p className="mt-2 text-sm leading-7 text-slate-600">{desc}</p></article>)}
+          {[{icon:Search,title:'كتالوج سيارات معتمد للشركات',desc:'استكشف السيارات المعتمدة وابحث حسب المحافظة ونوع السيارة ومدة الإيجار، من سيارة واحدة إلى احتياج أسطول.'},{icon:MessageCircle,title:'طلبات وعروض ومراسلات',desc:'أرسل طلبات التأجير واستقبل عروض الملاك وموردي الأساطيل، وتابع الردود والتحديثات من داخل المنصة.'},{icon:Building2,title:'تفويض My Car للبحث نيابةً عنك',desc:'فوّض فريق My Car للبحث عن السيارات المناسبة لاحتياج شركتك ومتابعة رحلة التجهيز معك.'},{icon:CarFront,title:'إدارة السيارات وتفاصيلها',desc:'أضف سياراتك وصورها وبياناتها، وتابع المراجعة والطلبات وتجديد البيانات مثل تاريخ انتهاء رخصة السيارة.'},{icon:UserRound,title:'بوابة الموظفين وطلبات السائقين',desc:'أنشئ حسابات مستقلة للموظفين، واستقبل طلبات تأجير شهرية بسيارة مع سائق وتابع العروض ومراجعة الطلب.'},{icon:Megaphone,title:'باقات إعلانية ودليل خدمات',desc:'زِد ظهور سياراتك أمام الشركات، واكتشف خدمات الصيانة والتأمين وقطع الغيار وخدمات الأساطيل.'}].map(({icon:Icon,title,desc})=><article key={title} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg sm:p-6"><span className="grid h-12 w-12 place-items-center rounded-xl bg-[#eaf2ff] text-[#174a82] ring-1 ring-blue-100 transition group-hover:bg-[#102b47] group-hover:text-[#ffad0a]"><Icon size={24}/></span><h3 className="mt-4 text-lg font-black text-[#102b47]">{title}</h3><p className="mt-2 text-sm leading-7 text-slate-600">{desc}</p></article>)}
         </div>
 
         <div className="mt-12 grid gap-6 rounded-3xl bg-[#102b47] p-6 text-white shadow-xl sm:p-9 lg:grid-cols-[1fr_1.1fr] lg:items-center">
@@ -293,8 +348,8 @@ export default function App() {
         </div>
 
         <div className="mt-12 text-right"><p className="font-extrabold text-[#f5a400]">مصمم لكل طرف في سوق السيارات</p><h2 className="mt-2 text-3xl font-black text-[#102b47] sm:text-4xl">اختر حسابك وابدأ الاستفادة</h2><p className="mt-3 text-sm leading-7 text-slate-500">تجربة مناسبة لدورك، وأدوات تساعدك على الوصول لهدفك.</p></div>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[{icon:Building2,title:'للشركات',desc:'ابحث عن سيارات للإيجار الشهري أو السنوي أو طويل الأجل، استعرض الكتالوج، أرسل طلباتك وعروضك، أو فوّض My Car عربيتي في البحث نيابةً عنك.',href:'/register/company',cta:'أنشئ حساب شركتك'},{icon:CarFront,title:'لملاك السيارات',desc:'سجّل سياراتك، أضف الصور والتفاصيل، تابع حالة التسجيل والطلبات، وتعرّف على باقات الإعلان لزيادة ظهور سياراتك.',href:'/register/owner',cta:'سجّل كمالك سيارة'},{icon:BusFront,title:'لموردي الأساطيل',desc:'اعرض سيارات أسطولك أمام الشركات، ونظّم بيانات المركبات وتابع فرص التواصل والطلبات من حساب المورد.',href:'/register/supplier',cta:'سجّل كمورد أسطول'}].map(({icon:Icon,title,desc,href,cta})=><article key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><Icon size={27} className="text-[#f5a400]"/><h3 className="mt-3 text-xl font-black text-[#102b47]">{title}</h3><p className="mt-2 text-sm leading-7 text-slate-600">{desc}</p><a href={href} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#102b47] px-4 font-extrabold text-white transition hover:bg-[#174a82]">{cta}<ArrowLeft size={16}/></a></article>)}
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[{icon:Building2,title:'للشركات',desc:'ابحث عن سيارات للإيجار الشهري أو السنوي أو طويل الأجل، استعرض الكتالوج، أرسل طلباتك وعروضك، أو فوّض My Car عربيتي في البحث نيابةً عنك.',href:'/register/company',cta:'أنشئ حساب شركتك'},{icon:CarFront,title:'لملاك السيارات',desc:'سجّل سياراتك، أضف الصور والتفاصيل، تابع حالة التسجيل والطلبات، وتعرّف على باقات الإعلان لزيادة ظهور سياراتك.',href:'/register/owner',cta:'سجّل كمالك سيارة'},{icon:BusFront,title:'لموردي الأساطيل',desc:'اعرض سيارات أسطولك أمام الشركات، ونظّم بيانات المركبات وتابع فرص التواصل والطلبات من حساب المورد.',href:'/register/supplier',cta:'سجّل كمورد أسطول'},{icon:UserRound,title:'للموظفين',desc:'أنشئ حسابًا مستقلًا واطلب سيارة شهرية بسائق، واستقبل عروضًا من ملاك السيارات وموردي الأساطيل وقارن بينها بسهولة.',href:'/register/employee',cta:'أنشئ حساب موظف'}].map(({icon:Icon,title,desc,href,cta})=><article key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><Icon size={27} className="text-[#f5a400]"/><h3 className="mt-3 text-xl font-black text-[#102b47]">{title}</h3><p className="mt-2 text-sm leading-7 text-slate-600">{desc}</p><a href={href} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#102b47] px-4 font-extrabold text-white transition hover:bg-[#174a82]">{cta}<ArrowLeft size={16}/></a></article>)}
         </div>
 
         <div className="mt-10 grid gap-4 rounded-2xl border border-blue-100 bg-blue-50 p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:p-7"><div className="text-right"><h3 className="text-lg font-black text-[#102b47]">وكمان تقدر تستكشف خدمات السيارات</h3><p className="mt-1 text-sm leading-7 text-slate-600">تعرّف على خدمات الصيانة والتأمين وقطع الغيار وخدمات الأساطيل، واقترح مقدم خدمة لإضافته بعد مراجعة بياناته.</p></div><a href="/services" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#173553] px-4 font-extrabold text-[#173553] hover:bg-white">استكشف خدمات السيارات<ArrowLeft size={16}/></a></div>
