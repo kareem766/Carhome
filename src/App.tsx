@@ -10,6 +10,7 @@ const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
 const EmployeeRegistrationPage = lazy(() => import('./components/EmployeeRegistrationPage'))
 const EmployeeWorkspacePage = lazy(() => import('./components/EmployeeWorkspacePage'))
 const EmployeeAccountPage = lazy(() => import('./components/EmployeeAccountPage'))
+const EmployeeRentalMessagesPage = lazy(() => import('./components/EmployeeRentalMessagesPage'))
 const EmployeeProviderRequestsPage = lazy(() => import('./components/EmployeeProviderRequestsPage'))
 const EmployeeAdminRequestsPage = lazy(() => import('./components/EmployeeAdminRequestsPage'))
 const CompanyInsightsPage = lazy(() => import('./components/CompanyInsightsPage'))
@@ -267,6 +268,7 @@ export default function App() {
   if (path === '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (path === '/reset-password') return <Suspense fallback={<PlatformLoading />}><ResetPasswordPage /></Suspense>
   if (path === '/auth/callback') return <Suspense fallback={<PlatformLoading />}><AuthCallbackPage /></Suspense>
+  if (path === '/workspace/employee/messages' || path === '/workspace/provider/employee-messages') return <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
   if (path === '/workspace/employee/account') return <Suspense fallback={<PlatformLoading />}><EmployeeAccountPage /></Suspense>
   if (path === '/workspace/employee' || path === '/workspace/employee/requests') return <Suspense fallback={<PlatformLoading />}><EmployeeWorkspacePage /></Suspense>
   if (path === '/workspace/provider-employee-requests' || path === '/workspace/owner/employee-requests' || path === '/workspace/supplier/employee-requests') return <Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense>
