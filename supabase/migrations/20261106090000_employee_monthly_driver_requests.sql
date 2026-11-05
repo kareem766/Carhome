@@ -131,6 +131,9 @@ begin
   select coalesce(request_fee_enabled,false), coalesce(request_fee_egp,0)
     into fee_enabled, fee_amount
   from public.employee_service_settings where id = true;
+  if new.start_date < current_date then
+    raise exception 'Employee request start date cannot be in the past.' using errcode = '22007';
+  end if;
   if fee_enabled then
     raise exception 'Employee request fee payment workflow is not enabled yet; request submission is temporarily paused.'
       using errcode = '55000';
