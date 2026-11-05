@@ -7,6 +7,10 @@ import PlatformEntryBanner from './components/PlatformEntryBanner'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import LegalPages from './components/LegalPages'
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
+const EmployeeRegistrationPage = lazy(() => import('./components/EmployeeRegistrationPage'))
+const EmployeeWorkspacePage = lazy(() => import('./components/EmployeeWorkspacePage'))
+const EmployeeProviderRequestsPage = lazy(() => import('./components/EmployeeProviderRequestsPage'))
+const EmployeeAdminRequestsPage = lazy(() => import('./components/EmployeeAdminRequestsPage'))
 const CompanyInsightsPage = lazy(() => import('./components/CompanyInsightsPage'))
 const CompanyTeamPage = lazy(() => import('./components/CompanyTeamPage'))
 const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'))
@@ -56,6 +60,7 @@ function OwnerPersistentBar() {
     { href: '/services', label: 'خدمات السيارات', icon: <Wrench size={17}/> },
     { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
     { href: '/messages', label: 'المراسلات', icon: <MessageCircle size={17}/> },
+    { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: <UserRound size={17}/> },
   ]
   return <header dir="rtl" className="mc-owner-persistent-bar">
     <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car <span className="text-cyan-300">عربيتي</span></strong><small>مساحة مالك السيارة</small></span></a>
@@ -169,11 +174,11 @@ export default function App() {
     if (!authUser) return
     // Authenticated users should never see sign-in/sign-up prompts or the registration chooser.
     setAuthOpen(false)
-    const destination = isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
+    const destination = isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'employee' ? '/workspace/employee' : authUser.user_metadata?.organization_type === 'employee' ? '/workspace/employee' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
     if (path === '/register' || path.startsWith('/register/')) window.location.replace(destination)
     if (path === '/workspace') window.location.replace(destination)
     // Owners land directly on their vehicle portfolio after every successful sign-in.
-    if ((path === '/' || pathIsHome(path)) && !isPlatformAdmin && authUser.user_metadata?.organization_type !== 'company' && authUser.user_metadata?.organization_type !== 'fleet_supplier') window.location.replace('/workspace/owner/vehicles')
+    if ((path === '/' || pathIsHome(path)) && !isPlatformAdmin && authUser.user_metadata?.organization_type !== 'company' && authUser.user_metadata?.organization_type !== 'fleet_supplier' && authUser.user_metadata?.organization_type !== 'employee') window.location.replace('/workspace/owner/vehicles')
   }, [authUser, isPlatformAdmin, path])
 
   useEffect(() => {
@@ -192,6 +197,9 @@ export default function App() {
   if (path === '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (path === '/reset-password') return <Suspense fallback={<PlatformLoading />}><ResetPasswordPage /></Suspense>
   if (path === '/auth/callback') return <Suspense fallback={<PlatformLoading />}><AuthCallbackPage /></Suspense>
+  if (path === '/workspace/employee') return <Suspense fallback={<PlatformLoading />}><EmployeeWorkspacePage /></Suspense>
+  if (path === '/workspace/provider-employee-requests' || path === '/workspace/owner/employee-requests' || path === '/workspace/supplier/employee-requests') return <Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense>
+  if (path === '/workspace/admin/employee-requests') return <Suspense fallback={<PlatformLoading />}><EmployeeAdminRequestsPage /></Suspense>
   if (path === '/workspace/company/team') return <Suspense fallback={<PlatformLoading />}><CompanyTeamPage /></Suspense>
   if (path === '/workspace/company/insights') return <Suspense fallback={<PlatformLoading />}><CompanyInsightsPage /></Suspense>
   if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage admin /></Suspense>
@@ -236,10 +244,11 @@ export default function App() {
   if (path === '/register/owner' && !settings.owner_registration_enabled) return <ServiceNotice settings={settings} title="تسجيل ملاك السيارات متوقف" message="التسجيل لهذا النوع من الحسابات غير متاح حاليًا." />
   if (path === '/register/company' && !settings.company_registration_enabled) return <ServiceNotice settings={settings} title="تسجيل الشركات متوقف" message="التسجيل لهذا النوع من الحسابات غير متاح حاليًا." />
   if (path === '/register/supplier' && !settings.supplier_registration_enabled) return <ServiceNotice settings={settings} title="تسجيل موردي الأساطيل متوقف" message="التسجيل لهذا النوع من الحسابات غير متاح حاليًا." />
+  if (path === '/register/employee') return <Suspense fallback={<PlatformLoading />}><EmployeeRegistrationPage /></Suspense>
   if (path === '/register') return <RoleChooserPage onChoose={(role) => {
     const enabled = role === 'individual_owner' ? settings.owner_registration_enabled : role === 'fleet_supplier' ? settings.supplier_registration_enabled : settings.company_registration_enabled
     if (!enabled) { window.alert('التسجيل لهذا النوع من الحسابات غير متاح حاليًا.'); return }
-    window.location.href = '/register/' + (role === 'individual_owner' ? 'owner' : role === 'fleet_supplier' ? 'supplier' : 'company')
+    window.location.href = role === 'employee' ? '/register/employee' : '/register/' + (role === 'individual_owner' ? 'owner' : role === 'fleet_supplier' ? 'supplier' : 'company')
   }} onLogin={() => { window.location.href = '/?login=1' }} />
   if (path === '/register/owner') return <RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} />
   if (path === '/register/company') return <RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} />
