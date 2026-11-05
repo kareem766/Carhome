@@ -62,7 +62,7 @@ const HOME_CAR_IMAGES = [
   [
     'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1100&q=90',
     'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1100&q=85',
-    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1100&q=85'
+    'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1100&q=85'
   ],
   [
     'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1000&q=90',
@@ -192,8 +192,7 @@ export default function App() {
       const tryNext = () => {
         const source = sources[index++]
         if (!source) {
-          // Never expose a broken-image icon: use a neutral local brand visual as the final safety net.
-          resolve('/carhome-icon.svg')
+          reject(new Error('Homepage vehicle photography could not be loaded.'))
           return
         }
         const image = new Image()
@@ -207,6 +206,9 @@ export default function App() {
       if (!active) return
       setHomeImageUrls(urls)
       setHomeImagesReady(true)
+    }).catch((error) => {
+      // Fail closed: the homepage stays on its branded loader instead of showing empty or broken vehicle cards.
+      console.error(error)
     })
     return () => { active = false }
   }, [])
