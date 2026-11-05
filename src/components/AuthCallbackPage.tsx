@@ -53,7 +53,9 @@ async function finishAccount(user: User) {
     if (legacy.error) throw legacy.error
   }
 
-  if (role === 'employee') return role\n\n  const membership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
+  if (role === 'employee') return role
+
+  const membership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
   if (membership.error) throw membership.error
   if (membership.data) {
     if (logoPath) {
@@ -165,6 +167,7 @@ export default function AuthCallbackPage() {
           ? '/workspace/admin'
           : role === 'company' ? '/workspace/company'
           : role === 'fleet_supplier' ? '/workspace/supplier'
+          : role === 'employee' ? '/workspace/employee'
           : '/workspace/owner'
         setMessage(adminRecord
           ? 'تم تأكيد الحساب بنجاح. جارٍ فتح لوحة الإدارة...'
