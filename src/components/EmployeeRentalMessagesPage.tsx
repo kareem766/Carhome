@@ -3,6 +3,7 @@ import { ArrowRight, MessageCircle, RefreshCw, Send, ShieldCheck, UserRound } fr
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
+import EmployeePageLoading from './EmployeePageLoading'
 
 type Offer = { id: string; request_id: string; status: string; monthly_price_egp: number; created_by: string | null }
 type Message = { id: string; offer_id: string; sender_user_id: string; body: string; created_at: string }
@@ -116,6 +117,8 @@ export default function EmployeeRentalMessagesPage() {
 
   const workspace = role === 'employee' ? '/workspace/employee' : '/workspace/provider-employee-requests'
   const canSend = Boolean(offer && ['submitted', 'accepted'].includes(offer.status))
+
+  if (loading) return <EmployeePageLoading />
 
   return <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
     {role==='employee' ? <EmployeeWorkspaceHeader active="messages"/> : <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
