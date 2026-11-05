@@ -55,19 +55,19 @@ const defaults: PlatformSettings = {
 function pathIsHome(path: string) { return path === '/' || path === '' }
 const HOME_CAR_IMAGES = [
   [
-    'https://images.pexels.com/photos/3954388/pexels-photo-3954388.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    'https://images.pexels.com/photos/18346530/pexels-photo-18346530.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=90'
+    'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg',
+    'https://corporate.autovermietung-arndt.de/fileadmin/corporate-page/img/arndt_corporate23.jpg',
+    'https://phoenixrentalcars.com/phoenix-car-rental-vehicle-lineup.webp'
   ],
   [
-    'https://images.pexels.com/photos/18393022/pexels-photo-18393022.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    'https://images.pexels.com/photos/3954388/pexels-photo-3954388.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=90'
+    'https://bmkltsly13vb.compat.objectstorage.ap-mumbai-1.oraclecloud.com/cdn.ft.lk/assets/uploads/image_e2653488f5.jpg',
+    'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg',
+    'https://corporate.autovermietung-arndt.de/fileadmin/corporate-page/img/arndt_corporate23.jpg'
   ],
   [
-    'https://images.pexels.com/photos/18346530/pexels-photo-18346530.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    'https://images.pexels.com/photos/18393022/pexels-photo-18393022.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1200&q=90'
+    'https://ireland.apollo.olxcdn.com/v1/files/bjh0fmv4qbah1-PT/image',
+    'https://phoenixrentalcars.com/phoenix-car-rental-vehicle-lineup.webp',
+    'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg'
   ]
 ]
 function OwnerPersistentBar() {
@@ -320,9 +320,9 @@ export default function App() {
           <div className="mc-home-copy mr-0 w-full max-w-3xl text-right"><p className="text-sm font-bold text-white/90 sm:text-lg">منصة <span className="text-[#ffad0a]">My Car عربيتي</span></p><h1 className="mt-3 text-4xl font-black leading-[1.35] tracking-tight sm:text-6xl lg:text-7xl">نربطك بأفضل<br/><span className="text-[#ffad0a]">السيارات في مصر</span></h1><p className="mt-5 max-w-2xl text-sm font-semibold leading-8 text-white/90 sm:text-lg">سواء كنت شركة تبحث عن سيارات تناسب تشغيلك، أو مالكًا يريد الوصول إلى فرص تأجير طويلة الأجل، أو موردًا يدير أسطولًا كاملًا؛ My Car عربيتي تجمع احتياجات سوق تأجير السيارات للشركات في مكان واحد.</p></div>
           <div className="mc-home-vehicle-gallery mx-auto mt-10 grid w-full max-w-6xl grid-cols-3 gap-3 sm:mt-12 sm:gap-5" aria-label="نماذج من السيارات المتاحة عبر المنصة">
             {homeImageUrls.map((src, index) => <figure key={src + index} className="mc-home-vehicle-card group relative isolate h-32 overflow-hidden rounded-2xl border border-white/15 bg-[#102b47] shadow-[0_18px_45px_rgba(0,0,0,.24)] sm:h-52 lg:h-64">
-              <img src={src} alt={['سيارات حديثة','سيارات مناسبة للأعمال','اختيارات مميزة'][index]} loading="eager" decoding="async" fetchPriority="high" width="1200" height="800" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"/>
+              <img src={src} alt={['سيدان تنفيذية لاحتياجات الشركات','سيارات SUV لتشغيل الأساطيل','فان ومركبات نقل الركاب'][index]} loading="eager" decoding="async" fetchPriority="high" width="1200" height="800" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"/>
               <div className="absolute inset-0 bg-gradient-to-t from-[#06172a]/95 via-[#06172a]/15 to-transparent"/>
-              <figcaption className="absolute inset-x-0 bottom-0 px-2 pb-3 text-right text-[11px] font-black text-white sm:px-4 sm:pb-4 sm:text-base">{['سيارات حديثة','سيارات للأعمال','اختيارات مميزة'][index]}<span className="mt-1 block text-[9px] font-semibold text-white/70 sm:text-xs">اكتشف فرصًا تناسب احتياجك</span></figcaption>
+              <figcaption className="absolute inset-x-0 bottom-0 px-2 pb-3 text-right text-[11px] font-black text-white sm:px-4 sm:pb-4 sm:text-base">{['سيدان للشركات','سيارات SUV','فان ونقل ركاب'][index]}<span className="mt-1 block text-[9px] font-semibold text-white/70 sm:text-xs">حلول نقل وتشغيل تناسب نشاطك</span></figcaption>
             </figure>)}
           </div>
           {authUser?.user_metadata?.organization_type === 'company' && <form onSubmit={(event)=>{event.preventDefault();const data=new FormData(event.currentTarget);const params=new URLSearchParams();['governorate','vehicle_type','duration'].forEach(key=>{const value=String(data.get(key)||'');if(value)params.set(key,value)});window.location.href='/workspace/catalog'+(params.toString()?'?'+params.toString():'')}} className="relative z-20 mx-auto mt-7 max-w-5xl rounded-3xl border border-white/70 bg-white p-3 text-slate-700 shadow-2xl sm:mt-8 sm:p-4">
