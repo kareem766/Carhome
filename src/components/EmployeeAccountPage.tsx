@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, BadgeCheck, CircleUserRound, LogOut, Save, ShieldCheck } from 'lucide-react'
+import { BadgeCheck, CircleUserRound, LogOut, Save, ShieldCheck } from 'lucide-react'
 import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
 import { supabase } from '../lib/supabase'
 
