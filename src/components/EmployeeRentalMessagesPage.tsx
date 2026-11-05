@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, MessageCircle, RefreshCw, Send, ShieldCheck, UserRound } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
+import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
 
 type Offer = { id: string; request_id: string; status: string; monthly_price_egp: number; created_by: string | null }
 type Message = { id: string; offer_id: string; sender_user_id: string; body: string; created_at: string }
@@ -117,12 +118,12 @@ export default function EmployeeRentalMessagesPage() {
   const canSend = Boolean(offer && ['submitted', 'accepted'].includes(offer.status))
 
   return <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+    {role==='employee' ? <EmployeeWorkspaceHeader active="messages"/> : <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
         <a href={workspace} className="font-black"><PlatformBrand/></a>
         <a href={workspace} className="inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-bold"><ArrowRight size={16}/> العودة لمساحة العمل</a>
       </div>
-    </header>
+    </header>}
     <div className="mx-auto max-w-5xl space-y-5 px-4 py-7">
       <section className="rounded-3xl bg-gradient-to-l from-[#102b47] to-[#176b9a] p-6 text-white sm:p-8">
         <div className="flex items-center gap-3"><span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/20 bg-white/10"><MessageCircle size={25}/></span><div><p className="text-sm font-bold text-cyan-200">MY CAR · مراسلات العرض</p><h1 className="mt-1 text-2xl font-black">محادثة خاصة وآمنة</h1></div></div>
