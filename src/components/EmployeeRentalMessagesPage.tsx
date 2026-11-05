@@ -27,7 +27,9 @@ export default function EmployeeRentalMessagesPage() {
     if (authError || !user) { window.location.replace('/?login=1'); return }
     setUserId(user.id)
     const { data: account } = await supabase.from('employee_accounts').select('account_status').eq('user_id', user.id).maybeSingle()
-    const isEmployee = account?.account_status === 'active'
+    // Use the authenticated account type as the routing source of truth; an RLS/read issue
+    // must not send an employee into the provider-only workspace.
+    const isEmployee = user.user_metadata?.organization_type === 'employee' || Boolean(account)
     if (!offerId) {
       setRole(isEmployee ? 'employee' : 'provider')
       if (isEmployee) {
