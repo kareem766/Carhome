@@ -88,7 +88,7 @@ begin
   end if;
   return old;
 end;
-$;
+$employee_fn$;
 drop trigger if exists organization_membership_suspend_employee on public.organization_memberships;
 create trigger organization_membership_suspend_employee
 after delete on public.organization_memberships
@@ -123,7 +123,7 @@ create table if not exists public.employee_rental_requests (
 );
 
 create or replace function app_private.guard_employee_request_fee()
-returns trigger language plpgsql security definer set search_path = '' as $
+returns trigger language plpgsql security definer set search_path = '' as $employee_fn$
 declare
   fee_enabled boolean;
   fee_amount numeric(12,2);
@@ -143,7 +143,7 @@ begin
   new.fee_status := 'not_required';
   return new;
 end;
-$;
+$employee_fn$;
 drop trigger if exists employee_request_fee_guard on public.employee_rental_requests;
 create trigger employee_request_fee_guard
 before insert on public.employee_rental_requests
@@ -242,7 +242,7 @@ with check (exists (select 1 from public.platform_admins a where a.user_id = (se
 
 
 create or replace function app_private.notify_employee_request_events()
-returns trigger language plpgsql security definer set search_path = '' as $
+returns trigger language plpgsql security definer set search_path = '' as $employee_fn$
 declare
   admin_user record;
 begin
@@ -264,7 +264,7 @@ begin
   end if;
   return new;
 end;
-$;
+$employee_fn$;
 drop trigger if exists employee_request_notifications on public.employee_rental_requests;
 create trigger employee_request_notifications
 after insert or update of status on public.employee_rental_requests
@@ -272,7 +272,7 @@ for each row execute function app_private.notify_employee_request_events();
 
 
 create or replace function public.employee_respond_to_offer(p_offer_id uuid, p_accept boolean)
-returns boolean language plpgsql security definer set search_path = '' as $
+returns boolean language plpgsql security definer set search_path = '' as $employee_fn$
 declare
   v_request_id uuid;
   v_employee_user_id uuid;
@@ -301,12 +301,12 @@ begin
   end if;
   return true;
 end;
-$;
+$employee_fn$;
 revoke all on function public.employee_respond_to_offer(uuid,boolean) from public, anon;
 grant execute on function public.employee_respond_to_offer(uuid,boolean) to authenticated;
 
 create or replace function app_private.notify_employee_offer_events()
-returns trigger language plpgsql security definer set search_path = '' as $
+returns trigger language plpgsql security definer set search_path = '' as $employee_fn$
 declare
   v_employee_user_id uuid;
   member record;
@@ -327,7 +327,7 @@ begin
   end if;
   return new;
 end;
-$;
+$employee_fn$;
 drop trigger if exists employee_offer_notifications on public.employee_rental_offers;
 create trigger employee_offer_notifications
 after insert or update of status on public.employee_rental_offers
