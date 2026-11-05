@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, ClipboardList, MessageCircle, RefreshCw, CheckCircle2, XCircle, CarFront } from 'lucide-react'
 import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
+import EmployeePageLoading from './EmployeePageLoading'
 import { supabase } from '../lib/supabase'
 
 type RequestRow = { id:string; title:string; vehicle_type:string; governorate:string; duration_months:number; start_date:string; status:string; created_at:string; pickup_address?:string; details?:string|null; seats?:number; work_days_per_week?:number; daily_hours?:number; budget_min_egp?:number|null; budget_max_egp?:number|null }
@@ -53,6 +54,7 @@ export default function EmployeeRequestsOffersPage(){
   setBusy('')
  }
  const totalOffers=offers.length
+ if(loading) return <EmployeePageLoading />
  return <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
   <EmployeeWorkspaceHeader active="requests"/>
   <div className="mx-auto max-w-6xl space-y-6 px-4 py-7">
