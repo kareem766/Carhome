@@ -126,7 +126,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
         const result = await client.from('rental_requests').select('id,title,details,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at,rental_offers(id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,organizations(id,name))').eq('organization_id', member.organization_id).order('created_at',{ascending:false})
         if (result.error) setError(result.error.message); else setRequests((result.data || []) as unknown as RentalRequest[])
         if (path === '/workspace/company') {
-          const cars = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('review_status','approved').eq('payment_status','verified').order('created_at',{ascending:false}).limit(4)
+          const cars = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,license_expiry_date,monthly_price_egp,review_status,payment_status').eq('review_status','approved').eq('payment_status','verified').order('created_at',{ascending:false}).limit(4)
           if (!cars.error) setVehicles((cars.data || []) as Vehicle[])
         }
       }
@@ -135,7 +135,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       if (result.error) setError('تعذر تحميل عروضك المقدمة: ' + result.error.message)
       else setSubmittedOffers((result.data || []) as unknown as SubmittedOffer[])
     } else if (!isRequestForm && !isRequestList) {
-      const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status,payment_status').eq('organization_id',member.organization_id).order('created_at',{ascending:false})
+      const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,license_expiry_date,monthly_price_egp,review_status,payment_status').eq('organization_id',member.organization_id).order('created_at',{ascending:false})
       if (path === '/workspace/owner/vehicles' || path === '/workspace/supplier/vehicles') {
         const promotions = await client.from('vehicle_promotions').select('id,status,starts_at,ends_at,payment_status').eq('organization_id', member.organization_id)
         if (promotions.error) setError('تعذر تحميل عدد الإعلانات النشطة: ' + promotions.error.message)
