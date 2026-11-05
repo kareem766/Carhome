@@ -150,7 +150,9 @@ export default function AccountNotifications() {
       window.location.href = offerId ? `${offersPath}?offer=${encodeURIComponent(offerId)}` : offersPath
       return
     }
-    const employeeApprovedRequestNotice = /تم اعتماد طلب السيارة|تم اعتماد طلبك|اعتماد طلب السيارة|تمت الموافقة على طلب السيارة/.test([notification.title, notification.body || ''].join(' '))
+    const notificationText = [notification.title, notification.body || ''].join(' ')
+    const employeeApprovedRequestNotice = /تم اعتماد طلب السيارة|تم اعتماد طلبك|اعتماد طلب السيارة|تمت الموافقة على طلب السيارة|تم اعتماد الطلب/.test(notificationText)
+      || /employee.*(rental_)?request.*approved|request.*approved/i.test(notification.notification_type)
     if (identity.role === 'حساب موظف' && employeeApprovedRequestNotice) {
       let requestId: string | null = null
       if (notification.action_url) {
@@ -161,8 +163,9 @@ export default function AccountNotifications() {
             const pathId = target.pathname.match(/[0-9a-f]{8}-[0-9a-f-]{27,}/i)?.[0]
             if (pathId) requestId = pathId
           }
-        } catch { /* open the employee requests list as a safe fallback */ }
+        } catch { /* inspect the notification text below */ }
       }
+      if (!requestId) requestId = notificationText.match(/[0-9a-f]{8}-[0-9a-f-]{27,}/i)?.[0] || null
       window.location.href = requestId
         ? `/workspace/employee/requests?request=${encodeURIComponent(requestId)}`
         : '/workspace/employee/requests'
