@@ -65,8 +65,8 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         ? [values.fullName, values.companyName, values.phone, values.email, values.governorate, values.address, fleetVehicleCount]
         : [values.fullName, values.phone, values.email, values.governorate, values.address]
     if (requiredValues.some((value) => !value.trim())) { setError('من فضلك أكمل جميع الحقول المطلوبة قبل إنشاء الحساب. لا يمكن ترك أي حقل مطلوب فارغًا.'); return }
-    const email = values.email.trim().toLowerCase()
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا.'); return }
+    const email = normalizeEmailAddress(values.email)
+    if (!isValidEmailAddress(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا.'); return }
     const phone = values.phone.replace(/\D/g, '')
     const phoneRequired = true
     if ((phoneRequired || phone.length > 0) && !/^01[0-9]{9}$/.test(phone)) {
