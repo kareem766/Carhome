@@ -5,7 +5,7 @@ import PlatformBrand from './PlatformBrand'
 import PlatformLoading from './PlatformLoading'
 import type { EmailOtpType, User } from '@supabase/supabase-js'
 
-type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company'
+type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company' | 'employee'
 
 async function finishAccount(user: User) {
   if (!supabase) throw new Error('خدمة الحسابات غير متاحة حاليًا.')
@@ -17,7 +17,7 @@ async function finishAccount(user: User) {
   }
   const metadata = user.user_metadata ?? {}
   const displayName = String(metadata.display_name || user.email || user.phone || 'مستخدم Carhome').trim()
-  const role = (['individual_owner', 'fleet_supplier', 'company'].includes(String(metadata.organization_type))
+  const role = (['individual_owner', 'fleet_supplier', 'company', 'employee'].includes(String(metadata.organization_type))
     ? metadata.organization_type
     : 'individual_owner') as AccountRole
   const organizationName = String(metadata.organization_name || displayName).trim()
@@ -52,6 +52,8 @@ async function finishAccount(user: User) {
     const legacy = await supabase.from('profiles').upsert({ id: user.id, display_name: displayName, locale: 'ar' }, { onConflict: 'id' })
     if (legacy.error) throw legacy.error
   }
+
+  if (role === 'employee') return role
 
   const membership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
   if (membership.error) throw membership.error
@@ -165,6 +167,7 @@ export default function AuthCallbackPage() {
           ? '/workspace/admin'
           : role === 'company' ? '/workspace/company'
           : role === 'fleet_supplier' ? '/workspace/supplier'
+          : role === 'employee' ? '/workspace/employee'
           : '/workspace/owner'
         setMessage(adminRecord
           ? 'تم تأكيد الحساب بنجاح. جارٍ فتح لوحة الإدارة...'
