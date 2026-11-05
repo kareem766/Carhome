@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, ClipboardList, MessageCircle, RefreshCw, CheckCircle2, XCircle, CarFront } from 'lucide-react'
+import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
 import { supabase } from '../lib/supabase'
-import PlatformBrand from './PlatformBrand'
-import AccountNotifications from './AccountNotifications'
 
 type RequestRow = { id:string; title:string; vehicle_type:string; governorate:string; duration_months:number; start_date:string; status:string; created_at:string; pickup_address?:string; details?:string|null; seats?:number; work_days_per_week?:number; daily_hours?:number; budget_min_egp?:number|null; budget_max_egp?:number|null }
 type OfferRow = { id:string; request_id:string; monthly_price_egp:number; status:string; message:string|null; created_at?:string; organizations:{name:string}|{name:string}[]|null; vehicles:{make:string;model:string;model_year:number}|{make:string;model:string;model_year:number}[]|null }
@@ -55,7 +54,7 @@ export default function EmployeeRequestsOffersPage(){
  }
  const totalOffers=offers.length
  return <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
-  <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur"><div className="mx-auto flex max-w-6xl items-center justify-between gap-3"><a href="/workspace/employee" className="font-black"><PlatformBrand/></a><div className="flex items-center gap-2"><AccountNotifications/><a href="/workspace/employee/account" className="rounded-xl border px-3 py-2 text-xs font-bold">حسابي</a></div></div><nav className="mx-auto mt-3 flex max-w-6xl gap-2 overflow-x-auto pb-1 text-xs font-extrabold"><a href="/workspace/employee" className="shrink-0 rounded-xl border px-4 py-2.5">الرئيسية</a><a href="/workspace/employee/requests" className="shrink-0 rounded-xl bg-blue-700 px-4 py-2.5 text-white">طلباتي والعروض</a><a href="/workspace/employee/messages" className="shrink-0 rounded-xl border px-4 py-2.5">المراسلات</a><a href="/workspace/employee/account" className="shrink-0 rounded-xl border px-4 py-2.5">بيانات الحساب</a></nav></header>
+  <EmployeeWorkspaceHeader active="requests"/>
   <div className="mx-auto max-w-6xl space-y-6 px-4 py-7">
    <section className="rounded-3xl bg-gradient-to-l from-[#102b47] to-[#176b9a] p-6 text-white sm:p-8"><a href="/workspace/employee" className="inline-flex items-center gap-2 text-xs font-bold text-blue-100"><ArrowRight size={16}/> العودة لمساحة العمل</a><p className="mt-4 text-sm font-bold text-cyan-200">إدارة طلباتك ومتابعة عروض مقدمي السيارات</p><h1 className="mt-2 text-3xl font-black">طلباتي والعروض المقدمة</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100">تابع حالة كل طلب، راجع تفاصيل العروض والأسعار والسيارات المقترحة، اختر العرض المناسب أو ارفضه، وتواصل مع مقدم العرض من داخل المنصة.</p></section>
    <div className="grid gap-3 sm:grid-cols-3"><div className="rounded-2xl border bg-white p-4"><p className="text-xs text-slate-500">إجمالي الطلبات</p><p className="mt-1 text-2xl font-black">{requests.length}</p></div><div className="rounded-2xl border bg-white p-4"><p className="text-xs text-slate-500">إجمالي العروض</p><p className="mt-1 text-2xl font-black">{totalOffers}</p></div><div className="rounded-2xl border bg-white p-4"><p className="text-xs text-slate-500">عروض جديدة</p><p className="mt-1 text-2xl font-black">{offers.filter(x=>x.status==='submitted').length}</p></div></div>
