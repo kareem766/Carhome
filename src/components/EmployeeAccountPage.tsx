@@ -91,7 +91,7 @@ export default function EmployeeAccountPage() {
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
         <a href="/workspace/employee" className="font-black"><PlatformBrand/></a>
-        <div className="flex items-center gap-2"><AccountNotifications/><a href="/workspace/employee/messages" className="inline-flex min-h-10 items-center rounded-xl border px-3 text-xs font-bold">المراسلات</a><a href="/workspace/employee" className="inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-bold"><ArrowRight size={16}/> مساحة الموظف</a></div>
+        <div className="flex items-center gap-2"><AccountNotifications/><a href="/workspace/employee/requests" className="inline-flex min-h-10 items-center rounded-xl border px-3 text-xs font-bold">طلباتي والعروض</a><a href="/workspace/employee/messages" className="inline-flex min-h-10 items-center rounded-xl border px-3 text-xs font-bold">المراسلات</a><a href="/workspace/employee" className="inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-bold"><ArrowRight size={16}/> مساحة الموظف</a></div>
       </div>
     </header>
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-7">
