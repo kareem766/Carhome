@@ -3,7 +3,7 @@ import { ArrowRight, Building2, CarFront, CheckCircle2, ChevronDown, ShieldCheck
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 
-type Role = 'individual_owner' | 'company' | 'fleet_supplier'
+type Role = 'individual_owner' | 'company' | 'fleet_supplier' | 'employee'
 type FieldKey = 'fullName' | 'authorizedName' | 'companyName' | 'phone' | 'email' | 'companyType' | 'governorate' | 'address' | 'password'
 
 const governorates = ['القاهرة','الجيزة','الإسكندرية','القليوبية','البحيرة','مطروح','المنوفية','الغربية','كفر الشيخ','الدقهلية','دمياط','الشرقية','بورسعيد','الإسماعيلية','السويس','شمال سيناء','جنوب سيناء','بني سويف','الفيوم','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد']
@@ -11,7 +11,8 @@ const companyTypes = ['عقارات','بترول وطاقة','نقل ولوجس�
 const roleInfo: Record<Role, { title: string; intro: string; icon: typeof CarFront }> = {
   individual_owner: { title: 'تسجيل مالك سيارة', intro: 'أدخل بياناتك الأساسية لإنشاء حسابك، ثم أضف سيارتك لتبدأ إجراءات المراجعة.', icon: CarFront },
   company: { title: 'تسجيل شركة', intro: 'أنشئ حساب شركتك لإدارة احتياجات التأجير ومراجعة السيارات والعروض المتاحة.', icon: Building2 },
-  fleet_supplier: { title: 'تسجيل مورد أسطول', intro: 'أكمل بيانات المورد ثم أضف سيارات أسطولك وابدأ في استقبال طلبات الشركات.', icon: CarFront }
+  fleet_supplier: { title: 'تسجيل مورد أسطول', intro: 'أكمل بيانات المورد ثم أضف سيارات أسطولك وابدأ في استقبال طلبات الشركات.', icon: CarFront },
+  employee: { title: 'تسجيل موظف', intro: 'أنشئ حسابك لطلب سيارة شهرية بسائق ومتابعة عروض الملاك وموردي الأساطيل.', icon: CarFront }
 }
 
 export default function RoleRegistrationPage({ role, onBack }: { role: Role; onBack: () => void }) {
@@ -189,7 +190,8 @@ export function RoleChooserPage({ onChoose, onLogin }: { onChoose: (role: Role) 
   const options: { role: Role; title: string; detail: string; icon: typeof CarFront }[] = [
     { role: 'individual_owner', title: 'مالك سيارة', detail: 'تسجيل بياناتك ثم تسجيل السيارة للمراجعة', icon: CarFront },
     { role: 'company', title: 'شركة', detail: 'طلبات التأجير، عروض الموردين، ومراسلات منظمة', icon: Building2 },
-    { role: 'fleet_supplier', title: 'مورد أسطول', detail: 'إدارة سيارات الأسطول وتجهيزها للمراجعة', icon: CarFront }
+    { role: 'fleet_supplier', title: 'مورد أسطول', detail: 'إدارة سيارات الأسطول وتجهيزها للمراجعة', icon: CarFront },
+    { role: 'employee', title: 'موظف', detail: 'اطلب سيارة شهرية بسائق وتابع العروض المقدمة لك', icon: CarFront }
   ]
   return <main dir="rtl" className="mc-role-chooser min-h-screen bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.13),_transparent_38%),linear-gradient(180deg,#eff6ff_0%,#f8fafc_55%,#eef2ff_100%)] px-3 py-7 sm:px-6 sm:py-12"><div className="mx-auto max-w-5xl"><section className="relative overflow-hidden rounded-[2rem] bg-[radial-gradient(ellipse_at_top_left,_rgba(59,130,246,0.42),_transparent_45%),linear-gradient(125deg,#142D4E_0%,#173e70_58%,#0f2340_100%)] px-5 py-7 text-white shadow-[0_32px_80px_-35px_rgba(20,45,78,0.55)] sm:px-10 sm:py-10"><div aria-hidden="true" className="pointer-events-none absolute -left-10 -top-16 h-52 w-52 rounded-full border-[30px] border-white/5"></div><div className="relative"><div className="flex flex-wrap items-center justify-between gap-3"><div className="inline-flex rounded-2xl border border-white/15 bg-white/10 px-4 py-3"><PlatformBrand /></div><a href="/" className="inline-flex min-h-10 items-center rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/15">العودة للرئيسية</a></div><p className="mt-7 text-xs font-extrabold tracking-wide text-blue-200">ابدأ رحلتك مع My Car</p><h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">اختر نوع الحساب</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100">اختر نوع الحساب الذي يتوافق مع نشاطك للوصول إلى الأدوات والخدمات المناسبة.</p></div></section><div className="mt-7 grid gap-4 md:grid-cols-3">{options.map(({role,title,detail,icon:Icon})=><button key={role} onClick={()=>onChoose(role)} className="group rounded-3xl border border-white bg-white/95 p-5 text-right text-slate-800 shadow-[0_18px_50px_-35px_rgba(20,45,78,0.32)] transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_24px_55px_-30px_rgba(20,45,78,0.3)] focus-visible:outline-blue-600 sm:p-6"><span className="grid h-12 w-12 place-items-center rounded-2xl border border-blue-100 bg-blue-50 text-[#2459A9] transition group-hover:bg-[#142D4E] group-hover:text-white"><Icon size={24}/></span><h2 className="mt-5 text-lg font-extrabold text-[#142D4E]">{title}</h2><p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{detail}</p><span className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-[#2459A9]">متابعة <ArrowRight size={16}/></span></button>)}</div><button onClick={onLogin} className="mt-8 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-[#142D4E]"><CheckCircle2 size={17}/> لدي حساب بالفعل — تسجيل الدخول</button></div></main>
 }
