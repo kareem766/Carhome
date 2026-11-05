@@ -109,7 +109,7 @@ Deno.serve(async(req:Request)=>{
   const emailParts=email.split("@");
   if(emailParts.length!==2||!emailParts[0]||!emailParts[1].includes(".")||emailParts[1].startsWith(".")||emailParts[1].endsWith("."))return send({error:"البريد الإلكتروني غير صحيح."},400);
   if(!displayName||displayName.length>120)return send({error:"اسم المستخدم مطلوب وبحد أقصى 120 حرفًا."},400);
-  if(!["individual_owner","company","fleet_supplier"].includes(role))return send({error:"نوع الحساب غير صحيح."},400);
+  if(!["individual_owner","company","fleet_supplier","employee"].includes(role))return send({error:"نوع الحساب غير صحيح."},400);
   if(password.length<8)return send({error:"كلمة المرور المؤقتة يجب ألا تقل عن 8 أحرف."},400);
   if(phone&&(phone.length<7||phone.length>30))return send({error:"رقم الهاتف يجب أن يكون من 7 إلى 30 رقمًا أو حرفًا."},400);
   if(city&&(city.length<2||city.length>120))return send({error:"اسم المحافظة يجب أن يكون من حرفين إلى 120 حرفًا."},400);
@@ -154,19 +154,25 @@ Deno.serve(async(req:Request)=>{
   if(userError)return send({error:"تعذر تحميل حسابات المستخدمين."},500);
   const ids=(users?.users||[]).map(u=>u.id);
   if(!ids.length)return send({accounts:[]});
-  const [{data:profiles},{data:memberships},{data:adminRows}]=await Promise.all([
+  const [{data:profiles,error:profilesError},{data:memberships,error:membershipsError},{data:adminRows,error:adminsError},{data:employeeRows,error:employeesError}]=await Promise.all([
    db.from("profiles").select("id,display_name,phone,contact_email,address").in("id",ids),
    db.from("organization_memberships").select("user_id,organization_id,role,organizations(id,name,organization_type,city,phone,contact_email,address,approval_status)").in("user_id",ids),
-   db.from("platform_admins").select("user_id").in("user_id",ids)
+   db.from("platform_admins").select("user_id").in("user_id",ids),
+   db.from("employee_accounts").select("user_id,employment_type,account_status").in("user_id",ids)
   ]);
+  if(profilesError||membershipsError||adminsError||employeesError)return send({error:"تعذر تحميل بيانات الحسابات وتصنيفاتها بالكامل. أعد المحاولة."},500);
   const adminIds=new Set((adminRows||[]).map(a=>a.user_id));
+  const employeeMap=new Map((employeeRows||[]).map(e=>[e.user_id,e]));
   const profileMap=new Map((profiles||[]).map(p=>[p.id,p]));
   const orgMap=new Map<string,any[]>();
-  for(const m of memberships||[]){const arr=orgMap.get(m.user_id)||[];if(m.organizations)arr.push(m.organizations);orgMap.set(m.user_id,arr);}
+  const membershipMap=new Map<string,any[]>();
+  for(const m of memberships||[]){const arr=orgMap.get(m.user_id)||[];if(m.organizations)arr.push(m.organizations);orgMap.set(m.user_id,arr);const memberRows=membershipMap.get(m.user_id)||[];memberRows.push(m);membershipMap.set(m.user_id,memberRows);}
   const accounts=(users?.users||[]).map(u=>{
-   const p=profileMap.get(u.id) as any;const orgs=orgMap.get(u.id)||[];const org=orgs[0]||{};
+   const p=profileMap.get(u.id) as any;const orgs=orgMap.get(u.id)||[];const org=orgs[0]||{};const employee=employeeMap.get(u.id);const memberRows=membershipMap.get(u.id)||[];
+   const isCompanyEmployee=memberRows.some((m:any)=>m.role!=="owner"&&m.organizations?.organization_type==="company");
+   const isEmployee=Boolean(employee||isCompanyEmployee||u.user_metadata?.organization_type==="employee");
    const bannedUntil=u.banned_until||null;const disabled=Boolean(bannedUntil&&new Date(bannedUntil).getTime()>Date.now());
-   return {id:u.id,email:u.email||"",display_name:p?.display_name||u.user_metadata?.display_name||"",phone:p?.phone||u.user_metadata?.phone||org.phone||"",address:p?.address||u.user_metadata?.address||org.address||"",organization_name:org.name||u.user_metadata?.organization_name||"",organization_type:u.user_metadata?.organization_type||org.organization_type||"individual_owner",city:org.city||u.user_metadata?.governorate||"",approval_status:org.approval_status||null,created_at:u.created_at,status:disabled?"suspended":"active",banned_until:bannedUntil,must_change_password:u.app_metadata?.must_change_password===true,is_admin:adminIds.has(u.id),organization_count:orgs.length};
+   return {id:u.id,email:u.email||"",display_name:p?.display_name||u.user_metadata?.display_name||"",phone:p?.phone||u.user_metadata?.phone||org.phone||"",address:p?.address||u.user_metadata?.address||org.address||"",organization_name:org.name||u.user_metadata?.organization_name||"",organization_type:isEmployee?"employee":(u.user_metadata?.organization_type||org.organization_type||"individual_owner"),employee_kind:employee?(employee.employment_type==="independent"?"independent":"company_member"):isCompanyEmployee?"company_member":null,city:org.city||u.user_metadata?.governorate||"",approval_status:org.approval_status||null,created_at:u.created_at,status:disabled?"suspended":"active",banned_until:bannedUntil,must_change_password:u.app_metadata?.must_change_password===true,is_admin:adminIds.has(u.id),organization_count:orgs.length};
   });
   return send({accounts});
  }
