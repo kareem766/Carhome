@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { CarFront, ClipboardList, UserRound } from 'lucide-react'
+import { CarFront, ClipboardList } from 'lucide-react'
 import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
 import { supabase } from '../lib/supabase'
 
