@@ -150,7 +150,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         <form onSubmit={submit} className="mc-registration-form space-y-6 p-4 sm:p-8 lg:p-9">
           <div className="grid gap-4 sm:grid-cols-2">
             {isCompany ? <>{field('authorizedName','اسم المفوض',true)}{field('companyName','اسم الشركة',true)}</> : <>{field('fullName','الاسم بالكامل',true)}{role === 'fleet_supplier' && field('companyName','اسم المكتب / الشركة',true)}</>}
-            {field('phone','رقم الموبايل',role !== 'fleet_supplier','tel','01xxxxxxxxx')}
+            {field('phone','رقم الموبايل',true,'tel','01xxxxxxxxx')}
             {field('email','البريد الإلكتروني',true,'email','name@example.com')}
             {(isCompany || role === 'fleet_supplier') && <div className="sm:col-span-2"><label className="block text-sm font-bold text-slate-700">{role === 'fleet_supplier' ? 'لوجو المكتب / الشركة *' : 'لوجو الشركة *'}<input required type="file" accept="image/png,image/jpeg,image/webp" onChange={chooseLogo} className={fieldClass + ' file:ml-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:font-bold file:text-blue-700'} /></label><p className="mt-1 text-xs text-slate-500">PNG أو JPG أو WEBP، بحد أقصى 2 ميجابايت.</p>{logoPreview && <img src={logoPreview} alt="معاينة لوجو الشركة" className="mt-3 h-24 w-24 rounded-2xl border border-slate-200 bg-white object-contain p-2" />}</div>}
             {role === 'fleet_supplier' && <label className="block text-sm font-bold text-slate-700">عدد سيارات المكتب / الشركة *<input className={fieldClass} type="number" required min="1" step="1" inputMode="numeric" value={fleetVehicleCount} onChange={(e) => setFleetVehicleCount(e.target.value)} placeholder="مثال: 15" /></label>}
