@@ -15,7 +15,7 @@ Deno.serve(async(req:Request)=>{
  if(authError||!caller.user)return send({error:"جلسة الدخول غير صالحة."},401);
  let body:Record<string,unknown>;try{body=await req.json();}catch{return send({error:"بيانات الطلب غير صالحة."},400);}
  if(body.action==="complete"){
-  const u=caller.user;if(u.app_metadata?.must_change_password!==true||u.app_metadata?.created_by_platform_admin!==true)return send({error:"لا يوجد تغيير إلزامي لهذا الحساب."},403);
+  const u=caller.user;if(u.app_metadata?.must_change_password!==true||!(u.app_metadata?.created_by_platform_admin===true||u.app_metadata?.created_by_company===true))return send({error:"لا يوجد تغيير إلزامي لهذا الحساب."},403);
   const newPassword=String(body.password||"");if(newPassword.length<8)return send({error:"أدخل كلمة المرور الجديدة."},400);
   const {data:stored,error:storedError}=await db.from("admin_managed_account_passwords").select("temporary_password_hash,password_salt").eq("user_id",u.id).maybeSingle();
   if(storedError||!stored)return send({error:"تعذر التحقق من كلمة المرور المؤقتة. تواصل مع مسؤول المنصة."},500);
@@ -27,6 +27,72 @@ Deno.serve(async(req:Request)=>{
   if(updateError)return send({error:"تعذر إنهاء تغيير كلمة المرور."},500);
   await db.from("admin_managed_account_passwords").delete().eq("user_id",u.id);
   return send({success:true});
+ }
+
+ if(body.action==="create_company_member"){
+  // Remove invisible characters commonly introduced by mobile keyboards/autofill.
+  const email=String(body.email||"").normalize("NFKC").replace(/[\\u200B-\\u200D\\uFEFF\\u00A0]/g,"").replace(/\\s+/g,"").trim().toLowerCase();
+  const displayName=String(body.display_name||"").trim();
+  const role=String(body.role||"member");
+  const validEmail=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i.test(email)
+    && !email.split("@")[0].startsWith(".")
+    && !email.split("@")[0].endsWith(".")
+    && !email.split("@")[0].includes("..");
+  if(email.length>254||!validEmail)return send({error:"صيغة البريد الإلكتروني غير صحيحة. احذف أي مسافات أو رموز غير ظاهرة، وتأكد من كتابته بالشكل name@example.com."},400);
+  if(displayName.length<2||displayName.length>120)return send({error:"اسم الموظف يجب أن يكون من حرفين إلى 120 حرفًا."},400);
+  if(!["manager","member"].includes(role))return send({error:"الدور المطلوب غير صالح."},400);
+  const {data:membership,error:membershipError}=await db.from("organization_memberships")
+   .select("organization_id,role,organizations!inner(id,name,organization_type,approval_status)")
+   .eq("user_id",caller.user.id).eq("role","owner").eq("organizations.organization_type","company").limit(1).maybeSingle();
+  if(membershipError||!membership?.organization_id)return send({error:"إضافة الموظفين متاحة لمالك الشركة فقط."},403);
+  const org=Array.isArray(membership.organizations)?membership.organizations[0]:membership.organizations;
+  if(!org||org.organization_type!=="company")return send({error:"الحساب المرتبط ليس حساب شركة."},403);
+  const {data:existingUsers,error:listError}=await db.auth.admin.listUsers({page:1,perPage:1000});
+  if(listError)return send({error:"تعذر التحقق من البريد الإلكتروني."},500);
+  const existingUser=(existingUsers?.users||[]).find((u:any)=>String(u.email||"").toLowerCase()===email);
+  if(existingUser){
+   const appMeta=existingUser.app_metadata||{};
+   if(appMeta.created_by_company!==true||appMeta.company_organization_id!==membership.organization_id)
+    return send({error:"هذا البريد مرتبط بحساب موجود أو بشركة أخرى، ولا يمكن ضمه إلى شركتك. استخدم بريدًا آخر أو تواصل مع مسؤول المنصة."},409);
+   const {data:currentMemberships,error:currentMembershipsError}=await db.from("organization_memberships").select("organization_id").eq("user_id",existingUser.id);
+   if(currentMembershipsError)return send({error:"تعذر التحقق من ارتباطات حساب الموظف الحالي."},500);
+   if((currentMemberships||[]).some((m:any)=>m.organization_id!==membership.organization_id))
+    return send({error:"هذا الحساب مرتبط بعضوية شركة أخرى ولا يمكن نقله تلقائيًا."},409);
+   if((currentMemberships||[]).some((m:any)=>m.organization_id===membership.organization_id))
+    return send({error:"هذا الموظف موجود بالفعل ضمن فريق شركتك."},409);
+   const existingUserId=existingUser.id;
+   const {error:profileError}=await db.from("profiles").upsert({id:existingUserId,display_name:displayName,contact_email:email,locale:"ar"},{onConflict:"id"});
+   if(profileError)return send({error:"تعذر تحديث الملف الشخصي للموظف: "+profileError.message},500);
+   const {error:membershipInsertError}=await db.from("organization_memberships").insert({organization_id:membership.organization_id,user_id:existingUserId,role});
+   if(membershipInsertError)return send({error:"تعذر إعادة ربط الموظف بالشركة: "+membershipInsertError.message},500);
+   const {error:metadataError}=await db.auth.admin.updateUserById(existingUserId,{user_metadata:{...(existingUser.user_metadata||{}),display_name:displayName,organization_type:"company",organization_name:org.name,company_member_role:role}});
+   if(metadataError){
+    await db.from("organization_memberships").delete().eq("organization_id",membership.organization_id).eq("user_id",existingUserId);
+    return send({error:"تم إيقاف إعادة الربط لحماية الحساب: "+metadataError.message},500);
+   }
+   return send({success:true,employee:{user_id:existingUserId,email,display_name:displayName,role},temporary_password:null,reused_existing_account:true,message:"تمت إعادة الموظف إلى فريق الشركة. يمكنه تسجيل الدخول بكلمة مروره الحالية؛ وإذا نسيها يستخدم خيار نسيت كلمة المرور."},200);
+  }
+  const temporaryPassword=randomPassword();
+  const {data:created,error:createError}=await db.auth.admin.createUser({
+   email,password:temporaryPassword,email_confirm:true,
+   app_metadata:{must_change_password:true,created_by_company:true,company_organization_id:membership.organization_id},
+   user_metadata:{display_name:displayName,organization_type:"company",organization_name:org.name,company_member_role:role}
+  });
+  if(createError){
+    const message=createError.message||"";
+    if(/invalid.*email|email.*invalid|invalid format/i.test(message))return send({error:"رفض نظام تسجيل الدخول صيغة البريد الإلكتروني. تأكد من عدم وجود مسافات أو رموز مخفية، واستخدم بريدًا صالحًا مثل name@example.com."},400);
+    return send({error:/already|registered|exists|duplicate/i.test(message)?"هذا البريد الإلكتروني مسجل بالفعل.":message},400);
+  }
+  const newUserId=created.user.id;
+  const rollback=async()=>{await db.from("organization_memberships").delete().eq("organization_id",membership.organization_id).eq("user_id",newUserId);await db.from("profiles").delete().eq("id",newUserId);await db.from("admin_managed_account_passwords").delete().eq("user_id",newUserId);await db.auth.admin.deleteUser(newUserId);};
+  const {error:profileError}=await db.from("profiles").upsert({id:newUserId,display_name:displayName,contact_email:email,locale:"ar"},{onConflict:"id"});
+  if(profileError){await rollback();return send({error:"تعذر إنشاء الملف الشخصي للموظف: "+profileError.message},500);}
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const {error:passwordError}=await db.from("admin_managed_account_passwords").upsert({user_id:newUserId,temporary_password_hash:await hashPassword(temporaryPassword,salt),password_salt:enc(salt)},{onConflict:"user_id"});
+  if(passwordError){await rollback();return send({error:"تعذر إعداد تغيير كلمة المرور الإلزامي: "+passwordError.message},500);}
+  const {error:memberInsertError}=await db.from("organization_memberships").insert({organization_id:membership.organization_id,user_id:newUserId,role});
+  if(memberInsertError){await rollback();return send({error:"تعذر ربط الموظف بالشركة: "+memberInsertError.message},500);}
+  return send({success:true,employee:{user_id:newUserId,email,display_name:displayName,role},temporary_password:temporaryPassword,message:"تم إنشاء حساب الموظف وربطه بالشركة. اعرض كلمة المرور المؤقتة للمالك مرة واحدة فقط."},201);
  }
  const {data:admin}=await db.from("platform_admins").select("user_id").eq("user_id",caller.user.id).maybeSingle();if(!admin)return send({error:"غير مصرح بإدارة الحسابات."},403);
 
