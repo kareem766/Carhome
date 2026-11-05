@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { BadgeCheck, CircleUserRound, LogOut, Save, ShieldCheck } from 'lucide-react'
+import { BadgeCheck, CircleUserRound, Save, ShieldCheck } from 'lucide-react'
 import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
+import EmployeePageLoading from './EmployeePageLoading'
 import { supabase } from '../lib/supabase'
 
 const field = 'mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
@@ -77,14 +78,9 @@ export default function EmployeeAccountPage() {
     else setNotice('تم تحديث بيانات الملف الشخصي بنجاح.')
   }
 
-  async function logout() {
-    if (!supabase) return
-    const { error: logoutError } = await supabase.auth.signOut()
-    if (logoutError) { setError('تعذر تسجيل الخروج: ' + logoutError.message); return }
-    window.location.replace('/')
-  }
-
   const statusText = status === 'active' ? 'نشط' : status === 'pending' ? 'قيد المراجعة' : status === 'suspended' ? 'موقوف' : status === 'unknown' ? 'غير محدد' : status || 'غير محدد'
+
+  if (loading) return <EmployeePageLoading />
 
   return <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
     <EmployeeWorkspaceHeader active="account"/>
@@ -107,7 +103,6 @@ export default function EmployeeAccountPage() {
           <div className="flex items-center gap-3 rounded-2xl border bg-white p-4"><ShieldCheck className="text-blue-700" size={24}/><div><p className="text-xs text-slate-500">نوع الحساب</p><p className="mt-1 font-extrabold">{employmentType==='independent'?'موظف مستقل':'موظف تابع لشركة'}</p></div></div>
           <div className="flex items-center gap-3 rounded-2xl border bg-white p-4"><BadgeCheck className="text-emerald-700" size={24}/><div><p className="text-xs text-slate-500">حالة الحساب</p><p className="mt-1 font-extrabold">{statusText}</p></div></div>
         </section>
-        <button type="button" onClick={()=>void logout()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rose-200 bg-white px-4 text-sm font-bold text-rose-700 hover:bg-rose-50"><LogOut size={17}/> تسجيل الخروج</button>
       </>}
     </div>
   </main>
