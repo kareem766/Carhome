@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { ArrowRight, UserRound, ShieldCheck, Sparkles, CarFront, BadgeCheck, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { isValidEmailAddress, normalizeEmailAddress } from '../lib/email'
 import PlatformBrand from './PlatformBrand'
 
 function normalizePhone(value: string) {
@@ -25,7 +26,7 @@ export default function EmployeeRegistrationPage() {
     setError('')
 
     const cleanName = name.trim()
-    const cleanEmail = email.trim().toLowerCase()
+    const cleanEmail = normalizeEmailAddress(email)
     const phoneDigits = normalizePhone(phone).replace(/\D/g,'')
 
     if(!cleanName || !phone.trim() || !cleanEmail || !password || !accepted){
@@ -40,7 +41,7 @@ export default function EmployeeRegistrationPage() {
       setError('رقم الموبايل يجب ألا يقل عن 11 رقمًا.')
       return
     }
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)){
+    if(!isValidEmailAddress(cleanEmail)){
       setError('يرجى إدخال بريد إلكتروني صحيح.')
       return
     }
@@ -84,7 +85,7 @@ export default function EmployeeRegistrationPage() {
       <form onSubmit={submit} noValidate className="grid gap-4 p-6 sm:grid-cols-2">
         <label className="text-sm font-bold">الاسم بالكامل <span className="text-red-600">*</span><input required minLength={2} maxLength={120} value={name} onChange={e=>setName(e.target.value)} autoComplete="name" className="mt-2 min-h-12 w-full rounded-xl border px-4"/></label>
         <label className="text-sm font-bold">رقم الموبايل <span className="text-red-600">*</span><input required type="tel" inputMode="numeric" autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="01xxxxxxxxx" className="mt-2 min-h-12 w-full rounded-xl border px-4" dir="ltr" aria-describedby="employee-phone-hint"/><span id="employee-phone-hint" className="mt-1 block text-xs font-normal text-slate-500">أدخل 11 رقمًا على الأقل.</span></label>
-        <label className="text-sm font-bold sm:col-span-2">البريد الإلكتروني <span className="text-red-600">*</span><input required type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border px-4" dir="ltr"/></label>
+        <label className="text-sm font-bold sm:col-span-2">البريد الإلكتروني <span className="text-red-600">*</span><input required type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} onBlur={e=>setEmail(normalizeEmailAddress(e.target.value))} className="mt-2 min-h-12 w-full rounded-xl border px-4" dir="ltr"/></label>
         <div className="sm:col-span-2"><label className="block text-sm font-bold">كلمة المرور <span className="text-red-600">*</span><span className="relative mt-2 block"><input required type={showPassword?'text':'password'} minLength={8} autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border px-4 pl-12" dir="ltr" placeholder="أنشئ كلمة مرور قوية"/><button type="button" onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?'إخفاء كلمة المرور':'إظهار كلمة المرور'} className="absolute left-3 top-2.5 rounded-lg p-2 text-slate-500 hover:bg-slate-100">{showPassword?<EyeOff size={18}/>:<Eye size={18}/>}</button></span></label><div className="mt-3 grid gap-2 rounded-xl border border-blue-100 bg-gradient-to-l from-blue-50 to-white p-4 text-xs sm:grid-cols-2">{[['8 أحرف على الأقل',password.length>=8],['حرف كبير وحرف صغير (A-Z / a-z)',/[A-Z]/.test(password)&&/[a-z]/.test(password)],['رقم واحد على الأقل (0-9)',/[0-9]/.test(password)],['رمز خاص مثل ! @ # $ %',/[^A-Za-z0-9]/.test(password)]].map(([label,valid])=><span key={String(label)} className={'flex items-center gap-2 '+(valid?'font-bold text-emerald-700':'text-slate-600')}><CheckCircle2 size={16} className={valid?'text-emerald-600':'text-slate-300'}/>{label}</span>)}</div><p className="mt-2 text-xs leading-6 text-slate-500">اختر كلمة مرور يصعب تخمينها، ولا تستخدم كلمة مرور حساب آخر. لن يُقبل التسجيل قبل استيفاء الشروط الأربعة.</p></div>
         <div className="rounded-xl bg-blue-50 p-4 text-sm leading-7 text-blue-950 sm:col-span-2"><ShieldCheck size={18} className="mb-1"/> حساب الموظف المستقل لا يحتاج إلى ربط بشركة. ويمكن ربط حساب موظف بالشركة من خلال إدارة فريق الشركة وصلاحياتها.</div>
         <label className="flex items-start gap-3 text-sm leading-6 sm:col-span-2"><input type="checkbox" required checked={accepted} onChange={e=>setAccepted(e.target.checked)} className="mt-1 h-5 w-5"/><span>أوافق على <a href="/terms" target="_blank" rel="noreferrer" className="font-bold text-blue-700 underline">شروط الاستخدام</a> و<a href="/privacy" target="_blank" rel="noreferrer" className="font-bold text-blue-700 underline">سياسة الخصوصية</a>. <span className="text-red-600">*</span></span></label>
