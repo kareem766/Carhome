@@ -141,8 +141,9 @@ Deno.serve(async (req: Request) => {
           await rollback();
           return send({ error: "تعذر إيقاف إعلانات المؤسسة قبل حذف الحساب: " + pauseError.message }, 500);
         }
+        // Do not alter approval_status here: that transition is reserved for an authenticated platform-admin session.
+        // The account has no remaining members; keep its historical approval state while clearing personal contact details.
         const { error: suspendError } = await db.from("organizations").update({
-          approval_status: "suspended",
           contact_name: null,
           phone: null,
           contact_email: null,
