@@ -192,7 +192,7 @@ Deno.serve(async(req:Request)=>{
   const role=String(body.organization_type||target.user_metadata?.organization_type||"individual_owner");
   if(!email.includes("@"))return send({error:"البريد الإلكتروني غير صحيح."},400);
   if(!displayName)return send({error:"اسم المستخدم مطلوب."},400);
-  if(!["individual_owner","company","fleet_supplier"].includes(role))return send({error:"نوع الحساب غير صحيح."},400);
+  if(!["individual_owner","company","fleet_supplier","employee"].includes(role))return send({error:"نوع الحساب غير صحيح."},400);
   const metadata={...target.user_metadata,display_name:displayName,organization_name:String(body.organization_name||"").trim(),organization_type:role,phone:String(body.phone||"").trim(),governorate:String(body.city||"").trim(),address:String(body.address||"").trim()};
   const suspended=body.status==="suspended";
   const updatePayload:any={email,email_confirm:true,user_metadata:metadata,ban_duration:suspended?"876000h":"none"};
@@ -200,10 +200,11 @@ Deno.serve(async(req:Request)=>{
   if(updateError)return send({error:/already|registered|exists|duplicate/i.test(updateError.message)?"البريد الإلكتروني مستخدم بالفعل.":updateError.message},400);
   const {error:profileError}=await db.from("profiles").upsert({id:userId,display_name:displayName,phone:metadata.phone||null,contact_email:email,address:metadata.address||null,locale:"ar"},{onConflict:"id"});
   if(profileError)return send({error:"تم تحديث بيانات الدخول لكن تعذر تحديث الملف الشخصي: "+profileError.message},500);
-  const {data:members}=await db.from("organization_memberships").select("organization_id").eq("user_id",userId);
-  const orgIds=[...new Set((members||[]).map(m=>m.organization_id))];
-  for(const orgId of orgIds){
-   const {error:orgError}=await db.from("organizations").update({name:String(body.organization_name||displayName).trim(),organization_type:role,city:metadata.governorate||null,contact_name:displayName,phone:metadata.phone||null,contact_email:email,address:metadata.address||null,updated_at:new Date().toISOString()}).eq("id",orgId);
+  const {data:members}=await db.from("organization_memberships").select("organization_id,organizations(organization_type)").eq("user_id",userId);
+  for(const member of members||[]){
+   const existingOrg=Array.isArray(member.organizations)?member.organizations[0]:member.organizations;
+   const organizationType=role==="employee"?(existingOrg?.organization_type||"company"):role;
+   const {error:orgError}=await db.from("organizations").update({name:String(body.organization_name||displayName).trim(),organization_type:organizationType,city:metadata.governorate||null,contact_name:displayName,phone:metadata.phone||null,contact_email:email,address:metadata.address||null,updated_at:new Date().toISOString()}).eq("id",member.organization_id);
    if(orgError)return send({error:"تم تحديث بيانات المستخدم لكن تعذر تحديث بيانات المؤسسة: "+orgError.message},500);
   }
   return send({success:true,message:suspended?"تم إيقاف الحساب.":"تم تحديث الحساب وإتاحته."});
