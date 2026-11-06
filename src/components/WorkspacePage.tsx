@@ -142,7 +142,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
         if (promotions.error) setError('تعذر تحميل عدد الإعلانات النشطة: ' + promotions.error.message)
         else {
           const now = Date.now()
-          setActiveAdsCount((promotions.data || []).filter(ad => ad.status === 'active' && ad.payment_status === 'verified' && (!ad.starts_at || new Date(ad.starts_at).getTime() <= now) && (!ad.ends_at || new Date(ad.ends_at).getTime() > now)).length)
+          setActiveAdsCount((promotions.data || []).filter(ad => ad.status === 'approved' && (ad.payment_status === 'verified' || ad.payment_status === 'waived') && (!ad.starts_at || new Date(ad.starts_at).getTime() <= now) && (!ad.ends_at || new Date(ad.ends_at).getTime() > now)).length)
         }
       }
       if (result.error) setError(result.error.message)
@@ -467,7 +467,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
   if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
 
   const isWorkspaceHome = (role === 'company' && path === '/workspace/company') || (role === 'owner' && path === '/workspace/owner/vehicles') || (role === 'supplier' && path === '/workspace/supplier/vehicles')
-  const activeVehicles = vehicles.filter(vehicle => vehicle.review_status === 'approved' && vehicle.payment_status === 'verified').length
+  const activeVehicles = vehicles.filter(vehicle => vehicle.review_status === 'approved' && (vehicle.payment_status === 'verified' || vehicle.payment_status === 'waived')).length
   const pendingVehicles = vehicles.filter(vehicle => vehicle.review_status === 'pending_review' || vehicle.payment_status === 'pending').length
   const receivedOffers = requests.reduce((total, request) => total + (request.rental_offers?.length || 0), 0)
   const dashboard = isWorkspaceHome ? <section className="mc-dashboard mt-6 space-y-5">
