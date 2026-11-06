@@ -186,17 +186,33 @@ export default function App() {
   useEffect(() => {
     if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
-    const loadImage = (sources: string[]) => new Promise<string>((resolve, reject) => {
+    const loadImage = (sources: string[]) => new Promise<string>((resolve) => {
       let index = 0
       const tryNext = () => {
         const source = sources[index++]
         if (!source) {
-          reject(new Error('Homepage vehicle photography could not be loaded.'))
+          // Use the locally bundled car mark as a last-resort visual instead of leaving visitors on an endless loader.
+          resolve('/carhome-icon.svg')
           return
         }
         const image = new Image()
-        image.onload = () => { void image.decode().catch(() => undefined).then(() => resolve(source)) }
-        image.onerror = tryNext
+        let settled = false
+        const advance = () => {
+          if (settled) return
+          settled = true
+          window.clearTimeout(timeout)
+          image.onload = null
+          image.onerror = null
+          tryNext()
+        }
+        const timeout = window.setTimeout(advance, 6000)
+        image.onload = () => {
+          if (settled) return
+          settled = true
+          window.clearTimeout(timeout)
+          void image.decode().catch(() => undefined).then(() => resolve(source))
+        }
+        image.onerror = advance
         image.src = source
       }
       tryNext()
@@ -205,9 +221,6 @@ export default function App() {
       if (!active) return
       setHomeImageUrls(urls)
       setHomeImagesReady(true)
-    }).catch((error) => {
-      // Fail closed: the homepage stays on its branded loader instead of showing empty or broken vehicle cards.
-      console.error(error)
     })
     return () => { active = false }
   }, [])
