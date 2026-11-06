@@ -232,7 +232,7 @@ Deno.serve(async (req: Request) => {
       let response: Response;
       try {
         response = await fetchGeminiWithRetry(
-          \`https://generativelanguage.googleapis.com/v1beta/models/\${primaryModel}:generateContent\`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${primaryModel}:generateContent`,
           requestInit,
           2,
         );
@@ -244,7 +244,7 @@ Deno.serve(async (req: Request) => {
         });
         try {
           response = await fetchGeminiWithRetry(
-            \`https://generativelanguage.googleapis.com/v1beta/models/\${fallbackModel}:generateContent\`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent`,
             requestInit,
             1,
           );
@@ -269,7 +269,7 @@ Deno.serve(async (req: Request) => {
         await response.body?.cancel();
         try {
           response = await fetchGeminiWithRetry(
-            \`https://generativelanguage.googleapis.com/v1beta/models/\${fallbackModel}:generateContent\`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent`,
             requestInit,
             1,
           );
