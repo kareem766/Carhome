@@ -212,20 +212,40 @@ Deno.serve(async (req: Request) => {
 
     let answer = "";
     for (let turn = 0; turn < 4; turn++) {
-      const response = await fetchGeminiWithRetry(
-        `https://generativelanguage.googleapis.com/v1beta/models/${Deno.env.get("GEMINI_MODEL") === "gemini-2.5-flash" ? "gemini-3.8-flash" : (Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash")}:generateContent`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemInstruction }] },
-            contents,
-            tools: [{ functionDeclarations: declarations }],
-            toolConfig: { functionCallingConfig: { mode: "AUTO" } },
-            generationConfig: { temperature: 0.35, maxOutputTokens: 1200 },
-          }),
-        },
+      const configuredModel = Deno.env.get("GEMINI_MODEL");
+      const primaryModel = configuredModel === "gemini-2.5-flash"
+        ? "gemini-3.8-flash"
+        : (configuredModel ?? "gemini-3.8-flash");
+      const configuredFallback = Deno.env.get("GEMINI_FALLBACK_MODEL") ?? "gemini-3.7-flash";
+      const fallbackModel = configuredFallback === primaryModel ? "gemini-3.6-flash" : configuredFallback;
+      const requestInit: RequestInit = {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          contents,
+          tools: [{ functionDeclarations: declarations }],
+          toolConfig: { functionCallingConfig: { mode: "AUTO" } },
+          generationConfig: { temperature: 0.35, maxOutputTokens: 1200 },
+        }),
+      };
+      let response = await fetchGeminiWithRetry(
+        `https://generativelanguage.googleapis.com/v1beta/models/${primaryModel}:generateContent`,
+        requestInit,
       );
+      if (!response.ok && retryableGeminiStatuses.has(response.status)) {
+        console.warn("Primary Gemini model unavailable; trying stable fallback", {
+          primary_model: primaryModel,
+          fallback_model: fallbackModel,
+          status: response.status,
+        });
+        await response.body?.cancel();
+        response = await fetchGeminiWithRetry(
+          `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent`,
+          requestInit,
+          1,
+        );
+      }
       if (!response.ok) {
         const detail = await response.text();
         console.error("Gemini request failed after retries", response.status, detail.slice(0, 500));
