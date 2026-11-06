@@ -83,8 +83,11 @@ export default function NotificationPreferencesPage() {
         user_agent: navigator.userAgent
       }, { onConflict: 'user_id,endpoint' })
       if (saveError) throw saveError
+      const { error: preferenceError } = await supabase.from('platform_notification_preferences')
+        .update({ push_enabled: true }).eq('user_id', user.id)
+      if (preferenceError) throw preferenceError
       setPush(true); setPushSubscribed(true)
-      setMessage('تم تفعيل إشعارات الهاتف على هذا الجهاز بنجاح.')
+      setMessage('تم تفعيل إشعارات الهاتف على هذا الجهاز وحفظ تفضيله بنجاح.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'تعذر تفعيل إشعارات الهاتف.')
     } finally {
