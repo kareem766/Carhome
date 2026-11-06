@@ -38,8 +38,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+      - run: npm install --no-audit --no-fund
       - run: npm run build
 
   edge-function-check:
@@ -50,4 +49,4 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno check supabase/functions/notification-dispatch/index.ts
+      - run: cd supabase/functions/notification-dispatch && deno check index.ts
