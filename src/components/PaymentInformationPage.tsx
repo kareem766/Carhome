@@ -5,8 +5,8 @@ import PlatformBrand from './PlatformBrand'
 import AdminPageNavigation from './AdminPageNavigation'
 
 export default function PaymentInformationPage(){
-  const [instapay,setInstapay]=useState('01208987035')
-  const [vodafone,setVodafone]=useState('01096656281')
+  const [instapay,setInstapay]=useState('')
+  const [vodafone,setVodafone]=useState('')
   const [loading,setLoading]=useState(true)
   const [authorized,setAuthorized]=useState(false)
   const [saving,setSaving]=useState(false)
