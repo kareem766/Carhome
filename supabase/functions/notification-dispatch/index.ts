@@ -49,7 +49,7 @@ Deno.serve(async (req: Request) => {
 
   const vapidPublic = Deno.env.get("VAPID_PUBLIC_KEY");
   const vapidPrivate = Deno.env.get("VAPID_PRIVATE_KEY");
-  const vapidSubject = Deno.env.get("VAPID_SUBJECT") || "mailto:notifications@mycar.example";
+  const vapidSubject = Deno.env.get("VAPID_SUBJECT");
   const brevoKey = Deno.env.get("BREVO_API_KEY");
   const senderEmail = Deno.env.get("BREVO_SENDER_EMAIL");
   const senderName = Deno.env.get("BREVO_SENDER_NAME") || "My Car عربيتي";
@@ -90,17 +90,20 @@ Deno.serve(async (req: Request) => {
         pushStatus = "skipped";
       } else if (!(subscriptionResult.data || []).length) {
         pushStatus = "skipped";
-      } else if (!vapidPublic || !vapidPrivate) {
+      } else if (!vapidPublic || !vapidPrivate || !vapidSubject) {
         pushStatus = "failed";
         errors.push("push: VAPID keys are not configured");
       } else {
         try {
           webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+          const safeActionUrl = item.action_url?.startsWith("/") && !item.action_url.startsWith("//")
+            ? item.action_url
+            : "/";
           const payload = JSON.stringify({
             id: item.id,
             title: item.title,
             body: item.body,
-            url: item.action_url || "/",
+            url: safeActionUrl,
           });
           const outcomes = await Promise.allSettled((subscriptionResult.data || []).map(async (subscription) => {
             try {
@@ -147,7 +150,10 @@ Deno.serve(async (req: Request) => {
         errors.push("email: Brevo API key or authenticated sender is not configured");
       } else {
         try {
-          const emailHtml = `<!doctype html><html lang="ar" dir="rtl"><body style="font-family:Arial,sans-serif;background:#f4f7fb;padding:24px;color:#142d4e"><main style="max-width:600px;margin:auto;background:#fff;border-radius:16px;padding:28px"><h2>${escapeHtml(item.title)}</h2><p style="line-height:1.9;white-space:pre-line">${escapeHtml(item.body)}</p>${item.action_url && appBaseUrl ? `<p><a href="${escapeHtml(appBaseUrl + item.action_url)}" style="display:inline-block;background:#126b9c;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none">فتح My Car</a></p>` : ""}<p style="color:#64748b;font-size:12px">هذه رسالة مرتبطة بإشعارات حسابك على My Car عربيتي.</p></main></body></html>`;
+          const safeActionUrl = item.action_url?.startsWith("/") && !item.action_url.startsWith("//")
+            ? item.action_url
+            : "/";
+          const emailHtml = `<!doctype html><html lang="ar" dir="rtl"><body style="font-family:Arial,sans-serif;background:#f4f7fb;padding:24px;color:#142d4e"><main style="max-width:600px;margin:auto;background:#fff;border-radius:16px;padding:28px"><h2>${escapeHtml(item.title)}</h2><p style="line-height:1.9;white-space:pre-line">${escapeHtml(item.body)}</p>${appBaseUrl ? `<p><a href="${escapeHtml(appBaseUrl + safeActionUrl)}" style="display:inline-block;background:#126b9c;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none">فتح My Car</a></p>` : ""}<p style="color:#64748b;font-size:12px">هذه رسالة مرتبطة بإشعارات حسابك على My Car عربيتي.</p></main></body></html>`;
           const response = await fetch("https://api.brevo.com/v3/smtp/email", {
             method: "POST",
             headers: { "api-key": brevoKey, "Content-Type": "application/json", "accept": "application/json" },
