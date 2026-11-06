@@ -115,13 +115,16 @@ export default function NotificationPreferencesPage() {
     if (!supabase || enablingPush) return
     setEnablingPush(true); setError(''); setMessage('')
     try {
-      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
-        throw new Error('المتصفح أو الجهاز لا يدعم إشعارات الويب. على iPhone استخدم المنصة من الشاشة الرئيسية بعد إضافتها إلى Home Screen.')
+      if (!('serviceWorker' in navigator) || typeof Notification === 'undefined') {
+        throw new Error('إشعارات الويب غير متاحة في جلسة التصفح الحالية. على iPhone افتح My Car من أيقونتها على الشاشة الرئيسية، وليس من تبويب Safari.')
       }
       if (!publicVapidKey) throw new Error('إعداد مفتاح إشعارات الهاتف لم يكتمل بعد. يرجى المحاولة لاحقًا.')
+      const registration = await navigator.serviceWorker.register('/push-sw.js', { scope: '/push/' })
+      if (!registration.pushManager || typeof registration.pushManager.subscribe !== 'function') {
+        throw new Error('الجهاز لا يتيح Push API في وضع التشغيل الحالي. تأكد من فتح My Car من الشاشة الرئيسية وأن إصدار iOS هو 16.4 أو أحدث.')
+      }
       const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission()
       if (permission !== 'granted') throw new Error('لم يتم منح إذن الإشعارات من إعدادات الجهاز أو المتصفح.')
-      const registration = await navigator.serviceWorker.register('/push-sw.js', { scope: '/push/' })
       let subscription = await registration.pushManager.getSubscription()
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
