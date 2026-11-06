@@ -1,9 +1,10 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
-import { ArrowLeft, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, RefreshCw, MessageCircle, Wrench, Megaphone } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, RefreshCw, MessageCircle, Wrench, Megaphone, Bot } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
 import PlatformEntryBanner from './components/PlatformEntryBanner'
+import MyCarAssistantPage from './components/MyCarAssistantPage'
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import LegalPages from './components/LegalPages'
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
@@ -80,6 +81,7 @@ function OwnerPersistentBar() {
     { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
     { href: '/messages', label: 'المراسلات', icon: <MessageCircle size={17}/> },
     { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: <UserRound size={17}/> },
+    { href: '/assistant', label: 'مساعد My Car', icon: <Bot size={17}/> },
   ]
   return <header dir="rtl" className="mc-owner-persistent-bar">
     <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car <span className="text-cyan-300">عربيتي</span></strong><small>مساحة مالك السيارة</small></span></a>
@@ -262,6 +264,7 @@ export default function App() {
   if (pathIsHome(window.location.pathname) && !homeImagesReady) return <PlatformLoading />
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (authUser && adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات لوحة التحكم</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
+  if (path === '/assistant') return authUser ? <MyCarAssistantPage /> : <ServiceNotice settings={settings} title="سجّل الدخول لاستخدام المساعد" message="مساعد My Car متاح للمستخدمين المسجلين فقط، ويعمل وفق صلاحيات الحساب." />
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/workspace' && !authLoaded) return <PlatformLoading />
