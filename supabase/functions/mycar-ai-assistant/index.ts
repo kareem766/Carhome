@@ -167,7 +167,7 @@ Deno.serve(async (req: Request) => {
 
     let answer = "";
     for (let turn = 0; turn < 4; turn++) {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash"}:generateContent`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${Deno.env.get("GEMINI_MODEL") === "gemini-2.5-flash" ? "gemini-3.8-flash" : (Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash")}:generateContent`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
         body: JSON.stringify({
