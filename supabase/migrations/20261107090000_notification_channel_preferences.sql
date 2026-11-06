@@ -93,3 +93,23 @@ grant select, insert, update, delete on public.platform_push_subscriptions to au
 insert into public.platform_notification_preferences (user_id, push_enabled, email_enabled, marketing_enabled)
 select id, true, true, false from auth.users
 on conflict (user_id) do nothing;
+
+-- Apply the same defaults automatically to every account created after this migration.
+create or replace function public.create_default_notification_preferences()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  insert into public.platform_notification_preferences (user_id, push_enabled, email_enabled, marketing_enabled)
+  values (new.id, true, true, false)
+  on conflict (user_id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created_notification_preferences on auth.users;
+create trigger on_auth_user_created_notification_preferences
+after insert on auth.users
+for each row execute function public.create_default_notification_preferences();
