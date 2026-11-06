@@ -95,6 +95,51 @@ async function resolveRole(client: ReturnType<typeof createClient>, userId: stri
   return { role: "unlinked_account", organizationId: null, organizationName: null, approvalStatus: null, profile };
 }
 
+function retryDelayMs(attempt: number, retryAfterHeader: string | null) {
+  if (retryAfterHeader) {
+    const seconds = Number(retryAfterHeader);
+    const dateDelay = Number.isFinite(seconds)
+      ? seconds * 1000
+      : Math.max(0, Date.parse(retryAfterHeader) - Date.now());
+    if (Number.isFinite(dateDelay) && dateDelay > 0) return Math.min(dateDelay, 5000);
+  }
+  return Math.min(800 * (2 ** attempt) + Math.floor(Math.random() * 250), 4000);
+}
+
+const retryableGeminiStatuses = new Set([408, 429, 500, 502, 503, 504]);
+
+async function fetchGeminiWithRetry(url: string, init: RequestInit, maxAttempts = 3): Promise<Response> {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        ...init,
+        signal: AbortSignal.timeout(25000),
+      });
+    } catch (error) {
+      if (attempt >= maxAttempts - 1) throw error;
+      const delay = retryDelayMs(attempt, null);
+      console.warn("Gemini network request failed; retrying", { attempt: attempt + 1, delay_ms: delay });
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      continue;
+    }
+
+    if (response.ok || !retryableGeminiStatuses.has(response.status) || attempt >= maxAttempts - 1) {
+      return response;
+    }
+
+    const delay = retryDelayMs(attempt, response.headers.get("Retry-After"));
+    console.warn("Gemini returned a temporary error; retrying", {
+      status: response.status,
+      attempt: attempt + 1,
+      delay_ms: delay,
+    });
+    await response.body?.cancel();
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+  throw new Error("Gemini retry loop exhausted unexpectedly");
+}
+
 async function runTool(name: string, client: ReturnType<typeof createClient>, userId: string, ctx: RoleContext) {
   if (name === "get_my_profile") {
     return { role: ctx.role, profile: ctx.profile, organization: ctx.organizationId ? {
@@ -167,21 +212,30 @@ Deno.serve(async (req: Request) => {
 
     let answer = "";
     for (let turn = 0; turn < 4; turn++) {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${Deno.env.get("GEMINI_MODEL") === "gemini-2.5-flash" ? "gemini-3.8-flash" : (Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash")}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemInstruction }] },
-          contents,
-          tools: [{ functionDeclarations: declarations }],
-          toolConfig: { functionCallingConfig: { mode: "AUTO" } },
-          generationConfig: { temperature: 0.35, maxOutputTokens: 1200 },
-        }),
-      });
+      const response = await fetchGeminiWithRetry(
+        `https://generativelanguage.googleapis.com/v1beta/models/${Deno.env.get("GEMINI_MODEL") === "gemini-2.5-flash" ? "gemini-3.8-flash" : (Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash")}:generateContent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            contents,
+            tools: [{ functionDeclarations: declarations }],
+            toolConfig: { functionCallingConfig: { mode: "AUTO" } },
+            generationConfig: { temperature: 0.35, maxOutputTokens: 1200 },
+          }),
+        },
+      );
       if (!response.ok) {
         const detail = await response.text();
-        console.error("Gemini request failed", response.status, detail.slice(0, 500));
-        return json({ error: "تعذر الاتصال بالمساعد الذكي حاليًا. حاول مرة أخرى." }, 502);
+        console.error("Gemini request failed after retries", response.status, detail.slice(0, 500));
+        const isTemporary = retryableGeminiStatuses.has(response.status);
+        return json(
+          { error: isTemporary
+              ? "خدمة المساعد مشغولة حاليًا. حاول مرة أخرى بعد لحظات."
+              : "تعذر الاتصال بالمساعد الذكي حاليًا. حاول مرة أخرى." },
+          isTemporary ? 503 : 502,
+        );
       }
       const payload = await response.json();
       const parts = payload.candidates?.[0]?.content?.parts ?? [];
