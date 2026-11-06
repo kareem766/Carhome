@@ -106,7 +106,7 @@ begin
            when status = 'waiting_user' and exists (
              select 1 from public.platform_admins where user_id = new.sender_user_id
            ) then 'in_progress'
-           when status = 'waiting_user' then status
+           when status = 'waiting_user' then 'in_progress'
            when status = 'resolved' and not exists (
              select 1 from public.platform_admins where user_id = new.sender_user_id
            ) then 'open'
@@ -122,3 +122,68 @@ drop trigger if exists support_touch_ticket_after_message on public.support_tick
 create trigger support_touch_ticket_after_message
 after insert on public.support_ticket_messages
 for each row execute function public.support_touch_ticket_on_message();
+
+
+-- Notify the platform team about new tickets and notify users when support replies.
+create or replace function public.support_notify_ticket_activity()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_ticket_id uuid;
+  v_ticket_number bigint;
+  v_owner_id uuid;
+  v_sender_id uuid;
+  v_title text;
+  v_body text;
+  v_url text;
+begin
+  if tg_table_name = 'support_tickets' then
+    v_ticket_id := new.id;
+    v_ticket_number := new.ticket_number;
+    v_owner_id := new.user_id;
+    v_sender_id := new.user_id;
+    v_title := 'تذكرة دعم جديدة #' || new.ticket_number::text;
+    v_body := 'تم استلام تذكرة دعم جديدة: ' || new.subject;
+    v_url := '/workspace/admin/support?ticket=' || new.id::text;
+    insert into public.platform_notifications(user_id,title,body,notification_type,action_url,created_by)
+      select a.user_id,v_title,v_body,'message',v_url,v_sender_id
+      from public.platform_admins a
+      where a.user_id <> v_sender_id;
+  else
+    v_ticket_id := new.ticket_id;
+    v_sender_id := new.sender_user_id;
+    select t.ticket_number,t.user_id into v_ticket_number,v_owner_id
+      from public.support_tickets t where t.id = v_ticket_id;
+    if exists(select 1 from public.platform_admins a where a.user_id = v_sender_id) then
+      v_title := 'رد جديد من دعم My Car على التذكرة #' || v_ticket_number::text;
+      v_body := 'أضاف فريق الدعم ردًا جديدًا على تذكرتك.';
+      v_url := '/support?ticket=' || v_ticket_id::text;
+      insert into public.platform_notifications(user_id,title,body,notification_type,action_url,created_by)
+      values(v_owner_id,v_title,v_body,'message',v_url,v_sender_id);
+    else
+      v_title := 'رد جديد على تذكرة الدعم #' || v_ticket_number::text;
+      v_body := 'أضاف صاحب التذكرة ردًا جديدًا يحتاج إلى المتابعة.';
+      v_url := '/workspace/admin/support?ticket=' || v_ticket_id::text;
+      insert into public.platform_notifications(user_id,title,body,notification_type,action_url,created_by)
+        select a.user_id,v_title,v_body,'message',v_url,v_sender_id
+        from public.platform_admins a
+        where a.user_id <> v_sender_id;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.support_notify_ticket_activity() from public, anon, authenticated;
+
+drop trigger if exists support_notify_new_ticket on public.support_tickets;
+create trigger support_notify_new_ticket
+after insert on public.support_tickets
+for each row execute function public.support_notify_ticket_activity();
+
+drop trigger if exists support_notify_ticket_message on public.support_ticket_messages;
+create trigger support_notify_ticket_message
+after insert on public.support_ticket_messages
+for each row execute function public.support_notify_ticket_activity();
