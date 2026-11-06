@@ -115,7 +115,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         company_type: isCompany ? values.companyType : null,
         fleet_vehicle_count: role === 'fleet_supplier' && fleetVehicleCount !== '' ? Number(fleetVehicleCount) : null,
         onboarding_version: 2,
-        legal_acceptance: { terms_version: '2026-10-25', privacy_version: '2026-10-25', accepted_at: new Date().toISOString() }
+        legal_acceptance: { terms_version: '2026-11-06', privacy_version: '2026-11-06', accepted_at: new Date().toISOString() }
       }
       const { data, error: signUpError } = await supabase.auth.signUp({ email, password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       if (signUpError) throw signUpError
