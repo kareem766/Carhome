@@ -114,7 +114,7 @@ async function fetchGeminiWithRetry(url: string, init: RequestInit, maxAttempts 
     try {
       response = await fetch(url, {
         ...init,
-        signal: AbortSignal.timeout(25000),
+        signal: AbortSignal.timeout(12000),
       });
     } catch (error) {
       if (attempt >= maxAttempts - 1) throw error;
@@ -216,7 +216,7 @@ Deno.serve(async (req: Request) => {
       const primaryModel = configuredModel === "gemini-2.5-flash"
         ? "gemini-3.8-flash"
         : (configuredModel ?? "gemini-3.8-flash");
-      const configuredFallback = Deno.env.get("GEMINI_FALLBACK_MODEL") ?? "gemini-3.7-flash";
+      const configuredFallback = Deno.env.get("GEMINI_FALLBACK_MODEL") ?? "gemini-3.6-flash";
       const fallbackModel = configuredFallback === primaryModel ? "gemini-3.6-flash" : configuredFallback;
       const requestInit: RequestInit = {
         method: "POST",
@@ -229,10 +229,37 @@ Deno.serve(async (req: Request) => {
           generationConfig: { temperature: 0.35, maxOutputTokens: 1200 },
         }),
       };
-      let response = await fetchGeminiWithRetry(
-        `https://generativelanguage.googleapis.com/v1beta/models/${primaryModel}:generateContent`,
-        requestInit,
-      );
+      let response: Response;
+      try {
+        response = await fetchGeminiWithRetry(
+          \`https://generativelanguage.googleapis.com/v1beta/models/\${primaryModel}:generateContent\`,
+          requestInit,
+          2,
+        );
+      } catch (error) {
+        console.warn("Primary Gemini model timed out or failed; trying stable fallback", {
+          primary_model: primaryModel,
+          fallback_model: fallbackModel,
+          error: String(error),
+        });
+        try {
+          response = await fetchGeminiWithRetry(
+            \`https://generativelanguage.googleapis.com/v1beta/models/\${fallbackModel}:generateContent\`,
+            requestInit,
+            1,
+          );
+        } catch (fallbackError) {
+          console.error("Gemini primary and fallback attempts failed", {
+            primary_model: primaryModel,
+            fallback_model: fallbackModel,
+            error: String(fallbackError),
+          });
+          return json(
+            { error: "خدمة المساعد غير مستقرة حاليًا. حاول مرة أخرى بعد لحظات." },
+            503,
+          );
+        }
+      }
       if (!response.ok && retryableGeminiStatuses.has(response.status)) {
         console.warn("Primary Gemini model unavailable; trying stable fallback", {
           primary_model: primaryModel,
@@ -240,11 +267,19 @@ Deno.serve(async (req: Request) => {
           status: response.status,
         });
         await response.body?.cancel();
-        response = await fetchGeminiWithRetry(
-          `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent`,
-          requestInit,
-          1,
-        );
+        try {
+          response = await fetchGeminiWithRetry(
+            \`https://generativelanguage.googleapis.com/v1beta/models/\${fallbackModel}:generateContent\`,
+            requestInit,
+            1,
+          );
+        } catch (fallbackError) {
+          console.error("Gemini fallback request failed", String(fallbackError));
+          return json(
+            { error: "خدمة المساعد غير مستقرة حاليًا. حاول مرة أخرى بعد لحظات." },
+            503,
+          );
+        }
       }
       if (!response.ok) {
         const detail = await response.text();
