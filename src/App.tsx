@@ -37,6 +37,7 @@ const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 const GoogleProfileCompletionPage = lazy(() => import('./components/GoogleProfileCompletionPage'))
 const ResetPasswordPage = lazy(() => import('./components/ResetPasswordPage'))
+const NotificationPreferencesPage = lazy(() => import('./components/NotificationPreferencesPage'))
 import { supabase } from './lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
@@ -275,6 +276,7 @@ export default function App() {
   if (path === '/reset-password') return <Suspense fallback={<PlatformLoading />}><ResetPasswordPage /></Suspense>
   if (path === '/auth/callback') return <Suspense fallback={<PlatformLoading />}><AuthCallbackPage /></Suspense>
   if (path === '/complete-profile') return <Suspense fallback={<PlatformLoading />}><GoogleProfileCompletionPage /></Suspense>
+  if (path === '/workspace/notifications') return authUser ? <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإعداد الإشعارات" message="يمكنك التحكم في قنوات الإشعارات بعد تسجيل الدخول." />
   if (path === '/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لمركز الدعم" message="مركز الدعم الفني متاح للمستخدمين المسجلين لمتابعة تذاكرهم والردود." />
   if (path === '/workspace/admin/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage admin /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الدعم" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
   if (path === '/workspace/employee/messages' || path === '/workspace/provider/employee-messages') return <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
