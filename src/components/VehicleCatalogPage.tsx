@@ -255,6 +255,7 @@ export default function VehicleCatalogPage() {
   async function requestPromotion() {
     // All advertising requests must use the dedicated payment-confirmation flow.
     // This prevents creating a promotion without transfer method/reference/date.
+    setSubmittingPromotion(true)
     window.location.href = '/workspace/advertising-plans'
   }
 
