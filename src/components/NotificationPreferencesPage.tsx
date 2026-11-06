@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react'
 import { Bell, Mail, Smartphone, Save, ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
+function withTimeout<T>(task: Promise<T>, message: string, ms = 15000): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error(message)), ms)
+    task.then(
+      value => { window.clearTimeout(timer); resolve(value) },
+      error => { window.clearTimeout(timer); reject(error) }
+    )
+  })
+}
+
 const toggleClass = 'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300'
 
 function urlBase64ToUint8Array(value: string) {
@@ -26,29 +36,77 @@ export default function NotificationPreferencesPage() {
   useEffect(() => {
     let active = true
     async function load() {
-      if (!supabase) { setError('الخدمة غير متاحة حاليًا.'); setLoading(false); return }
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { window.location.replace('/?login=1'); return }
-      const { data, error: loadError } = await supabase.from('platform_notification_preferences')
-        .select('push_enabled,email_enabled,marketing_enabled').eq('user_id', user.id).maybeSingle()
-      if (!active) return
-      if (loadError) setError('تعذر تحميل إعدادات الإشعارات. يرجى المحاولة لاحقًا.')
-      else if (data) {
-        setPush(data.push_enabled)
-        setEmail(data.email_enabled)
-        setMarketing(data.marketing_enabled)
-      } else {
-        const { error: insertError } = await supabase.from('platform_notification_preferences').upsert({
-          user_id: user.id, push_enabled: true, email_enabled: true, marketing_enabled: true
-        }, { onConflict: 'user_id' })
-        if (insertError) setError('تعذر تهيئة إعدادات الإشعارات.')
+      if (!supabase) {
+        setError('الخدمة غير متاحة حاليًا. يرجى المحاولة لاحقًا.')
+        setLoading(false)
+        return
       }
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.getRegistration('/push/')
-        if (active && registration) setPushSubscribed(Boolean(await registration.pushManager.getSubscription()))
+
+      try {
+        const authResult = await withTimeout(
+          (async () => await supabase.auth.getUser())(),
+          'استغرق التحقق من تسجيل الدخول وقتًا أطول من المعتاد. حدّث الصفحة وحاول مرة أخرى.'
+        )
+        if (!active) return
+        const user = authResult.data.user
+        if (!user) {
+          setError('انتهت جلسة الدخول. سجّل الدخول مرة أخرى لعرض إعدادات الإشعارات.')
+          window.location.replace('/?login=1')
+          return
+        }
+
+        const result = await withTimeout(
+          (async () => await supabase.from('platform_notification_preferences')
+            .select('push_enabled,email_enabled,marketing_enabled')
+            .eq('user_id', user.id).maybeSingle())(),
+          'تعذر الاتصال بإعدادات الإشعارات. تحقق من اتصال الإنترنت وحاول مرة أخرى.'
+        )
+        if (!active) return
+        if (result.error) throw result.error
+
+        if (result.data) {
+          setPush(result.data.push_enabled)
+          setEmail(result.data.email_enabled)
+          setMarketing(result.data.marketing_enabled)
+        } else {
+          const { error: insertError } = await withTimeout(
+            (async () => await supabase.from('platform_notification_preferences').upsert({
+              user_id: user.id, push_enabled: true, email_enabled: true, marketing_enabled: true
+            }, { onConflict: 'user_id' }))(),
+            'تعذر تهيئة إعدادات الإشعارات. حاول مرة أخرى.'
+          )
+          if (insertError) throw insertError
+        }
+
+        try {
+          if ('serviceWorker' in navigator) {
+            const registration = await withTimeout(
+              navigator.serviceWorker.getRegistration('/push/'),
+              'تعذر فحص تسجيل إشعارات هذا الجهاز.',
+              8000
+            )
+            if (active && registration) {
+              const subscription = await withTimeout(
+                registration.pushManager.getSubscription(),
+                'تعذر فحص اشتراك إشعارات هذا الجهاز.',
+                8000
+              )
+              if (active) setPushSubscribed(Boolean(subscription))
+            }
+          }
+        } catch {
+          // Device subscription status is secondary; preferences should remain usable.
+          if (active) setPushSubscribed(false)
+        }
+      } catch (err) {
+        if (active) setError(err instanceof Error
+          ? err.message
+          : 'حدث خطأ أثناء تحميل إعدادات الإشعارات. حاول مرة أخرى.')
+      } finally {
+        if (active) setLoading(false)
       }
-      if (active) setLoading(false)
     }
+
     void load()
     return () => { active = false }
   }, [])
