@@ -72,7 +72,7 @@ export default function EmployeeRegistrationPage() {
 
     setBusy(true)
     try{
-      const {data,error:signupError}=await supabase.auth.signUp({email:cleanEmail,password,options:{emailRedirectTo:`${window.location.origin}/auth/callback`,data:{display_name:cleanName,organization_type:'employee',employment_type:'independent',phone:phoneDigits,email_contact:cleanEmail,legal_acceptance:{terms_version:'2026-10-25',privacy_version:'2026-10-25',accepted_at:new Date().toISOString()}}}})
+      const {data,error:signupError}=await supabase.auth.signUp({email:cleanEmail,password,options:{emailRedirectTo:`${window.location.origin}/auth/callback`,data:{display_name:cleanName,organization_type:'employee',employment_type:'independent',phone:phoneDigits,email_contact:cleanEmail,legal_acceptance:{terms_version:'2026-11-06',privacy_version:'2026-11-06',accepted_at:new Date().toISOString()}}}})
       if(signupError)throw signupError
       if(data.user?.identities?.length===0)throw new Error('هذا البريد مسجل بالفعل. سجّل الدخول أو استخدم استعادة كلمة المرور.')
       if(data.session){window.location.replace('/auth/callback');return}
