@@ -120,7 +120,7 @@ create or replace function public.admin_broadcast_notifications_with_category(
 returns integer
 language plpgsql
 set search_path = ''
-as $
+as $$
 declare
   v_count integer := 0;
 begin
