@@ -7,7 +7,7 @@ const toggleClass = 'relative inline-flex h-7 w-12 shrink-0 items-center rounded
 export default function NotificationPreferencesPage() {
   const [push, setPush] = useState(true)
   const [email, setEmail] = useState(true)
-  const [marketing, setMarketing] = useState(false)
+  const [marketing, setMarketing] = useState(true)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -24,7 +24,7 @@ export default function NotificationPreferencesPage() {
       if (loadError) setError('تعذر تحميل إعدادات الإشعارات. يرجى المحاولة لاحقًا.')
       else if (data) { setPush(data.push_enabled); setEmail(data.email_enabled); setMarketing(data.marketing_enabled) }
       else {
-        const { error: insertError } = await supabase.from('platform_notification_preferences').upsert({ user_id: user.id, push_enabled: true, email_enabled: true, marketing_enabled: false }, { onConflict: 'user_id' })
+        const { error: insertError } = await supabase.from('platform_notification_preferences').upsert({ user_id: user.id, push_enabled: true, email_enabled: true, marketing_enabled: true }, { onConflict: 'user_id' })
         if (insertError) setError('تعذر تهيئة إعدادات الإشعارات.')
       }
       setLoading(false)
