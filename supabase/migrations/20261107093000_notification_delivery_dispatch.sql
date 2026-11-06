@@ -16,6 +16,7 @@ alter table public.platform_notifications
     'system'::text,
     'managed_sourcing_request'::text,
     'managed_sourcing_update'::text,
+    'admin_broadcast'::text,
     'marketing'::text
   ]));
 
@@ -118,8 +119,8 @@ create or replace function public.admin_broadcast_notifications_with_category(
 )
 returns integer
 language plpgsql
-set search_path = public, pg_temp
-as $$
+set search_path = ''
+as $
 declare
   v_count integer := 0;
 begin
