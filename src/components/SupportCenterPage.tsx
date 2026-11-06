@@ -65,7 +65,8 @@ export default function SupportCenterPage({ admin = false }: Props) {
     if (result.error) throw result.error
     const rows = (result.data || []) as TicketRow[]
     setTickets(rows)
-    setSelectedId(current => rows.some(t => t.id === current) ? current : rows[0]?.id || '')
+    const requestedTicket = new URLSearchParams(window.location.search).get('ticket')
+    setSelectedId(current => requestedTicket && rows.some(t => t.id === requestedTicket) ? requestedTicket : rows.some(t => t.id === current) ? current : rows[0]?.id || '')
   }, [admin])
 
   const loadMessages = useCallback(async (ticketId: string) => {
