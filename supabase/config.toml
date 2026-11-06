@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "mycar-ai-assistant": {
+      "verify_jwt": true
+    }
+  }
+}

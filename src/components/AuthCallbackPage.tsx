@@ -149,6 +149,23 @@ export default function AuthCallbackPage() {
           window.location.replace('/first-login-password')
           return
         }
+        // New Google identities must complete role-specific onboarding before any workspace is created.
+        if (data.session.user.app_metadata?.provider === 'google') {
+          const existingMembership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', data.session.user.id).limit(1).maybeSingle()
+          if (existingMembership.error) throw existingMembership.error
+          const metadata = data.session.user.user_metadata ?? {}
+          const pendingRole = sessionStorage.getItem('mycar_google_pending_role')
+          const allowedRoles = ['individual_owner', 'company', 'fleet_supplier', 'employee']
+          // Employee accounts are independent profiles and can be linked to a company later.
+          // The employee onboarding form does not create an organization workspace.
+          if (!existingMembership.data && Number(metadata.onboarding_version || 0) < 2) {
+            if (pendingRole && allowedRoles.includes(pendingRole)) {
+              window.location.replace('/complete-profile?role=' + encodeURIComponent(pendingRole))
+              return
+            }
+            throw new Error('اختر نوع الحساب من صفحة التسجيل قبل المتابعة باستخدام Google.')
+          }
+        }
         const invitationId = params.get('invitation')
         if (invitationId) {
           const { error: acceptError } = await supabase.rpc('company_accept_invitation', { p_invitation_id: invitationId })

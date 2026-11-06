@@ -21,6 +21,25 @@ export default function EmployeeRegistrationPage() {
   const [sent,setSent]=useState(false)
   const [showPassword,setShowPassword]=useState(false)
 
+  async function continueWithGoogle(){
+    setError('')
+    if(!accepted){setError('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية أولًا.');return}
+    if(!supabase){setError('خدمة الحسابات غير متاحة حاليًا.');return}
+    setBusy(true)
+    try{
+      sessionStorage.setItem('mycar_google_pending_role','employee')
+      const {error:oauthError}=await supabase.auth.signInWithOAuth({
+        provider:'google',
+        options:{redirectTo:`${window.location.origin}/auth/callback`,queryParams:{prompt:'select_account'}}
+      })
+      if(oauthError)throw oauthError
+    }catch(err){
+      sessionStorage.removeItem('mycar_google_pending_role')
+      setError(err instanceof Error?err.message:'تعذر بدء التسجيل باستخدام Google.')
+      setBusy(false)
+    }
+  }
+
   async function submit(e:FormEvent){
     e.preventDefault()
     setError('')
@@ -90,7 +109,14 @@ export default function EmployeeRegistrationPage() {
         <div className="rounded-xl bg-blue-50 p-4 text-sm leading-7 text-blue-950 sm:col-span-2"><ShieldCheck size={18} className="mb-1"/> حساب الموظف المستقل لا يحتاج إلى ربط بشركة. ويمكن ربط حساب موظف بالشركة من خلال إدارة فريق الشركة وصلاحياتها.</div>
         <label className="flex items-start gap-3 text-sm leading-6 sm:col-span-2"><input type="checkbox" required checked={accepted} onChange={e=>setAccepted(e.target.checked)} className="mt-1 h-5 w-5"/><span>أوافق على <a href="/terms" target="_blank" rel="noreferrer" className="font-bold text-blue-700 underline">شروط الاستخدام</a> و<a href="/privacy" target="_blank" rel="noreferrer" className="font-bold text-blue-700 underline">سياسة الخصوصية</a>. <span className="text-red-600">*</span></span></label>
         {error&&<p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700 sm:col-span-2">{error}</p>}
-        <button disabled={busy} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 font-black text-white disabled:opacity-50 sm:col-span-2">{busy?'جارٍ إنشاء الحساب...':'إنشاء حساب الموظف'}<ArrowRight size={18}/></button>
+        <button type="button" onClick={continueWithGoogle} disabled={busy||!accepted} className="group relative inline-flex min-h-[54px] w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-800 shadow-[0_8px_24px_-16px_rgba(15,23,42,.45)] transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_14px_30px_-16px_rgba(37,99,235,.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50 sm:col-span-2">
+          <span className="absolute inset-y-0 right-0 w-1 bg-gradient-to-b from-blue-500 via-sky-400 to-amber-400"/>
+          <svg aria-hidden="true" viewBox="0 0 48 48" className="h-5 w-5 shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.25 5.48-4.72 7.18l7.62 5.91c4.45-4.11 7.14-10.16 7.14-17.56Z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19Z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.89l-7.62-5.91c-2.12 1.43-4.84 2.28-8.28 2.28-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"/></svg>
+          <span>{busy?'جارٍ الاتصال بـ Google...':'المتابعة باستخدام Google'}</span>
+          <span className="text-xs font-medium text-slate-400">آمن وسريع</span>
+        </button>
+        <div className="flex items-center gap-3 text-xs font-bold text-slate-400 sm:col-span-2"><span className="h-px flex-1 bg-slate-200"/><span>أو بالبريد الإلكتروني</span><span className="h-px flex-1 bg-slate-200"/></div>
+        <button disabled={busy} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 font-black text-white shadow-lg shadow-blue-900/10 transition hover:bg-blue-800 disabled:opacity-50 sm:col-span-2">{busy?'جارٍ إنشاء الحساب...':'إنشاء حساب الموظف'}<ArrowRight size={18}/></button>
         <a href="/register" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-600 sm:col-span-2"><ArrowRight size={17}/> الرجوع لاختيار نوع الحساب</a>
       </form>
     </section>

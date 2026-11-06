@@ -50,6 +50,25 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     setLogoPreview(URL.createObjectURL(file))
   }
 
+  async function continueWithGoogle() {
+    setError('')
+    if (!acceptedLegal) { setError('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية أولًا.'); return }
+    if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
+    setBusy(true)
+    try {
+      sessionStorage.setItem('mycar_google_pending_role', role)
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: { prompt: 'select_account' } }
+      })
+      if (oauthError) throw oauthError
+    } catch (caught) {
+      sessionStorage.removeItem('mycar_google_pending_role')
+      setError(caught instanceof Error ? caught.message : 'تعذر بدء التسجيل باستخدام Google.')
+      setBusy(false)
+    }
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
@@ -183,6 +202,13 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
           {isOwner && <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950"><p className="font-extrabold">رسوم تسجيل السيارة</p><p>300 جنيه لكل سيارة شهريًا، ويُستكمل التسجيل بعد تحويل المبلغ ومراجعة الإدارة لبيانات السيارة. لن تُعرض السيارة كسيارة مسجلة أو معتمدة قبل الموافقة.</p><p className="mt-1 text-xs">هذه الخطوة لا تحصّل أي مبلغ تلقائيًا؛ تعليمات الدفع ومراجعة الإدارة تُستكمل في مرحلة تسجيل السيارة.</p></div>}
           {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm leading-6 text-red-700">{error}</p>}
           {notice && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">{notice}</p>}
+          <button type="button" onClick={continueWithGoogle} disabled={busy || !acceptedLegal} className="group relative inline-flex min-h-[54px] w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-800 shadow-[0_8px_24px_-16px_rgba(15,23,42,.45)] transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_14px_30px_-16px_rgba(37,99,235,.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60">
+            <span className="absolute inset-y-0 right-0 w-1 bg-gradient-to-b from-blue-500 via-sky-400 to-amber-400"/>
+            <svg aria-hidden="true" viewBox="0 0 48 48" className="h-5 w-5 shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.25 5.48-4.72 7.18l7.62 5.91c4.45-4.11 7.14-10.16 7.14-17.56Z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19Z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.89l-7.62-5.91c-2.12 1.43-4.84 2.28-8.28 2.28-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"/></svg>
+            <span>{busy ? 'جارٍ الاتصال بـ Google...' : 'المتابعة باستخدام Google'}</span>
+            <span className="text-xs font-medium text-slate-400">آمن وسريع</span>
+          </button>
+          <div className="flex items-center gap-3 text-xs font-bold text-slate-400"><span className="h-px flex-1 bg-slate-200"/><span>أو بالبريد الإلكتروني</span><span className="h-px flex-1 bg-slate-200"/></div>
           <button type="submit" disabled={busy || !acceptedLegal} className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-blue-800 to-blue-600 px-5 font-extrabold text-white shadow-[0_12px_25px_-12px_rgba(29,78,216,0.8)] transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-60">{busy ? 'جارٍ إنشاء الحساب...' : 'إنشاء الحساب والمتابعة'} <ArrowRight size={18}/></button>
           <p className="text-center text-xs leading-6 text-slate-400">الحقول المطلوبة موضحة بعلامة (*). لا يتم تحصيل رسوم من خلال هذه الصفحة.</p>
         </form>
