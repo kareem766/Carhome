@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "My Car عربيتي",
+  "short_name": "My Car",
+  "description": "منصة My Car عربيتي لخدمات السيارات والشركات والأساطيل في مصر",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#142D4E",
+  "theme_color": "#142D4E",
+  "icons": [
+    {
+      "src": "/carhome-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
