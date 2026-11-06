@@ -23,7 +23,7 @@ export default function PlatformEntryBanner() {
    if(!selected)return
    try{sessionStorage.setItem('mycar-banner-seen-'+selected.id,'1')}catch{}
    setBanner(selected);setVisible(true)
-   const duration=Math.max(1,Math.min(30,selected.duration_seconds||30))
+   const duration=10
    window.setTimeout(()=>{if(active)setVisible(false)},duration*1000)
   }
   void load()
@@ -31,10 +31,10 @@ export default function PlatformEntryBanner() {
  },[])
  if(!visible||!banner)return null
  return <div dir="rtl" className="fixed inset-0 z-[300] grid place-items-center bg-slate-950/65 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="mycar-entry-banner-title">
-  <section className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-sky-200 bg-white shadow-2xl">
+  <section className="relative w-full max-w-2xl overflow-hidden mc-entry-banner-frame relative rounded-3xl border-2 border-sky-400 bg-white shadow-2xl">
    <button type="button" onClick={()=>setVisible(false)} aria-label="إغلاق الإعلان" className="absolute left-3 top-3 z-10 grid h-10 w-10 place-items-center rounded-full bg-slate-950/75 text-white hover:bg-slate-950"><X size={20}/></button>
    {banner.image_url&&<img src={banner.image_url} alt="" className="max-h-72 w-full object-cover"/>}
-   <div className="p-6 sm:p-8"><span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-800"><Megaphone size={14}/> إعلان من My Car</span><h2 id="mycar-entry-banner-title" className="mt-4 text-2xl font-black text-slate-950">{banner.title}</h2><p className="mt-3 whitespace-pre-line text-sm leading-8 text-slate-600">{banner.body}</p>{banner.button_label&&banner.button_url&&<a href={banner.button_url} onClick={()=>setVisible(false)} className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 font-black text-white hover:bg-blue-800">{banner.button_label}<ExternalLink size={16}/></a>}<p className="mt-4 text-[11px] text-slate-400">سيُغلق الإعلان تلقائيًا بعد 30 ثانية.</p></div>
+   <div className="p-6 sm:p-8"><span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-800"><Megaphone size={14}/> إعلان من My Car</span><h2 id="mycar-entry-banner-title" className="mt-4 text-2xl font-black text-slate-950">{banner.title}</h2><p className="mt-3 whitespace-pre-line text-sm leading-8 text-slate-600">{banner.body}</p>{banner.button_label&&banner.button_url&&<a href={banner.button_url} onClick={()=>setVisible(false)} className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 font-black text-white hover:bg-blue-800">{banner.button_label}<ExternalLink size={16}/></a>}<p className="mt-4 text-[11px] text-slate-400">سيُغلق الإعلان تلقائيًا بعد 10 ثوانٍ.</p></div>
   </section>
  </div>
 }
