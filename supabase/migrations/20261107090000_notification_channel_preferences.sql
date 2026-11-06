@@ -97,7 +97,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   insert into public.platform_notification_preferences (user_id, push_enabled, email_enabled, marketing_enabled)
   values (new.id, true, true, true)
