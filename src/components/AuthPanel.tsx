@@ -115,7 +115,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     })
     const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession)
-      if (event === 'PASSWORD_RECOVERY') { setSettingNewPassword(true); setForgotPassword(false); setNotice('أدخل كلمة المرور الجديدة لحسابك.'); setError('') }
+      if (event === 'PASSWORD_RECOVERY') { setSettingNewPassword(true); setForgotPassword(false); setNotice('أدخل كلمة السر الجديدة لحسابك.'); setError('') }
     })
     return () => listener.subscription.unsubscribe()
   }, [])
@@ -126,14 +126,14 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     setNotice('')
     if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
     const normalizedEmail = normalizeEmailAddress(email)
-    if (!isValidEmailAddress(normalizedEmail)) { setError('اكتب البريد الإلكتروني الصحيح لاستعادة كلمة المرور.'); return }
+    if (!isValidEmailAddress(normalizedEmail)) { setError('اكتب الإيميل الصحيح لاستعادة كلمة السر.'); return }
     setLoading(true)
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo: `${window.location.origin}/auth/callback?flow=password-reset` })
       if (resetError) throw resetError
-      setNotice('إذا كان البريد مسجلًا، ستصلك رسالة تحتوي على رابط آمن لإعادة تعيين كلمة المرور.')
+      setNotice('إذا كان البريد مسجلًا، ستصلك رسالة تحتوي على رابط آمن لإعادة تعيين كلمة السر.')
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'تعذر إرسال رابط استعادة كلمة المرور.')
+      setError(caught instanceof Error ? caught.message : 'تعذر إرسال رابط استعادة كلمة السر.')
     } finally { setLoading(false) }
   }
 
@@ -141,19 +141,19 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
     event.preventDefault()
     setError(''); setNotice('')
     if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
-    if (!isStrongPassword(password)) { setError('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وحرف صغير ورقم ورمز خاص.'); return }
+    if (!isStrongPassword(password)) { setError('كلمة السر يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وحرف صغير ورقم ورمز خاص.'); return }
     setLoading(true)
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) throw updateError
       setSettingNewPassword(false); setForgotPassword(false); setPassword('')
-      setNotice('تم تغيير كلمة المرور بنجاح. جارٍ توجيهك إلى مساحة عملك...')
+      setNotice('تم تغيير كلمة السر بنجاح. جارٍ توجيهك إلى مساحة عملك...')
       // Keep the recovery session alive and reuse the shared account setup/router.
       // This sends the user to the correct role workspace (or admin console) without another login.
       window.location.replace('/auth/callback?flow=password-reset')
       return
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'تعذر تغيير كلمة المرور. اطلب رابط استعادة جديدًا.')
+      setError(caught instanceof Error ? caught.message : 'تعذر تغيير كلمة السر. اطلب رابط استعادة جديدًا.')
     } finally { setLoading(false) }
   }
 
@@ -165,7 +165,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
       setError('الاتصال بخدمة الحسابات غير مضبوط بعد. راجع إعدادات Supabase في Vercel.')
       return
     }
-    if (mode === 'signup' && !isStrongPassword(password)) { setError('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وحرف صغير ورقم ورمز خاص.'); return }
+    if (mode === 'signup' && !isStrongPassword(password)) { setError('كلمة السر يجب أن تحتوي على 8 أحرف على الأقل، وحرف كبير وحرف صغير ورقم ورمز خاص.'); return }
     setLoading(true)
     try {
       if (mode === 'signup') {
@@ -193,14 +193,14 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           const msg = signUpError.message.toLowerCase()
           if (/already registered|user already exists|already been registered|email exists|duplicate/i.test(msg)) {
             setMode('signin')
-            throw new Error('هذا البريد الإلكتروني لديه حساب بالفعل في قاعدة بيانات My Car. برجاء تسجيل الدخول أو استخدام «نسيت كلمة السر».')
+            throw new Error('هذا الإيميل لديه حساب بالفعل في قاعدة بيانات My Car. برجاء تسجيل الدخول أو استخدام «نسيت كلمة السر».')
           }
           throw signUpError
         }
         // Supabase may return a user without an error for an existing address when confirmations are enabled.
         if (data.user && !data.session && data.user.identities?.length === 0) {
           setMode('signin')
-          throw new Error('هذا البريد الإلكتروني لديه حساب بالفعل في قاعدة بيانات My Car. برجاء تسجيل الدخول أو استخدام «نسيت كلمة السر».')
+          throw new Error('هذا الإيميل لديه حساب بالفعل في قاعدة بيانات My Car. برجاء تسجيل الدخول أو استخدام «نسيت كلمة السر».')
         }
         if (data.session && data.user) {
           if (!invitationId) await prepareAccount(data.user, name)
@@ -208,7 +208,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           window.location.replace(`/auth/callback${invitationId ? `?invitation=${encodeURIComponent(invitationId)}` : ''}`)
           return
         } else {
-          setNotice('تم إرسال طلب التسجيل. افتح رسالة تأكيد البريد الإلكتروني، ثم ارجع وسجّل الدخول لإكمال إعداد الحساب.')
+          setNotice('تم إرسال طلب التسجيل. افتح رسالة تأكيد الإيميل، ثم ارجع وسجّل الدخول لإكمال إعداد الحساب.')
           setMode('signin')
         }
       } else {
@@ -228,7 +228,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
       }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع. حاول مرة أخرى.'
-      setError(message.includes('Invalid login credentials') ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : message)
+      setError(message.includes('Invalid login credentials') ? 'الإيميل أو كلمة السر غير صحيحة.' : message)
     } finally {
       setLoading(false)
     }
@@ -278,7 +278,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           <div>
             <div className="mb-2"><PlatformBrand /></div>
             <h2 id="auth-title" className="mt-1 text-2xl font-extrabold text-navy">
-              {settingNewPassword ? 'تعيين كلمة مرور جديدة' : forgotPassword ? 'استعادة كلمة المرور' : session ? 'حسابك' : mode === 'signup' ? 'أنشئ حسابك' : 'أهلًا بعودتك'}
+              {settingNewPassword ? 'تعيين كلمة مرور جديدة' : forgotPassword ? 'استعادة كلمة السر' : session ? 'حسابك' : mode === 'signup' ? 'أنشئ حسابك' : 'أهلًا بعودتك'}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">
               {settingNewPassword ? 'اختر كلمة مرور جديدة وآمنة لحسابك.' : forgotPassword ? 'استعد الوصول إلى حسابك بسهولة.' : session ? 'تم تسجيل الدخول. سنضيف وظائف لوحة التحكم في الخطوات التالية.' : 'حساب واحد لتبدأ رحلتك في تأجير السيارات للشركات.'}
@@ -294,13 +294,13 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           ) : settingNewPassword ? (
             <form onSubmit={handleSetNewPassword} className="space-y-4">
               <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور قوية تحتوي على 8 أحرف على الأقل وحروف وأرقام ورمزًا خاصًا.</p>
-              <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="8 أحرف على الأقل" dir="ltr" /></label>
-              <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة المرور الجديدة</button>
+              <label className="block text-sm font-bold text-slate-700">كلمة السر الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="8 أحرف على الأقل" dir="ltr" /></label>
+              <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة السر الجديدة</button>
             </form>
           ) : forgotPassword ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
-              <p className="text-sm leading-6 text-slate-600">اكتب بريدك الإلكتروني وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة المرور إذا كان الحساب مسجلًا.</p>
-              <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني<input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="name@example.com" dir="ltr" /></label>
+              <p className="text-sm leading-6 text-slate-600">اكتب الإيميل وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة السر إذا كان الحساب مسجلًا.</p>
+              <label className="block text-sm font-bold text-slate-700">الإيميل<input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="name@example.com" dir="ltr" /></label>
               <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}إرسال رابط الاستعادة</button>
               <button type="button" onClick={() => { setForgotPassword(false); setError(''); setNotice('') }} className="w-full py-2 text-sm font-bold text-blue-700">العودة لتسجيل الدخول</button>
             </form>
@@ -325,14 +325,14 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
               {settingNewPassword ? (
                 <form onSubmit={handleSetNewPassword} className="space-y-4">
                   <p className="text-sm leading-6 text-slate-600">أنشئ كلمة مرور جديدة تحتوي على 8 أحرف على الأقل وحروف وأرقام ورمز خاص.</p>
-                  <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="8 أحرف على الأقل" dir="ltr" /></label>
-                  <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة المرور الجديدة</button>
+                  <label className="block text-sm font-bold text-slate-700">كلمة السر الجديدة<input type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="8 أحرف على الأقل" dir="ltr" /></label>
+                  <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}حفظ كلمة السر الجديدة</button>
                 </form>
               ) : forgotPassword ? (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
-                  <p className="text-sm leading-6 text-slate-600">اكتب بريدك الإلكتروني وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة المرور إذا كان الحساب مسجلًا.</p>
-                  <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني
-                    <input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" />
+                  <p className="text-sm leading-6 text-slate-600">اكتب الإيميل وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة السر إذا كان الحساب مسجلًا.</p>
+                  <label className="block text-sm font-bold text-slate-700">الإيميل
+                    <input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="الإيميل" dir="ltr" />
                   </label>
                   <button type="submit" disabled={loading || !supabase} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}إرسال رابط الاستعادة</button>
                   <button type="button" onClick={() => { setForgotPassword(false); setError(''); setNotice('') }} className="w-full py-2 text-sm font-bold text-blue-700">العودة لتسجيل الدخول</button>
@@ -340,7 +340,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
               ) : <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === 'signup' && (
                   <>
-                    <label className="block text-sm font-bold text-slate-700">الاسم الكامل
+                    <label className="block text-sm font-bold text-slate-700">اسمك بالكامل
                       <input autoComplete="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="اكتب اسمك" />
                     </label>
                     {!invitationId && <fieldset>
@@ -354,22 +354,22 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
                         ))}
                       </div>
                     </fieldset>}
-                    {invitationId && <p className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-blue-900">أنت بصدد إنشاء حساب موظف للانضمام إلى الشركة التي أرسلت لك الدعوة. استخدم نفس البريد الإلكتروني الذي استلم الدعوة.</p>}
-                    {!invitationId && <label className="block text-sm font-bold text-slate-700">اسم المؤسسة أو النشاط
+                    {invitationId && <p className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-blue-900">أنت بصدد إنشاء حساب موظف للانضمام إلى الشركة التي أرسلت لك الدعوة. استخدم نفس الإيميل الذي استلم الدعوة.</p>}
+                    {!invitationId && <label className="block text-sm font-bold text-slate-700">اسم الشركة أو المكتب
                       <input required value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder={accountType === 'company' ? 'اسم الشركة' : accountType === 'fleet_supplier' ? 'اسم المورد أو الشركة' : 'اسمك أو اسم النشاط (يمكن أن يكون اسمك)'} />
                     </label>}
                   </>
                 )}
-                <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني
-                  <input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="البريد الإلكتروني" dir="ltr" />
+                <label className="block text-sm font-bold text-slate-700">الإيميل
+                  <input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 px-4 font-normal outline-none focus:border-carblue" placeholder="الإيميل" dir="ltr" />
                 </label>
-                <label className="block text-sm font-bold text-slate-700">كلمة المرور
+                <label className="block text-sm font-bold text-slate-700">كلمة السر
                   <span className="relative mt-2 block">
                     <input type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={mode === 'signup' ? 8 : undefined} required value={password} onChange={(e) => setPassword(e.target.value)} className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pl-12 font-normal outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100" placeholder="8 أحرف على الأقل" dir="ltr" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="absolute left-3 top-3 rounded-md p-1 text-slate-400">{showPassword ? <EyeOff size={19} /> : <Eye size={19} />}</button>
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'إخفاء كلمة السر' : 'إظهار كلمة السر'} className="absolute left-3 top-3 rounded-md p-1 text-slate-400">{showPassword ? <EyeOff size={19} /> : <Eye size={19} />}</button>
                   </span>
                 </label>
-                {mode === 'signin' && <div className="text-left"><button type="button" onClick={() => { setForgotPassword(true); setError(''); setNotice('') }} className="inline-flex rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-extrabold text-blue-800 hover:bg-blue-100">نسيت كلمة المرور؟</button></div>}
+                {mode === 'signin' && <div className="text-left"><button type="button" onClick={() => { setForgotPassword(true); setError(''); setNotice('') }} className="inline-flex rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-extrabold text-blue-800 hover:bg-blue-100">نسيت كلمة السر؟</button></div>}
                 {mode === 'signup' && <label className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm leading-6 text-slate-700"><input type="checkbox" required checked={acceptedLegal} onChange={(event) => setAcceptedLegal(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-blue-700"/><span>أوافق على <a href="/terms" target="_blank" rel="noreferrer" className="font-extrabold text-blue-700 underline">شروط الاستخدام</a> و<a href="/privacy" target="_blank" rel="noreferrer" className="font-extrabold text-blue-700 underline">سياسة الخصوصية</a>.</span></label>}
                 <button type="submit" disabled={loading || !supabase || (mode === 'signup' && !acceptedLegal)} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-carblue px-4 font-extrabold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                   {loading ? <LoaderCircle className="animate-spin" size={19} /> : <ShieldCheck size={19} />}

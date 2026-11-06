@@ -10,9 +10,9 @@ type FieldKey = 'fullName' | 'authorizedName' | 'companyName' | 'phone' | 'email
 const governorates = ['القاهرة','الجيزة','الإسكندرية','القليوبية','البحيرة','مطروح','المنوفية','الغربية','كفر الشيخ','الدقهلية','دمياط','الشرقية','بورسعيد','الإسماعيلية','السويس','شمال سيناء','جنوب سيناء','بني سويف','الفيوم','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد']
 const companyTypes = ['عقارات','بترول وطاقة','نقل ولوجستيات','تجارة وتوزيع','صناعة','مقاولات','خدمات','سياحة وفنادق','رعاية صحية','تقنية واتصالات','أخرى']
 const roleInfo: Record<Role, { title: string; intro: string; marketing: string; icon: typeof CarFront }> = {
-  individual_owner: { title: 'تسجيل مالك سيارة', intro: 'أدخل بياناتك الأساسية لإنشاء حسابك، ثم أضف سيارتك لتبدأ إجراءات المراجعة.', marketing: 'حوّل سيارتك إلى فرصة حقيقية؛ سجّل بياناتها واعرضها أمام الشركات الباحثة عن سيارات للتأجير طويل الأجل، وتابع الطلبات والعروض من حساب واحد.', icon: CarFront },
-  company: { title: 'تسجيل شركة', intro: 'أنشئ حساب شركتك لإدارة احتياجات التأجير ومراجعة السيارات والعروض المتاحة.', marketing: 'وفّر وقت فريقك في البحث عن السيارات؛ استكشف الكتالوج، أرسل طلباتك، قارن العروض، أو فوّض My Car عربيتي للبحث نيابةً عن شركتك.', icon: Building2 },
-  fleet_supplier: { title: 'تسجيل مورد أسطول', intro: 'أكمل بيانات المورد ثم أضف سيارات أسطولك وابدأ في استقبال طلبات الشركات.', marketing: 'وسّع فرص ظهور أسطولك أمام الشركات؛ اعرض سياراتك المعتمدة، واستقبل طلبات التأجير المناسبة، وأدر بيانات مركباتك من مساحة عمل واحدة.', icon: CarFront },
+  individual_owner: { title: 'تسجيل مالك سيارة', intro: 'سجّل بياناتك الأساسية، وبعدها أضف عربيتك عشان نراجعها.', marketing: 'حوّل سيارتك إلى فرصة حقيقية؛ سجّل بياناتها واعرضها أمام الشركات الباحثة عن سيارات للتأجير طويل الأجل، وتابع الطلبات والعروض من حساب واحد.', icon: CarFront },
+  company: { title: 'تسجيل شركة', intro: 'اعمل حساب لشركتك عشان تطلب عربيات للإيجار وتتابع العربيات والعروض المتاحة.', marketing: 'وفّر وقت فريقك في البحث عن السيارات؛ استكشف الكتالوج، أرسل طلباتك، قارن العروض، أو فوّض My Car عربيتي للبحث نيابةً عن شركتك.', icon: Building2 },
+  fleet_supplier: { title: 'تسجيل مورد أسطول', intro: 'سجّل بيانات مكتبك، وبعدها أضف عربيات الأسطول وابدأ استقبل طلبات الشركات.', marketing: 'وسّع فرص ظهور أسطولك أمام الشركات؛ اعرض سياراتك المعتمدة، واستقبل طلبات التأجير المناسبة، وأدر بيانات مركباتك من مساحة عمل واحدة.', icon: CarFront },
   employee: { title: 'تسجيل موظف', intro: 'أنشئ حسابك لطلب سيارة شهرية بسائق ومتابعة عروض الملاك وموردي الأساطيل.', marketing: 'اطلب سيارة شهرية بسائق بسهولة، واستقبل عروضًا متعددة وقارن بينها واختر الأنسب لاحتياجك وميزانيتك دون إضاعة وقتك في البحث.', icon: CarFront }
 }
 
@@ -85,9 +85,9 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         : role === 'fleet_supplier'
         ? [values.fullName, values.companyName, values.phone, values.email, values.governorate, values.address, fleetVehicleCount]
         : [values.fullName, values.phone, values.email, values.governorate, values.address]
-    if (requiredValues.some((value) => !value.trim())) { setError('من فضلك أكمل جميع الحقول المطلوبة قبل إنشاء الحساب. لا يمكن ترك أي حقل مطلوب فارغًا.'); return }
+    if (requiredValues.some((value) => !value.trim())) { setError('من فضلك كمّل البيانات المطلوبة قبل ما تنشئ الحساب.'); return }
     const email = normalizeEmailAddress(values.email)
-    if (!isValidEmailAddress(email)) { setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا.'); return }
+    if (!isValidEmailAddress(email)) { setError('من فضلك اكتب إيميل صحيح.'); return }
     const phone = values.phone.replace(/\D/g, '')
     const phoneRequired = true
     if ((phoneRequired || phone.length > 0) && !/^01[0-9]{9}$/.test(phone)) {
@@ -160,7 +160,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
 
   return <main dir="rtl" className="mc-registration-main min-h-screen bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.13),_transparent_38%),linear-gradient(180deg,#eff6ff_0%,#f8fafc_52%,#eef2ff_100%)] px-3 py-6 sm:px-6 sm:py-10">
     <div className="mx-auto max-w-4xl">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><button onClick={onBack} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white bg-white/90 px-4 py-2.5 text-sm font-extrabold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-800"><ArrowRight size={18}/> العودة لاختيار نوع الحساب</button><a href="/" className="inline-flex min-h-11 items-center rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-white/80 hover:text-blue-800">الرئيسية</a></div>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><button onClick={onBack} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white bg-white/90 px-4 py-2.5 text-sm font-extrabold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-800"><ArrowRight size={18}/> الرجوع لاختيار نوع الحساب</button><a href="/" className="inline-flex min-h-11 items-center rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-white/80 hover:text-blue-800">الرئيسية</a></div>
       <section className="overflow-hidden rounded-[2rem] border border-white/90 bg-white/95 shadow-[0_32px_90px_-38px_rgba(20,45,78,0.35)] ring-1 ring-blue-950/5 backdrop-blur-xl">
         <div className="relative overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_rgba(59,130,246,0.42),_transparent_45%),linear-gradient(125deg,#142D4E_0%,#173e70_58%,#0f2340_100%)] px-5 py-6 text-white sm:px-9 sm:py-9">
           <div aria-hidden="true" className="pointer-events-none absolute -left-10 -top-16 h-48 w-48 rounded-full border-[28px] border-white/5"></div>
@@ -173,16 +173,16 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         </div>
         <form onSubmit={submit} className="mc-registration-form space-y-6 p-4 sm:p-8 lg:p-9">
           <div className="grid gap-4 sm:grid-cols-2">
-            {isCompany ? <>{field('authorizedName','اسم المفوض',true)}{field('companyName','اسم الشركة',true)}</> : <>{field('fullName','الاسم بالكامل',true)}{role === 'fleet_supplier' && field('companyName','اسم المكتب / الشركة',true)}</>}
+            {isCompany ? <>{field('authorizedName','اسم الشخص المسؤول عن التواصل',true)}{field('companyName','اسم الشركة',true)}</> : <>{field('fullName','اسمك بالكامل',true)}{role === 'fleet_supplier' && field('companyName','اسم مكتبك / شركتك',true)}</>}
             {field('phone','رقم الموبايل',true,'tel','01xxxxxxxxx')}
-            {field('email','البريد الإلكتروني',true,'email','name@example.com')}
+            {field('email','الإيميل',true,'email','name@example.com')}
             {(isCompany || role === 'fleet_supplier') && <div className="sm:col-span-2"><label className="block text-sm font-bold text-slate-700">{role === 'fleet_supplier' ? 'لوجو المكتب / الشركة *' : 'لوجو الشركة *'}<input required type="file" accept="image/png,image/jpeg,image/webp" onChange={chooseLogo} className={fieldClass + ' file:ml-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:font-bold file:text-blue-700'} /></label><p className="mt-1 text-xs text-slate-500">PNG أو JPG أو WEBP، بحد أقصى 2 ميجابايت.</p>{logoPreview && <img src={logoPreview} alt="معاينة لوجو الشركة" className="mt-3 h-24 w-24 rounded-2xl border border-slate-200 bg-white object-contain p-2" />}</div>}
-            {role === 'fleet_supplier' && <label className="block text-sm font-bold text-slate-700">عدد سيارات المكتب / الشركة *<input className={fieldClass} type="number" required min="1" step="1" inputMode="numeric" value={fleetVehicleCount} onChange={(e) => setFleetVehicleCount(e.target.value)} placeholder="مثال: 15" /></label>}
-            {isCompany && <label className="block text-sm font-bold text-slate-700">نوع الشركة *<span className="relative block"><select required className={fieldClass} value={values.companyType} onChange={(e) => update('companyType',e.target.value)}><option value="">اختر نشاط الشركة</option>{companyTypes.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>}
-            <label className="block text-sm font-bold text-slate-700">المحافظة *<span className="relative block"><select required className={fieldClass} value={values.governorate} onChange={(e) => update('governorate',e.target.value)}><option value="">اختر المحافظة</option>{governorates.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>
-            {field('address',isCompany ? 'عنوان الشركة' : 'العنوان',true,'text','المركز / الشارع / رقم العقار')}
+            {role === 'fleet_supplier' && <label className="block text-sm font-bold text-slate-700">عدد العربيات عندك *<input className={fieldClass} type="number" required min="1" step="1" inputMode="numeric" value={fleetVehicleCount} onChange={(e) => setFleetVehicleCount(e.target.value)} placeholder="مثال: 15" /></label>}
+            {isCompany && <label className="block text-sm font-bold text-slate-700">مجال شغل الشركة *<span className="relative block"><select required className={fieldClass} value={values.companyType} onChange={(e) => update('companyType',e.target.value)}><option value="">اختار مجال شغل الشركة</option>{companyTypes.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>}
+            <label className="block text-sm font-bold text-slate-700">محافظتك *<span className="relative block"><select required className={fieldClass} value={values.governorate} onChange={(e) => update('governorate',e.target.value)}><option value="">اختار المحافظة</option>{governorates.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={17} className="pointer-events-none absolute left-4 top-4 text-slate-400"/></span></label>
+            {field('address',isCompany ? 'عنوان الشركة بالتفصيل' : 'عنوانك بالتفصيل',true,'text','المركز / الشارع / رقم العقار')}
             <div className="sm:col-span-2">
-              <label className="block text-sm font-bold text-slate-700">كلمة المرور *
+              <label className="block text-sm font-bold text-slate-700">كلمة السر *
                 <span className="relative mt-2 block">
                   <input className={fieldClass + ' pl-12'} type={showPassword ? 'text' : 'password'} required autoComplete="new-password" value={values.password} onChange={(e) => update('password', e.target.value)} placeholder="أنشئ كلمة مرور قوية" dir="ltr" minLength={8} />
                   <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="absolute left-3 top-3 rounded-lg p-2 text-slate-500 hover:bg-slate-100">{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>
@@ -211,7 +211,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
             <span className="text-xs font-medium text-slate-400">آمن وسريع</span>
           </button>
           {showGoogleConsentHint && !acceptedLegal && <p role="alert" className="-mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-xs font-semibold leading-6 text-amber-800">تنبيه: يجب الموافقة على شروط الاستخدام وسياسة الخصوصية قبل المتابعة باستخدام Google.</p>}
-          <div className="flex items-center gap-3 text-xs font-bold text-slate-400"><span className="h-px flex-1 bg-slate-200"/><span>أو بالبريد الإلكتروني</span><span className="h-px flex-1 bg-slate-200"/></div>
+          <div className="flex items-center gap-3 text-xs font-bold text-slate-400"><span className="h-px flex-1 bg-slate-200"/><span>أو بالإيميل</span><span className="h-px flex-1 bg-slate-200"/></div>
           <button type="submit" disabled={busy || !acceptedLegal} className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-blue-800 to-blue-600 px-5 font-extrabold text-white shadow-[0_12px_25px_-12px_rgba(29,78,216,0.8)] transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-60">{busy ? 'جارٍ إنشاء الحساب...' : 'إنشاء الحساب والمتابعة'} <ArrowRight size={18}/></button>
           <p className="text-center text-xs leading-6 text-slate-400">الحقول المطلوبة موضحة بعلامة (*). لا يتم تحصيل رسوم من خلال هذه الصفحة.</p>
         </form>
