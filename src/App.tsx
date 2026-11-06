@@ -5,6 +5,7 @@ import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
 import PlatformEntryBanner from './components/PlatformEntryBanner'
 import MyCarAssistantPage from './components/MyCarAssistantPage'
+const SupportCenterPage = lazy(() => import('./components/SupportCenterPage'))
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import LegalPages from './components/LegalPages'
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
@@ -274,6 +275,8 @@ export default function App() {
   if (path === '/reset-password') return <Suspense fallback={<PlatformLoading />}><ResetPasswordPage /></Suspense>
   if (path === '/auth/callback') return <Suspense fallback={<PlatformLoading />}><AuthCallbackPage /></Suspense>
   if (path === '/complete-profile') return <Suspense fallback={<PlatformLoading />}><GoogleProfileCompletionPage /></Suspense>
+  if (path === '/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لمركز الدعم" message="مركز الدعم الفني متاح للمستخدمين المسجلين لمتابعة تذاكرهم والردود." />
+  if (path === '/workspace/admin/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage admin /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الدعم" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
   if (path === '/workspace/employee/messages' || path === '/workspace/provider/employee-messages') return <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
   if (path === '/workspace/employee/account') return <Suspense fallback={<PlatformLoading />}><EmployeeAccountPage /></Suspense>
   if (path === '/workspace/employee/requests') return <Suspense fallback={<PlatformLoading />}><EmployeeRequestsOffersPage /></Suspense>
