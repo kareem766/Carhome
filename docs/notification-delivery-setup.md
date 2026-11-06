@@ -33,6 +33,7 @@ openssl rand -hex 32
 
 ```sql
 select vault.create_secret('PASTE_THE_SAME_NOTIFICATION_DISPATCH_SECRET_HERE', 'mycar_notification_dispatch_secret');
+select vault.create_secret('YOUR_SUPABASE_PUBLISHABLE_KEY', 'mycar_supabase_publishable_key');
 ```
 
 ثم أنشئ مهمة تشغيل عامل الإرسال كل دقيقة:
@@ -46,6 +47,13 @@ select cron.schedule(
     url := 'https://bxmfykzckjoecvpoqlag.supabase.co/functions/v1/notification-dispatch',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
+      'apikey', (
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'mycar_supabase_publishable_key'
+        order by created_at desc
+        limit 1
+      ),
       'Authorization', 'Bearer ' || (
         select decrypted_secret
         from vault.decrypted_secrets
