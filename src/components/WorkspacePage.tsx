@@ -121,13 +121,13 @@ export default function WorkspacePage({ role }: { role: Role }) {
     if (vehiclePaymentPending) localStorage.removeItem('mycar_vehicle_payment_banner')
     if (isAccountPage) { /* Profile metadata is already available from the authenticated user. */ } else if (role === 'company') {
       if (isCompanyVehicles) {
-        const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,license_expiry_date,monthly_price_egp,review_status,payment_status').eq('review_status','approved').eq('payment_status','verified').order('created_at',{ascending:false})
+        const result = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,license_expiry_date,monthly_price_egp,review_status,payment_status').eq('review_status','approved').in('payment_status',['verified','waived']).or(`license_expiry_date.is.null,license_expiry_date.gte.${new Date().toLocaleDateString('en-CA')}`).order('created_at',{ascending:false})
         if (result.error) setError(result.error.message); else setVehicles((result.data || []) as Vehicle[])
       } else {
         const result = await client.from('rental_requests').select('id,title,details,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at,rental_offers(id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,organizations(id,name))').eq('organization_id', member.organization_id).order('created_at',{ascending:false})
         if (result.error) setError(result.error.message); else setRequests((result.data || []) as unknown as RentalRequest[])
         if (path === '/workspace/company') {
-          const cars = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,license_expiry_date,monthly_price_egp,review_status,payment_status').eq('review_status','approved').eq('payment_status','verified').order('created_at',{ascending:false}).limit(4)
+          const cars = await client.from('vehicles').select('id,make,model,model_year,vehicle_type,governorate,license_expiry_date,monthly_price_egp,review_status,payment_status').eq('review_status','approved').in('payment_status',['verified','waived']).or(`license_expiry_date.is.null,license_expiry_date.gte.${new Date().toLocaleDateString('en-CA')}`).order('created_at',{ascending:false}).limit(4)
           if (!cars.error) setVehicles((cars.data || []) as Vehicle[])
         }
       }
@@ -385,7 +385,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     }
     const { error: saveError } = await supabase.from('rental_offers').insert(payload)
     setSaving(false)
-    if (saveError) { setError(saveError.code === '23505' ? 'سبق أن قدمت عرضًا لهذا الطلب.' : saveError.message.includes('Could not find the table') ? 'قاعدة بيانات العروض لم تُفعّل بعد. يلزم تطبيق Migration السيارات والطلبات أولًا.' : saveError.message); return }
+    if (saveError) { setError(saveError.code === '23505' ? 'سبق أن قدمت عرضًا لهذا الطلب.' : saveError.code === '42501' ? 'تعذر إرسال العرض: تأكد من وجود عدد كافٍ من السيارات المعتمدة والمدفوعة والمطابقة للطلب، وأن الترخيص ساري.' : saveError.message.includes('Could not find the table') ? 'قاعدة بيانات العروض لم تُفعّل بعد. يلزم تطبيق Migration السيارات والطلبات أولًا.' : saveError.message); return }
     setOfferRequest(null)
     setNotice('تم إرسال عرضك للشركة بنجاح. يمكنك متابعة حالة العرض من صفحة «متابعة العروض».')
     window.location.href = role === 'owner' ? '/workspace/owner/offers' : '/workspace/supplier/offers'
