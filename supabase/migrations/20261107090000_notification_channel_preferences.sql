@@ -1,10 +1,10 @@
 -- Notification channel preferences and browser push subscriptions.
--- In-app notifications remain unchanged; external channels are opt-in by default.
+-- All notification channels are enabled by default; users can disable each channel independently.
 create table if not exists public.platform_notification_preferences (
   user_id uuid primary key references auth.users(id) on delete cascade,
   push_enabled boolean not null default true,
   email_enabled boolean not null default true,
-  marketing_enabled boolean not null default false,
+  marketing_enabled boolean not null default true,
   updated_at timestamptz not null default now()
 );
 
@@ -91,7 +91,7 @@ grant select, insert, update, delete on public.platform_push_subscriptions to au
 -- Existing accounts start with operational push/email preferences enabled.
 -- Browser/OS permission is still required before any push delivery can occur.
 insert into public.platform_notification_preferences (user_id, push_enabled, email_enabled, marketing_enabled)
-select id, true, true, false from auth.users
+select id, true, true, true from auth.users
 on conflict (user_id) do nothing;
 
 -- Apply the same defaults automatically to every account created after this migration.
@@ -103,7 +103,7 @@ set search_path = public, pg_temp
 as $$
 begin
   insert into public.platform_notification_preferences (user_id, push_enabled, email_enabled, marketing_enabled)
-  values (new.id, true, true, false)
+  values (new.id, true, true, true)
   on conflict (user_id) do nothing;
   return new;
 end;
