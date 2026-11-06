@@ -253,16 +253,9 @@ export default function VehicleCatalogPage() {
   }
 
   async function requestPromotion() {
-    if (!supabase || !selectedPlanId || !selectedPromotionVehicle || !userId || !orgId) return
-    setSubmittingPromotion(true); setError('')
-    const { error: insertError } = await supabase.from('vehicle_promotions').insert({
-      vehicle_id: selectedPromotionVehicle, organization_id: orgId, advertising_plan_id: selectedPlanId,
-      created_by: userId, status: 'pending_review', payment_status: 'pending'
-    })
-    setSubmittingPromotion(false)
-    if (insertError) { setError('تعذر إرسال طلب الترويج: ' + insertError.message); return }
-    setNotice('تم إرسال طلب الترويج للمراجعة. لن يظهر الإعلان قبل اعتماد الإدارة والتحقق من حالة الدفع.')
-    setSelectedPlanId(''); setSelectedPromotionVehicle(''); setShowPlans(false)
+    // All advertising requests must use the dedicated payment-confirmation flow.
+    // This prevents creating a promotion without transfer method/reference/date.
+    window.location.href = '/workspace/advertising-plans'
   }
 
   function sendBotMessage(question: string) {
