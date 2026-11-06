@@ -1,0 +1,53 @@
+name: Notification delivery phase checks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "public/push-sw.js"
+      - "supabase/functions/notification-dispatch/**"
+      - "supabase/migrations/*notification*"
+      - "supabase/config.toml"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.ts"
+      - ".github/workflows/notification-phase-ci.yml"
+  push:
+    branches: [feat/notification-channels-push-email]
+    paths:
+      - "src/**"
+      - "public/push-sw.js"
+      - "supabase/functions/notification-dispatch/**"
+      - "supabase/migrations/*notification*"
+      - "supabase/config.toml"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.ts"
+      - ".github/workflows/notification-phase-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-build:
+    name: Frontend typecheck and production build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  edge-function-check:
+    name: Notification dispatcher typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check supabase/functions/notification-dispatch/index.ts
