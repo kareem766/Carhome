@@ -190,10 +190,11 @@ export default function WorkspacePage({ role }: { role: Role }) {
 
   useEffect(() => { void loadWorkspace() }, [])
   useEffect(() => {
-    if (!supabase) return
+    const client = supabase
+    if (!client) return
     let active = true
     const loadPaymentDetails = async () => {
-      const { data, error: settingsError } = await supabase.from('public_platform_settings').select('instapay_number,vodafone_cash_number').eq('id', true).maybeSingle()
+      const { data, error: settingsError } = await client.from('public_platform_settings').select('instapay_number,vodafone_cash_number').eq('id', true).maybeSingle()
       if (!active) return
       if (settingsError) { setError('تعذر تحميل بيانات الدفع الرسمية: ' + settingsError.message); return }
       setPaymentDetails({ instapay_number: data?.instapay_number?.trim() || '', vodafone_cash_number: data?.vodafone_cash_number?.trim() || '' })
