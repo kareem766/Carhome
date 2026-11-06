@@ -85,7 +85,7 @@ with check (
     where t.id = ticket_id
       and (
         public.support_is_platform_admin()
-        or (t.user_id = (select auth.uid()) and t.status not in ('resolved','closed'))
+        or (t.user_id = (select auth.uid()) and t.status <> 'closed')
       )
   )
 );
