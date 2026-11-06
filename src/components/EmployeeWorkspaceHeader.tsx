@@ -1,10 +1,11 @@
-import { LayoutDashboard, ClipboardList, MessageCircle, UserRound, CarFront } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, MessageCircle, UserRound, CarFront, Bot } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 
 type ActivePage = 'home' | 'requests' | 'messages' | 'account'
 const links = [
  {key:'home',href:'/workspace/employee',label:'الرئيسية',icon:LayoutDashboard},
+ {key:'assistant',href:'/assistant',label:'مساعد My Car',icon:Bot},
  {key:'requests',href:'/workspace/employee/requests',label:'طلباتي والعروض',icon:ClipboardList},
  {key:'messages',href:'/workspace/employee/messages',label:'المراسلات',icon:MessageCircle},
  {key:'account',href:'/workspace/employee/account',label:'بيانات الحساب',icon:UserRound}
