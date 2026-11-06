@@ -9,9 +9,9 @@
 - `NOTIFICATION_DISPATCH_SECRET`: قيمة عشوائية طويلة (32 بايت أو أكثر).
 - `VAPID_PUBLIC_KEY`: المفتاح العام الناتج من توليد VAPID.
 - `VAPID_PRIVATE_KEY`: المفتاح الخاص الناتج من توليد VAPID — لا تشاركه.
-- `VAPID_SUBJECT`: عنوان تواصل بصيغة `mailto:...`.
+- `VAPID_SUBJECT`: عنوان تواصل بصيغة `mailto:abdelrahmansaied140@gmail.com`.
 - `BREVO_API_KEY`: مفتاح API الخاص بحساب Brevo.
-- `BREVO_SENDER_EMAIL`: بريد مرسل تابع لنطاق موثّق في Brevo.
+- `BREVO_SENDER_EMAIL`: `abdelrahmansaied140@gmail.com` (البريد الرسمي المعتمد للمنصة؛ يجب أن يكون مفعّلًا/موثّقًا كمرسل داخل حساب Brevo نفسه).
 - `BREVO_SENDER_NAME`: `My Car عربيتي`.
 - `APP_BASE_URL`: رابط الإنتاج الحالي للمنصة، من دون / في النهاية.
 
@@ -79,7 +79,7 @@ select cron.schedule(
 
 ## البريد الإلكتروني
 
-Brevo يرسل عبر واجهة Transactional SMTP API. لا يبدأ الإرسال قبل ضبط `BREVO_API_KEY` ومرسل موثّق. حالة المرسل النشط وحدها لا تكفي؛ يجب توثيق نطاق الإرسال وإعداد SPF/DKIM (ويُفضّل DMARC) قبل رسائل العملاء.
+Brevo يرسل عبر واجهة Transactional SMTP API. لا يبدأ الإرسال قبل ضبط `BREVO_API_KEY` ومرسل موثّق. استخدم المرسل المعتمد `abdelrahmansaied140@gmail.com`. يجب التأكد من حالة توثيقه داخل حساب Brevo الذي يحمل مفتاح API المستخدم في Supabase؛ توثيق Gmail كعنوان مرسل لا يعني إمكانية إضافة سجلات SPF/DKIM على gmail.com. لا تُرسل حملات جماعية قبل اختبار رسالة معاملات إلى حساب تملكه ومراجعة التسليم.
 
 ## الخصوصية والتصنيف
 
