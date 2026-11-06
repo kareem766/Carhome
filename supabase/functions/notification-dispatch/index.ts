@@ -51,7 +51,7 @@ Deno.serve(async (req: Request) => {
   const vapidPrivate = Deno.env.get("VAPID_PRIVATE_KEY");
   const vapidSubject = Deno.env.get("VAPID_SUBJECT");
   const brevoKey = Deno.env.get("BREVO_API_KEY");
-  const senderEmail = Deno.env.get("BREVO_SENDER_EMAIL");
+  const senderEmail = Deno.env.get("BREVO_SENDER_EMAIL") || "abdelrahmansaied140@gmail.com";
   const senderName = Deno.env.get("BREVO_SENDER_NAME") || "My Car عربيتي";
   const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "").replace(/\/$/, "");
 
