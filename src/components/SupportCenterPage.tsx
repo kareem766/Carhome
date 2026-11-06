@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
 import { AlertCircle, ArrowRight, CheckCircle2, Clock3, Headset, MessageSquare, Plus, RefreshCw, Send, ShieldCheck, Ticket, XCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
@@ -96,7 +97,7 @@ export default function SupportCenterPage({ admin = false }: Props) {
     void loadMessages(selectedId).catch(e => setError(e instanceof Error ? e.message : 'تعذر تحميل المحادثة.'))
   }, [selectedId, loadMessages])
 
-  async function createTicket(event: React.FormEvent) {
+  async function createTicket(event: FormEvent) {
     event.preventDefault()
     if (!supabase || !userId || saving) return
     setSaving(true); setError('')
@@ -112,7 +113,7 @@ export default function SupportCenterPage({ admin = false }: Props) {
     await refresh(); setSelectedId(ticket.id); await loadMessages(ticket.id); setSaving(false)
   }
 
-  async function sendReply(event: React.FormEvent) {
+  async function sendReply(event: FormEvent) {
     event.preventDefault()
     if (!supabase || !selectedTicket || !messageDraft.trim() || saving) return
     setSaving(true); setError('')
@@ -167,7 +168,7 @@ export default function SupportCenterPage({ admin = false }: Props) {
             <div className="flex-1 space-y-3 overflow-y-auto py-4">
               {messages.length===0 ? <p className="py-8 text-center text-sm text-slate-500">لا توجد رسائل في هذه التذكرة.</p> : messages.map(m=>{const own=m.sender_user_id===userId;return <div key={m.id} className={`flex ${own?'justify-start':'justify-end'}`}><article className={`max-w-[88%] rounded-2xl px-4 py-3 ${own?'bg-blue-50 text-slate-800':'bg-[#102b47] text-white'}`}><p className="mb-1 text-[10px] font-black opacity-70">{own?'أنت':admin?'صاحب التذكرة':'فريق دعم My Car'} · {dateLabel(m.created_at)}</p><p className="whitespace-pre-wrap break-words text-sm leading-7">{m.body}</p></article></div>})}
             </div>
-            {selectedTicket.status!=='closed' && selectedTicket.status!=='resolved' ? <form onSubmit={sendReply} className="flex items-end gap-2 border-t border-slate-100 pt-3"><textarea value={messageDraft} onChange={e=>setMessageDraft(e.target.value)} required maxLength={4000} rows={2} placeholder="اكتب ردك هنا..." className="min-h-12 flex-1 resize-y rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-400"/><button disabled={saving||!messageDraft.trim()} aria-label="إرسال الرد" className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-700 text-white disabled:opacity-50"><Send size={18}/></button></form> : <div className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-800"><CheckCircle2 size={17}/> هذه التذكرة {selectedTicket.status==='closed'?'مغلقة':'تم حلها'} ولا تقبل ردودًا جديدة.</div>}
+            {selectedTicket.status!=='closed' ? <form onSubmit={sendReply} className="flex items-end gap-2 border-t border-slate-100 pt-3"><textarea value={messageDraft} onChange={e=>setMessageDraft(e.target.value)} required maxLength={4000} rows={2} placeholder="اكتب ردك هنا..." className="min-h-12 flex-1 resize-y rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-blue-400"/><button disabled={saving||!messageDraft.trim()} aria-label="إرسال الرد" className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-700 text-white disabled:opacity-50"><Send size={18}/></button></form> : <div className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-800"><CheckCircle2 size={17}/> هذه التذكرة {selectedTicket.status==='closed'?'مغلقة':'تم حلها'} ولا تقبل ردودًا جديدة.</div>}
           </>}
         </section>
       </section>
