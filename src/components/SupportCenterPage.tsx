@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { AlertCircle, ArrowRight, CheckCircle2, Clock3, Headset, MessageSquare, Plus, RefreshCw, Send, ShieldCheck, Ticket, XCircle } from 'lucide-react'
+import { AlertCircle, ArrowRight, CheckCircle2, Headset, MessageSquare, Plus, RefreshCw, Send, ShieldCheck, Ticket } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
