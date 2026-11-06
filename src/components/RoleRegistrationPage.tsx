@@ -50,6 +50,25 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     setLogoPreview(URL.createObjectURL(file))
   }
 
+  async function continueWithGoogle() {
+    setError('')
+    if (!acceptedLegal) { setError('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية أولًا.'); return }
+    if (!supabase) { setError('خدمة الحسابات غير متاحة حاليًا.'); return }
+    setBusy(true)
+    try {
+      sessionStorage.setItem('mycar_google_pending_role', role)
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: { prompt: 'select_account' } }
+      })
+      if (oauthError) throw oauthError
+    } catch (caught) {
+      sessionStorage.removeItem('mycar_google_pending_role')
+      setError(caught instanceof Error ? caught.message : 'تعذر بدء التسجيل باستخدام Google.')
+      setBusy(false)
+    }
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
@@ -183,6 +202,8 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
           {isOwner && <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950"><p className="font-extrabold">رسوم تسجيل السيارة</p><p>300 جنيه لكل سيارة شهريًا، ويُستكمل التسجيل بعد تحويل المبلغ ومراجعة الإدارة لبيانات السيارة. لن تُعرض السيارة كسيارة مسجلة أو معتمدة قبل الموافقة.</p><p className="mt-1 text-xs">هذه الخطوة لا تحصّل أي مبلغ تلقائيًا؛ تعليمات الدفع ومراجعة الإدارة تُستكمل في مرحلة تسجيل السيارة.</p></div>}
           {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm leading-6 text-red-700">{error}</p>}
           {notice && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">{notice}</p>}
+          <button type="button" onClick={continueWithGoogle} disabled={busy || !acceptedLegal} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 font-extrabold text-slate-800 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60">G&nbsp; المتابعة باستخدام Google</button>
+          <div className="flex items-center gap-3 text-xs font-bold text-slate-400"><span className="h-px flex-1 bg-slate-200"/><span>أو بالبريد الإلكتروني</span><span className="h-px flex-1 bg-slate-200"/></div>
           <button type="submit" disabled={busy || !acceptedLegal} className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-blue-800 to-blue-600 px-5 font-extrabold text-white shadow-[0_12px_25px_-12px_rgba(29,78,216,0.8)] transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-60">{busy ? 'جارٍ إنشاء الحساب...' : 'إنشاء الحساب والمتابعة'} <ArrowRight size={18}/></button>
           <p className="text-center text-xs leading-6 text-slate-400">الحقول المطلوبة موضحة بعلامة (*). لا يتم تحصيل رسوم من خلال هذه الصفحة.</p>
         </form>
