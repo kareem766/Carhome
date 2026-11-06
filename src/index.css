@@ -849,3 +849,12 @@ main.min-h-screen :is(input, select, textarea):disabled {
  .mc-home-benefits>div{grid-template-columns:4rem 1fr;column-gap:.75rem}
  .mc-home-benefits>div>span:first-child{width:4rem;height:4rem}
 }
+
+
+/* Animated neon-blue frame for the 10-second platform entry banner. */
+@keyframes mcEntryBannerNeon {
+  0%, 100% { border-color: #38bdf8; box-shadow: 0 0 0 1px rgba(56,189,248,.72), 0 0 12px rgba(14,165,233,.42), 0 0 28px rgba(37,99,235,.22), 0 24px 70px rgba(2,12,27,.35); }
+  50% { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(59,130,246,.9), 0 0 22px rgba(14,165,233,.78), 0 0 42px rgba(37,99,235,.4), 0 24px 70px rgba(2,12,27,.35); }
+}
+.mc-entry-banner-frame { animation: mcEntryBannerNeon 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .mc-entry-banner-frame { animation: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(59,130,246,.45), 0 0 18px rgba(14,165,233,.3); } }
