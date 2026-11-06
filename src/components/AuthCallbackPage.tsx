@@ -156,6 +156,11 @@ export default function AuthCallbackPage() {
           const metadata = data.session.user.user_metadata ?? {}
           const pendingRole = sessionStorage.getItem('mycar_google_pending_role')
           const allowedRoles = ['individual_owner', 'company', 'fleet_supplier']
+          // Employees belong to an existing company; they must be provisioned/invited by that company first.
+          // Never create a standalone employee workspace from a fresh Google identity.
+          if (!existingMembership.data && pendingRole === 'employee') {
+            throw new Error('حساب الموظف يتم إنشاؤه أو دعوته من خلال الشركة أولًا. اطلب من مسؤول الشركة إضافتك، ثم سجّل الدخول باستخدام Google بنفس البريد الإلكتروني المسجل لدى الشركة.')
+          }
           if (!existingMembership.data && Number(metadata.onboarding_version || 0) < 2) {
             if (pendingRole && allowedRoles.includes(pendingRole)) {
               window.location.replace('/complete-profile?role=' + encodeURIComponent(pendingRole))
