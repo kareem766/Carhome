@@ -1,5 +1,5 @@
 -- Notification channel preferences and browser push subscriptions.
--- All notification channels are enabled by default; users can disable each channel independently.
+-- All three channels are enabled by default; users can disable each independently.
 create table if not exists public.platform_notification_preferences (
   user_id uuid primary key references auth.users(id) on delete cascade,
   push_enabled boolean not null default true,
@@ -88,13 +88,10 @@ revoke all on public.platform_push_subscriptions from anon;
 grant select, insert, update on public.platform_notification_preferences to authenticated;
 grant select, insert, update, delete on public.platform_push_subscriptions to authenticated;
 
--- Existing accounts start with operational push/email preferences enabled.
--- Browser/OS permission is still required before any push delivery can occur.
 insert into public.platform_notification_preferences (user_id, push_enabled, email_enabled, marketing_enabled)
 select id, true, true, true from auth.users
 on conflict (user_id) do nothing;
 
--- Apply the same defaults automatically to every account created after this migration.
 create or replace function public.create_default_notification_preferences()
 returns trigger
 language plpgsql
@@ -109,6 +106,7 @@ begin
 end;
 $$;
 
+revoke all on function public.create_default_notification_preferences() from public, anon, authenticated;
 drop trigger if exists on_auth_user_created_notification_preferences on auth.users;
 create trigger on_auth_user_created_notification_preferences
 after insert on auth.users
