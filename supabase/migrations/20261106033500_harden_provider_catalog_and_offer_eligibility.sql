@@ -276,6 +276,7 @@ using (
         and (
           employee_rental_requests.vehicle_type = 'أخرى'
           or lower(btrim(v.vehicle_type)) = lower(btrim(employee_rental_requests.vehicle_type))
+          or (employee_rental_requests.vehicle_type = 'فان / ميكروباص' and v.vehicle_type in ('فان','ميكروباص'))
         )
         and v.seats >= employee_rental_requests.seats
         and v.governorate = employee_rental_requests.governorate
@@ -319,6 +320,7 @@ with check (
       and (
         r.vehicle_type = 'أخرى'
         or lower(btrim(v.vehicle_type)) = lower(btrim(r.vehicle_type))
+        or (r.vehicle_type = 'فان / ميكروباص' and v.vehicle_type in ('فان','ميكروباص'))
       )
       and v.seats >= r.seats
       and v.governorate = r.governorate
