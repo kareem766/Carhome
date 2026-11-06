@@ -1,3 +1,24 @@
+-- Reserve a notification type for marketing messages so external channels can honor opt-outs.
+alter table public.platform_notifications
+  drop constraint if exists platform_notifications_notification_type_check;
+
+alter table public.platform_notifications
+  add constraint platform_notifications_notification_type_check
+  check (notification_type = any (array[
+    'general'::text,
+    'account'::text,
+    'vehicle'::text,
+    'payment'::text,
+    'request'::text,
+    'message'::text,
+    'subscription'::text,
+    'promotion'::text,
+    'system'::text,
+    'managed_sourcing_request'::text,
+    'managed_sourcing_update'::text,
+    'marketing'::text
+  ]));
+
 -- Durable delivery queue for all existing in-app notification events.
 -- Push and email are dispatched asynchronously by a protected Edge Function.
 create extension if not exists pg_net;
