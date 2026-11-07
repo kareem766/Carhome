@@ -1,5 +1,5 @@
 import { useEffect,useState } from 'react'
-import { CarFront, ClipboardList, MessageCircle, RefreshCw, ArrowRight } from 'lucide-react'
+import { CarFront, ClipboardList, MessageCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
