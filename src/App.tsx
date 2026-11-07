@@ -245,6 +245,9 @@ export default function App() {
     if (!authLoaded) return
     // Never guess an admin's business role when the trusted admin lookup fails.
     if (adminLookupError) return
+    // Incomplete Google signups must be allowed to choose their account type before workspace routing.
+    const needsGoogleOnboarding = authUser.app_metadata?.provider === 'google' && Number(authUser.user_metadata?.onboarding_version || 0) < 2
+    if (needsGoogleOnboarding && path.startsWith('/register')) return
     // Authenticated users should never see sign-in/sign-up prompts or the registration chooser.
     setAuthOpen(false)
     const destination = isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'employee' ? '/workspace/employee' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
@@ -333,6 +336,12 @@ export default function App() {
   if (path === '/register') return <RoleChooserPage onChoose={(role) => {
     const enabled = role === 'employee' ? true : role === 'individual_owner' ? settings.owner_registration_enabled : role === 'fleet_supplier' ? settings.supplier_registration_enabled : settings.company_registration_enabled
     if (!enabled) { window.alert('التسجيل لهذا النوع من الحسابات غير متاح حاليًا.'); return }
+    const needsGoogleOnboarding = authUser?.app_metadata?.provider === 'google' && Number(authUser.user_metadata?.onboarding_version || 0) < 2
+    if (needsGoogleOnboarding) {
+      sessionStorage.setItem('mycar_google_pending_role', role)
+      window.location.href = '/complete-profile?role=' + encodeURIComponent(role)
+      return
+    }
     window.location.href = role === 'employee' ? '/register/employee' : '/register/' + (role === 'individual_owner' ? 'owner' : role === 'fleet_supplier' ? 'supplier' : 'company')
   }} onLogin={() => { window.location.href = '/?login=1' }} />
   if (path === '/register/owner') return <RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} />
