@@ -885,3 +885,11 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-supplier-navigation-link.is-active::after{position:absolute;right:14px;bottom:-.48rem;left:14px;height:3px;border-radius:99px;background:#2672c9;content:""}
 .mc-supplier-navigation-link:focus-visible{outline:3px solid #7db9f5;outline-offset:2px}
 @media(max-width:760px){.mc-supplier-navigation-inner{min-height:54px;gap:.25rem;padding:.4rem .6rem}.mc-supplier-navigation-link{min-height:40px;gap:.4rem;padding:.5rem .72rem;font-size:.74rem}.mc-supplier-navigation-link svg{width:16px;height:16px}}
+
+/* Supplier-only pages reuse one shared header; suppress their legacy page headers inside this shell. */
+.mc-supplier-page-shell>.mc-supplier-page-content>main>header:first-child,.mc-supplier-page-shell>.mc-supplier-page-content>header:first-child{display:none!important}
+.mc-supplier-page-shell{min-height:100vh;background:#f3f6fb}
+.mc-supplier-page-content{min-width:0}
+.mc-supplier-page-back{display:flex;justify-content:flex-start;padding:.65rem clamp(.75rem,2.5vw,1.5rem);background:#f3f6fb}
+.mc-supplier-page-back button{display:inline-flex;min-height:40px;align-items:center;gap:.5rem;border:1px solid #dbe4ef;border-radius:11px;background:#fff;padding:.5rem .9rem;color:#40536a;font-size:.82rem;font-weight:800;box-shadow:0 2px 7px rgba(15,35,65,.04)}
+.mc-supplier-page-back button:hover{border-color:#93c5fd;background:#eff6ff;color:#174f91}
