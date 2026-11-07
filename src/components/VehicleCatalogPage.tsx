@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CircleUserRound, ArrowLeft, BadgeCheck, Heart, Bot, CarFront, Check, ChevronDown, CircleHelp, Filter, Menu, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { CircleUserRound, ArrowLeft, BadgeCheck, Heart, Bot, CarFront, Check, ChevronDown, Filter, Menu, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
