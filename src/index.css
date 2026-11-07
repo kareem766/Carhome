@@ -734,10 +734,8 @@ main.min-h-screen :is(input, select, textarea):disabled {
 }
 
 
-/* Keep the account popover fully visible and centered on narrow screens. */
-@media(max-width:760px){
- .mc-account-menu{left:50%!important;right:auto!important;transform:translateX(-50%);width:min(20rem,calc(100vw - 24px))!important;max-width:calc(100vw - 24px);max-height:calc(100svh - 110px);overflow-y:auto;overscroll-behavior:contain}
-}
+/* Account menu placement is calculated from its trigger and clamped to the viewport. */
+.mc-account-menu{max-width:calc(100vw - 24px);max-height:calc(100svh - 24px);overscroll-behavior:contain}
 
 @media(min-width:761px){.mc-workspace-topbar{position:sticky;top:0;z-index:80;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);box-shadow:0 8px 24px rgba(15,35,65,.05)}}
 .mc-account-menu a:focus-visible,.mc-account-menu button:focus-visible{outline:3px solid #38bdf8;outline-offset:2px}
