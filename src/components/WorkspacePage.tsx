@@ -7,7 +7,7 @@ import AccountNotifications from './AccountNotifications'
 import AccountProfilePage from './AccountProfilePage'
 
 type Role = 'company' | 'owner' | 'supplier'
-type Organization = { id: string; name: string; organization_type: string }
+type Organization = { id: string; name: string; organization_type: string; approval_status?: string | null }
 type Vehicle = { id: string; make: string; model: string; model_year: number; vehicle_type: string; governorate: string; license_expiry_date: string | null; monthly_price_egp: number; review_status: string; payment_status: string; images?: { url: string; alt_text: string }[] }
 type RentalOffer = { id: string; monthly_price_egp: number; yearly_price_egp: number | null; vehicle_count: number; message: string | null; status: string; organizations: { id: string; name: string } | { id: string; name: string }[] | null }
 type RentalRequest = { id: string; title: string; details: string | null; vehicle_type: string; quantity: number; duration_type: string; duration_months: number; governorate: string; with_driver: boolean; status: string; created_at: string; rental_offers?: RentalOffer[] }
@@ -52,6 +52,7 @@ const primaryClass = 'inline-flex min-h-12 items-center justify-center gap-2 rou
 export default function WorkspacePage({ role }: { role: Role }) {
   const [user, setUser] = useState<{ id: string; name: string; email: string } | null>(null)
   const [organization, setOrganization] = useState<Organization | null>(null)
+  const [showReviewModal, setShowReviewModal] = useState(false)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [activeAdsCount, setActiveAdsCount] = useState(0)
   const [requests, setRequests] = useState<RentalRequest[]>([])
@@ -106,7 +107,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       setNotice('أهلًا بك في My Car! تم تأكيد بريدك وتجهيز حسابك بنجاح. نتمنى لك تجربة موفقة.')
     }
     const expectedType = role === 'owner' ? 'individual_owner' : role === 'supplier' ? 'fleet_supplier' : 'company'
-    const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations!inner(id,name,organization_type)').eq('user_id', authUser.id).eq('organizations.organization_type', expectedType).limit(1)
+    const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations!inner(id,name,organization_type,approval_status)').eq('user_id', authUser.id).eq('organizations.organization_type', expectedType).limit(1)
     if (membershipError) { setError(membershipError.message); setLoading(false); return }
     const member = memberships?.[0] as unknown as { organization_id: string; organizations: Organization | Organization[] | null } | undefined
     const org = Array.isArray(member?.organizations) ? member?.organizations[0] : member?.organizations
@@ -117,6 +118,10 @@ export default function WorkspacePage({ role }: { role: Role }) {
       return
     }
     setOrganization({ ...org, id: member.organization_id })
+    if (org.approval_status === 'pending_review') {
+      const reviewNoticeKey = 'mycar_review_notice_seen_' + authUser.id
+      if (localStorage.getItem(reviewNoticeKey) !== '1') setShowReviewModal(true)
+    }
     if (welcomePending) localStorage.removeItem('mycar_welcome_banner')
     if (vehiclePaymentPending) localStorage.removeItem('mycar_vehicle_payment_banner')
     if (isAccountPage) { /* Profile metadata is already available from the authenticated user. */ } else if (role === 'company') {
@@ -466,6 +471,12 @@ export default function WorkspacePage({ role }: { role: Role }) {
 
   if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
 
+  const reviewStatusNotice = organization?.approval_status === 'pending_review' ? (
+    <>
+      <div role="status" className="mb-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950 shadow-sm"><span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-amber-700"><Clock3 size={19}/></span><div><p className="font-extrabold">حسابك قيد المراجعة</p><p className="mt-1 text-sm leading-6 text-amber-900">بيانات حسابك وصلت لفريق My Car وهي حاليًا قيد المراجعة. هنبلغك فور اعتماد الحساب وتفعيل خدماته.</p></div></div>
+      {showReviewModal && <div className="fixed inset-0 z-[150] grid place-items-center bg-slate-950/65 p-4 backdrop-blur-sm" role="presentation"><section role="alertdialog" aria-modal="true" aria-labelledby="account-review-title" className="w-full max-w-md overflow-hidden rounded-3xl border border-amber-100 bg-white text-center shadow-2xl"><div className="h-2 bg-gradient-to-l from-amber-400 via-orange-400 to-blue-600"/><div className="px-6 py-8 sm:px-9"><div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-amber-50 text-amber-600 ring-8 ring-amber-50/70"><Clock3 size={39}/></div><h2 id="account-review-title" className="mt-6 text-xl font-black text-slate-900 sm:text-2xl">حسابك قيد المراجعة</h2><span className="mt-3 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-extrabold text-amber-800">في انتظار الموافقة</span><p className="mt-4 text-sm leading-7 text-slate-600">شكرًا لتسجيلك في منصة My Car عربيتي. تم استلام بيانات حسابك بنجاح، وهي حاليًا قيد المراجعة من فريق الإدارة.</p><p className="mt-2 text-sm leading-7 text-slate-600">هنرسل لك إشعارًا فور الانتهاء من مراجعة حسابك وتفعيل خدمات المنصة.</p><button type="button" onClick={() => { localStorage.setItem('mycar_review_notice_seen_' + (user?.id || 'account'), '1'); setShowReviewModal(false) }} className="mt-7 min-h-12 w-full rounded-xl bg-[#123b68] px-5 font-extrabold text-white shadow-lg transition hover:bg-blue-900">حسنًا، فهمت</button></div></section></div>}
+    </>
+  ) : null;
   const isWorkspaceHome = (role === 'company' && path === '/workspace/company') || (role === 'owner' && path === '/workspace/owner/vehicles') || (role === 'supplier' && path === '/workspace/supplier/vehicles')
   const activeVehicles = vehicles.filter(vehicle => vehicle.review_status === 'approved' && (vehicle.payment_status === 'verified' || vehicle.payment_status === 'waived')).length
   const pendingVehicles = vehicles.filter(vehicle => vehicle.review_status === 'pending_review' || vehicle.payment_status === 'pending').length
@@ -563,6 +574,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
   return <main dir="rtl" className={`mc-workspace-main min-h-screen bg-[#f3f6fb] ${role === 'owner' ? 'mc-owner-workspace-main' : ''}`}>
     {role !== 'owner' && <aside className="mc-workspace-sidebar"><div className="mc-sidebar-brand"><PlatformBrand compact/><span className="mc-sidebar-tag">مساحة العمل</span></div>{sideNavigation}<div className="mc-sidebar-promo"><CarFront size={27}/><strong>كل خدمات السيارات في مكان واحد</strong><p>إدارة أسهل وفرص تشغيل أكثر مع CarHome.</p><a href="/workspace/catalog">استكشف الكتالوج ←</a></div></aside>}
     <div className="mc-workspace-content min-w-0">
+      {reviewStatusNotice}
       {role !== 'owner' && <>
       <header className="mc-workspace-topbar">
         <div className="mc-workspace-heading"><span className="text-xs font-bold text-slate-400">My Car / مساحة العمل</span><h1 className="mt-1 text-lg font-extrabold text-slate-900">{names[role]}</h1><p className="mc-workspace-subtitle">كل ما تحتاجه لإدارة سياراتك وطلباتك من مكان واحد.</p></div>
