@@ -56,7 +56,7 @@ export default function NotificationOnboardingPrompt() {
   }
 
   async function saveDeviceSubscription(registration: ServiceWorkerRegistration, user: { id: string }) {
-    if (!supabase || !publicVapidKey) throw new Error('إعداد إشعارات الهاتف غير مكتمل حاليًا.')
+    if (!supabase || !publicVapidKey) throw new Error('إعداد إشعارات هذا الجهاز غير مكتمل حاليًا.')
     if (!registration.pushManager || typeof registration.pushManager.subscribe !== 'function') {
       throw new Error('المتصفح لا يدعم إشعارات Push في وضع التشغيل الحالي.')
     }
@@ -106,7 +106,7 @@ export default function NotificationOnboardingPrompt() {
       if (isIosDevice() && !isStandalonePwa()) {
         throw new Error('على iPhone أو iPad، أضف My Car إلى الشاشة الرئيسية أولًا، ثم افتح المنصة من الأيقونة وجرّب التفعيل مرة أخرى.')
       }
-      if (!publicVapidKey) throw new Error('إعداد مفتاح إشعارات الهاتف غير مكتمل حاليًا.')
+      if (!publicVapidKey) throw new Error('إعداد مفتاح إشعارات هذا الجهاز غير مكتمل حاليًا.')
 
       // The browser permission request must be invoked directly from this button click.
       const permissionRequest = Notification.permission === 'granted'
@@ -124,7 +124,7 @@ export default function NotificationOnboardingPrompt() {
       await saveDeviceSubscription(registration, user)
       dismiss()
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر تفعيل إشعارات الهاتف.')
+      setError(cause instanceof Error ? cause.message : 'تعذر تفعيل إشعارات هذا الجهاز.')
     } finally {
       setBusy(false)
     }
@@ -140,7 +140,7 @@ export default function NotificationOnboardingPrompt() {
       <h2 id="push-onboarding-title" className="mt-2 text-center text-xl font-black text-slate-900">فعّل إشعارات المنصة</h2>
       <p className="mt-3 text-center text-sm leading-7 text-slate-600">خليك على اطلاع بطلباتك والعروض والرسائل المهمة. اضغط تفعيل، وبعدها اختار «سماح» في رسالة المتصفح.</p>
       {error && <p role="alert" className="mt-4 rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-800">{error}</p>}
-      <button type="button" disabled={busy} onClick={() => void enableNotifications()} className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 font-black text-white hover:bg-blue-800 disabled:opacity-60"><Bell size={18}/>{busy ? 'جارٍ تفعيل الإشعارات...' : 'تفعيل إشعارات الهاتف'}</button>
+      <button type="button" disabled={busy} onClick={() => void enableNotifications()} className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 font-black text-white hover:bg-blue-800 disabled:opacity-60"><Bell size={18}/>{busy ? 'جارٍ تفعيل الإشعارات...' : 'تفعيل إشعارات هذا الجهاز'}</button>
       <button type="button" onClick={dismiss} className="mt-3 min-h-11 w-full rounded-xl px-4 text-sm font-bold text-slate-500 hover:bg-slate-50">لاحقًا</button>
       <p className="mt-3 text-center text-xs leading-5 text-slate-400">تقدر تغيّر اختيارك في أي وقت من إعدادات الإشعارات أو إعدادات الجهاز.</p>
     </section>
