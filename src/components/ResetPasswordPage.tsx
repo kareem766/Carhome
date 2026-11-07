@@ -68,6 +68,9 @@ export default function ResetPasswordPage() {
         throw new Error('تم تغيير كلمة المرور، لكن تعذر تحديث الجلسة. سجّل الدخول مرة أخرى.')
       }
       const currentUser = refreshed.session.user
+      // Password recovery is not a new account-registration or review event.
+      // Remember that this account has already passed through its initial review notice.
+      localStorage.setItem('mycar_review_notice_seen_' + currentUser.id, '1')
       const { data: adminRecord, error: adminLookupError } = await client.from('platform_admins').select('user_id').eq('user_id', currentUser.id).maybeSingle()
       if (adminLookupError) throw adminLookupError
       const role = currentUser.user_metadata?.organization_type
