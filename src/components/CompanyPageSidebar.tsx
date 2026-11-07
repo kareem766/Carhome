@@ -1,37 +1,56 @@
-import { BarChart3, Building2, LayoutDashboard, Search, Users } from 'lucide-react'
+import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, Megaphone, MessageCircle, Plus, Search, UserRound, Users, Wrench } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
+import { supabase } from '../lib/supabase'
 
 type Section = 'team' | 'insights' | 'managed-sourcing'
 
 const links = [
-  { id: 'overview', href: '/workspace/company', label: 'الرئيسية', icon: LayoutDashboard },
+  { id: 'assistant', href: '/assistant', label: 'مساعد My Car', icon: Bot },
+  { id: 'overview', href: '/workspace/company', label: 'الرئيسية', icon: Building2 },
   { id: 'team', href: '/workspace/company/team', label: 'إدارة موظفي الشركة', icon: Users },
-  { id: 'insights', href: '/workspace/company/insights', label: 'المؤشرات والتقارير', icon: BarChart3 },
+  { id: 'insights', href: '/workspace/company/insights', label: 'المؤشرات والتقارير', icon: FileText },
+  { id: 'requests', href: '/workspace/company/requests', label: 'طلبات التأجير', icon: ClipboardList },
+  { id: 'new-request', href: '/workspace/company/requests/new', label: 'طلب جديد', icon: Plus },
   { id: 'managed-sourcing', href: '/workspace/company/managed-sourcing', label: 'فوّض My Car للبحث', icon: Search },
-  { id: 'catalog', href: '/workspace/catalog', label: 'كتالوج السيارات', icon: Building2 },
+  { id: 'catalog', href: '/workspace/catalog', label: 'السيارات المتاحة', icon: CarFront },
+  { id: 'services', href: '/services', label: 'خدمات السيارات', icon: Wrench },
+  { id: 'messages', href: '/messages', label: 'المحادثات', icon: MessageCircle },
+  { id: 'ads', href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: Megaphone },
+  { id: 'account', href: '/workspace/company/account', label: 'الحساب', icon: UserRound },
 ]
 
 export default function CompanyPageSidebar({ active }: { active: Section }) {
-  return <aside dir="rtl" className="mc-company-sidebar" aria-label="قائمة مساحة الشركة">
-    <a href="/workspace/company" className="mc-company-sidebar-brand">
-      <span className="mc-company-sidebar-logo"><PlatformBrand compact /></span>
-      <span className="mc-company-sidebar-brand-copy"><strong>مساحة الشركة</strong><small>إدارة ومتابعة أعمالك</small></span>
-    </a>
-    <div className="mc-company-sidebar-divider" />
-    <p className="mc-company-sidebar-label">القائمة الرئيسية</p>
-    <nav className="mc-company-sidebar-nav">
-      {links.map(link => {
-        const Icon = link.icon
-        const selected = link.id === active || (link.id === 'overview' && active === 'team' && window.location.pathname === '/workspace/company')
-        return <a key={link.id} href={link.href} aria-current={selected ? 'page' : undefined} className={'mc-company-sidebar-link' + (selected ? ' is-active' : '')}>
-          <Icon size={19} strokeWidth={2.1} />
-          <span>{link.label}</span>
+  async function signOut() {
+    if (!supabase) return
+    await supabase.auth.signOut()
+    window.location.assign('/')
+  }
+
+  const currentPath = window.location.pathname
+  return <aside dir="rtl" className="mc-workspace-sidebar mc-company-shared-sidebar" aria-label="قائمة مساحة العمل">
+    <div className="mc-sidebar-brand">
+      <PlatformBrand compact />
+      <span className="mc-sidebar-tag">مساحة العمل</span>
+    </div>
+    <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">
+      {links.map(({ id, href, label, icon: Icon }) => {
+        const selected = id === active || currentPath === href
+        return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-sidebar-link ' + (selected ? 'is-active' : '')}>
+          <Icon size={19} />
+          <span>{label}</span>
         </a>
       })}
+      <div className="mc-sidebar-divider" />
+      <button type="button" onClick={() => void signOut()} className="mc-sidebar-link mc-sidebar-logout">
+        <LogOut size={19} />
+        <span>تسجيل الخروج</span>
+      </button>
     </nav>
-    <div className="mc-company-sidebar-footer">
-      <span className="mc-company-sidebar-footer-mark">MC</span>
-      <span><strong>My Car عربيتي</strong><small>منصة السيارات للشركات والأساطيل</small></span>
+    <div className="mc-sidebar-promo">
+      <CarFront size={27} />
+      <strong>كل خدمات السيارات في مكان واحد</strong>
+      <p>إدارة أسهل وفرص تشغيل أكثر مع My Car.</p>
+      <a href="/workspace/catalog">استكشف الكتالوج ←</a>
     </div>
   </aside>
 }

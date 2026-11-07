@@ -1006,36 +1006,24 @@ main.min-h-screen :is(input, select, textarea):disabled {
 }
 
 
-/* Company workspace: fixed desktop navigation shared by team, insights and delegated sourcing. */
-.mc-company-sidebar{display:none}
+/* Company pages reuse the exact primary workspace sidebar and branding. */
+.mc-company-shared-sidebar{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:auto!important;z-index:80!important;display:flex!important;width:260px!important;height:100vh!important;flex-direction:column!important;gap:1.5rem!important;overflow-y:auto!important;background:linear-gradient(180deg,#0b1d36 0%,#102b4c 100%)!important;padding:1.5rem 1rem!important;color:#fff!important;box-shadow:none!important;border:0!important;border-radius:0!important}
+.mc-company-page-with-sidebar{width:calc(100% - 260px);min-height:100vh;margin-right:260px}
+.mc-company-shared-sidebar .mc-sidebar-brand{justify-content:space-between}
+.mc-company-shared-sidebar .mc-sidebar-nav{display:flex;flex-direction:column;gap:.4rem}
+.mc-company-shared-sidebar .mc-sidebar-link{display:flex;min-height:3rem;align-items:center;gap:.85rem;border:0;border-radius:.8rem;padding:.75rem .85rem;color:#d6e3f5;font-size:.86rem;font-weight:700;text-decoration:none;transition:background .18s,color .18s}
+.mc-company-shared-sidebar .mc-sidebar-link:hover{background:rgba(255,255,255,.09);color:#fff}
+.mc-company-shared-sidebar .mc-sidebar-link.is-active{background:linear-gradient(100deg,#2878ed,#1760cb);color:#fff;box-shadow:0 8px 22px rgba(17,96,203,.3)}
+.mc-company-shared-sidebar .mc-sidebar-promo{margin-top:auto}
 .mc-managed-sourcing-page{font-family:'Cairo',sans-serif}
-@media(min-width:1024px){
-  .mc-company-sidebar{position:fixed;inset-block:0;right:0;z-index:80;display:flex;width:272px;flex-direction:column;gap:0;overflow-y:auto;border-left:1px solid #dbe6f2;background:linear-gradient(180deg,#081d36 0%,#0c2b4d 55%,#0a203a 100%);padding:1.25rem 1rem;color:#f8fbff;box-shadow:-12px 0 36px rgba(9,31,56,.10)}
-  .mc-company-sidebar-brand{display:flex;min-height:86px;align-items:center;gap:.85rem;border:1px solid rgba(148,190,230,.2);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.045));padding:.9rem;color:#fff}
-  .mc-company-sidebar-logo{display:grid;min-width:48px;min-height:48px;place-items:center;border:1px solid rgba(125,211,252,.4);border-radius:14px;background:#fff;padding:.3rem}
-  .mc-company-sidebar-brand-copy{display:flex;min-width:0;flex-direction:column;gap:.2rem}
-  .mc-company-sidebar-brand-copy strong{font-size:.92rem;font-weight:950;letter-spacing:-.02em}
-  .mc-company-sidebar-brand-copy small{color:#a9c7e6;font-size:.68rem;font-weight:700}
-  .mc-company-sidebar-divider{height:1px;margin:1.2rem .25rem .95rem;background:linear-gradient(90deg,transparent,rgba(148,190,230,.35),transparent)}
-  .mc-company-sidebar-label{margin:0 .5rem .6rem;color:#8fb4d8;font-size:.68rem;font-weight:850;letter-spacing:.04em}
-  .mc-company-sidebar-nav{display:grid;gap:.4rem}
-  .mc-company-sidebar-link{position:relative;display:flex;min-height:50px;align-items:center;gap:.8rem;border:1px solid transparent;border-radius:13px;padding:.75rem .85rem;color:#c7d8e9;font-size:.79rem;font-weight:800;transition:background .18s,border-color .18s,color .18s}
-  .mc-company-sidebar-link:hover{border-color:rgba(125,181,232,.2);background:rgba(255,255,255,.075);color:#fff}
-  .mc-company-sidebar-link.is-active{border-color:rgba(93,173,255,.35);background:linear-gradient(100deg,rgba(25,105,185,.5),rgba(25,105,185,.18));color:#fff;box-shadow:inset 0 0 0 1px rgba(125,211,252,.08)}
-  .mc-company-sidebar-link.is-active:before{position:absolute;top:10px;right:-1rem;bottom:10px;width:3px;border-radius:4px;background:#ffad0a;content:""}
-  .mc-company-sidebar-link.is-active svg{color:#ffbf42}
-  .mc-company-sidebar-footer{display:flex;align-items:center;gap:.7rem;margin-top:auto;padding:1.2rem .35rem .25rem;color:#dbeafe}
-  .mc-company-sidebar-footer-mark{display:grid;width:38px;height:38px;place-items:center;border:1px solid rgba(255,173,10,.5);border-radius:12px;background:rgba(255,173,10,.12);color:#ffbf42;font-size:.78rem;font-weight:950}
-  .mc-company-sidebar-footer>span:last-child{display:flex;min-width:0;flex-direction:column;gap:.15rem}
-  .mc-company-sidebar-footer strong{font-size:.72rem;font-weight:900}
-  .mc-company-sidebar-footer small{color:#8fb4d8;font-size:.6rem;line-height:1.6}
-  .mc-company-page-with-sidebar{width:calc(100% - 272px);margin-right:272px}
+@media(min-width:761px) and (max-width:1100px){
+ .mc-company-shared-sidebar{width:220px!important;padding:1.15rem .8rem!important}
+ .mc-company-page-with-sidebar{width:calc(100% - 220px);margin-right:220px}
 }
-@media(min-width:1024px) and (max-width:1199px){
-  .mc-company-sidebar{width:244px;padding:.95rem .8rem}
-  .mc-company-page-with-sidebar{width:calc(100% - 244px);margin-right:244px}
+@media(max-width:760px){
+ .mc-company-shared-sidebar{display:none!important}
+ .mc-company-page-with-sidebar{width:100%;margin-right:0}
 }
-@media(max-width:1023px){.mc-company-page-with-sidebar{margin-right:0;width:100%}}
 /* Give desktop catalog filters a consistent four-column rhythm and aligned controls. */
 @media(min-width:1024px){
   .mc-catalog-filters{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:1.25rem}
