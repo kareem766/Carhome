@@ -136,20 +136,10 @@ export default function WorkspacePage({ role }: { role: Role }) {
       setNotice('أهلًا بك في My Car! تم تأكيد بريدك وتجهيز حسابك بنجاح. نتمنى لك تجربة موفقة.')
     }
     const expectedType = role === 'owner' ? 'individual_owner' : role === 'supplier' ? 'fleet_supplier' : 'company'
-    // Some older signup callbacks may have left duplicate organization memberships.
-    // Always prefer an organization already approved by the platform administrator.
-    // This keeps an approved account approved after password recovery or a new session.
-    const { data: memberships, error: membershipError } = await client.from('organization_memberships')
-      .select('organization_id, organizations!inner(id,name,organization_type,approval_status)')
-      .eq('user_id', authUser.id)
-      .eq('organizations.organization_type', expectedType)
+    const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations!inner(id,name,organization_type,approval_status)').eq('user_id', authUser.id).eq('organizations.organization_type', expectedType).limit(1)
     if (membershipError) { setError(membershipError.message); setLoading(false); return }
-    const matchingMembers = (memberships || []) as unknown as { organization_id: string; organizations: Organization | Organization[] | null }[]
-    const member = matchingMembers.find(item => {
-      const linkedOrg = Array.isArray(item.organizations) ? item.organizations[0] : item.organizations
-      return linkedOrg?.approval_status === 'approved'
-    }) || matchingMembers[0]
-    const org = Array.isArray(member?.organizations) ? member.organizations[0] : member?.organizations
+    const member = memberships?.[0] as unknown as { organization_id: string; organizations: Organization | Organization[] | null } | undefined
+    const org = Array.isArray(member?.organizations) ? member?.organizations[0] : member?.organizations
     if (!member?.organization_id || !org) { setError('لم يتم ربط حسابك بمؤسسة من النوع الصحيح بعد. سجّل الخروج ثم ادخل مجددًا، أو أعد إكمال التسجيل.'); setLoading(false); return }
     if (org.organization_type !== expectedType) {
       const correctPath = org.organization_type === 'company' ? '/workspace/company' : org.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
@@ -524,7 +514,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
 
   if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
 
-  const reviewStatusNotice = organization?.approval_status === 'pending_review' ? (
+  const reviewNoticeAlreadySeen = localStorage.getItem('mycar_review_notice_seen_' + user.id) === '1'
+  const reviewStatusNotice = organization?.approval_status === 'pending_review' && !reviewNoticeAlreadySeen ? (
     <>
       <div role="status" className="mb-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950 shadow-sm"><span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-100 text-amber-700"><Clock3 size={19}/></span><div><p className="font-extrabold">حسابك قيد المراجعة</p><p className="mt-1 text-sm leading-6 text-amber-900">بيانات حسابك وصلت لفريق My Car وهي حاليًا قيد المراجعة. هنبلغك فور اعتماد الحساب وتفعيل خدماته.</p></div></div>
       {showReviewModal && <div className="fixed inset-0 z-[150] grid place-items-center bg-slate-950/65 p-4 backdrop-blur-sm" role="presentation"><section role="alertdialog" aria-modal="true" aria-labelledby="account-review-title" className="w-full max-w-md overflow-hidden rounded-3xl border border-amber-100 bg-white text-center shadow-2xl"><div className="h-2 bg-gradient-to-l from-amber-400 via-orange-400 to-blue-600"/><div className="px-6 py-8 sm:px-9"><div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-amber-50 text-amber-600 ring-8 ring-amber-50/70"><Clock3 size={39}/></div><h2 id="account-review-title" className="mt-6 text-xl font-black text-slate-900 sm:text-2xl">حسابك قيد المراجعة</h2><span className="mt-3 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-extrabold text-amber-800">في انتظار الموافقة</span><p className="mt-4 text-sm leading-7 text-slate-600">شكرًا لتسجيلك في منصة My Car عربيتي. تم استلام بيانات حسابك بنجاح، وهي حاليًا قيد المراجعة من فريق الإدارة.</p><p className="mt-2 text-sm leading-7 text-slate-600">هنرسل لك إشعارًا فور الانتهاء من مراجعة حسابك وتفعيل خدمات المنصة.</p><button type="button" onClick={() => { localStorage.setItem('mycar_review_notice_seen_' + (user?.id || 'account'), '1'); setShowReviewModal(false) }} className="mt-7 min-h-12 w-full rounded-xl bg-[#123b68] px-5 font-extrabold text-white shadow-lg transition hover:bg-blue-900">حسنًا، فهمت</button></div></section></div>}
