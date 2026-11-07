@@ -163,7 +163,11 @@ export default function AuthCallbackPage() {
               window.location.replace('/complete-profile?role=' + encodeURIComponent(pendingRole))
               return
             }
-            throw new Error('اختر نوع الحساب من صفحة التسجيل قبل المتابعة باستخدام Google.')
+            // A first-time Google login may start from the sign-in dialog, without a role selected.
+            // Keep the Google session and send the user to the in-app role chooser instead of failing.
+            sessionStorage.setItem('mycar_google_needs_role', '1')
+            window.location.replace('/register?google=1')
+            return
           }
         }
         const invitationId = params.get('invitation')
