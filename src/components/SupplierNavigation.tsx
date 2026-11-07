@@ -1,7 +1,7 @@
 import { Bell, CarFront, ClipboardList, FileText, LayoutGrid, Megaphone, MessageCircle, Wrench } from 'lucide-react'
 
 const links = [
-  { href: '/workspace/supplier/vehicles', label: 'أسطولي', icon: CarFront, match: (path: string) => path.startsWith('/workspace/supplier') && !path.includes('/offers') && !path.endsWith('/account') },
+  { href: '/workspace/supplier/vehicles', label: 'أسطولي', icon: CarFront, match: (path: string) => path.startsWith('/workspace/supplier') && !path.includes('/offers') && !path.includes('employee-requests') && !path.endsWith('/account') },
   { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: ClipboardList, match: (path: string) => path === '/workspace/provider-employee-requests' || path === '/workspace/supplier/employee-requests' },
   { href: '/workspace/supplier/offers', label: 'عروضي', icon: FileText, match: (path: string) => path.startsWith('/workspace/supplier/offers') },
   { href: '/workspace/catalog', label: 'كتالوج السيارات', icon: LayoutGrid, match: (path: string) => path.startsWith('/workspace/catalog') },
