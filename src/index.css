@@ -873,3 +873,15 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-supplier-topbar .mc-workspace-header-actions>div>button>span:not(.absolute){display:none!important}
 .mc-supplier-topbar .mc-top-icon:hover{border-color:#93c5fd!important;background:#f0f7ff!important;color:#124caa!important}
 @media(max-width:760px){.mc-supplier-topbar{flex-direction:row!important;align-items:center!important;gap:.45rem!important;width:100%!important;margin:0!important;min-height:68px!important;padding:calc(.5rem + env(safe-area-inset-top)) .7rem .5rem!important}.mc-supplier-brand{flex:1 1 auto!important}.mc-supplier-brand>span{gap:.5rem!important}.mc-supplier-brand img{width:38px!important;height:38px!important;flex-basis:38px!important}.mc-supplier-brand span span{font-size:1rem!important}.mc-supplier-topbar .mc-workspace-header-actions{width:auto!important;flex-wrap:nowrap!important;gap:.35rem!important}.mc-supplier-topbar .mc-top-icon,.mc-supplier-topbar .mc-workspace-header-actions>div>button{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important}}
+
+
+/* Supplier secondary navigation: sits directly beneath the shared account header. */
+.mc-supplier-navigation{position:sticky;top:0;z-index:85;width:100%;border-bottom:1px solid #dbe6f2;background:rgba(248,251,255,.97);box-shadow:0 7px 20px rgba(15,35,65,.07);backdrop-filter:blur(16px)}
+.mc-supplier-navigation-inner{display:flex;min-height:58px;max-width:1440px;margin:0 auto;align-items:center;justify-content:flex-start;gap:.35rem;overflow-x:auto;padding:.45rem clamp(.7rem,2.5vw,1.5rem);scrollbar-width:none;overscroll-behavior-x:contain}
+.mc-supplier-navigation-inner::-webkit-scrollbar{display:none}
+.mc-supplier-navigation-link{position:relative;display:inline-flex;min-height:42px;flex:0 0 auto;align-items:center;justify-content:center;gap:.5rem;border:1px solid transparent;border-radius:12px;padding:.55rem .9rem;color:#526982;font-size:.82rem;font-weight:850;white-space:nowrap;transition:background .18s,border-color .18s,color .18s,box-shadow .18s}
+.mc-supplier-navigation-link:hover{border-color:#d7e6f8;background:#f0f6ff;color:#1557a0}
+.mc-supplier-navigation-link.is-active{border-color:#b9d7fa;background:linear-gradient(180deg,#eaf4ff,#dcecff);color:#124f99;box-shadow:inset 0 0 0 1px rgba(37,99,235,.06),0 3px 9px rgba(37,99,235,.08)}
+.mc-supplier-navigation-link.is-active::after{position:absolute;right:14px;bottom:-.48rem;left:14px;height:3px;border-radius:99px;background:#2672c9;content:""}
+.mc-supplier-navigation-link:focus-visible{outline:3px solid #7db9f5;outline-offset:2px}
+@media(max-width:760px){.mc-supplier-navigation-inner{min-height:54px;gap:.25rem;padding:.4rem .6rem}.mc-supplier-navigation-link{min-height:40px;gap:.4rem;padding:.5rem .72rem;font-size:.74rem}.mc-supplier-navigation-link svg{width:16px;height:16px}}
