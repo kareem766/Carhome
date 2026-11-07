@@ -46,20 +46,20 @@ const documents = {
 
 export default function LegalPages({ kind }: { kind: LegalKind }) {
   const document = documents[kind]
-  const [isSignedIn, setIsSignedIn] = useState(false)
+  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null)
   useEffect(() => {
     let active = true
-    if (!supabase) return
+    if (!supabase) { setIsSignedIn(false); return }
     void supabase.auth.getUser().then(({ data }) => { if (active) setIsSignedIn(Boolean(data.user)) })
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (active) setIsSignedIn(Boolean(session?.user)) })
     return () => { active = false; listener.subscription.unsubscribe() }
   }, [])
-  const returnHref = isSignedIn ? '/workspace' : '/'
-  const returnLabel = isSignedIn ? 'مساحة العمل' : 'الرئيسية'
+  const returnHref = isSignedIn === false ? '/' : '/workspace'
+  const returnLabel = isSignedIn === false ? 'الرئيسية' : 'مساحة العمل'
   return <main dir="rtl" className="min-h-screen bg-slate-50 text-slate-900">
-    <header className="border-b border-slate-200 bg-white"><div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-5 sm:px-6"><PlatformBrand/><a href={returnHref} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:border-blue-300 hover:text-blue-700"><ArrowRight size={17}/> {returnLabel}</a></div></header>
+    <header className="border-b border-slate-200 bg-white"><div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-5 sm:px-6"><PlatformBrand/>{isSignedIn === null ? <span className="text-xs text-slate-400">جارٍ التحقق من الحساب...</span> : <a href={returnHref} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:border-blue-300 hover:text-blue-700"><ArrowRight size={17}/> {returnLabel}</a>}</div></header>
     <section className="bg-gradient-to-br from-blue-950 via-blue-800 to-blue-700 text-white"><div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14"><span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold">{kind === 'privacy' ? <ShieldCheck size={16}/> : <FileText size={16}/>} MY CAR عربيتي · وثائق المنصة</span><h1 className="mt-5 text-3xl font-black sm:text-4xl">{document.title}</h1><p className="mt-4 max-w-3xl text-sm leading-8 text-blue-100 sm:text-base">{document.intro}</p><p className="mt-3 text-xs text-blue-200">آخر تحديث: 6 نوفمبر 2026</p></div></section>
-    <section className="mx-auto max-w-5xl space-y-4 px-4 py-8 sm:px-6 sm:py-12">{document.sections.map(([heading, body]) => <article key={heading} className="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm shadow-blue-950/5 sm:p-7"><h2 className="text-lg font-extrabold text-blue-950">{heading}</h2><p className="mt-3 text-sm leading-8 text-slate-600 sm:text-base">{body}</p></article>)}<div className="flex flex-wrap gap-3 pt-2"><a href={kind === 'privacy' ? '/terms' : '/privacy'} className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-blue-800">{kind === 'privacy' ? 'قراءة شروط الاستخدام' : 'قراءة سياسة الخصوصية'}</a><a href={returnHref} className="rounded-xl border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-800 transition hover:bg-blue-50">{isSignedIn ? "العودة لمساحة العمل" : "العودة للتسجيل"}</a></div></section>
+    <section className="mx-auto max-w-5xl space-y-4 px-4 py-8 sm:px-6 sm:py-12">{document.sections.map(([heading, body]) => <article key={heading} className="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm shadow-blue-950/5 sm:p-7"><h2 className="text-lg font-extrabold text-blue-950">{heading}</h2><p className="mt-3 text-sm leading-8 text-slate-600 sm:text-base">{body}</p></article>)}<div className="flex flex-wrap gap-3 pt-2"><a href={kind === 'privacy' ? '/terms' : '/privacy'} className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-blue-800">{kind === 'privacy' ? 'قراءة شروط الاستخدام' : 'قراءة سياسة الخصوصية'}</a>{isSignedIn !== null && <a href={returnHref} className="rounded-xl border border-blue-200 bg-white px-5 py-3 text-sm font-extrabold text-blue-800 transition hover:bg-blue-50">{isSignedIn ? "العودة لمساحة العمل" : "العودة للتسجيل"}</a>}</div></section>
     <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">© {new Date().getFullYear()} My Car عربيتي · منصة إلكترونية لعرض وتسويق السيارات للشركات</footer>
   </main>
 }
