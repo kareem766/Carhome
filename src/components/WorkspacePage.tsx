@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { vehicleCatalog } from '../data/vehicleCatalog'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
+import SupplierNavigation from './SupplierNavigation'
 import AccountProfilePage from './AccountProfilePage'
 
 type Role = 'company' | 'owner' | 'supplier'
@@ -588,6 +589,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
           <div className="mc-workspace-header-actions"><a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-top-icon"><MessageCircle size={18}/><span>المحادثات</span></a><button type="button" onClick={()=>void loadWorkspace()} aria-label="تحديث البيانات" title="تحديث البيانات" className="mc-top-icon"><RefreshCw size={17}/><span>تحديث</span></button><AccountNotifications/></div>
         </>}
       </header>
+      {role === 'supplier' && <SupplierNavigation/>}
       {role === 'supplier' && path !== '/workspace/supplier/vehicles' && <div className="mb-4 flex justify-start"><button type="button" onClick={() => { const fallback = '/workspace/supplier/vehicles'; if (document.referrer && new URL(document.referrer).origin === window.location.origin && window.history.length > 1) window.history.back(); else window.location.assign(fallback) }} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800"><ArrowLeft size={17}/> رجوع</button></div>}
       <div className="mc-workspace-mobile-nav">{sideNavigation}</div>
       </>}
