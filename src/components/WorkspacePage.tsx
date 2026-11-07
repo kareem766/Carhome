@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowLeft, Building2, CarFront, Wrench, ClipboardList, FileText, ImagePlus, LogOut, MessageCircle, Plus, RefreshCw, X, Clock3, CheckCircle2, XCircle, Send, Trash2, Megaphone, UserRound, Bot } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, Wrench, ClipboardList, FileText, ImagePlus, LogOut, MessageCircle, Plus, RefreshCw, X, Clock3, CheckCircle2, XCircle, Send, Trash2, Megaphone, Bot } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { vehicleCatalog } from '../data/vehicleCatalog'
 import PlatformBrand from './PlatformBrand'
@@ -577,13 +577,12 @@ export default function WorkspacePage({ role }: { role: Role }) {
       {reviewStatusNotice}
       {role !== 'owner' && <>
       <header className={`mc-workspace-topbar ${role === 'supplier' ? 'mc-supplier-topbar' : ''}`}>
-        {role === 'supplier' ? <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
-          <a href="/workspace/supplier/vehicles" aria-label="My Car عربيتي - مساحة مورد الأسطول" className="shrink-0"><PlatformBrand/></a>
-          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
-            <a href="/workspace/supplier/account" className="mc-top-icon" aria-label="الحساب" title="الحساب"><UserRound size={18}/><span>الحساب</span></a>
-            <a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-top-icon"><MessageCircle size={18}/><span>المحادثات</span></a>
-            <button type="button" onClick={()=>window.location.reload()} aria-label="تحديث الصفحة" title="تحديث الصفحة" className="mc-top-icon"><RefreshCw size={17}/><span>تحديث</span></button>
+        {role === 'supplier' ? <div className="flex w-full min-w-0 flex-nowrap items-center justify-between gap-2">
+          <a href="/workspace/supplier/vehicles" aria-label="My Car عربيتي - مساحة مورد الأسطول" className="min-w-0 shrink"><PlatformBrand compact/></a>
+          <div className="flex shrink-0 flex-nowrap items-center justify-end gap-1.5">
             <AccountNotifications/>
+            <a href="/messages" aria-label="المحادثات" title="المحادثات" className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm"><MessageCircle size={18}/></a>
+            <button type="button" onClick={()=>window.location.reload()} aria-label="تحديث الصفحة" title="تحديث الصفحة" className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm"><RefreshCw size={17}/></button>
           </div>
         </div> : <>
           <div className="mc-workspace-heading"><span className="text-xs font-bold text-slate-400">My Car / مساحة العمل</span><h1 className="mt-1 text-lg font-extrabold text-slate-900">{names[role]}</h1><p className="mc-workspace-subtitle">كل ما تحتاجه لإدارة سياراتك وطلباتك من مكان واحد.</p></div>
