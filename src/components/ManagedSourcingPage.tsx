@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 import AdminPageNavigation from './AdminPageNavigation'
+import CompanyPageSidebar from './CompanyPageSidebar'
 
 type Row = Record<string, any>
 const input = 'mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-[14px] font-medium leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-100'
@@ -137,7 +138,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   if(e)setError(e.message);else await load()
  }
  const current=requests.find(r=>r.id===selected)
- return <main dir="rtl" className="min-h-screen bg-[#f3f7fc] font-sans text-[14px] leading-7 text-slate-900 antialiased"><div className="mx-auto max-w-[1380px] px-3 py-4 sm:px-6 sm:py-6">
+ return <>{!admin && <CompanyPageSidebar active="managed-sourcing"/>}<main dir="rtl" className={(admin ? "" : "mc-company-page-with-sidebar ") + "mc-managed-sourcing-page min-h-screen bg-[#f3f7fc] text-[14px] leading-7 text-slate-900 antialiased"}><div className="mx-auto max-w-[1380px] px-3 py-4 sm:px-6 sm:py-6">
   <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm sm:px-5"><PlatformBrand/><div className="flex items-center gap-2"><a href={admin?'/workspace/admin':'/workspace/company'} className="rounded-xl border px-3 py-2 text-sm font-bold">رجوع لمساحة العمل</a><AccountNotifications/></div></header>
   {admin?<AdminPageNavigation/>:null}
   <section className="mt-5 rounded-3xl bg-gradient-to-l from-[#0b2340] via-[#123a61] to-[#1768a6] p-6 text-white shadow-lg sm:p-8"><div className="flex flex-wrap items-center justify-between gap-4"><div><span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold"><BriefcaseBusiness size={15}/> خدمة البحث والتوفير نيابة عن شركتك</span><h1 className="mt-4 text-2xl font-black sm:text-3xl">{admin?'إدارة خدمة البحث والتوفير':'دع My Car تبحث عن السيارات المناسبة لشركتك'}</h1><p className="mt-2 max-w-3xl text-sm leading-7 text-blue-100">{admin?'إدارة الطلبات والتسعير والمدفوعات والاشتراكات وتجهيز عروض الموردين.':'فريق متخصص يتولى البحث والتواصل مع الملاك وموردي الأساطيل والتحقق من توافر السيارات وتجهيز عروض مقارنة.'}</p></div><div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-sm"><ShieldCheck className="mb-2 text-cyan-200"/><b>تفويض ومتابعة موثقة</b><p className="mt-1 text-xs text-blue-100">لا نضمن إتمام الإيجار أو تشغيل المركبة.</p></div></div></section>
@@ -163,5 +164,4 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   <h3 className="mt-5 font-extrabold">سجل تحديثات الطلب</h3><div className="mt-2 space-y-2">{updates.map(u=><article key={u.id} className="rounded-xl border p-3"><div className="flex items-center justify-between gap-2"><b className="text-sm">{u.title}</b><time className="text-[11px] text-slate-400">{new Date(u.created_at).toLocaleString('ar-EG')}</time></div><p className="mt-1 text-sm leading-6 text-slate-600">{u.body}</p></article>)}{!updates.length&&<p className="text-sm text-slate-500">لا توجد تحديثات بعد.</p>}</div>
   </>:<div className="py-16 text-center text-slate-500"><Search size={30} className="mx-auto mb-3 text-slate-300"/>اختر طلبًا من القائمة لعرض التفاصيل وإدارته.</div>}</div></section>:null}
   <footer className="mt-7 rounded-xl border bg-white p-4 text-xs leading-6 text-slate-500">خدمة البحث والتنسيق لا تمثل ضمانًا لتشغيل المركبات أو توافرها أو إتمام عقد الإيجار. رسوم My Car تخص البحث والتواصل وتجهيز العروض فقط، ولا تشمل قيمة الإيجار. الاتفاق المالي والتعاقدي على الإيجار يتم مباشرة بين الشركة ومقدم السيارة خارج نطاق تحصيل المنصة.</footer>
- </div></main>
-}
+ </div></main></>}

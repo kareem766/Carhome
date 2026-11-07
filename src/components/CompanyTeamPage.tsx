@@ -3,6 +3,7 @@ import { ArrowRight, Users, UserPlus, ShieldCheck, Copy, RefreshCw, Trash2, KeyR
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
+import CompanyPageSidebar from './CompanyPageSidebar'
 
 type Member = { user_id:string; role:'owner'|'manager'|'member'; created_at:string; email:string|null }
 const roleLabel:Record<string,string>={owner:'مالك الشركة',manager:'مدير',member:'موظف'}
@@ -62,7 +63,7 @@ export default function CompanyTeamPage(){
   if(data===false){setError('لم يتم تنفيذ الإجراء؛ تحقق من صلاحيات الحساب.');return}
   setNotice(success);setRefresh(v=>v+1)
  }
- return <main dir="rtl" className="min-h-screen bg-[linear-gradient(180deg,#f4f8ff_0%,#f8fbff_42%,#eef4fc_100%)] text-slate-900">
+ return <><CompanyPageSidebar active="team"/><main dir="rtl" className="mc-company-page-with-sidebar min-h-screen bg-[linear-gradient(180deg,#f4f8ff_0%,#f8fbff_42%,#eef4fc_100%)] text-slate-900">
   <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 shadow-[0_8px_30px_rgba(20,55,95,.06)] backdrop-blur-xl">
    <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
     <div className="flex min-w-0 items-center justify-between gap-3">
@@ -107,5 +108,4 @@ export default function CompanyTeamPage(){
    </section>
    <p className="flex items-center gap-2 text-xs text-slate-500"><CheckCircle2 size={16}/> بيانات الدخول تُنشأ من الخادم، ولا يتم تخزين كلمة المرور المؤقتة كنص مكشوف في قاعدة البيانات.</p>
   </div>
- </main>
-}
+ </main></>}
