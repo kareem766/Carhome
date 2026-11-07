@@ -858,3 +858,17 @@ main.min-h-screen :is(input, select, textarea):disabled {
 }
 .mc-entry-banner-frame { animation: mcEntryBannerNeon 1.6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .mc-entry-banner-frame { animation: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(59,130,246,.45), 0 0 18px rgba(14,165,233,.3); } }
+
+/* Restore the supplier workspace's original light header; only order the brand and icon controls. */
+.mc-supplier-topbar{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:.65rem!important;min-height:68px!important;padding:.65rem 1rem!important;background:rgba(255,255,255,.97)!important;border-bottom:1px solid #e4eaf2!important;box-shadow:0 4px 14px rgba(15,35,65,.045)!important;overflow:visible!important}
+.mc-supplier-brand{display:flex;align-items:center;min-width:0;flex:1 1 auto;color:#123456;text-decoration:none}
+.mc-supplier-brand>span{display:inline-flex;align-items:center;gap:.55rem;white-space:nowrap}
+.mc-supplier-brand img{width:30px!important;height:30px!important;flex:0 0 30px}
+.mc-supplier-brand span span{font-size:1rem;line-height:1.1}
+.mc-supplier-topbar .mc-workspace-header-actions{display:flex!important;flex:0 0 auto!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-end!important;gap:.45rem!important;width:auto!important;min-width:0!important}
+.mc-supplier-topbar .mc-top-icon{display:grid!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;padding:0!important;place-items:center!important;border:1px solid #e3eaf3!important;border-radius:12px!important;background:#fff!important;color:#38516e!important;box-shadow:none!important}
+.mc-supplier-topbar .mc-workspace-header-actions>div{display:flex;align-items:center;gap:.4rem;flex:0 0 auto}
+.mc-supplier-topbar .mc-workspace-header-actions>div>button{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;border-radius:12px!important}
+.mc-supplier-topbar .mc-workspace-header-actions>div>button>span:not(.absolute){display:none!important}
+.mc-supplier-topbar .mc-top-icon:hover{border-color:#93c5fd!important;background:#f0f7ff!important;color:#124caa!important}
+@media(max-width:760px){.mc-supplier-topbar{flex-direction:row!important;align-items:center!important;gap:.4rem!important;width:100%!important;margin:0!important;padding:calc(.55rem + env(safe-area-inset-top)) .7rem .55rem!important}.mc-supplier-brand img{width:27px!important;height:27px!important;flex-basis:27px}.mc-supplier-brand span span{font-size:.91rem}.mc-supplier-topbar .mc-workspace-header-actions{width:auto!important;flex-wrap:nowrap!important;gap:.35rem!important}.mc-supplier-topbar .mc-top-icon,.mc-supplier-topbar .mc-workspace-header-actions>div>button{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important}}
