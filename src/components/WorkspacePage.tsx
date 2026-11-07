@@ -582,7 +582,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
           <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             <a href="/workspace/supplier/account" className="mc-top-icon" aria-label="الحساب" title="الحساب"><UserRound size={18}/><span>الحساب</span></a>
             <a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-top-icon"><MessageCircle size={18}/><span>المحادثات</span></a>
-            <button type="button" onClick={()=>void loadWorkspace()} aria-label="تحديث الصفحة والبيانات" title="تحديث الصفحة والبيانات" className="mc-top-icon"><RefreshCw size={17}/><span>تحديث</span></button>
+            <button type="button" onClick={()=>window.location.reload()} aria-label="تحديث الصفحة" title="تحديث الصفحة" className="mc-top-icon"><RefreshCw size={17}/><span>تحديث</span></button>
             <AccountNotifications/>
           </div>
         </div> : <>
