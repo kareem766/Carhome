@@ -608,7 +608,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     <div className="mc-workspace-content min-w-0">
       {reviewStatusNotice}
       {role !== 'owner' && <>
-      <header className={`mc-workspace-topbar ${role === 'supplier' ? 'mc-supplier-topbar' : ''}`}>
+      <header className={`mc-workspace-topbar ${role === 'supplier' ? 'mc-supplier-topbar' : role === 'company' ? 'mc-company-topbar' : ''}`}>
         {role === 'supplier' ? <>
           <a href="/workspace/supplier/vehicles" aria-label="My Car عربيتي" className="mc-supplier-brand"><PlatformBrand compact/></a>
           <div className="mc-workspace-header-actions">
@@ -617,7 +617,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
           </div>
         </> : <>
           <div className="mc-workspace-heading"><span className="text-xs font-bold text-slate-400">My Car / مساحة العمل</span><h1 className="mt-1 text-lg font-extrabold text-slate-900">{names[role]}</h1><p className="mc-workspace-subtitle">كل ما تحتاجه لإدارة سياراتك وطلباتك من مكان واحد.</p></div>
-          <div className="mc-workspace-header-actions"><a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-top-icon"><MessageCircle size={18}/><span>المحادثات</span></a><button type="button" onClick={()=>void loadWorkspace()} aria-label="تحديث البيانات" title="تحديث البيانات" className="mc-top-icon"><RefreshCw size={17}/><span>تحديث</span></button><AccountNotifications/></div>
+          <div className="mc-workspace-header-actions mc-company-header-actions"><a href="/messages" aria-label="المحادثات" title="فتح المحادثات" className="mc-top-icon mc-company-top-action"><MessageCircle size={18}/><span>المحادثات</span></a><button type="button" onClick={()=>void loadWorkspace()} aria-label="تحديث البيانات" title="تحديث بيانات مساحة الشركة" className="mc-top-icon mc-company-top-action"><RefreshCw size={17}/><span>تحديث البيانات</span></button><div className="mc-company-account-actions"><AccountNotifications/></div></div>
         </>}
       </header>
       {role === 'supplier' && <SupplierNavigation/>}
