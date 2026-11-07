@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { Bell, CircleUserRound, LogOut, MessageCircle, ChevronDown, X, ExternalLink, CarFront, ClipboardList, FileText, Megaphone, Headset } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -218,7 +219,7 @@ export default function AccountNotifications() {
       </div>}
       <a href="/messages" className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-sky-50 px-3 py-2.5 text-sm font-bold text-sky-800 hover:bg-sky-100"><MessageCircle size={16}/> الانتقال إلى المحادثات</a>
     </div>}
-    {open && <div style={{ position: 'fixed', top: accountMenuPosition.top, right: accountMenuPosition.right, width: 'min(20rem, calc(100vw - 1.5rem))', zIndex: 200 }} className="mc-account-menu max-h-[min(80vh,34rem)] overflow-y-auto rounded-2xl border border-sky-200 bg-white text-right text-slate-800 shadow-[0_16px_44px_rgba(15,23,42,.24),0_0_0_1px_rgba(56,139,253,.14)]">
+    {open && createPortal(<div style={{ position: 'fixed', top: accountMenuPosition.top, right: accountMenuPosition.right, width: 'min(20rem, calc(100vw - 1.5rem))', zIndex: 9999 }} className="mc-account-menu max-h-[min(80vh,34rem)] overflow-y-auto rounded-2xl border border-sky-200 bg-white text-right text-slate-800 shadow-[0_16px_44px_rgba(15,23,42,.24),0_0_0_1px_rgba(56,139,253,.14)]">
       <div className="bg-gradient-to-l from-[#071d35] via-[#103b67] to-[#126a9c] p-4 text-white"><div className="flex items-center gap-3"><AccountAvatar name={identity.name} size="large"/><div className="min-w-0"><p className="truncate text-sm font-black">{identity.name}</p><p className="mt-1 truncate text-[11px] text-blue-100">{platformAdmin ? 'مدير المنصة' : identity.role}</p></div></div><p className="mt-3 break-all text-[11px] text-blue-100/90">{identity.email}</p>{identity.organization && <p className="mt-1 truncate text-xs font-bold text-cyan-100">{identity.organization}</p>}</div>
       <div className="grid gap-1 p-2">
         <a href={platformAdmin ? '/workspace/admin' : identity.role === 'حساب موظف' ? '/workspace/employee/account' : identity.role === 'مالك سيارة' ? '/workspace/owner/account' : identity.role === 'مورد أسطول' ? '/workspace/supplier/account' : identity.role === 'حساب شركة' ? '/workspace/company/account' : '/workspace'} onClick={()=>setOpen(false)} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-bold text-slate-700 hover:bg-sky-50 hover:text-blue-800"><CircleUserRound size={17}/> {platformAdmin ? 'لوحة الإدارة' : 'بيانات الحساب'} {!platformAdmin && <span className="mr-auto text-xs text-slate-400">تعديل</span>}</a>
@@ -228,6 +229,6 @@ export default function AccountNotifications() {
         <a href={platformAdmin ? '/workspace/admin/support' : '/support'} onClick={()=>setOpen(false)} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-bold text-slate-700 hover:bg-sky-50 hover:text-blue-800"><Headset size={17}/> {platformAdmin ? 'إدارة الدعم والتذاكر' : 'مركز الدعم الفني'}</a>
       </div>
       <div className="border-t border-slate-100 p-2"><button onClick={() => void logout()} className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-extrabold text-rose-700 hover:bg-rose-50"><LogOut size={17}/> تسجيل الخروج</button></div>
-    </div>}
+    </div>, document.body)}
   </div>
 }
