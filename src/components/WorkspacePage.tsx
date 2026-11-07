@@ -576,10 +576,21 @@ export default function WorkspacePage({ role }: { role: Role }) {
     <div className="mc-workspace-content min-w-0">
       {reviewStatusNotice}
       {role !== 'owner' && <>
-      <header className="mc-workspace-topbar">
-        <div className="mc-workspace-heading"><span className="text-xs font-bold text-slate-400">My Car / مساحة العمل</span><h1 className="mt-1 text-lg font-extrabold text-slate-900">{names[role]}</h1><p className="mc-workspace-subtitle">كل ما تحتاجه لإدارة سياراتك وطلباتك من مكان واحد.</p></div>
-        <div className="mc-workspace-header-actions"><a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-top-icon"><MessageCircle size={18}/><span>المحادثات</span></a><button type="button" onClick={()=>void loadWorkspace()} aria-label="تحديث البيانات" title="تحديث البيانات" className="mc-top-icon"><RefreshCw size={17}/><span>تحديث</span></button><AccountNotifications/></div>
+      <header className={`mc-workspace-topbar ${role === 'supplier' ? 'mc-supplier-topbar' : ''}`}>
+        {role === 'supplier' ? <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
+          <a href="/workspace/supplier/vehicles" aria-label="My Car عربيتي - مساحة مورد الأسطول" className="shrink-0"><PlatformBrand/></a>
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+            <a href="/workspace/supplier/account" className="mc-top-icon" aria-label="الحساب" title="الحساب"><UserRound size={18}/><span>الحساب</span></a>
+            <a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-top-icon"><MessageCircle size={18}/><span>المحادثات</span></a>
+            <button type="button" onClick={()=>void loadWorkspace()} aria-label="تحديث الصفحة والبيانات" title="تحديث الصفحة والبيانات" className="mc-top-icon"><RefreshCw size={17}/><span>تحديث</span></button>
+            <AccountNotifications/>
+          </div>
+        </div> : <>
+          <div className="mc-workspace-heading"><span className="text-xs font-bold text-slate-400">My Car / مساحة العمل</span><h1 className="mt-1 text-lg font-extrabold text-slate-900">{names[role]}</h1><p className="mc-workspace-subtitle">كل ما تحتاجه لإدارة سياراتك وطلباتك من مكان واحد.</p></div>
+          <div className="mc-workspace-header-actions"><a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-top-icon"><MessageCircle size={18}/><span>المحادثات</span></a><button type="button" onClick={()=>void loadWorkspace()} aria-label="تحديث البيانات" title="تحديث البيانات" className="mc-top-icon"><RefreshCw size={17}/><span>تحديث</span></button><AccountNotifications/></div>
+        </>}
       </header>
+      {role === 'supplier' && path !== '/workspace/supplier/vehicles' && <div className="mb-4 flex justify-start"><button type="button" onClick={() => { const fallback = '/workspace/supplier/vehicles'; if (document.referrer && new URL(document.referrer).origin === window.location.origin && window.history.length > 1) window.history.back(); else window.location.assign(fallback) }} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800"><ArrowLeft size={17}/> رجوع</button></div>}
       <div className="mc-workspace-mobile-nav">{sideNavigation}</div>
       </>}
       <div className="mc-workspace-page">
