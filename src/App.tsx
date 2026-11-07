@@ -187,35 +187,69 @@ export default function App() {
     if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
     const loadImage = (sources: string[]) => new Promise<string>((resolve) => {
-      let index = 0
-      const tryNext = () => {
-        const source = sources[index++]
-        if (!source) {
-          // Use the locally bundled car mark as a last-resort visual instead of leaving visitors on an endless loader.
-          resolve('/carhome-icon.svg')
-          return
-        }
-        const image = new Image()
-        let settled = false
-        const advance = () => {
-          if (settled) return
-          settled = true
-          window.clearTimeout(timeout)
-          image.onload = null
-          image.onerror = null
-          tryNext()
-        }
-        const timeout = window.setTimeout(advance, 6000)
-        image.onload = () => {
-          if (settled) return
-          settled = true
-          window.clearTimeout(timeout)
-          void image.decode().catch(() => undefined).then(() => resolve(source))
-        }
-        image.onerror = advance
-        image.src = source
+      const fallbackSource = '/carhome-icon.svg'
+      let finished = false
+      const timers: number[] = []
+      const finish = (source: string) => {
+        if (finished) return
+        finished = true
+        timers.forEach((timer) => window.clearTimeout(timer))
+        resolve(source)
       }
-      tryNext()
+      const finishWithFallback = () => {
+        const fallback = new Image()
+        let fallbackSettled = false
+        const settleFallback = () => {
+          if (fallbackSettled) return
+          fallbackSettled = true
+          finish(fallbackSource)
+        }
+        timers.push(window.setTimeout(settleFallback, 1500))
+        fallback.onload = () => {
+          if (fallbackSettled) return
+          const decode = typeof fallback.decode === 'function' ? fallback.decode().catch(() => undefined) : Promise.resolve()
+          const decodeTimeout = window.setTimeout(settleFallback, 1000)
+          timers.push(decodeTimeout)
+          void decode.then(() => settleFallback())
+        }
+        fallback.onerror = settleFallback
+        fallback.src = fallbackSource
+      }
+      if (!sources.length) {
+        finishWithFallback()
+        return
+      }
+      let failed = 0
+      const fail = () => {
+        failed += 1
+        if (failed >= sources.length) finishWithFallback()
+      }
+      sources.forEach((source) => {
+        const image = new Image()
+        let attemptSettled = false
+        const timeout = window.setTimeout(() => {
+          if (attemptSettled) return
+          attemptSettled = true
+          fail()
+        }, 4500)
+        timers.push(timeout)
+        image.onerror = () => {
+          if (attemptSettled) return
+          attemptSettled = true
+          window.clearTimeout(timeout)
+          fail()
+        }
+        image.onload = () => {
+          if (attemptSettled) return
+          attemptSettled = true
+          window.clearTimeout(timeout)
+          const decode = typeof image.decode === 'function' ? image.decode().catch(() => undefined) : Promise.resolve()
+          const decodeTimeout = window.setTimeout(() => finish(source), 2000)
+          timers.push(decodeTimeout)
+          void decode.then(() => finish(source))
+        }
+        image.src = source
+      })
     })
     void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
       if (!active) return
