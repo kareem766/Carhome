@@ -7,9 +7,9 @@ import PlatformEntryBanner from './PlatformEntryBanner'
 function AccountAvatar({ name, size = 'small' }: { name: string; size?: 'small' | 'large' }) {
   const initial = name.trim().charAt(0) || 'ح'
   const dimensions = size === 'large' ? 'h-11 w-11 text-base' : 'h-9 w-9 text-sm'
-  return <span aria-label={`حساب ${name}`} className={`grid ${dimensions} shrink-0 place-items-center overflow-hidden rounded-full border-2 border-cyan-300 bg-[#103b67] font-black text-white shadow-[0_0_10px_rgba(34,211,238,.35)]`}>
+  return <div aria-label={`حساب ${name}`} className={`grid ${dimensions} shrink-0 place-items-center overflow-hidden rounded-full border-2 border-cyan-300 bg-[#103b67] font-black text-white shadow-[0_0_10px_rgba(34,211,238,.35)]`}>
     {initial}
-  </span>
+  </div>
 }
 
 type PlatformNotification = {
@@ -203,7 +203,7 @@ export default function AccountNotifications() {
       {unreadCount > 0 && <span aria-label={`${unreadCount} إشعارات غير مقروءة`} className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>}
     </button>
     {incomingNotification && <div role="status" className="fixed left-1/2 top-16 z-[120] w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 rounded-2xl border border-sky-200 bg-white p-4 text-right text-slate-800 shadow-2xl sm:left-auto sm:right-5 sm:translate-x-0"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-black text-sky-900">{incomingNotification.title}</p>{incomingNotification.body && <p className="mt-1 text-xs leading-6 text-slate-600">{incomingNotification.body}</p>}</div><button type="button" aria-label="إغلاق التنبيه" onClick={() => setIncomingNotification(null)} className="rounded-lg p-1 text-slate-500 hover:bg-slate-100"><X size={16}/></button></div><button type="button" onClick={() => { void openNotification(incomingNotification); setIncomingNotification(null); setNotificationsOpen(true) }} className="mt-3 text-xs font-extrabold text-sky-800">عرض الإشعار</button></div>}
-    <button ref={accountButtonRef} type="button" aria-expanded={open} aria-label="تفاصيل الحساب" onClick={() => { const rect = accountButtonRef.current?.getBoundingClientRect(); if (rect) setAccountMenuPosition({ top: Math.max(12, Math.min(rect.bottom + 8, window.innerHeight - 440)), right: Math.max(12, Math.min(window.innerWidth - rect.right, window.innerWidth - 320)) }); setOpen(v => !v); setNotificationsOpen(false) }} className="flex h-11 w-11 shrink-0 items-center justify-center gap-2 rounded-full border border-cyan-200 bg-[#071d35] p-0 text-white shadow-[0_0_16px_rgba(34,211,238,.18)] transition hover:border-cyan-300 sm:h-auto sm:w-auto sm:justify-start sm:px-3 sm:py-1.5">
+    <button ref={accountButtonRef} type="button" aria-expanded={open} aria-label="تفاصيل الحساب" onClick={() => { const rect = accountButtonRef.current?.getBoundingClientRect(); if (rect) { const mobile = window.innerWidth <= 760; setAccountMenuPosition({ top: Math.max(12, Math.min(mobile ? rect.bottom - 4 : rect.bottom + 8, window.innerHeight - 440)), right: Math.max(12, Math.min(window.innerWidth - rect.right, window.innerWidth - 320)) }); } setOpen(v => !v); setNotificationsOpen(false) }} className="flex h-11 w-11 shrink-0 items-center justify-center gap-2 rounded-full border border-cyan-200 bg-[#071d35] p-0 text-white shadow-[0_0_16px_rgba(34,211,238,.18)] transition hover:border-cyan-300 sm:h-auto sm:w-auto sm:justify-start sm:px-3 sm:py-1.5">
       <AccountAvatar name={identity.name}/>
       <span className="hidden max-w-36 text-right sm:block"><span className="block truncate text-xs font-extrabold">{identity.name}</span><span className="block truncate text-[10px] text-cyan-100">{platformAdmin ? 'مدير المنصة' : identity.organization || identity.role}</span></span><ChevronDown size={14} className="hidden text-cyan-200 sm:block"/>
     </button>
