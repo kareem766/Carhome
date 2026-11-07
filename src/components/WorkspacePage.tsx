@@ -591,7 +591,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       </header>
       {role === 'supplier' && <SupplierNavigation/>}
       {role === 'supplier' && path !== '/workspace/supplier/vehicles' && <div className="mb-4 flex justify-start"><button type="button" onClick={() => { const fallback = '/workspace/supplier/vehicles'; if (document.referrer && new URL(document.referrer).origin === window.location.origin && window.history.length > 1) window.history.back(); else window.location.assign(fallback) }} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800"><ArrowLeft size={17}/> رجوع</button></div>}
-      <div className="mc-workspace-mobile-nav">{sideNavigation}</div>
+      {role !== 'supplier' && <div className="mc-workspace-mobile-nav">{sideNavigation}</div>}
       </>}
       <div className="mc-workspace-page">
     {isAccountPage ? <AccountProfilePage role={role} /> : <>{dashboard}{feedback}</>}
