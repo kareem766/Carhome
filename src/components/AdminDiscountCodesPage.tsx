@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, CheckCircle2, Plus, RefreshCw, Save, TicketPercent, XCircle } from 'lucide-react'
+import { Plus, RefreshCw, Save, TicketPercent } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AdminPageNavigation from './AdminPageNavigation'
@@ -31,7 +31,7 @@ export default function AdminDiscountCodesPage(){
   setAuthorized(true)
   const [{data:codes,error:codesError},{data:uses,error:usesError}]=await Promise.all([
    supabase.from('discount_codes').select('*').contains('services',['company_subscription']).order('created_at',{ascending:false}),
-   supabase.from('discount_code_redemptions').select('id,code,service,original_amount_egp,discount_amount_egp,final_amount_egp,status,created_at,discount_code_id').eq('service','company_subscription').order('created_at',{ascending:false}).limit(50)
+   supabase.from('discount_code_redemptions').select('id,code,service,original_amount_egp,discount_amount_egp,final_amount_egp,status,created_at,discount_code_id').eq('service','company_subscription').order('created_at',{ascending:false}).limit(20)
   ])
   if(codesError)setError('تعذر تحميل أكواد الخصم: '+codesError.message)
   else setRows((codes||[]) as DiscountCode[])
@@ -39,7 +39,11 @@ export default function AdminDiscountCodesPage(){
   else{
    const list=(uses||[]) as (Redemption&{discount_code_id:string})[]
    setRedemptions(list)
-   setCounts(list.reduce<Record<string,number>>((acc,row)=>({...acc,[row.discount_code_id]:(acc[row.discount_code_id]||0)+1}),{}))
+   const countRows=await Promise.all(((codes||[]) as DiscountCode[]).map(async row=>{
+    const {count}=await supabase.from('discount_code_redemptions').select('id',{count:'exact',head:true}).eq('discount_code_id',row.id).in('status',['pending','confirmed'])
+    return [row.id,count||0] as const
+   }))
+   setCounts(Object.fromEntries(countRows))
   }
   setLoading(false)
  }
