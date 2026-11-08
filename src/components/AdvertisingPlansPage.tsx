@@ -28,13 +28,13 @@ export default function AdvertisingPlansPage(){
     const [{data:planRows,error:planError},{data:auth},{data:paymentSettings}]=await Promise.all([
       supabase.from('advertising_plans').select('id,name,description,duration_days,price_egp,features,display_order,placement_type').eq('is_active',true).order('display_order').order('created_at'),
       supabase.auth.getUser(),
-      supabase.from('public_platform_settings').select('instapay_number,vodafone_cash_number').eq('id',true).maybeSingle()
+      supabase.from('public_platform_settings').select('instapay_number,vodafone_cash_number').limit(1).maybeSingle()
     ])
     if(!active)return
     if(planError)setError('تعذر تحميل الباقات: '+planError.message)
     const availablePlans=(planRows||[]) as Plan[]
     setPlans(premiumOnly?availablePlans.filter(plan=>plan.placement_type==='premium'):availablePlans)
-    if(paymentSettings)setPaymentInfo({instapay_number:paymentSettings.instapay_number||'',vodafone_cash_number:paymentSettings.vodafone_cash_number||''})
+    if(paymentSettings){setPaymentInfo({instapay_number:String(paymentSettings.instapay_number||'').trim(),vodafone_cash_number:String(paymentSettings.vodafone_cash_number||'').trim()})}else{setError('تعذر تحميل أرقام التحويل. راجع إعدادات الدفع أو حدّث الصفحة.')}
     if(auth.user){
       setUserId(auth.user.id)
       const {data:membership}=await supabase.from('organization_memberships').select('organization_id,organizations(organization_type)').eq('user_id',auth.user.id).limit(1).maybeSingle()
