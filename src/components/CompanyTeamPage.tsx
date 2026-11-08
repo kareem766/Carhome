@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 import CompanyPageSidebar from './CompanyPageSidebar'
+import PlanUpgradeNotice from './PlanUpgradeNotice'
 
 type Member = { user_id:string; role:'owner'|'manager'|'member'; created_at:string; email:string|null }
 const roleLabel:Record<string,string>={owner:'مالك الشركة',manager:'مدير',member:'موظف'}
@@ -21,6 +22,7 @@ export default function CompanyTeamPage(){
  const [saving,setSaving]=useState(false)
  const [error,setError]=useState('')
  const [notice,setNotice]=useState('')
+ const [planLimitNotice,setPlanLimitNotice]=useState('')
  const [refresh,setRefresh]=useState(0)
 
  const load=useCallback(async()=>{
@@ -40,12 +42,12 @@ export default function CompanyTeamPage(){
 
  async function createEmployee(e:FormEvent){
   e.preventDefault();if(!supabase||saving)return
-  setSaving(true);setError('');setNotice('');setTemporaryPassword('')
+  setSaving(true);setError('');setNotice('');setPlanLimitNotice('');setTemporaryPassword('')
   const normalizedEmail=email.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF\u00A0]/g,'').replace(/\s+/g,'').trim().toLowerCase()
   const validEmail=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i.test(normalizedEmail)
   if(!validEmail){setError('صيغة البريد الإلكتروني غير صحيحة. تأكد من كتابته بالشكل name@example.com ومن عدم وجود مسافات.');setSaving(false);return}
   const {data,error:invokeError}=await supabase.functions.invoke('admin-managed-accounts',{body:{action:'create_company_member',display_name:displayName.trim(),email:normalizedEmail,role}})
-  if(invokeError||data?.error){setError(data?.error||invokeError?.message||'تعذر إنشاء حساب الموظف.');setSaving(false);return}
+  if(invokeError||data?.error){const message=String(data?.error||invokeError?.message||'تعذر إنشاء حساب الموظف.');if(message.includes('الحد الأقصى')||message.includes('حد أعضاء الفريق'))setPlanLimitNotice(message);else setError(message);setSaving(false);return}
   setTemporaryPassword(String(data.temporary_password||''))
   setNotice('تم إنشاء حساب الموظف وربطه بالشركة. انسخ كلمة المرور المؤقتة وشاركها معه؛ لن تظهر مرة أخرى بعد مغادرة هذه الصفحة.')
   setDisplayName('');setEmail('');setRole('member');setSaving(false);setRefresh(v=>v+1)
@@ -82,6 +84,7 @@ export default function CompanyTeamPage(){
    </section>
    {error&&<div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
    {notice&&<div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">{notice}</div>}
+   {planLimitNotice&&<PlanUpgradeNotice title="وصلت شركتك إلى الحد المسموح للموظفين" message={planLimitNotice+' يمكنك ترقية الاشتراك لزيادة عدد أعضاء الفريق.'}/>}
    {myRole==='owner'&&<section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,.8fr)]">
     <form onSubmit={createEmployee} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
      <div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><UserPlus/></span><div><h2 className="font-black">إنشاء حساب موظف</h2><p className="text-xs text-slate-500">لن يحتاج الموظف إلى رابط دعوة أو إنشاء حساب بنفسه.</p></div></div>
