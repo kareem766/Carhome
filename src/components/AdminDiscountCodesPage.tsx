@@ -39,7 +39,7 @@ export default function AdminDiscountCodesPage(){
   else{
    const list=(uses||[]) as (Redemption&{discount_code_id:string})[]
    setRedemptions(list)
-   setCounts(list.reduce((acc,row)=>({...acc,[row.discount_code_id]:(acc[row.discount_code_id]||0)+1}),{}))
+   setCounts(list.reduce<Record<string,number>>((acc,row)=>({...acc,[row.discount_code_id]:(acc[row.discount_code_id]||0)+1}),{}))
   }
   setLoading(false)
  }
