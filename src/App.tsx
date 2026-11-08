@@ -271,6 +271,8 @@ export default function App() {
   if (pathIsHome(window.location.pathname) && !homeImagesReady) return <PlatformLoading />
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (authUser && adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات لوحة التحكم</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
+  // Do not briefly render private workspace content while the current admin role is still being resolved.
+  if (settings.maintenance_mode && !authLoaded && !path.startsWith('/workspace/admin')) return <PlatformLoading />
   // Enforce maintenance mode across every non-admin application route, not only the public homepage and registration pages.
   if (settings.maintenance_mode && authLoaded && !isPlatformAdmin && !path.startsWith('/workspace/admin') && !['/privacy','/terms','/auth/callback','/reset-password','/first-login-password'].includes(path)) {
     return <ServiceNotice settings={settings} title="المنصة تحت الصيانة" message="نعمل حاليًا على تحسين خدمات My Car عربيتي. ستعود المنصة للعمل فور انتهاء الصيانة، ونعتذر عن أي إزعاج." />
