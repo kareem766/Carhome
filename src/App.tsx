@@ -26,6 +26,7 @@ const AdminAnalyticsPage = lazy(() => import('./components/AdminAnalyticsPage'))
 const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
+const AdminCompanySubscriptionsPage = lazy(() => import('./components/AdminCompanySubscriptionsPage'))
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
 const AutomotiveServicesPage = lazy(() => import('./components/AutomotiveServicesPage'))
 const ServiceProviderRegistrationPage = lazy(() => import('./components/ServiceProviderRegistrationPage'))
@@ -299,6 +300,7 @@ export default function App() {
   if (path === '/workspace/admin/managed-accounts') return <Suspense fallback={<PlatformLoading />}><AdminManagedAccountsPage /></Suspense>
   if (path === '/workspace/admin/payment-information') return <Suspense fallback={<PlatformLoading />}><PaymentInformationPage /></Suspense>
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<PlatformLoading />}><SubscriptionPlansPage /></Suspense>
+  if (path === '/workspace/admin/company-subscriptions') return <Suspense fallback={<PlatformLoading />}><AdminCompanySubscriptionsPage /></Suspense>
   if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<PlatformLoading />}><AdvertisingPlansAdminPage /></Suspense>
   if (path === '/workspace/admin/communications') return <Suspense fallback={<PlatformLoading />}><AdminCommunicationsPage /></Suspense>
   if (path === '/workspace/catalog') {
