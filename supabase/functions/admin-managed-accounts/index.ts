@@ -47,9 +47,10 @@ Deno.serve(async(req:Request)=>{
   if(membershipError||!membership?.organization_id)return send({error:"إضافة الموظفين متاحة لمالك الشركة فقط."},403);
   const org=Array.isArray(membership.organizations)?membership.organizations[0]:membership.organizations;
   if(!org||org.organization_type!=="company")return send({error:"الحساب المرتبط ليس حساب شركة."},403);
+  if(org.approval_status!=="approved")return send({error:"يجب اعتماد حساب الشركة أولًا قبل إدارة أعضاء الفريق."},403);
   // Read the global subscription gate before allowing any company-only paid action.
   const {data:platformSettings,error:settingsError}=await db.from("platform_settings").select("company_subscription_required").eq("id",true).maybeSingle();
-  if(settingsError)return send({error:"تعذر التحقق من إعدادات اشتراك الشركات. حاول مرة أخرى."},500);
+  if(settingsError||!platformSettings)return send({error:"تعذر التحقق من إعدادات اشتراك الشركات. حاول مرة أخرى."},500);
   // Enforce the active subscription's team-member allowance on the server.
   const nowIso=new Date().toISOString();
   const {data:activeSubscription,error:subscriptionError}=await db.from("company_subscriptions")
@@ -62,8 +63,9 @@ Deno.serve(async(req:Request)=>{
    const {data:plan,error:planError}=await db.from("platform_subscription_plans").select("limits,is_active").eq("id",activeSubscription.plan_id).maybeSingle();
    if(planError||!plan?.is_active)return send({error:"تعذر التحقق من صلاحيات الباقة الحالية."},500);
    const rawLimit=plan.limits?.team_members;
-   const teamLimit=rawLimit==="unlimited"?Number.POSITIVE_INFINITY:Number(rawLimit);
-   if(Number.isFinite(teamLimit)){
+   if(rawLimit!=="unlimited"){
+    const teamLimit=Number(rawLimit);
+    if(!Number.isInteger(teamLimit)||teamLimit<1)return send({error:"حد أعضاء الفريق غير مضبوط في إعدادات الباقة. تواصل مع مسؤول المنصة."},500);
     const {count:memberCount,error:countError}=await db.from("organization_memberships").select("user_id",{count:"exact",head:true})
      .eq("organization_id",membership.organization_id).neq("role","owner");
     if(countError)return send({error:"تعذر التحقق من عدد أعضاء الفريق."},500);
