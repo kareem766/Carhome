@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Plus, RefreshCw, Save, TicketPercent } from 'lucide-react'
+import { Plus, RefreshCw, Save, Ticket } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AdminPageNavigation from './AdminPageNavigation'
