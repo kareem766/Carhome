@@ -37,14 +37,14 @@ export default function CompanySmartAlertsPage(){
   setLoading(false)
  }
  useEffect(()=>{void load()},[])
- async function add(e:FormEvent){
-  e.preventDefault();if(!supabase||!orgId||saving)return
+ async function add(event:FormEvent){
+  event.preventDefault();if(!supabase||!orgId||saving)return
   if(!enabled){setError('التنبيهات الذكية متاحة ضمن الباقة الاحترافية وباقة المؤسسات.');return}
   setSaving(true);setError('');setNotice('')
   const {data:{user}}=await supabase.auth.getUser()
-  const {error:e}=await supabase.from('company_vehicle_alerts').insert({organization_id:orgId,created_by:user?.id,governorate:governorate||null,vehicle_type:vehicleType||null,with_driver:driver==='any'?null:driver==='yes',is_active:true})
+  const {error:insertError}=await supabase.from('company_vehicle_alerts').insert({organization_id:orgId,created_by:user?.id,governorate:governorate||null,vehicle_type:vehicleType||null,with_driver:driver==='any'?null:driver==='yes',is_active:true})
   setSaving(false)
-  if(e){setError(e.message.includes('row-level security')?'هذه الميزة غير متاحة في باقتك الحالية. يمكنك الترقية لتفعيلها.':e.message);return}
+  if(insertError){setError(insertError.message.includes('row-level security')?'هذه الميزة غير متاحة في باقتك الحالية. يمكنك الترقية لتفعيلها.':insertError.message);return}
   setNotice('تم حفظ التنبيه. سنرسل إشعارًا لأعضاء الشركة عند اعتماد سيارة تطابق شروط البحث.')
   setGovernorate('');setVehicleType('');setDriver('any');await load()
  }
