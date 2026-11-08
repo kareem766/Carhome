@@ -61,7 +61,7 @@ export default function CompanySubscriptionsPage(){
   const {error:insertError}=await supabase.from('company_subscriptions').insert({
    organization_id:organizationId,plan_id:chosen.id,plan_name:chosen.name,billing_cycle:'monthly',
    amount_egp:Number(chosen.monthly_price),status:'pending',payment_status:'submitted',
-   payment_reference:clean,payment_transfer_date:transferDate,payment_submitted_at:new Date().toISOString(),created_by:user?.id
+   payment_reference:clean,payment_transfer_date:transferDate,payment_method:method,payment_submitted_at:new Date().toISOString(),created_by:user?.id
   })
   setSaving(false)
   if(insertError){setError('تعذر إرسال طلب الاشتراك: '+insertError.message);return}
