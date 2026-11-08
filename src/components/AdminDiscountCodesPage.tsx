@@ -60,8 +60,8 @@ export default function AdminDiscountCodesPage(){
   if(draft.expires_at&&new Date(draft.expires_at)<=new Date(draft.starts_at)){setError('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية.');return}
   setSaving(true);setError('');setNotice('')
   const {data:{user}}=await supabase.auth.getUser()
-  const payload={code,name:draft.name.trim(),discount_type:draft.discount_type,discount_value:Number(draft.discount_value),max_discount_egp:draft.max_discount_egp===''?null:Number(draft.max_discount_egp),min_order_egp:Number(draft.min_order_egp),services:['company_subscription'],target_roles:['company'],starts_at:new Date(draft.starts_at).toISOString(),expires_at:draft.expires_at?new Date(draft.expires_at).toISOString():null,max_redemptions:draft.max_redemptions===''?null:Number(draft.max_redemptions),max_per_user:Number(draft.max_per_user),new_customers_only:draft.new_customers_only,is_active:draft.is_active,created_by:user?.id,updated_at:new Date().toISOString()}
-  const result=editing?await supabase.from('discount_codes').update(payload).eq('id',editing):await supabase.from('discount_codes').insert(payload)
+  const payload={code,name:draft.name.trim(),discount_type:draft.discount_type,discount_value:Number(draft.discount_value),max_discount_egp:draft.max_discount_egp===''?null:Number(draft.max_discount_egp),min_order_egp:Number(draft.min_order_egp),services:['company_subscription'],target_roles:['company'],starts_at:new Date(draft.starts_at).toISOString(),expires_at:draft.expires_at?new Date(draft.expires_at).toISOString():null,max_redemptions:draft.max_redemptions===''?null:Number(draft.max_redemptions),max_per_user:Number(draft.max_per_user),new_customers_only:draft.new_customers_only,is_active:draft.is_active,updated_at:new Date().toISOString()}
+  const result=editing?await supabase.from('discount_codes').update(payload).eq('id',editing):await supabase.from('discount_codes').insert({...payload,created_by:user?.id})
   setSaving(false)
   if(result.error){setError('تعذر حفظ الكود: '+result.error.message);return}
   setNotice(editing?'تم تحديث كود الخصم.':'تم إنشاء كود الخصم بنجاح.')
