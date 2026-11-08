@@ -453,14 +453,13 @@ export default function WorkspacePage({ role }: { role: Role }) {
       const rawLimit = limits?.monthly_requests
       const monthlyLimit = rawLimit === 'unlimited' ? Number.POSITIVE_INFINITY : Number(rawLimit)
       if (Number.isFinite(monthlyLimit)) {
-        const now = new Date()
-        const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
-        const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)).toISOString()
-        const { count, error: countError } = await supabase.from('rental_requests').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).gte('created_at', monthStart).lt('created_at', nextMonth)
+        const { data: period, error: periodError } = await supabase.rpc('company_current_subscription_period', { p_organization_id: organization.id })
+        if (periodError || !period?.starts_at || !period?.ends_at) { setSaving(false); setError('تعذر التحقق من مدة الاشتراك الحالية. حاول مرة أخرى.'); return }
+        const { count, error: countError } = await supabase.from('rental_requests').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).gte('created_at', period.starts_at).lt('created_at', period.ends_at)
         if (countError) { setSaving(false); setError('تعذر التحقق من حد الطلبات في باقتك. حاول مرة أخرى.'); return }
         if ((count || 0) >= monthlyLimit) {
           setSaving(false)
-          setPlanLimitNotice('وصلت إلى الحد الشهري المسموح به في باقتك (' + monthlyLimit + ' طلبات شهريًا). يمكنك ترقية الباقة لمتابعة إضافة طلبات جديدة.')
+          setPlanLimitNotice('وصلت إلى الحد المسموح به في باقتك (' + monthlyLimit + ' طلبات) خلال مدة الاشتراك الحالية البالغة 30 يومًا. يمكنك ترقية الباقة لمتابعة إضافة طلبات جديدة.')
           return
         }
       }
