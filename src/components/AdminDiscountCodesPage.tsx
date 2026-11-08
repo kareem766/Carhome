@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Plus, RefreshCw, Save, Ticket } from 'lucide-react'
+import { RefreshCw, Save, Ticket } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AdminPageNavigation from './AdminPageNavigation'
@@ -40,7 +40,7 @@ export default function AdminDiscountCodesPage(){
    const list=(uses||[]) as (Redemption&{discount_code_id:string})[]
    setRedemptions(list)
    const countRows=await Promise.all(((codes||[]) as DiscountCode[]).map(async row=>{
-    const {count}=await supabase.from('discount_code_redemptions').select('id',{count:'exact',head:true}).eq('discount_code_id',row.id).in('status',['pending','confirmed'])
+    const {count}=await supabase!.from('discount_code_redemptions').select('id',{count:'exact',head:true}).eq('discount_code_id',row.id).in('status',['pending','confirmed'])
     return [row.id,count||0] as const
    }))
    setCounts(Object.fromEntries(countRows))
@@ -78,7 +78,7 @@ export default function AdminDiscountCodesPage(){
   <header className="rounded-3xl border bg-white p-5 shadow-sm"><PlatformBrand compact/><h1 className="mt-2 text-2xl font-black">إدارة أكواد الخصم والبروموكود</h1><p className="mt-2 text-sm leading-7 text-slate-500">أنشئ أكوادًا مخصصة لاشتراكات الشركات، وحدد نسبة أو قيمة الخصم، وفترة الصلاحية وعدد مرات الاستخدام.</p></header><AdminPageNavigation/>
   {error&&<p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-800">{error}</p>}{notice&&<p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">{notice}</p>}
   {authorized&&<form onSubmit={e=>void save(e)} className="mt-5 rounded-3xl border bg-white p-5 shadow-sm sm:p-6">
-   <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><TicketPercent/></span><div><h2 className="font-black">{editing?'تعديل كود الخصم':'إنشاء بروموكود جديد'}</h2><p className="text-xs text-slate-500">الأكواد هنا مخصصة لاشتراكات الشركات فقط.</p></div></div>{editing&&<button type="button" onClick={()=>{setEditing('');setDraft(blank)}} className="rounded-lg border px-3 py-2 text-sm font-bold">كود جديد</button>}</div>
+   <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><Ticket/></span><div><h2 className="font-black">{editing?'تعديل كود الخصم':'إنشاء بروموكود جديد'}</h2><p className="text-xs text-slate-500">الأكواد هنا مخصصة لاشتراكات الشركات فقط.</p></div></div>{editing&&<button type="button" onClick={()=>{setEditing('');setDraft(blank)}} className="rounded-lg border px-3 py-2 text-sm font-bold">كود جديد</button>}</div>
    <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     <label className="text-sm font-bold">الكود *<input required value={draft.code} onChange={e=>setDraft(v=>({...v,code:e.target.value.toUpperCase()}))} maxLength={40} dir="ltr" className={field}/></label>
     <label className="text-sm font-bold">اسم الحملة *<input required value={draft.name} onChange={e=>setDraft(v=>({...v,name:e.target.value}))} maxLength={120} className={field}/></label>
