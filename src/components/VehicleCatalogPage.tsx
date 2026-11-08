@@ -255,6 +255,7 @@ export default function VehicleCatalogPage() {
 
 
   return <main dir="rtl" className="mc-catalog-main min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_48%,#f8fafc_100%)] text-slate-900">
+    {orgType !== 'individual_owner' && <>
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <PlatformBrand />
@@ -263,6 +264,7 @@ export default function VehicleCatalogPage() {
       </div>
     </header>
     {mobileNavOpen&&<nav id="catalog-mobile-navigation" aria-label="التنقل الرئيسي للهاتف" className="sticky top-[65px] z-20 mx-3 mt-2 grid gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl md:hidden"><a onClick={()=>setMobileNavOpen(false)} href="/" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">الرئيسية</a><a onClick={()=>setMobileNavOpen(false)} href="#catalog" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">السيارات المتاحة</a><a onClick={()=>setMobileNavOpen(false)} href="/messages" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">المحادثات</a><a onClick={()=>setMobileNavOpen(false)} href="/services" className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">خدمات السيارات</a><a onClick={()=>setMobileNavOpen(false)} href={orgType==='individual_owner'?'/workspace/advertising-plans?placement=premium':orgType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/company/managed-sourcing'} className="rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">{orgType==='individual_owner'?'باقات الإعلان المميز':orgType==='fleet_supplier'?'إدارة أسطولك':'خدمة البحث نيابةً عنك'}</a></nav>}
+    </>}
     <section className="relative overflow-hidden bg-slate-950 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(37,99,235,.35),transparent_38%),radial-gradient(circle_at_85%_80%,rgba(16,185,129,.18),transparent_30%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[1.1fr_.9fr]">
