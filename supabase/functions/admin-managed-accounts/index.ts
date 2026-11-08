@@ -47,6 +47,9 @@ Deno.serve(async(req:Request)=>{
   if(membershipError||!membership?.organization_id)return send({error:"إضافة الموظفين متاحة لمالك الشركة فقط."},403);
   const org=Array.isArray(membership.organizations)?membership.organizations[0]:membership.organizations;
   if(!org||org.organization_type!=="company")return send({error:"الحساب المرتبط ليس حساب شركة."},403);
+  // Read the global subscription gate before allowing any company-only paid action.
+  const {data:platformSettings,error:settingsError}=await db.from("platform_settings").select("company_subscription_required").eq("id",true).maybeSingle();
+  if(settingsError)return send({error:"تعذر التحقق من إعدادات اشتراك الشركات. حاول مرة أخرى."},500);
   // Enforce the active subscription's team-member allowance on the server.
   const nowIso=new Date().toISOString();
   const {data:activeSubscription,error:subscriptionError}=await db.from("company_subscriptions")
@@ -54,6 +57,7 @@ Deno.serve(async(req:Request)=>{
    .in("payment_status",["verified","waived"]).lte("starts_at",nowIso).gt("ends_at",nowIso)
    .order("ends_at",{ascending:false}).limit(1).maybeSingle();
   if(subscriptionError)return send({error:"تعذر التحقق من اشتراك الشركة. حاول مرة أخرى."},500);
+  if(platformSettings?.company_subscription_required===true&&!activeSubscription)return send({error:"يلزم تفعيل اشتراك شركة سارٍ قبل إضافة أعضاء جدد. اختر باقة من صفحة اشتراك الشركة وأرسل بيانات التحويل للمراجعة."},403);
   if(activeSubscription){
    const {data:plan,error:planError}=await db.from("platform_subscription_plans").select("limits,is_active").eq("id",activeSubscription.plan_id).maybeSingle();
    if(planError||!plan?.is_active)return send({error:"تعذر التحقق من صلاحيات الباقة الحالية."},500);
