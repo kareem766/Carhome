@@ -520,6 +520,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       else if (rawMessage.includes('تم استنفاد عدد مرات استخدام الكود')) message = 'تم استنفاد العدد المسموح لاستخدام هذا البروموكود.'
       else if (rawMessage.includes('كود الخصم غير متاح لهذه الخدمة')) message = 'هذا البروموكود غير متاح لخدمة تسجيل السيارة.'
       else if (rawMessage.includes('كود الخصم غير متاح لنوع حسابك')) message = 'هذا البروموكود غير متاح لنوع حسابك.'
+      else if (rawMessage.includes('هذا الكود مخصص للعملاء الجدد')) message = 'هذا البروموكود مخصص للعملاء الجدد فقط ولا ينطبق على هذا الحساب.'
       else if (rawMessage.includes('قيمة الطلب أقل من الحد الأدنى')) message = 'قيمة الرسوم أقل من الحد الأدنى المطلوب لتفعيل هذا البروموكود.'
       setDiscountFeedback({ type: 'error', text: message })
       return
