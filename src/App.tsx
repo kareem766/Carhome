@@ -85,6 +85,7 @@ const HOME_CAR_IMAGES = [
 function OwnerPersistentBar() {
   const links = [
     { href: '/workspace/owner/vehicles', label: 'سياراتي', icon: <CarFront size={17}/> },
+    { href: '/workspace/catalog', label: 'كتالوج السيارات', icon: <Search size={17}/> },
     { href: '/services', label: 'خدمات السيارات', icon: <Wrench size={17}/> },
     { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
     { href: '/messages', label: 'المراسلات', icon: <MessageCircle size={17}/> },
@@ -309,11 +310,8 @@ export default function App() {
   if (path === '/workspace/admin/communications') return <Suspense fallback={<PlatformLoading />}><AdminCommunicationsPage /></Suspense>
   if (path === '/workspace/catalog') {
     if (!authLoaded) return <PlatformLoading />
-    if (authUser?.user_metadata?.organization_type === 'individual_owner') {
-      window.location.replace('/workspace/owner/vehicles')
-      return <PlatformLoading />
-    }
-    if (!authUser || !['company','fleet_supplier'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للشركات وموردي الأساطيل" message="سجّل الدخول بحساب شركة أو مورد أسطول لاستعراض السيارات المعتمدة." />
+    if (!authUser || !['company','fleet_supplier','individual_owner'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للحسابات المعتمدة" message="سجّل الدخول بحساب مالك سيارة أو شركة أو مورد أسطول معتمد لاستعراض السيارات والإعلانات." />
+    if (authUser.user_metadata?.organization_type === 'individual_owner') return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense></>
     return authUser.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense>
   }
   if (path === '/services/provider/register') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<Suspense fallback={<PlatformLoading />}><ServiceProviderRegistrationPage /></Suspense></>
