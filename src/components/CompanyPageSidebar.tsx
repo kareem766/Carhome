@@ -1,14 +1,15 @@
-import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, Megaphone, MessageCircle, Plus, Search, UserRound, Users, Wrench, CreditCard } from 'lucide-react'
+import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, Megaphone, MessageCircle, Plus, Search, UserRound, Users, Wrench, CreditCard, BellRing } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
-type Section = 'team' | 'insights' | 'managed-sourcing' | 'subscriptions'
+type Section = 'team' | 'insights' | 'managed-sourcing' | 'subscriptions' | 'alerts'
 
 const links = [
   { id: 'assistant', href: '/assistant', label: 'مساعد My Car', icon: Bot },
   { id: 'overview', href: '/workspace/company', label: 'الرئيسية', icon: Building2 },
   { id: 'team', href: '/workspace/company/team', label: 'إدارة موظفي الشركة', icon: Users },
   { id: 'subscriptions', href: '/workspace/company/subscriptions', label: 'اشتراك الشركة والباقات', icon: CreditCard },
+  { id: 'alerts', href: '/workspace/company/alerts', label: 'التنبيهات الذكية', icon: BellRing },
   { id: 'insights', href: '/workspace/company/insights', label: 'المؤشرات والتقارير', icon: FileText },
   { id: 'requests', href: '/workspace/company/requests', label: 'طلبات التأجير', icon: ClipboardList },
   { id: 'new-request', href: '/workspace/company/requests/new', label: 'طلب جديد', icon: Plus },

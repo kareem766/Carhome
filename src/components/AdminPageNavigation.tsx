@@ -1,4 +1,4 @@
-import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing, Wallet, UserPlus, ClipboardCheck, BarChart3, Activity, BriefcaseBusiness, Users, Headset } from 'lucide-react'
+import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing, Wallet, UserPlus, ClipboardCheck, BarChart3, Activity, BriefcaseBusiness, Users, Headset, TicketPercent } from 'lucide-react'
 import { useState } from 'react'
 import PlatformEntryBanner from './PlatformEntryBanner'
 
@@ -16,6 +16,7 @@ const groups = [
  { title:'الاشتراكات والإعدادات', links:[
   {href:'/workspace/admin/subscription-plans',label:'إدارة الباقات والأسعار',icon:CreditCard},
   {href:'/workspace/admin/company-subscriptions',label:'مراجعة طلبات الاشتراك',icon:ClipboardCheck},
+  {href:'/workspace/admin/discount-codes',label:'أكواد الخصم والبروموكود',icon:TicketPercent},
   {href:'/workspace/admin/advertising-plans',label:'باقات الإعلانات',icon:Megaphone},
   {href:'/workspace/admin/payment-information',label:'معلومات الدفع',icon:Wallet},
   {href:'/workspace/admin/platform-settings',label:'هوية المنصة',icon:Palette}
