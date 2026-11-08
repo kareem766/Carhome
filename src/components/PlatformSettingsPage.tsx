@@ -117,7 +117,7 @@ export default function PlatformSettingsPage() {
     setSaving(false)
     if (saveError) { setError('تعذر حفظ الإعدادات: ' + saveError.message); return }
     window.dispatchEvent(new Event('platform-settings-updated'))
-    setNotice('تم حفظ إعدادات الهوية بنجاح. سيتم تحديث اسم المنصة وشعارها وألوانها في الصفحات المشتركة، مع إعادة تحميل الصفحة لتحديث بيانات العنوان والأيقونة.')
+    setNotice(settings.maintenance_mode ? 'تم حفظ الإعدادات وتفعيل وضع الصيانة. ستظهر رسالة الصيانة للمستخدمين غير الإداريين على صفحات المنصة، مع استمرار إتاحة لوحة الإدارة.' : 'تم حفظ الإعدادات وإيقاف وضع الصيانة. عادت صفحات المنصة للعمل للمستخدمين.')
   }
 
   function update<K extends keyof PlatformSettings>(key: K, value: PlatformSettings[K]) {
