@@ -15,7 +15,8 @@ const groups = [
  ]},
  { title:'الاشتراكات والإعدادات', links:[
   {href:'/workspace/admin/subscription-plans',label:'إدارة الباقات والأسعار',icon:CreditCard},
-  {href:'/workspace/admin/company-subscriptions',label:'مراجعة طلبات الاشتراك',icon:ClipboardCheck},\n  {href:'/workspace/admin/discount-codes',label:'أكواد الخصم والبروموكود',icon:TicketPercent},
+  {href:'/workspace/admin/company-subscriptions',label:'مراجعة طلبات الاشتراك',icon:ClipboardCheck},
+  {href:'/workspace/admin/discount-codes',label:'أكواد الخصم والبروموكود',icon:TicketPercent},
   {href:'/workspace/admin/advertising-plans',label:'باقات الإعلانات',icon:Megaphone},
   {href:'/workspace/admin/payment-information',label:'معلومات الدفع',icon:Wallet},
   {href:'/workspace/admin/platform-settings',label:'هوية المنصة',icon:Palette}
