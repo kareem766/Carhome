@@ -48,6 +48,8 @@ export default function SupportCenterPage({ admin = false }: Props) {
   const [subject, setSubject] = useState('')
   const [category, setCategory] = useState('general')
   const [priority, setPriority] = useState('normal')
+  const [companyAccount, setCompanyAccount] = useState(false)
+  const [prioritySupport, setPrioritySupport] = useState(false)
   const [firstMessage, setFirstMessage] = useState('')
   const [search, setSearch] = useState('')
 
@@ -83,6 +85,16 @@ export default function SupportCenterPage({ admin = false }: Props) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) { window.location.replace('/?login=1'); return }
     setUserId(user.id)
+    if (!admin) {
+      const { data: companyMembership } = await supabase.from('organization_memberships').select('organization_id,organizations!inner(organization_type)').eq('user_id', user.id).eq('organizations.organization_type', 'company').limit(1).maybeSingle()
+      if (companyMembership?.organization_id) {
+        setCompanyAccount(true)
+        const { data: priorityEnabled } = await supabase.rpc('company_has_plan_feature', { p_organization_id: companyMembership.organization_id, p_feature: 'priority_support' })
+        setPrioritySupport(priorityEnabled === true)
+      } else {
+        setCompanyAccount(false); setPrioritySupport(false)
+      }
+    }
     if (admin) {
       const { data: adminRecord, error: adminError } = await supabase.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle()
       if (adminError || !adminRecord) { setAuthorized(false); setError('هذه الصفحة متاحة لمديري المنصة فقط.'); setLoading(false); return }
@@ -155,7 +167,8 @@ export default function SupportCenterPage({ admin = false }: Props) {
           {newTicketOpen && <form onSubmit={createTicket} className="mt-3 space-y-3 rounded-xl border border-blue-100 bg-blue-50/60 p-3">
             <label className="block text-xs font-bold text-slate-700">عنوان التذكرة<input required minLength={5} maxLength={160} value={subject} onChange={e=>setSubject(e.target.value)} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"/></label>
             <label className="block text-xs font-bold text-slate-700">نوع الاستفسار<select value={category} onChange={e=>setCategory(e.target.value)} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm">{categories.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
-            <label className="block text-xs font-bold text-slate-700">الأولوية<select value={priority} onChange={e=>setPriority(e.target.value)} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"><option value="low">منخفضة</option><option value="normal">عادية</option><option value="high">عاجلة</option></select></label>
+            <label className="block text-xs font-bold text-slate-700">الأولوية<select value={priority} onChange={e=>setPriority(e.target.value)} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"><option value="low">منخفضة</option><option value="normal">عادية</option>{(!companyAccount||prioritySupport)&&<option value="high">{companyAccount?'عاجلة · أولوية الباقة':'عاجلة'}</option>}</select></label>
+            {companyAccount&&!prioritySupport&&<p className="text-[11px] leading-5 text-slate-500">أولوية الدعم العاجلة متاحة ضمن باقة المؤسسات. تذاكرك الحالية ستصل إلى فريق الدعم بالأولوية العادية.</p>}
             <label className="block text-xs font-bold text-slate-700">اشرح المشكلة أو الاستفسار<textarea required minLength={1} maxLength={4000} rows={4} value={firstMessage} onChange={e=>setFirstMessage(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 text-sm"/></label>
             <div className="flex gap-2"><button disabled={saving} className="flex-1 rounded-lg bg-blue-700 px-3 py-2.5 text-sm font-black text-white disabled:opacity-50">{saving?'جارٍ الإرسال...':'إرسال التذكرة'}</button><button type="button" onClick={()=>setNewTicketOpen(false)} className="rounded-lg border border-slate-200 px-3 text-sm font-bold">إلغاء</button></div>
           </form>}
