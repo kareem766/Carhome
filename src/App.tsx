@@ -270,6 +270,23 @@ export default function App() {
   // Wait for saved platform identity to load before painting any route.
   // This prevents a default-theme flash before persisted brand colors are applied.
   if (!settingsLoaded) return <PlatformLoading />
+  // During maintenance, resolve the signed-in user's trusted admin status before deciding access.
+  if (settings.maintenance_mode && !authLoaded) return <PlatformLoading />
+  // Maintenance is a platform-wide access gate: only users in platform_admins may enter.
+  // Keep legal pages and authentication callbacks available; admins bypass the gate entirely.
+  const maintenanceAllowedPaths = ['/privacy', '/terms', '/auth/callback', '/reset-password', '/first-login-password']
+  if (settings.maintenance_mode && !isPlatformAdmin && !maintenanceAllowedPaths.includes(path)) {
+    return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.16),_transparent_42%),linear-gradient(180deg,#071b31_0%,#0b2743_100%)] px-5 py-10 text-white">
+      <section className="w-full max-w-xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur-xl">
+        {settings.logo_url && <img src={settings.logo_url} alt={settings.platform_name} className="mx-auto mb-5 h-20 max-w-40 object-contain"/>}
+        <ShieldCheck className="mx-auto mb-4 text-amber-400" size={44}/>
+        <h1 className="text-2xl font-black">المنصة متوقفة مؤقتًا</h1>
+        <p className="mt-3 leading-8 text-white/75">المنصة متاحة حاليًا لصاحب المنصة فقط أثناء فترة الإيقاف. ستعود الخدمة لباقي المستخدمين عند إعادة التفعيل.</p>
+        {!authUser ? <button type="button" onClick={() => openAuth('signin')} className="mt-7 rounded-xl bg-[#ffad0a] px-6 py-3 font-black text-[#142b43]">دخول صاحب المنصة</button> : <button type="button" onClick={() => { void supabase?.auth.signOut().then(() => { window.location.assign('/') }) }} className="mt-7 rounded-xl border border-white/20 px-6 py-3 font-bold text-white">تسجيل الخروج</button>}
+      </section>
+      {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode}/>}
+    </main>
+  }
   // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
   if (pathIsHome(window.location.pathname) && !authLoaded) return <PlatformLoading />
   // Keep the public homepage behind the branded loader until every hero vehicle visual has decoded.
@@ -330,9 +347,6 @@ export default function App() {
   if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense>
 
   if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
-  if (settings.maintenance_mode && (path === '/' || path === '/register' || path.startsWith('/register/'))) {
-    return <ServiceNotice settings={settings} title="المنصة تحت الصيانة" message="نعمل على تحسين الخدمة. يرجى المحاولة مرة أخرى لاحقًا." />
-  }
   if ((path === '/register' || path.startsWith('/register/')) && !settings.registration_enabled) {
     return <ServiceNotice settings={settings} title="التسجيل متوقف مؤقتًا" message="لا نستقبل حسابات جديدة في الوقت الحالي. يمكنك التواصل مع إدارة المنصة للاستفسار." />
   }
