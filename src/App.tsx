@@ -19,12 +19,14 @@ const EmployeeProviderRequestsPage = lazy(() => import('./components/EmployeePro
 const EmployeeAdminRequestsPage = lazy(() => import('./components/EmployeeAdminRequestsPage'))
 const CompanyInsightsPage = lazy(() => import('./components/CompanyInsightsPage'))
 const CompanyTeamPage = lazy(() => import('./components/CompanyTeamPage'))
+const CompanySubscriptionsPage = lazy(() => import('./components/CompanySubscriptionsPage'))
 const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'))
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const AdminAnalyticsPage = lazy(() => import('./components/AdminAnalyticsPage'))
 const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
+const AdminCompanySubscriptionsPage = lazy(() => import('./components/AdminCompanySubscriptionsPage'))
 const VehicleCatalogPage = lazy(() => import('./components/VehicleCatalogPage'))
 const AutomotiveServicesPage = lazy(() => import('./components/AutomotiveServicesPage'))
 const ServiceProviderRegistrationPage = lazy(() => import('./components/ServiceProviderRegistrationPage'))
@@ -290,6 +292,7 @@ export default function App() {
   if (path === '/workspace/provider-employee-requests' || path === '/workspace/owner/employee-requests' || path === '/workspace/supplier/employee-requests') return <Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense>
   if (path === '/workspace/admin/employee-requests') return <Suspense fallback={<PlatformLoading />}><EmployeeAdminRequestsPage /></Suspense>
   if (path === '/workspace/company/team') return <Suspense fallback={<PlatformLoading />}><CompanyTeamPage /></Suspense>
+  if (path === '/workspace/company/subscriptions') return <Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense>
   if (path === '/workspace/company/insights') return <Suspense fallback={<PlatformLoading />}><CompanyInsightsPage /></Suspense>
   if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage admin /></Suspense>
   if (path === '/workspace/company/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense>
@@ -297,6 +300,7 @@ export default function App() {
   if (path === '/workspace/admin/managed-accounts') return <Suspense fallback={<PlatformLoading />}><AdminManagedAccountsPage /></Suspense>
   if (path === '/workspace/admin/payment-information') return <Suspense fallback={<PlatformLoading />}><PaymentInformationPage /></Suspense>
   if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<PlatformLoading />}><SubscriptionPlansPage /></Suspense>
+  if (path === '/workspace/admin/company-subscriptions') return <Suspense fallback={<PlatformLoading />}><AdminCompanySubscriptionsPage /></Suspense>
   if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<PlatformLoading />}><AdvertisingPlansAdminPage /></Suspense>
   if (path === '/workspace/admin/communications') return <Suspense fallback={<PlatformLoading />}><AdminCommunicationsPage /></Suspense>
   if (path === '/workspace/catalog') {
