@@ -16,6 +16,8 @@ type VehicleEditForm = { make: string; model: string; model_year: string; monthl
 const emptyVehicleEdit: VehicleEditForm = { make: '', model: '', model_year: '', monthly_price_egp: '', yearly_price_egp: '', address: '', notes: '', review_status: 'pending_review' }
 type RentalRequestRow = { id: string; title: string; vehicle_type: string; quantity: number; duration_type: string; duration_months: number; governorate: string; with_driver: boolean; details: string | null; status: string; created_at: string; organizations: { name: string } | { name: string }[] | null }
 type RentalOfferRow = { id: string; request_id: string; monthly_price_egp: number; yearly_price_egp: number | null; vehicle_count: number; message: string | null; status: string; created_at: string; organizations: { name: string } | { name: string }[] | null; rental_requests: { title: string } | { title: string }[] | null }
+type AdvertisingPlanOption = { id: string; name: string; duration_days: number; price_egp: number; placement_type: string; is_active: boolean }
+type PromotionEditForm = { advertising_plan_id: string; starts_at: string; ends_at: string; admin_notes: string }
 type PromotionRow = { id: string; vehicle_id: string; organization_id: string; advertising_plan_id: string; status: string; payment_status: string; payment_reference: string | null; coupon_code: string | null; original_amount_egp: number | null; discount_amount_egp: number; final_amount_egp: number | null; admin_notes: string | null; created_at: string; starts_at: string | null; ends_at: string | null; vehicles: { make: string; model: string; model_year: number; governorate: string } | { make: string; model: string; model_year: number; governorate: string }[] | null; organizations: { name: string; organization_type: string; contact_name: string | null; contact_email: string | null } | { name: string; organization_type: string; contact_name: string | null; contact_email: string | null }[] | null; advertising_plans: { name: string; duration_days: number; price_egp: number; placement_type: string } | { name: string; duration_days: number; price_egp: number; placement_type: string }[] | null }
 type PaymentRow = { id: string; vehicle_id: string; amount_egp: number; period_months: number; transfer_method: string; transfer_reference: string; review_status: string; admin_notes: string | null; proof_path: string | null; created_at: string; vehicles: { make: string; model: string; model_year?: number; vehicle_type?: string; governorate?: string; monthly_price_egp?: number; review_status?: string } | { make: string; model: string; model_year?: number; vehicle_type?: string; governorate?: string; monthly_price_egp?: number; review_status?: string }[] | null; organizations: { name: string; organization_type?: string } | { name: string; organization_type?: string }[] | null }
 
@@ -36,6 +38,9 @@ export default function AdminReviewPage() {
   const [savingOrganization, setSavingOrganization] = useState(false)
   const [payments, setPayments] = useState<PaymentRow[]>([])
   const [promotions, setPromotions] = useState<PromotionRow[]>([])
+  const [advertisingPlans, setAdvertisingPlans] = useState<AdvertisingPlanOption[]>([])
+  const [editingPromotionId, setEditingPromotionId] = useState<string | null>(null)
+  const [promotionEditForm, setPromotionEditForm] = useState<PromotionEditForm>({ advertising_plan_id: '', starts_at: '', ends_at: '', admin_notes: '' })
   const [paymentProofUrls, setPaymentProofUrls] = useState<Record<string, string>>({})
   const [rentalRequests, setRentalRequests] = useState<RentalRequestRow[]>([])
   const [rentalOffers, setRentalOffers] = useState<RentalOfferRow[]>([])
@@ -52,16 +57,18 @@ export default function AdminReviewPage() {
     if (adminError) { setError('تعذر التحقق من صلاحية الإدارة. تأكد من تطبيق Migration صلاحيات المراجعة.'); setLoading(false); return }
     if (!admin) { setError('هذا الحساب غير مفعّل كمسؤول للمنصة. لا يمكن فتح لوحة المراجعة.'); setAuthorized(false); setLoading(false); return }
     setAuthorized(true)
-    const [vehicleResult,paymentResult,organizationResult,profileResult,requestResult,offerResult,promotionResult] = await Promise.all([
+    const [vehicleResult,paymentResult,organizationResult,profileResult,requestResult,offerResult,promotionResult,advertisingPlanResult] = await Promise.all([
       supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,address,monthly_price_egp,yearly_price_egp,with_driver,notes,review_status,payment_status,organizations(name)').order('created_at',{ascending:false}),
       supabase.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,period_months,transfer_method,transfer_reference,review_status,admin_notes,proof_path,created_at,vehicles(make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status),organizations(name,organization_type)').order('created_at',{ascending:false}),
       supabase.from('organizations').select('id,name,organization_type,approval_status,city,contact_name,contact_email,address,company_type,fleet_vehicle_count,created_at').order('created_at',{ascending:false}),
       supabase.from('profiles').select('id,display_name,phone,contact_email,address,created_at').order('created_at',{ascending:false}),
       supabase.from('rental_requests').select('id,title,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,details,status,created_at,organizations(name)').order('created_at',{ascending:false}),
       supabase.from('rental_offers').select('id,request_id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,created_at,organizations(name),rental_requests(title)').order('created_at',{ascending:false}),
-      supabase.from('vehicle_promotions').select('id,vehicle_id,organization_id,advertising_plan_id,status,payment_status,payment_reference,coupon_code,original_amount_egp,discount_amount_egp,final_amount_egp,admin_notes,created_at,starts_at,ends_at,vehicles(make,model,model_year,governorate),organizations(name,organization_type,contact_name,contact_email),advertising_plans(name,duration_days,price_egp,placement_type)').order('created_at',{ascending:false})
+      supabase.from('vehicle_promotions').select('id,vehicle_id,organization_id,advertising_plan_id,status,payment_status,payment_reference,coupon_code,original_amount_egp,discount_amount_egp,final_amount_egp,admin_notes,created_at,starts_at,ends_at,vehicles(make,model,model_year,governorate),organizations(name,organization_type,contact_name,contact_email),advertising_plans(name,duration_days,price_egp,placement_type)').order('created_at',{ascending:false}),
+      supabase.from('advertising_plans').select('id,name,duration_days,price_egp,placement_type,is_active').order('display_order',{ascending:true}).order('created_at',{ascending:true})
     ])
     if (promotionResult.error) setError('تعذر تحميل طلبات الإعلانات: ' + promotionResult.error.message); else setPromotions((promotionResult.data || []) as unknown as PromotionRow[])
+    if (advertisingPlanResult.error) setError('تعذر تحميل باقات الإعلانات: ' + advertisingPlanResult.error.message); else setAdvertisingPlans((advertisingPlanResult.data || []) as AdvertisingPlanOption[])
     if (vehicleResult.error) setError(vehicleResult.error.message); else {
       const vehicleRows = (vehicleResult.data || []) as unknown as VehicleRow[]
       if (vehicleRows.length) {
@@ -209,6 +216,75 @@ export default function AdminReviewPage() {
     if (updateError) { setError('تعذر تحديث طلب الإعلان: ' + updateError.message); return }
     if (!updated) { setError('لم يتم تحديث الطلب؛ ربما تمت مراجعته من مسؤول آخر. حدّث الصفحة للتحقق.'); return }
     setNotice(status === 'approved' ? 'تم اعتماد الإعلان وتأكيد الدفع وتفعيل مدة الباقة.' : 'تم رفض طلب الإعلان وتسجيل سبب الرفض.')
+    await load()
+  }
+
+  function startPromotionEdit(row: PromotionRow) {
+    setEditingPromotionId(row.id)
+    const toLocalInput = (value: string | null) => {
+      if (!value) return ''
+      const date = new Date(value)
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      return local.toISOString().slice(0, 16)
+    }
+    setPromotionEditForm({
+      advertising_plan_id: row.advertising_plan_id,
+      starts_at: toLocalInput(row.starts_at),
+      ends_at: toLocalInput(row.ends_at),
+      admin_notes: row.admin_notes || ''
+    })
+    setError(''); setNotice('')
+  }
+
+  async function savePromotionEdit(row: PromotionRow) {
+    if (!supabase || row.status !== 'approved' || !['verified', 'waived'].includes(row.payment_status)) return
+    if (!promotionEditForm.advertising_plan_id || !promotionEditForm.starts_at || !promotionEditForm.ends_at) {
+      setError('اختر باقة الإعلان وحدد تاريخ البداية والنهاية.'); return
+    }
+    const startsAt = new Date(promotionEditForm.starts_at)
+    const endsAt = new Date(promotionEditForm.ends_at)
+    if (!Number.isFinite(startsAt.getTime()) || !Number.isFinite(endsAt.getTime()) || endsAt <= startsAt) {
+      setError('تاريخ نهاية الإعلان يجب أن يكون بعد تاريخ بدايته.'); return
+    }
+    const selectedPlan = advertisingPlans.find(plan => plan.id === promotionEditForm.advertising_plan_id)
+    if (!selectedPlan) { setError('باقة الإعلان المحددة غير موجودة. حدّث الصفحة وحاول مرة أخرى.'); return }
+    setBusyId(row.id); setError(''); setNotice('')
+    const { data: auth } = await supabase.auth.getUser()
+    const { data: updated, error: updateError } = await supabase.from('vehicle_promotions').update({
+      advertising_plan_id: selectedPlan.id,
+      starts_at: startsAt.toISOString(),
+      ends_at: endsAt.toISOString(),
+      admin_notes: promotionEditForm.admin_notes.trim() || null,
+      reviewed_by: auth.user?.id,
+      reviewed_at: new Date().toISOString()
+    }).eq('id', row.id).eq('status', 'approved').in('payment_status', ['verified', 'waived']).select('id').maybeSingle()
+    setBusyId('')
+    if (updateError) { setError('تعذر تعديل الإعلان: ' + updateError.message); return }
+    if (!updated) { setError('لم يتم تعديل الإعلان؛ ربما تغيرت حالته. حدّث الصفحة للتحقق.'); return }
+    setEditingPromotionId(null)
+    setNotice('تم حفظ تعديلات الإعلان المنشور وإرسال إشعار لصاحب السيارة عند تغيير المدة.')
+    await load()
+  }
+
+  async function removePublishedPromotion(row: PromotionRow) {
+    if (!supabase || row.status !== 'approved' || !['verified', 'waived'].includes(row.payment_status)) return
+    const reason = window.prompt('اكتب سبب حذف الإعلان من الكتالوج. سيُحفظ سجل الدفع والمراجعة لأغراض المتابعة:', '')
+    if (reason === null) return
+    if (!reason.trim()) { setError('اكتب سبب حذف الإعلان أولًا.'); return }
+    if (!window.confirm('سيتم إيقاف ظهور الإعلان فورًا مع الاحتفاظ بسجل الدفع والبروموكود. هل تريد المتابعة؟')) return
+    setBusyId(row.id); setError(''); setNotice('')
+    const { data: auth } = await supabase.auth.getUser()
+    const { data: updated, error: updateError } = await supabase.from('vehicle_promotions').update({
+      status: 'cancelled',
+      admin_notes: [row.admin_notes, 'حذف إداري: ' + reason.trim()].filter(Boolean).join('\n'),
+      reviewed_by: auth.user?.id,
+      reviewed_at: new Date().toISOString()
+    }).eq('id', row.id).eq('status', 'approved').in('payment_status', ['verified', 'waived']).select('id').maybeSingle()
+    setBusyId('')
+    if (updateError) { setError('تعذر حذف الإعلان: ' + updateError.message); return }
+    if (!updated) { setError('لم يتم حذف الإعلان؛ ربما تغيرت حالته. حدّث الصفحة للتحقق.'); return }
+    if (editingPromotionId === row.id) setEditingPromotionId(null)
+    setNotice('تم حذف الإعلان من الكتالوج مع الاحتفاظ بسجل الدفع والمراجعة، وإرسال إشعار لصاحب السيارة.')
     await load()
   }
 
@@ -364,6 +440,25 @@ export default function AdminReviewPage() {
       <section className="mt-8" id="admin-payments"><h2 className="text-xl font-extrabold">طلبات تسجيل السيارات ورسومها ({payments.filter(p=>p.review_status==="pending").length} قيد المراجعة)</h2><p className="mt-1 text-sm text-slate-500">كل بطاقة تمثل ملفًا واحدًا يجمع بيانات السيارة وصورها وبيانات التحويل. قرار القبول أو الرفض يطبّق على السيارة والدفع معًا.</p><div className="mt-4 space-y-3">{payments.map(p=><article key={p.id} className="rounded-3xl border border-white bg-white/95 p-5 shadow-md shadow-slate-200/50"><h3 className="font-extrabold">طلب تسجيل: {Array.isArray(p.vehicles) ? p.vehicles[0]?.make : p.vehicles?.make} {Array.isArray(p.vehicles) ? p.vehicles[0]?.model : p.vehicles?.model} · {Array.isArray(p.organizations) ? p.organizations[0]?.name : p.organizations?.name}</h3><p className="mt-1 text-sm text-slate-600">{Array.isArray(p.vehicles) ? p.vehicles[0]?.model_year : p.vehicles?.model_year} · {Array.isArray(p.vehicles) ? p.vehicles[0]?.vehicle_type : p.vehicles?.vehicle_type} · {Array.isArray(p.vehicles) ? p.vehicles[0]?.governorate : p.vehicles?.governorate} · الإيجار الشهري: {Number(Array.isArray(p.vehicles) ? p.vehicles[0]?.monthly_price_egp : p.vehicles?.monthly_price_egp || 0).toLocaleString("ar-EG")} جنيه</p><p className="mt-1 text-xs font-bold text-blue-800">قرار المراجعة يشمل بيانات السيارة وإثبات الدفع معًا.</p><p className="mt-2 text-sm text-slate-600">{methodName[p.transfer_method] || p.transfer_method} · مرجع التحويل: <bdi>{p.transfer_reference}</bdi></p><p className="mt-1 text-sm text-slate-600">المبلغ: {Number(p.amount_egp).toLocaleString('ar-EG')} جنيه · {((Array.isArray(p.organizations) ? p.organizations[0]?.organization_type : p.organizations?.organization_type) === 'fleet_supplier') ? 'رسوم تسجيل مرة واحدة' : `المدة: ${p.period_months} شهر`}</p><p className="mt-1 text-xs text-slate-500">تاريخ الإرسال: {new Date(p.created_at).toLocaleString('ar-EG')}</p><p className="mt-2 text-sm font-bold">حالة المراجعة: {p.review_status === 'pending' ? 'بانتظار المراجعة' : p.review_status === 'approved' ? 'مقبول' : p.review_status === 'rejected' ? 'مرفوض' : p.review_status}</p><button disabled={busyId===p.id} onClick={()=>void deleteAdminRecord("vehicle_payment_submissions",p.id,"سجل التحويل")} className="mt-3 inline-flex items-center gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-2 text-sm font-bold text-red-800 disabled:opacity-50"><Trash2 size={16}/> حذف سجل التحويل</button>{p.admin_notes && <p className="mt-2 rounded-lg border border-sky-100 bg-sky-50 p-3 text-sm">ملاحظة الإدارة: {p.admin_notes}</p>}{p.proof_path && (paymentProofUrls[p.id] ? <a href={paymentProofUrls[p.id]} target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-xl border border-blue-200 px-4 py-2 text-sm font-bold text-blue-800">فتح إثبات التحويل (رابط مؤقت)</a> : <p className="mt-2 text-xs text-slate-500">تعذر إنشاء رابط آمن للإثبات؛ تحقق من صلاحيات التخزين.</p>)}{p.review_status === 'pending' && <div className="mt-4 flex gap-2"><button disabled={busyId===p.id} onClick={() => void reviewPayment(p,'approved')} className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-bold text-white"><CheckCircle2 size={16}/> قبول التحويل</button><button disabled={busyId===p.id} onClick={() => void reviewPayment(p,'rejected')} className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2 text-sm font-bold text-red-700"><XCircle size={16}/> رفض التحويل</button></div>}</article>)}{payments.length===0 && <p className="rounded-xl border border-dashed bg-white p-6 text-sm text-slate-500">لا توجد تحويلات مسجلة.</p>}</div></section>
       <section className="mt-8" id="admin-advertising-reviews"><h2 className="text-xl font-extrabold">طلبات مراجعة الإعلانات ({promotions.filter(p=>p.status==='pending_review' && p.payment_status==='pending').length} بانتظار المراجعة)</h2><p className="mt-1 text-sm text-slate-500">مراجعة باقات ترويج السيارات وبيانات التحويل وأكواد الخصم. اعتماد الطلب يؤكد الدفع ويبدأ مدة الإعلان تلقائيًا.</p><div className="mt-4 space-y-3">{promotions.map(p=>{const vehicle=Array.isArray(p.vehicles)?p.vehicles[0]:p.vehicles;const org=Array.isArray(p.organizations)?p.organizations[0]:p.organizations;const plan=Array.isArray(p.advertising_plans)?p.advertising_plans[0]:p.advertising_plans;return <article key={p.id} className="rounded-3xl border border-white bg-white/95 p-5 shadow-md shadow-slate-200/50"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-extrabold">{vehicle?.make || 'سيارة'} {vehicle?.model || ''} · {vehicle?.model_year || ''}</h3><p className="mt-1 text-sm text-slate-600">{org?.name || 'مالك غير محدد'} · {org?.contact_name || 'بدون مسؤول تواصل'} · {org?.contact_email || 'بدون بريد مسجل'}</p><p className="mt-1 text-sm text-slate-600">{vehicle?.governorate || 'المحافظة غير محددة'} · {plan?.name || 'باقة إعلانية'} · {plan?.duration_days || 0} يوم · {plan?.placement_type==='premium'?'إعلان مميز':'إعلان عادي'}</p></div><span className={'rounded-full px-3 py-1 text-xs font-extrabold '+(p.status==='approved'?'bg-emerald-100 text-emerald-800':p.status==='rejected'?'bg-red-100 text-red-800':'bg-amber-100 text-amber-900')}>{p.status==='pending_review'?'بانتظار المراجعة':p.status==='approved'?'معتمد':p.status==='rejected'?'مرفوض':p.status}</span></div><div className="mt-4 grid gap-2 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-2"><p><strong>بيانات التحويل:</strong> <bdi>{p.payment_reference || 'غير مسجلة'}</bdi></p><p><strong>المبلغ الأصلي:</strong> {Number(p.original_amount_egp ?? plan?.price_egp ?? 0).toLocaleString('ar-EG')} جنيه</p><p><strong>الخصم:</strong> {Number(p.discount_amount_egp || 0).toLocaleString('ar-EG')} جنيه {p.coupon_code ? '· كود: '+p.coupon_code : '· بدون كود خصم'}</p><p><strong>المطلوب تحويله:</strong> {Number(p.final_amount_egp ?? plan?.price_egp ?? 0).toLocaleString('ar-EG')} جنيه</p><p><strong>حالة الدفع:</strong> {p.payment_status==='pending'?'بانتظار التحقق':p.payment_status==='verified'?'تم التحقق':p.payment_status==='rejected'?'مرفوض':p.payment_status}</p><p><strong>تاريخ الطلب:</strong> {new Date(p.created_at).toLocaleString('ar-EG')}</p>{p.starts_at&&<p><strong>بداية الإعلان:</strong> {new Date(p.starts_at).toLocaleDateString('ar-EG')}</p>}{p.ends_at&&<p><strong>نهاية الإعلان:</strong> {new Date(p.ends_at).toLocaleDateString('ar-EG')}</p>}</div>{p.admin_notes&&<p className="mt-3 rounded-lg border border-sky-100 bg-sky-50 p-3 text-sm">ملاحظات الإدارة: {p.admin_notes}</p>}{p.status==='pending_review'&&p.payment_status==='pending'&&<div className="mt-4 flex flex-wrap gap-2"><button disabled={busyId===p.id} onClick={()=>void reviewPromotion(p,'approved')} className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"><CheckCircle2 size={16}/> اعتماد الإعلان وتأكيد الدفع</button><button disabled={busyId===p.id} onClick={()=>void reviewPromotion(p,'rejected')} className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2 text-sm font-bold text-red-700 disabled:opacity-50"><XCircle size={16}/> رفض الطلب</button></div>}</article>})}{promotions.length===0&&<p className="rounded-xl border border-dashed bg-white p-6 text-sm text-slate-500">لا توجد طلبات إعلانية حتى الآن.</p>}</div></section>
     </>}
+      <section className="mt-8" id="admin-published-advertisements">
+        <h2 className="text-xl font-extrabold">إدارة الإعلانات المنشورة ({promotions.filter(p=>p.status==='approved' && ['verified','waived'].includes(p.payment_status)).length})</h2>
+        <p className="mt-1 text-sm text-slate-500">يمكنك تعديل الباقة وفترة الظهور أو حذف الإعلان من الكتالوج. الحذف إداري غير نهائي ويحافظ على سجل الدفع والخصم.</p>
+        <div className="mt-4 space-y-3">
+          {promotions.filter(p=>p.status==='approved' && ['verified','waived'].includes(p.payment_status)).map(p=>{const vehicle=Array.isArray(p.vehicles)?p.vehicles[0]:p.vehicles;const org=Array.isArray(p.organizations)?p.organizations[0]:p.organizations;const plan=Array.isArray(p.advertising_plans)?p.advertising_plans[0]:p.advertising_plans;return <article key={p.id} className="rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-extrabold">{vehicle?.make || 'سيارة'} {vehicle?.model || ''} · {vehicle?.model_year || ''}</h3><p className="mt-1 text-sm text-slate-600">{org?.name || 'مالك غير محدد'} · {plan?.name || 'باقة إعلانية'} · {plan?.placement_type==='premium'?'إعلان مميز':'إعلان عادي'}</p><p className="mt-1 text-sm text-slate-500">بداية الظهور: {p.starts_at?new Date(p.starts_at).toLocaleString('ar-EG'):'غير محددة'} · النهاية: {p.ends_at?new Date(p.ends_at).toLocaleString('ar-EG'):'غير محددة'}</p></div><span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-800">منشور</span></div>
+            <div className="mt-4 flex flex-wrap gap-2"><button disabled={busyId===p.id} onClick={()=>startPromotionEdit(p)} className="inline-flex items-center gap-2 rounded-xl border border-blue-200 px-4 py-2 text-sm font-bold text-blue-800 disabled:opacity-50"><Pencil size={16}/> تعديل الإعلان</button><button disabled={busyId===p.id} onClick={()=>void removePublishedPromotion(p)} className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 disabled:opacity-50"><Trash2 size={16}/> حذف من الكتالوج</button></div>
+            {editingPromotionId===p.id&&<form onSubmit={e=>{e.preventDefault();void savePromotionEdit(p)}} className="mt-4 grid gap-3 rounded-2xl border border-blue-100 bg-blue-50/60 p-4 sm:grid-cols-2">
+              <label className="text-sm font-bold sm:col-span-2">الباقة الإعلانية<select required value={promotionEditForm.advertising_plan_id} onChange={e=>setPromotionEditForm({...promotionEditForm,advertising_plan_id:e.target.value})} className="mt-1 min-h-11 w-full rounded-xl border bg-white px-3">{advertisingPlans.map(planOption=><option key={planOption.id} value={planOption.id}>{planOption.name} · {planOption.placement_type==='premium'?'مميز':'عادي'} · {planOption.duration_days} يوم{!planOption.is_active?' (غير مفعّلة حاليًا)':''}</option>)}</select></label>
+              <label className="text-sm font-bold">بداية الإعلان<input required type="datetime-local" value={promotionEditForm.starts_at} onChange={e=>setPromotionEditForm({...promotionEditForm,starts_at:e.target.value})} className="mt-1 min-h-11 w-full rounded-xl border bg-white px-3"/></label>
+              <label className="text-sm font-bold">نهاية الإعلان<input required type="datetime-local" value={promotionEditForm.ends_at} onChange={e=>setPromotionEditForm({...promotionEditForm,ends_at:e.target.value})} className="mt-1 min-h-11 w-full rounded-xl border bg-white px-3"/></label>
+              <p className="text-xs leading-6 text-slate-500 sm:col-span-2">تغيير الباقة لا يغيّر تواريخ الظهور تلقائيًا؛ عدّل تاريخ النهاية إذا أردت تمديد المدة أو تقليلها. أي تغيير في فترة الإعلان يُرسل إشعارًا لصاحب السيارة.</p>
+              <label className="text-sm font-bold sm:col-span-2">ملاحظات الإدارة<textarea rows={2} maxLength={1000} value={promotionEditForm.admin_notes} onChange={e=>setPromotionEditForm({...promotionEditForm,admin_notes:e.target.value})} className="mt-1 w-full rounded-xl border bg-white p-3 font-normal"/></label>
+              <div className="flex flex-wrap gap-2 sm:col-span-2"><button disabled={busyId===p.id} className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{busyId===p.id?'جارٍ الحفظ...':'حفظ التعديلات'}</button><button type="button" onClick={()=>setEditingPromotionId(null)} className="rounded-xl border bg-white px-4 py-2 text-sm font-bold">إلغاء</button></div>
+            </form>}
+          </article>})}
+          {promotions.filter(p=>p.status==='approved' && ['verified','waived'].includes(p.payment_status)).length===0&&<p className="rounded-xl border border-dashed p-5 text-sm text-slate-500">لا توجد إعلانات منشورة حاليًا.</p>}
+        </div>
+      </section>
     <p className="mt-8 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-8 text-sky-900">لأسباب أمنية، لا يمكن لأي مستخدم تفعيل صلاحية الإدارة من داخل الواجهة. يجب إضافة حساب المسؤول إلى جدول platform_admins من خلال إجراء إداري موثوق.</p>
   </div></main>
 }
