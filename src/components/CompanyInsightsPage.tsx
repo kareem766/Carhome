@@ -19,7 +19,7 @@ export default function CompanyInsightsPage() {
  const [offers,setOffers]=useState(0)
  const [refresh,setRefresh]=useState(0)
  const [statusFilter,setStatusFilter]=useState('all')
- const [reportLevel,setReportLevel]=useState<'basic'|'advanced'>('advanced')
+ const [reportLevel,setReportLevel]=useState<'basic'|'advanced'>('basic')
  const [planAlert,setPlanAlert]=useState('')
  const [periodFilter,setPeriodFilter]=useState('all')
  const filteredRows=useMemo(()=>rows.filter(r=>{const statusOk=statusFilter==='all'||r.status===statusFilter;const age=Date.now()-new Date(r.created_at).getTime();const periodOk=periodFilter==='all'||(periodFilter==='30'&&age<=30*86400000)||(periodFilter==='90'&&age<=90*86400000);return statusOk&&periodOk}),[rows,statusFilter,periodFilter])
