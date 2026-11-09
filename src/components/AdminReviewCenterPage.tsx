@@ -14,7 +14,8 @@ type QueueItem = {
   details: string[]
   vehicleId?: string
 }
-type AuditItem = { id: string; type: string; status: string; reviewedAt: string; reviewer: string | null; note: string | null }\ntype EvidenceItem = { label: string; url: string; kind: 'image' | 'file' }
+type AuditItem = { id: string; type: string; status: string; reviewedAt: string; reviewer: string | null; note: string | null }
+type EvidenceItem = { label: string; url: string; kind: 'image' | 'file' }
 const groups = [
   { title: 'مراجعة التسجيل والاعتماد', description: 'طلبات تحتاج فحص بيانات أو اتخاذ قرار اعتماد.', items: [
     { label: 'السيارات والتحويلات', detail: 'مراجعة بيانات السيارات والصور ورسوم التسجيل وإثباتات الدفع.', href: '/workspace/admin/vehicle-reviews', icon: CarFront },
@@ -46,7 +47,10 @@ export default function AdminReviewCenterPage() {
   const [sortOrder, setSortOrder] = useState('oldest')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [loadError, setLoadError] = useState('')
-  const [page, setPage] = useState(0)\n  const [evidence, setEvidence] = useState<EvidenceItem[]>([])\n  const [evidenceLoading, setEvidenceLoading] = useState(false)\n  const [evidenceError, setEvidenceError] = useState('')
+  const [page, setPage] = useState(0)
+  const [evidence, setEvidence] = useState<EvidenceItem[]>([])
+  const [evidenceLoading, setEvidenceLoading] = useState(false)
+  const [evidenceError, setEvidenceError] = useState('')
   const pageSize = 25
   const loadQueues = useCallback(async () => {
     const client = supabase
@@ -147,7 +151,8 @@ export default function AdminReviewCenterPage() {
     return matchesTerm&&matchesFilter&&matchesStatus
   }).sort((a,b)=>sortOrder==='newest'?new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime():new Date(a.createdAt).getTime()-new Date(b.createdAt).getTime()),[queue,query,filter,statusFilter,sortOrder])
   const visibleQueue = useMemo(()=>filteredQueue.slice(page*pageSize,(page+1)*pageSize),[filteredQueue,page])
-  const selectedItem = selectedIndex===null ? null : visibleQueue[selectedIndex]||null\n  useEffect(() => {
+  const selectedItem = selectedIndex===null ? null : visibleQueue[selectedIndex]||null
+  useEffect(() => {
     let active = true
     async function loadEvidence() {
       setEvidence([])
