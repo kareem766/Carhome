@@ -72,7 +72,7 @@ export default function AdvertisingPlansPage(){
     const submittedPaymentReference=selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate
     const {data:pendingRequest,error:pendingLookupError}=await supabase
       .from('vehicle_promotions')
-      .select('id,advertising_plan_id,payment_status')
+      .select('id,advertising_plan_id,payment_status,payment_reference')
       .eq('vehicle_id',vehicleId)
       .eq('status','pending_review')
       .maybeSingle()
@@ -89,7 +89,9 @@ export default function AdvertisingPlansPage(){
       original_amount_egp:couponPreview?.original_amount_egp??Number(selectedPlan.price_egp),
       discount_amount_egp:couponPreview?.discount_amount_egp??0,
       final_amount_egp:couponPreview?.final_amount_egp??Number(selectedPlan.price_egp),
-      payment_reference:submittedPaymentReference,
+      payment_reference:pendingRequest?.payment_reference
+        ? submittedPaymentReference+' — مرجع التحويل السابق: '+pendingRequest.payment_reference
+        : submittedPaymentReference,
       payment_status:'pending',
       updated_at:new Date().toISOString()
     }
