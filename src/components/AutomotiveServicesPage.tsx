@@ -32,7 +32,6 @@ const fieldClass = 'min-h-12 w-full rounded-xl border border-slate-200 bg-white 
 export default function AutomotiveServicesPage() {
   const [category, setCategory] = useState('all')
   const [city, setCity] = useState('الكل')
-  const launchCities = ['الإسكندرية', 'القاهرة', 'الجيزة']
   const [search, setSearch] = useState('')
   const [publishedServices, setPublishedServices] = useState<Service[]>([])
   useEffect(() => {
