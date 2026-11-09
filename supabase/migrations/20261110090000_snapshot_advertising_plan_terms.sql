@@ -30,7 +30,9 @@ alter table public.vehicle_promotions
   alter column plan_display_order_snapshot set not null,
   alter column plan_placement_type_snapshot set not null;
 
-create or replace function app_private.set_vehicle_promotion_period()
+-- Enforce snapshot immutability on every row update. A snapshot is refreshed
+-- only when a promotion is intentionally assigned a different plan.
+create or replace function app_private.snapshot_vehicle_promotion_plan()
 returns trigger
 language plpgsql
 security definer
@@ -38,22 +40,9 @@ set search_path = ''
 as $function$
 declare
   v_plan record;
-  v_duration_days integer;
-  v_was_activated boolean := false;
-  v_next_start timestamptz;
-  v_plan_changed boolean := false;
 begin
-  v_plan_changed := tg_op = 'INSERT'
-    or old.advertising_plan_id is distinct from new.advertising_plan_id;
-
-  if v_plan_changed
-     or new.plan_name_snapshot is null
-     or new.plan_description_snapshot is null
-     or new.plan_duration_days_snapshot is null
-     or new.plan_price_egp_snapshot is null
-     or new.plan_features_snapshot is null
-     or new.plan_display_order_snapshot is null
-     or new.plan_placement_type_snapshot is null then
+  if tg_op = 'INSERT'
+     or old.advertising_plan_id is distinct from new.advertising_plan_id then
     select p.name, p.description, p.duration_days, p.price_egp,
            p.features, p.display_order, p.placement_type
       into v_plan
@@ -71,8 +60,36 @@ begin
     new.plan_features_snapshot := v_plan.features;
     new.plan_display_order_snapshot := v_plan.display_order;
     new.plan_placement_type_snapshot := v_plan.placement_type;
+  else
+    new.plan_name_snapshot := old.plan_name_snapshot;
+    new.plan_description_snapshot := old.plan_description_snapshot;
+    new.plan_duration_days_snapshot := old.plan_duration_days_snapshot;
+    new.plan_price_egp_snapshot := old.plan_price_egp_snapshot;
+    new.plan_features_snapshot := old.plan_features_snapshot;
+    new.plan_display_order_snapshot := old.plan_display_order_snapshot;
+    new.plan_placement_type_snapshot := old.plan_placement_type_snapshot;
   end if;
 
+  return new;
+end;
+$function$;
+
+drop trigger if exists vehicle_promotions_a_snapshot_plan_terms on public.vehicle_promotions;
+create trigger vehicle_promotions_a_snapshot_plan_terms
+before insert or update on public.vehicle_promotions
+for each row execute function app_private.snapshot_vehicle_promotion_plan();
+
+create or replace function app_private.set_vehicle_promotion_period()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_duration_days integer;
+  v_was_activated boolean := false;
+  v_next_start timestamptz;
+begin
   if new.status = 'approved'
      and new.payment_status in ('verified', 'waived') then
     if tg_op = 'INSERT' then
