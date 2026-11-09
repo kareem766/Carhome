@@ -69,10 +69,82 @@ export default function AdvertisingPlansPage(){
     if(!selectedPaymentNumber){setError('وسيلة الدفع المختارة غير متاحة حاليًا. اختر وسيلة دفع مفعّلة من إعدادات المنصة.');return}
     setSending(true);setError('');setNotice('')
     const selectedPaymentLabel=paymentMethod==='instapay'?'InstaPay':'Vodafone Cash'
-    const {error:e}=await supabase.from('vehicle_promotions').insert({vehicle_id:vehicleId,organization_id:orgId,advertising_plan_id:selectedPlan.id,created_by:userId,status:'pending_review',payment_status:'pending',coupon_code:couponPreview?.code||null,payment_reference:selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate})
+    const submittedPaymentReference=selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate
+    const {data:pendingRequest,error:pendingLookupError}=await supabase
+      .from('vehicle_promotions')
+      .select('id,advertising_plan_id,payment_status')
+      .eq('vehicle_id',vehicleId)
+      .eq('status','pending_review')
+      .maybeSingle()
+    if(pendingLookupError){
+      setSending(false)
+      setError('تعذر التحقق من وجود طلب إعلان سابق لهذه السيارة. لم يتم إرسال أي طلب جديد. حاول مرة أخرى.')
+      return
+    }
+
+    let requestError: {message:string}|null=null
+    let upgradedExistingRequest=false
+    const pricing={
+      coupon_code:couponPreview?.code||null,
+      original_amount_egp:couponPreview?.original_amount_egp??Number(selectedPlan.price_egp),
+      discount_amount_egp:couponPreview?.discount_amount_egp??0,
+      final_amount_egp:couponPreview?.final_amount_egp??Number(selectedPlan.price_egp),
+      payment_reference:submittedPaymentReference,
+      payment_status:'pending',
+      updated_at:new Date().toISOString()
+    }
+
+    if(pendingRequest){
+      const {data:currentPlan,error:currentPlanError}=await supabase
+        .from('advertising_plans')
+        .select('id,price_egp')
+        .eq('id',pendingRequest.advertising_plan_id)
+        .maybeSingle()
+      if(currentPlanError||!currentPlan){
+        setSending(false)
+        setError('تعذر قراءة الباقة المرتبطة بطلبك الحالي. لم يتم تغيير الطلب.')
+        return
+      }
+      if(pendingRequest.advertising_plan_id===selectedPlan.id||Number(selectedPlan.price_egp)<=Number(currentPlan.price_egp)){
+        setSending(false)
+        setError(pendingRequest.advertising_plan_id===selectedPlan.id
+          ?'لديك بالفعل طلب لهذه الباقة قيد المراجعة. لا يمكن تكرار الطلب قبل انتهاء مراجعته.'
+          :'لديك طلب إعلان قيد المراجعة بباقة مساوية أو أعلى. يمكنك اختيار باقة أعلى فقط لترقية الطلب الحالي.')
+        return
+      }
+      const {error:updateError}=await supabase
+        .from('vehicle_promotions')
+        .update({
+          advertising_plan_id:selectedPlan.id,
+          ...pricing,
+          reviewed_by:null,
+          reviewed_at:null
+        })
+        .eq('id',pendingRequest.id)
+        .eq('status','pending_review')
+      requestError=updateError
+      upgradedExistingRequest=!updateError
+    }else{
+      const {error:insertError}=await supabase.from('vehicle_promotions').insert({
+        vehicle_id:vehicleId,
+        organization_id:orgId,
+        advertising_plan_id:selectedPlan.id,
+        created_by:userId,
+        status:'pending_review',
+        ...pricing
+      })
+      requestError=insertError
+    }
     setSending(false)
-    if(e){setError('تعذر إرسال طلب الترويج: '+e.message);return}
-    setNotice('تم إرسال طلب الإعلان وبيانات التحويل بنجاح. طلبك الآن في قائمة مراجعة الدفع بلوحة الإدارة، ولن يظهر الإعلان قبل مراجعة التحويل واعتماده.')
+    if(requestError){
+      setError(requestError.message.includes('vehicle_promotions_one_pending_per_vehicle_uidx')
+        ?'يوجد طلب إعلان لهذه السيارة قيد المراجعة بالفعل. حدّث الصفحة لمتابعة الطلب القائم أو ترقيته.'
+        :'تعذر حفظ طلب الترويج: '+requestError.message)
+      return
+    }
+    setNotice(upgradedExistingRequest
+      ?'تم تحديث طلب الإعلان الموجود إلى الباقة الأعلى بنجاح. لم يتم إنشاء طلب جديد، وتم تحديث بيانات الباقة والمبلغ وبيانات التحويل ليُراجعها الأدمن في نفس الطلب.'
+      :'تم إرسال طلب الإعلان وبيانات التحويل بنجاح. طلبك الآن في قائمة مراجعة الدفع بلوحة الإدارة، ولن يظهر الإعلان قبل مراجعة التحويل واعتماده.')
     setSelectedPlan(null);setVehicleId('');setPaymentReference('');setPaymentDate(new Date().toISOString().slice(0,10));setPaymentMethod('instapay');setCouponCode('');setCouponPreview(null)
   }
 
