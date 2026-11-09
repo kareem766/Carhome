@@ -22,8 +22,8 @@ type PromotionRow = { id: string; vehicle_id: string; organization_id: string; a
 type PaymentRow = { id: string; vehicle_id: string; amount_egp: number; period_months: number; transfer_method: string; transfer_reference: string; review_status: string; admin_notes: string | null; proof_path: string | null; created_at: string; vehicles: { make: string; model: string; model_year?: number; vehicle_type?: string; governorate?: string; monthly_price_egp?: number; review_status?: string } | { make: string; model: string; model_year?: number; vehicle_type?: string; governorate?: string; monthly_price_egp?: number; review_status?: string }[] | null; organizations: { name: string; organization_type?: string } | { name: string; organization_type?: string }[] | null }
 
 function promotionTransferKeys(value: string | null | undefined) {
-  return String(value || '').split(/\\n---\\n/).map(reference => reference.split('—')[1] || '')
-    .map(reference => reference.replace(/[\\u200e\\u200f\\u202a-\\u202e\\u2066-\\u2069]/g, '').replace(/\\s/g, '').toLowerCase())
+  return String(value || '').split(/\n---\n/).map(reference => reference.split('—')[1] || '')
+    .map(reference => reference.replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '').replace(/\s/g, '').toLowerCase())
     .filter(Boolean)
 }
 function hasDuplicateTransferReference(row: PromotionRow, rows: PromotionRow[]) {
