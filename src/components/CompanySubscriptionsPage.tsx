@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { CalendarClock, CheckCircle2, CreditCard, RefreshCw, ShieldCheck } from 'lucide-react'
+import { ArrowRight, CalendarClock, CarFront, CheckCircle2, CreditCard, Home, RefreshCw, ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import CompanyPageSidebar from './CompanyPageSidebar'
@@ -100,7 +100,11 @@ export default function CompanySubscriptionsPage(){
  return <><CompanyPageSidebar active="subscriptions"/><main dir="rtl" className="mc-company-page-with-sidebar min-h-screen bg-[linear-gradient(180deg,#f4f8ff_0%,#f8fbff_42%,#eef4fc_100%)] px-4 py-6 text-slate-900 sm:px-6"><div className="mx-auto max-w-6xl">
   <header className="rounded-3xl border border-white bg-white/95 p-5 shadow-sm"><PlatformBrand compact/><h1 className="mt-2 text-2xl font-black">اشتراك الشركة والباقات</h1><p className="mt-2 text-sm leading-7 text-slate-500">اختر الباقة المناسبة وحدد نظام الفوترة الشهري أو السنوي. تبدأ مدة الاشتراك من تاريخ اعتماد الدفع. اشتراك المنصة منفصل تمامًا عن أي مبالغ تخص تأجير السيارات.</p></header>
   <nav aria-label="التنقل داخل صفحة الاشتراكات" className="sticky top-3 z-20 mt-4 rounded-2xl border border-blue-100 bg-white/95 p-2 shadow-lg backdrop-blur">
-   <div className="flex gap-2 overflow-x-auto">
+   <div className="flex flex-wrap gap-2">
+    <button type="button" onClick={()=>{if(window.history.length>1)window.history.back();else window.location.assign('/workspace/company')}} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-extrabold text-slate-700"><ArrowRight size={17}/> رجوع</button>
+    <a href="/" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm font-extrabold text-amber-800"><Home size={17}/> الصفحة الرئيسية</a>
+    <a href="/workspace/catalog" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-extrabold text-blue-800"><CarFront size={17}/> الكتالوج</a>
+    <span aria-hidden="true" className="mx-1 hidden border-r border-slate-200 sm:block"/>
     <button type="button" onClick={()=>document.getElementById('company-plans')?.scrollIntoView({behavior:'smooth',block:'start'})} className="min-h-11 shrink-0 rounded-xl bg-blue-700 px-4 text-sm font-extrabold text-white">الباقات والأسعار</button>
     <button type="button" onClick={()=>document.getElementById('company-payment')?.scrollIntoView({behavior:'smooth',block:'start'})} className="min-h-11 shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-extrabold text-blue-800">الدفع والاشتراك</button>
     <button type="button" onClick={()=>document.getElementById('company-history')?.scrollIntoView({behavior:'smooth',block:'start'})} className="min-h-11 shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-extrabold text-slate-700">سجل الاشتراكات</button>
