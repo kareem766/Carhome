@@ -11,6 +11,7 @@ const initial: Counts = { users: 0, organizations: 0, companyAccounts: 0, approv
 const shortcuts = [
  { href: '/workspace/admin/managed-sourcing', title: 'خدمة البحث نيابة عن الشركات', desc: 'إدارة التفويضات والتسعير والمدفوعات والعروض', icon: BriefcaseBusiness, tone: 'from-cyan-600 to-blue-800' },
  { href: '/workspace/admin/vehicle-reviews', title: 'مراجعة السيارات والتحويلات', desc: 'اعتماد السيارات ومراجعة إثباتات الدفع', icon: ClipboardCheck, tone: 'from-sky-500 to-blue-700' },
+ { href: '/workspace/admin/provider-reviews', title: 'مراجعة مقدمي الخدمات', desc: 'مراجعة واعتماد طلبات الجهات المقدمة لخدمات السيارات', icon: ShieldCheck, tone: 'from-teal-500 to-cyan-700' },
  { href: '/workspace/admin/employee-requests', title: 'مراجعة طلبات الموظفين', desc: 'مراجعة طلبات السيارات الشهرية بالسائق واعتمادها أو رفضها', icon: Users, tone: 'from-violet-500 to-indigo-700' },
  { href: '/workspace/admin/managed-accounts', title: 'إدارة حسابات المستخدمين', desc: 'إنشاء الحسابات وتعديلها وتعطيلها أو حذفها', icon: Users, tone: 'from-indigo-500 to-violet-700' },
  { href: '/workspace/admin/subscription-plans', title: 'اشتراكات الشركات', desc: 'التحكم في الباقات والأسعار', icon: CreditCard, tone: 'from-emerald-500 to-teal-700' },
