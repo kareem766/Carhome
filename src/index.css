@@ -1034,3 +1034,8 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-catalog-filters>label:first-child input{min-height:52px;font-size:.9rem}
   .mc-catalog-filters>div{grid-column:1/-1}
 }
+
+
+/* User-provided homepage banner: preserve the complete image with a polished responsive frame. */
+.mc-home-hero-visual img.mc-home-user-banner{width:100%;max-width:100%;height:auto;max-height:30rem;aspect-ratio:16/9;object-fit:contain;border:1px solid rgba(255,255,255,.22);border-radius:1.65rem;background:rgba(7,27,49,.72);box-shadow:0 22px 48px rgba(0,0,0,.32),0 0 0 1px rgba(255,173,10,.14);filter:none;mask-image:none}
+@media(max-width:760px){.mc-home-hero-visual{min-height:0;padding:.25rem 0}.mc-home-hero-visual img.mc-home-user-banner{width:100%;max-height:none;border-radius:1.15rem;aspect-ratio:16/9}}
