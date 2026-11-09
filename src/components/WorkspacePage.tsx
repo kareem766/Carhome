@@ -631,7 +631,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
         {label:'العروض المستلمة',value:receivedOffers,detail:'عروض من الملاك والموردين',icon:FileText,tone:'bg-emerald-50 text-emerald-700'},
         {label:'طلبات مفتوحة',value:requests.filter(item=>item.status==='open').length,detail:'تستقبل عروضًا حاليًا',icon:MessageCircle,tone:'bg-amber-50 text-amber-700'}
       ] : [
-        {label:'إجمالي السيارات',value:vehicles.length,detail:'سيارات مسجلة بحسابك',icon:CarFront,tone:'bg-blue-50 text-blue-700'},
+        {label:'إجمالي السيارات',value:vehicles.filter(vehicle=>vehicle.review_status!=='pending_payment').length,detail:'السيارات التي أُرسل تسجيلها؛ لا يشمل التسجيلات غير المكتملة',icon:CarFront,tone:'bg-blue-50 text-blue-700'},
         {label:'سيارات نشطة',value:activeVehicles,detail:'معتمدة ومفعّلة للشركات',icon:Building2,tone:'bg-emerald-50 text-emerald-700'},
         {label:'تحت المراجعة',value:pendingVehicles,detail:'تحتاج متابعة الإدارة',icon:ClipboardList,tone:'bg-amber-50 text-amber-700'},
         {label:'الإعلانات النشطة',value:activeAdsCount,detail:'إعلانات سياراتك الظاهرة للشركات',icon:Megaphone,tone:'bg-indigo-50 text-indigo-700',href:'/workspace/advertising-plans'}
