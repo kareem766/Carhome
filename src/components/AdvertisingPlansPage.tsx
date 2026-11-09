@@ -105,7 +105,7 @@ export default function AdvertisingPlansPage(){
     if(requiresTransfer&&!selectedPaymentNumber){setError('وسيلة الدفع المختارة غير متاحة حاليًا. اختر وسيلة دفع مفعّلة من إعدادات المنصة.');return}
     setSending(true);setError('');setNotice('')
     const selectedPaymentLabel=paymentMethod==='instapay'?'InstaPay':'Vodafone Cash'
-    const submittedPaymentReference=requiresTransfer?selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate:'لا يوجد فرق مستحق — ترقية دون مبلغ إضافي'
+    let submittedPaymentReference=''
     const {data:activePromotion,error:activeError}=await supabase.from('vehicle_promotions').select('id,advertising_plan_id').eq('vehicle_id',vehicleId).eq('status','approved').in('payment_status',['verified','waived']).gt('ends_at',new Date().toISOString()).order('ends_at',{ascending:false}).limit(1).maybeSingle()
     if(activeError){setSending(false);setError('تعذر التحقق من الباقة الحالية للسيارة. لم يتم إنشاء أو تعديل أي طلب.');return}
     if(activePromotion?.advertising_plan_id===selectedPlan.id){setSending(false);setError('هذه الباقة مفعّلة بالفعل على السيارة. اختر باقة مختلفة أو انتظر انتهاء مدتها.');return}
@@ -131,7 +131,6 @@ export default function AdvertisingPlansPage(){
       original_amount_egp:couponPreview?.original_amount_egp??Number(selectedPlan.price_egp),
       discount_amount_egp:couponPreview?.discount_amount_egp??0,
       final_amount_egp:fullPlanAmount,
-      payment_reference:submittedPaymentReference,
       payment_status:'pending',
       updated_at:new Date().toISOString()
     }
@@ -162,11 +161,15 @@ export default function AdvertisingPlansPage(){
       const previousReferences=[priorRef,oldTransferExists?oldRef:''].filter(Boolean)
       previousCredit=(priorRef&&priorAmount>0?priorAmount:0)+(oldTransferExists?oldDue:0)
       paymentDueAmount=Math.max(0,fullPlanAmount-previousCredit)
+      if(paymentDueAmount>0&&!paymentReference.trim()){setSending(false);setError('بعد إعادة التحقق من الطلب، ما زال هناك مبلغ مستحق. أدخل رقم التحويل الحالي قبل الإرسال.');return}
+      if(paymentDueAmount>0&&!selectedPaymentNumber){setSending(false);setError('وسيلة الدفع المختارة غير متاحة حاليًا. اختر وسيلة دفع مفعّلة من إعدادات المنصة.');return}
+      submittedPaymentReference=paymentDueAmount>0?selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate:'لا يوجد فرق مستحق — ترقية دون مبلغ إضافي'
       const {data:updatedRequest,error:updateError}=await supabase
         .from('vehicle_promotions')
         .update({
           advertising_plan_id:selectedPlan.id,
           ...pricing,
+          payment_reference:submittedPaymentReference,
           previous_payment_reference:previousReferences.join('\n---\n')||null,
           previous_payment_amount_egp:previousCredit,
           previous_payment_credit_egp:previousCredit,
@@ -181,6 +184,10 @@ export default function AdvertisingPlansPage(){
       requestError=updateError||(!updatedRequest?{message:'تغيرت حالة الطلب أثناء التحديث. حدّث الصفحة وحاول مرة أخرى.'}:null)
       upgradedExistingRequest=!requestError
     }else{
+      paymentDueAmount=fullPlanAmount
+      if(paymentDueAmount>0&&!paymentReference.trim()){setSending(false);setError('أدخل رقم العملية بعد تحويل المبلغ المستحق.');return}
+      if(paymentDueAmount>0&&!selectedPaymentNumber){setSending(false);setError('وسيلة الدفع المختارة غير متاحة حاليًا. اختر وسيلة دفع مفعّلة من إعدادات المنصة.');return}
+      submittedPaymentReference=paymentDueAmount>0?selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate:'لا يوجد مبلغ مستحق بعد الخصم'
       const {error:insertError}=await supabase.from('vehicle_promotions').insert({
         vehicle_id:vehicleId,
         organization_id:orgId,
@@ -188,8 +195,9 @@ export default function AdvertisingPlansPage(){
         created_by:userId,
         status:'pending_review',
         previous_payment_credit_egp:0,
-        payment_due_egp:fullPlanAmount,
-        ...pricing
+        payment_due_egp:paymentDueAmount,
+        ...pricing,
+        payment_reference:submittedPaymentReference
       })
       requestError=insertError
     }
