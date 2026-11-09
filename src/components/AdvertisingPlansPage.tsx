@@ -136,6 +136,9 @@ export default function AdvertisingPlansPage(){
     }
 
     if(pendingRequest){
+      if(pendingRequest.payment_status!=='pending'){
+        setSending(false);setError('الطلب السابق ليس في حالة انتظار التحقق من الدفع. لن نعدّل الرصيد تلقائيًا؛ تواصل مع الإدارة لمراجعة حالته.');return
+      }
       const {data:currentPlan,error:currentPlanError}=await supabase
         .from('advertising_plans')
         .select('id,price_egp,display_order')
