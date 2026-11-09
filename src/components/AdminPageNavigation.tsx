@@ -6,6 +6,7 @@ const groups = [
  { title:'الرئيسية', links:[{href:'/workspace/admin',label:'لوحة التحكم',icon:LayoutDashboard}] },
  { title:'إدارة المنصة', links:[
   {href:'/workspace/admin/vehicle-reviews',label:'المراجعات والطلبات',icon:ClipboardCheck},
+  {href:'/workspace/admin/provider-reviews',label:'مراجعة مقدمي الخدمات',icon:ClipboardCheck},
   {href:'/workspace/admin/employee-requests',label:'طلبات الموظفين',icon:Users},
   {href:'/workspace/admin/support',label:'مركز الدعم والتذاكر',icon:Headset},
   {href:'/workspace/admin/managed-sourcing',label:'خدمة البحث نيابة عن الشركات',icon:BriefcaseBusiness},
