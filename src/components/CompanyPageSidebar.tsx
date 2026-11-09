@@ -17,7 +17,7 @@ const links = [
   { id: 'catalog', href: '/workspace/catalog', label: 'السيارات المتاحة', icon: CarFront },
   { id: 'services', href: '/services', label: 'خدمات السيارات', icon: Wrench },
   { id: 'messages', href: '/messages', label: 'المحادثات', icon: MessageCircle },
-  { id: 'ads', href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: Megaphone },
+  { id: 'ads', href: '/workspace/company/subscriptions', label: 'باقات الإعلانات', icon: Megaphone },
   { id: 'account', href: '/workspace/company/account', label: 'الحساب', icon: UserRound },
 ]
 
