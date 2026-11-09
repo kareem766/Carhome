@@ -41,7 +41,7 @@ export default function AutomotiveServicesPage() {
       if (!active) return
       if (error) { console.error('Published service providers could not be loaded:', error); return }
       const rows = (data || []) as Array<{ id: string; provider_name: string; category: string; governorate: string; address: string; phone: string; website_url: string | null; official_source_url: string | null; description: string | null }>
-      const safeUrl = (value: string | null) => value && /^https?:\\/\\//i.test(value) ? value : ''
+      const safeUrl = (value: string | null) => value && /^https?:\/\//i.test(value) ? value : ''
       const categoryMap: Record<string, string> = { spare_parts: 'parts' }
       setPublishedServices(rows.map(row => ({
         id: 'approved-provider-' + row.id,
