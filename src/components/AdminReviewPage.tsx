@@ -217,7 +217,7 @@ export default function AdminReviewPage() {
     const { data: updated, error: updateError } = await supabase.from('vehicle_promotions').update({
       status,
       payment_status: status === 'approved' ? (Number(row.payment_due_egp ?? row.final_amount_egp ?? 0) > 0 ? 'verified' : 'waived') : 'rejected',
-      admin_notes: note.trim() || null,
+      admin_notes: [status==='approved'&&priorAmount>0?'أقر المسؤول بالتحقق اليدوي من جميع مراجع التحويلات السابقة والحالية.':'',note.trim()].filter(Boolean).join('\n') || null,
       reviewed_by: auth.user?.id,
       reviewed_at: new Date().toISOString()
     }).eq('id', row.id).eq('status', 'pending_review').eq('payment_status', 'pending').select('id').maybeSingle()
