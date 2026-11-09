@@ -23,6 +23,7 @@ const categories = [
   { id: 'insurance', label: 'تأمين السيارات', icon: ShieldCheck },
   { id: 'parts', label: 'قطع الغيار', icon: CarFront },
   { id: 'fleet_services', label: 'خدمات الأساطيل', icon: CarFront },
+  { id: 'other', label: 'خدمات أخرى', icon: Wrench },
   { id: 'tires', label: 'الإطارات والبطاريات', icon: Disc3 },
   { id: 'inspection', label: 'الفحص الفني', icon: ClipboardCheck },
   { id: 'roadside', label: 'المساعدة على الطريق', icon: Phone }
