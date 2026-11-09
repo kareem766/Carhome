@@ -12,6 +12,7 @@ type QueueItem = {
   createdAt: string
   href: string
   details: string[]
+  vehicleId?: string
 }
 type AuditItem = { id: string; type: string; status: string; reviewedAt: string; reviewer: string | null; note: string | null }
 const groups = [
@@ -43,6 +44,8 @@ export default function AdminReviewCenterPage() {
   const [filter, setFilter] = useState('all')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [loadError, setLoadError] = useState('')
+  const [page, setPage] = useState(0)
+  const pageSize = 25
   const loadQueues = useCallback(async () => {
     const client = supabase
     if (!client) return
@@ -50,14 +53,14 @@ export default function AdminReviewCenterPage() {
     setLoadError('')
     try {
       const [vehicles, payments, promotions, subscriptions, employeeRequests, sourcingSubscriptions, organizations, tickets, paymentAudit, promotionAudit, subscriptionAudit, employeeAudit, sourcingAudit] = await Promise.all([
-        client.from('vehicles').select('id,make,model,model_year,review_status,payment_status,created_at,organizations(name)').in('review_status', ['pending_review','pending_payment']).order('created_at',{ascending:true}),
-        client.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,transfer_reference,review_status,created_at,vehicles(make,model),organizations(name)').in('review_status',['pending','pending_review']).order('created_at',{ascending:true}),
-        client.from('vehicle_promotions').select('id,plan_name_snapshot,status,payment_status,payment_reference,created_at,vehicles(make,model),organizations(name)').eq('status','pending_review').eq('payment_status','pending').order('created_at',{ascending:true}),
-        client.from('company_subscriptions').select('id,plan_name,billing_cycle,amount_egp,payment_reference,payment_transfer_date,payment_status,status,created_at,organizations(name)').in('payment_status',['submitted','pending']).order('created_at',{ascending:true}),
-        client.from('employee_rental_requests').select('id,title,vehicle_type,governorate,duration_months,status,created_at').eq('status','pending_review').order('created_at',{ascending:true}),
-        client.from('managed_sourcing_subscriptions').select('id,monthly_price_egp,requests_included,payment_reference,payment_status,status,created_at,organizations!managed_sourcing_subscriptions_organization_id_fkey(name)').eq('status','pending_review').order('created_at',{ascending:true}),
-        client.from('organizations').select('id,name,organization_type,approval_status,created_at').eq('approval_status','pending_review').order('created_at',{ascending:true}),
-        client.from('support_tickets').select('id,ticket_number,subject,category,priority,status,created_at').in('status',['open','in_progress','waiting_user']).order('created_at',{ascending:true}),
+        client.from('vehicles').select('id,make,model,model_year,review_status,payment_status,created_at,organizations(name)',{count:'exact'}).in('review_status', ['pending_review','pending_payment']).order('created_at',{ascending:true}),
+        client.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,transfer_reference,review_status,created_at,vehicles(make,model),organizations(name)',{count:'exact'}).in('review_status',['pending','pending_review']).order('created_at',{ascending:true}),
+        client.from('vehicle_promotions').select('id,plan_name_snapshot,status,payment_status,payment_reference,created_at,vehicles(make,model),organizations(name)',{count:'exact'}).eq('status','pending_review').eq('payment_status','pending').order('created_at',{ascending:true}),
+        client.from('company_subscriptions').select('id,plan_name,billing_cycle,amount_egp,payment_reference,payment_transfer_date,payment_status,status,created_at,organizations(name)',{count:'exact'}).in('payment_status',['submitted','pending']).order('created_at',{ascending:true}),
+        client.from('employee_rental_requests').select('id,title,vehicle_type,governorate,duration_months,status,created_at',{count:'exact'}).eq('status','pending_review').order('created_at',{ascending:true}),
+        client.from('managed_sourcing_subscriptions').select('id,monthly_price_egp,requests_included,payment_reference,payment_status,status,created_at,organizations!managed_sourcing_subscriptions_organization_id_fkey(name)',{count:'exact'}).eq('status','pending_review').order('created_at',{ascending:true}),
+        client.from('organizations').select('id,name,organization_type,approval_status,created_at',{count:'exact'}).eq('approval_status','pending_review').order('created_at',{ascending:true}),
+        client.from('support_tickets').select('id,ticket_number,subject,category,priority,status,created_at',{count:'exact'}).in('status',['open','in_progress','waiting_user']).order('created_at',{ascending:true}),
         client.from('vehicle_payment_submissions').select('id,review_status,reviewed_at,reviewed_by,admin_notes').not('reviewed_at','is',null).order('reviewed_at',{ascending:false}).limit(8),
         client.from('vehicle_promotions').select('id,status,reviewed_at,reviewed_by,admin_notes').not('reviewed_at','is',null).order('reviewed_at',{ascending:false}).limit(8),
         client.from('company_subscriptions').select('id,status,payment_status,reviewed_at,reviewed_by,admin_notes').not('reviewed_at','is',null).order('reviewed_at',{ascending:false}).limit(8),
@@ -69,8 +72,19 @@ export default function AdminReviewCenterPage() {
       const failed = results.map((r,i)=>r.error?labels[i]+': '+r.error.message:'').filter(Boolean)
       setLoadError(failed.length ? 'تعذر تحميل بعض قوائم المراجعة: '+failed.join(' — ') : '')
       const items: QueueItem[] = []
-      for (const row of (vehicles.data||[]) as any[]) items.push({id:row.id,type:'vehicles',title:[row.make,row.model,row.model_year].filter(Boolean).join(' '),subtitle:relationName(row.organizations)||'مالك سيارة',status:row.review_status+' · '+row.payment_status,createdAt:row.created_at,href:'/workspace/admin/vehicle-reviews',details:['حالة المراجعة: '+row.review_status,'حالة الدفع: '+row.payment_status,'صاحب السيارة: '+(relationName(row.organizations)||'غير محدد')]})
-      for (const row of (payments.data||[]) as any[]) { const vehicle=Array.isArray(row.vehicles)?row.vehicles[0]:row.vehicles; items.push({id:row.id,type:'payments',title:'تحويل تسجيل سيارة',subtitle:[vehicle?.make,vehicle?.model].filter(Boolean).join(' ')||relationName(row.organizations)||'طلب تحويل',status:row.review_status,createdAt:row.created_at,href:'/workspace/admin/vehicle-reviews',details:['المبلغ: '+Number(row.amount_egp||0).toLocaleString('ar-EG')+' جنيه','رقم التحويل: '+(row.transfer_reference||'غير مسجل'),'السيارة: '+[vehicle?.make,vehicle?.model].filter(Boolean).join(' ')]}) }
+      const pendingVehicles = new Map<string, any>()
+      const paymentsByVehicle = new Map<string, any>()
+      for (const row of (vehicles.data||[]) as any[]) pendingVehicles.set(String(row.id), row)
+      for (const row of (payments.data||[]) as any[]) if (row.vehicle_id) paymentsByVehicle.set(String(row.vehicle_id), row)
+      for (const row of (vehicles.data||[]) as any[]) {
+        const payment = paymentsByVehicle.get(String(row.id))
+        items.push({id:row.id,vehicleId:row.id,type:'vehicles',title:[row.make,row.model,row.model_year].filter(Boolean).join(' '),subtitle:relationName(row.organizations)||'مالك سيارة',status:row.review_status+' · '+row.payment_status,createdAt:row.created_at,href:'/workspace/admin/vehicle-reviews',details:['حالة المراجعة: '+row.review_status,'حالة الدفع: '+row.payment_status,'صاحب السيارة: '+(relationName(row.organizations)||'غير محدد'),...(payment?['طلب الدفع مرتبط بنفس السيارة','المبلغ: '+Number(payment.amount_egp||0).toLocaleString('ar-EG')+' جنيه','رقم التحويل: '+(payment.transfer_reference||'غير مسجل'),'حالة إثبات الدفع: '+payment.review_status]:[])]})
+      }
+      for (const row of (payments.data||[]) as any[]) {
+        if (row.vehicle_id && pendingVehicles.has(String(row.vehicle_id))) continue
+        const vehicle=Array.isArray(row.vehicles)?row.vehicles[0]:row.vehicles
+        items.push({id:row.id,type:'payments',title:'تحويل تسجيل سيارة',subtitle:[vehicle?.make,vehicle?.model].filter(Boolean).join(' ')||relationName(row.organizations)||'طلب تحويل',status:row.review_status,createdAt:row.created_at,href:'/workspace/admin/vehicle-reviews',details:['المبلغ: '+Number(row.amount_egp||0).toLocaleString('ar-EG')+' جنيه','رقم التحويل: '+(row.transfer_reference||'غير مسجل'),'السيارة: '+[vehicle?.make,vehicle?.model].filter(Boolean).join(' ')]})
+      }
       for (const row of (promotions.data||[]) as any[]) { const vehicle=Array.isArray(row.vehicles)?row.vehicles[0]:row.vehicles; items.push({id:row.id,type:'promotions',title:row.plan_name_snapshot||'طلب إعلان',subtitle:[vehicle?.make,vehicle?.model].filter(Boolean).join(' ')||relationName(row.organizations)||'إعلان سيارة',status:row.status+' · '+row.payment_status,createdAt:row.created_at,href:'/workspace/admin/vehicle-reviews',details:['الباقة: '+(row.plan_name_snapshot||'غير محددة'),'رقم التحويل: '+(row.payment_reference||'غير مسجل'),'السيارة: '+[vehicle?.make,vehicle?.model].filter(Boolean).join(' ')]}) }
       for (const row of (subscriptions.data||[]) as any[]) items.push({id:row.id,type:'subscriptions',title:row.plan_name||'اشتراك شركة',subtitle:relationName(row.organizations)||'شركة',status:row.payment_status,createdAt:row.created_at,href:'/workspace/admin/company-subscriptions',details:['دورة الفوترة: '+(row.billing_cycle==='yearly'?'سنوي':'شهري'),'المبلغ: '+Number(row.amount_egp||0).toLocaleString('ar-EG')+' جنيه','رقم التحويل: '+(row.payment_reference||'غير مسجل'),'تاريخ التحويل: '+(row.payment_transfer_date||'غير مسجل')]})
       for (const row of (employeeRequests.data||[]) as any[]) items.push({id:row.id,type:'employees',title:row.title||'طلب موظف',subtitle:[row.vehicle_type,row.governorate].filter(Boolean).join(' · '),status:row.status,createdAt:row.created_at,href:'/workspace/admin/employee-requests',details:['نوع السيارة: '+(row.vehicle_type||'غير محدد'),'المحافظة: '+(row.governorate||'غير محددة'),'المدة: '+(row.duration_months||'—')+' شهر']})
@@ -80,14 +94,14 @@ export default function AdminReviewCenterPage() {
       items.sort((a,b)=>new Date(a.createdAt).getTime()-new Date(b.createdAt).getTime())
       setQueue(items)
       setCounts({
-        vehicles: vehicles.error?null:(vehicles.data||[]).length,
-        payments: payments.error?null:(payments.data||[]).length,
-        promotions: promotions.error?null:(promotions.data||[]).length,
-        companySubscriptions: subscriptions.error?null:(subscriptions.data||[]).length,
-        employeeRequests: employeeRequests.error?null:(employeeRequests.data||[]).length,
-        sourcingSubscriptions: sourcingSubscriptions.error?null:(sourcingSubscriptions.data||[]).length,
-        organizations: organizations.error?null:(organizations.data||[]).length,
-        tickets: tickets.error?null:(tickets.data||[]).length,
+        vehicles: vehicles.error?null:(vehicles.count??0),
+        payments: payments.error?null:(payments.count??0),
+        promotions: promotions.error?null:(promotions.count??0),
+        companySubscriptions: subscriptions.error?null:(subscriptions.count??0),
+        employeeRequests: employeeRequests.error?null:(employeeRequests.count??0),
+        sourcingSubscriptions: sourcingSubscriptions.error?null:(sourcingSubscriptions.count??0),
+        organizations: organizations.error?null:(organizations.count??0),
+        tickets: tickets.error?null:(tickets.count??0),
       })
       const audits: AuditItem[] = []
       const auditRows = [
@@ -123,12 +137,13 @@ export default function AdminReviewCenterPage() {
     void verify()
     return () => { active = false }
   }, [loadQueues])
-  const visibleQueue = useMemo(() => queue.filter(item => {
+  const filteredQueue = useMemo(() => queue.filter(item => {
     const term=query.trim().toLocaleLowerCase()
     const matchesTerm=!term||[item.title,item.subtitle,item.type,item.status].join(' ').toLocaleLowerCase().includes(term)
     const matchesFilter=filter==='all'||item.type===filter
     return matchesTerm&&matchesFilter
   }),[queue,query,filter])
+  const visibleQueue = useMemo(()=>filteredQueue.slice(page*pageSize,(page+1)*pageSize),[filteredQueue,page])
   const selectedItem = selectedIndex===null ? null : visibleQueue[selectedIndex]||null
   const countFor = (label: string) => label === 'السيارات والتحويلات' ? (counts.vehicles===null||counts.payments===null?null:(counts.vehicles||0)+(counts.payments||0)) : label === 'الحسابات والمؤسسات' ? counts.organizations : label === 'الإعلانات' ? counts.promotions : label === 'اشتراكات الشركات' ? counts.companySubscriptions : label === 'طلبات الموظفين' ? counts.employeeRequests : label === 'تفويضات البحث' ? counts.sourcingSubscriptions : label === 'الدعم والتذاكر' ? counts.tickets : null
   const queueFilters=[{value:'all',label:'الكل'},{value:'vehicles',label:'سيارات'},{value:'payments',label:'تحويلات'},{value:'promotions',label:'إعلانات'},{value:'subscriptions',label:'اشتراكات'},{value:'employees',label:'موظفين'},{value:'sourcing',label:'تفويض البحث'},{value:'organizations',label:'حسابات'},{value:'tickets',label:'دعم'}]
@@ -143,10 +158,11 @@ export default function AdminReviewCenterPage() {
       </header>
       {loadError&&<div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">{loadError}</div>}
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[{label:"السيارات والتحويلات",value:countFor('السيارات والتحويلات')},{label:"الحسابات والمؤسسات",value:counts.organizations},{label:"الإعلانات",value:counts.promotions},{label:"اشتراكات الشركات",value:counts.companySubscriptions},{label:"طلبات الموظفين",value:counts.employeeRequests},{label:"تفويضات البحث",value:counts.sourcingSubscriptions},{label:"الدعم والتذاكر",value:counts.tickets}].map(item=><div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-sm font-bold text-slate-500">{item.label}</p><p className="mt-1 text-2xl font-black text-slate-900">{item.value===null||item.value===undefined?'—':item.value}</p><p className="mt-1 text-xs text-slate-400">عناصر في قائمة المتابعة</p></div>)}</section>
-      <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black">قائمة المراجعة الموحدة</h2><p className="text-xs text-slate-500">الأقدم أولًا لمساعدتك على إنهاء الطلبات حسب أسبقية الوصول</p></div><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-800">{visibleQueue.length} طلب</span></div>
-        <div className="flex flex-wrap gap-2">{queueFilters.map(option=><button key={option.value} onClick={()=>{setFilter(option.value);setSelectedIndex(null)}} className={'rounded-full px-3 py-2 text-xs font-bold '+(filter===option.value?'bg-[#102b47] text-white':'border border-slate-200 bg-white text-slate-600')}>{option.label}</button>)}</div>
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3"><Search size={18} className="text-slate-400"/><input value={query} onChange={event=>{setQuery(event.target.value);setSelectedIndex(null)}} placeholder="ابحث باسم الطلب أو الجهة أو الحالة..." className="w-full bg-transparent text-sm outline-none" aria-label="البحث في قائمة المراجعة"/></div>
+      <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black">قائمة المراجعة الموحدة</h2><p className="text-xs text-slate-500">الأقدم أولًا لمساعدتك على إنهاء الطلبات حسب أسبقية الوصول</p></div><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-800">{filteredQueue.length} طلب</span></div>
+        <div className="flex flex-wrap gap-2">{queueFilters.map(option=><button key={option.value} onClick={()=>{setFilter(option.value);setSelectedIndex(null);setPage(0)}} className={'rounded-full px-3 py-2 text-xs font-bold '+(filter===option.value?'bg-[#102b47] text-white':'border border-slate-200 bg-white text-slate-600')}>{option.label}</button>)}</div>
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3"><Search size={18} className="text-slate-400"/><input value={query} onChange={event=>{setQuery(event.target.value);setSelectedIndex(null);setPage(0)}} placeholder="ابحث باسم الطلب أو الجهة أو الحالة..." className="w-full bg-transparent text-sm outline-none" aria-label="البحث في قائمة المراجعة"/></div>
         {visibleQueue.length===0?<div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">لا توجد طلبات مطابقة للفلاتر الحالية.</div>:<div className="divide-y divide-slate-100">{visibleQueue.map((item,index)=><button key={item.type+item.id} onClick={()=>setSelectedIndex(index)} className={'flex w-full flex-wrap items-center justify-between gap-3 px-2 py-4 text-right transition hover:bg-blue-50/70 '+(selectedIndex===index?'bg-blue-50':'')}><div className="min-w-0"><p className="font-extrabold text-slate-900">{item.title}</p><p className="mt-1 text-xs text-slate-500">{item.subtitle} · {item.type==='tickets'?'دعم':item.type==='vehicles'?'سيارة':item.type==='payments'?'تحويل':item.type==='promotions'?'إعلان':item.type==='subscriptions'?'اشتراك شركة':item.type==='employees'?'طلب موظف':item.type==='sourcing'?'تفويض بحث':'حساب'}</p></div><div className="flex items-center gap-3"><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">{item.status}</span><span className="text-xs text-slate-400">{dateLabel(item.createdAt)}</span><ChevronLeft size={17} className="text-slate-400"/></div></button>)}</div>}
+        {filteredQueue.length>pageSize&&<div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4"><p className="text-xs text-slate-500">صفحة {page+1} من {Math.ceil(filteredQueue.length/pageSize)} · تعرض القائمة أول 200 عنصر من كل نوع في هذه المرحلة</p><div className="flex gap-2"><button onClick={()=>{setPage(p=>Math.max(0,p-1));setSelectedIndex(null)}} disabled={page===0} className="rounded-xl border px-4 py-2 text-sm font-bold disabled:opacity-40">السابق</button><button onClick={()=>{setPage(p=>Math.min(Math.ceil(filteredQueue.length/pageSize)-1,p+1));setSelectedIndex(null)}} disabled={(page+1)*pageSize>=filteredQueue.length} className="rounded-xl border px-4 py-2 text-sm font-bold disabled:opacity-40">التالي</button></div></div>}
       </section>
       {selectedItem&&<div className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/50 p-0 sm:items-center sm:p-5" role="presentation" onClick={()=>setSelectedIndex(null)}><section role="dialog" aria-modal="true" aria-labelledby="review-preview-title" onClick={event=>event.stopPropagation()} className="max-h-[88vh] w-full max-w-xl overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-6"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-blue-700">معاينة سريعة · {selectedIndex!+1} من {visibleQueue.length}</p><h2 id="review-preview-title" className="mt-1 text-xl font-black text-slate-900">{selectedItem.title}</h2><p className="mt-1 text-sm text-slate-500">{selectedItem.subtitle}</p></div><button onClick={()=>setSelectedIndex(null)} className="rounded-xl border border-slate-200 p-2" aria-label="إغلاق"><X size={18}/></button></div><div className="mt-4 rounded-xl bg-slate-50 p-4"><p className="text-xs font-bold text-slate-500">الحالة الحالية</p><p className="mt-1 font-extrabold text-slate-900">{selectedItem.status}</p><p className="mt-2 flex items-center gap-2 text-xs text-slate-500"><Clock3 size={14}/>{dateLabel(selectedItem.createdAt)}</p></div><ul className="mt-4 space-y-2">{selectedItem.details.map((detail,index)=><li key={index} className="rounded-lg border border-slate-100 px-3 py-2 text-sm text-slate-700">{detail}</li>)}</ul><div className="mt-5 flex flex-wrap items-center justify-between gap-2"><div className="flex gap-2"><button disabled={selectedIndex===0} onClick={()=>moveSelection(-1)} className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-sm font-bold disabled:opacity-40"><ChevronRight size={16}/> السابق</button><button disabled={selectedIndex===visibleQueue.length-1} onClick={()=>moveSelection(1)} className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-sm font-bold disabled:opacity-40">التالي <ChevronLeft size={16}/></button></div><a href={selectedItem.href} className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-extrabold text-white"><ExternalLink size={16}/> فتح شاشة الإجراء</a></div></section></div>}
       <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex items-center gap-2"><History size={18} className="text-blue-700"/><h2 className="text-lg font-black">آخر قرارات المراجعة المسجلة</h2></div><p className="text-xs leading-6 text-slate-500">يعرض السجل بيانات المراجعة المحفوظة حاليًا في جداول الخدمات (المراجع، وقت المراجعة، والحالة). لا يمثل سجل تدقيق مستقلًا غير قابل للتعديل.</p>{audit.length===0?<p className="rounded-xl bg-slate-50 p-5 text-center text-sm text-slate-500">لا توجد قرارات مراجعة مسجلة بعد.</p>:<div className="divide-y divide-slate-100">{audit.map(item=><div key={item.type+item.id} className="flex flex-wrap items-start justify-between gap-3 py-3"><div><p className="font-bold text-slate-800">{item.type}</p><p className="mt-1 text-xs text-slate-500">الحالة: {item.status} · رقم الطلب: {item.id.slice(0,8)}</p>{item.note&&<p className="mt-1 text-xs text-slate-500">ملاحظة: {item.note}</p>}</div><div className="text-left text-xs text-slate-500"><p>{dateLabel(item.reviewedAt)}</p><p className="mt-1">معرف المراجع: {item.reviewer||'غير مسجل'}</p></div></div>)}</div>}</section>
