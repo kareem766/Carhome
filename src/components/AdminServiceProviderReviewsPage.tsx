@@ -104,7 +104,7 @@ export default function AdminServiceProviderReviewsPage() {
         user_id: row.submitted_by,
         title: status === 'approved' ? 'تم اعتماد طلب مقدم الخدمة' : 'تم تحديث طلب مقدم الخدمة',
         body: status === 'approved'
-          ? 'تم اعتماد طلب ' + row.provider_name + '. ستتم مراجعة بيانات النشر قبل إتاحته في دليل الخدمات.'
+          ? 'تم اعتماد طلب ' + row.provider_name + ' وإدراج بيانات الجهة العامة في دليل خدمات السيارات.'
           : 'لم تتم الموافقة على طلب ' + row.provider_name + '. يمكنك مراجعة ملاحظات الإدارة أو التواصل مع الدعم.',
         notification_type: 'system',
         action_url: '/services',
