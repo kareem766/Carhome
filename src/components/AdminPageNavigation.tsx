@@ -5,6 +5,7 @@ import PlatformEntryBanner from './PlatformEntryBanner'
 const groups = [
  { title:'الرئيسية', links:[{href:'/workspace/admin',label:'لوحة التحكم',icon:LayoutDashboard}] },
  { title:'إدارة المنصة', links:[
+  {href:'/workspace/admin/review-center',label:'مركز المراجعات',icon:ClipboardCheck},
   {href:'/workspace/admin/vehicle-reviews',label:'المراجعات والطلبات',icon:ClipboardCheck},
   {href:'/workspace/admin/employee-requests',label:'طلبات الموظفين',icon:Users},
   {href:'/workspace/admin/support',label:'مركز الدعم والتذاكر',icon:Headset},
