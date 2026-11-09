@@ -72,7 +72,7 @@ export default function AdvertisingPlansPage(){
       const {data:currentPlan,error:planError}=await supabase.from('advertising_plans').select('display_order').eq('id',pending.advertising_plan_id).maybeSingle()
       if(!active)return
       if(planError||!currentPlan){setPromotionMode('invalid');setPaymentDue(null);setCheckingPromotion(false);return}
-      if(Number(selectedPlan.display_order)<=Number(currentPlan.display_order)){setPromotionMode('invalid');setPaymentDue(null);setPreviousPaymentCredit(Number(pending.final_amount_egp||0));setCheckingPromotion(false);return}
+      if(Number(selectedPlan.display_order)<=Number(currentPlan.display_order)){setPromotionMode('invalid');setPaymentDue(null);setPreviousPaymentCredit(0);setCheckingPromotion(false);return}
       const priorRef=String(pending.previous_payment_reference||'').trim()
       const priorAmount=Number(pending.previous_payment_amount_egp||0)
       const currentDue=Number(pending.payment_due_egp??pending.final_amount_egp??0)
