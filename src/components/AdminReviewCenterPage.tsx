@@ -145,7 +145,6 @@ export default function AdminReviewCenterPage() {
   }),[queue,query,filter])
   const visibleQueue = useMemo(()=>filteredQueue.slice(page*pageSize,(page+1)*pageSize),[filteredQueue,page])
   const selectedItem = selectedIndex===null ? null : visibleQueue[selectedIndex]||null
-  const countFor = (label: string) => label === 'السيارات والتحويلات' ? (counts.vehicles===null||counts.payments===null?null:(counts.vehicles||0)+(counts.payments||0)) : label === 'الحسابات والمؤسسات' ? counts.organizations : label === 'الإعلانات' ? counts.promotions : label === 'اشتراكات الشركات' ? counts.companySubscriptions : label === 'طلبات الموظفين' ? counts.employeeRequests : label === 'تفويضات البحث' ? counts.sourcingSubscriptions : label === 'الدعم والتذاكر' ? counts.tickets : null
   const queueFilters=[{value:'all',label:'الكل'},{value:'vehicles',label:'سيارات'},{value:'payments',label:'تحويلات'},{value:'promotions',label:'إعلانات'},{value:'subscriptions',label:'اشتراكات'},{value:'employees',label:'موظفين'},{value:'sourcing',label:'تفويض البحث'},{value:'organizations',label:'حسابات'},{value:'tickets',label:'دعم'}]
   const moveSelection=(direction:number)=>setSelectedIndex(current=>current===null?null:Math.max(0,Math.min(visibleQueue.length-1,current+direction)))
   if (loading || !authorized) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50"><p className="font-bold text-slate-600">جارٍ التحقق من صلاحيات الإدارة...</p></main>
