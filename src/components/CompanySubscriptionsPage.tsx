@@ -36,19 +36,32 @@ export default function CompanySubscriptionsPage(){
   setLoading(true);setError('')
   const {data:{user},error:authError}=await supabase.auth.getUser()
   if(authError||!user){window.location.replace('/?login=1');return}
-  const {data:membership,error:membershipError}=await supabase.from('organization_memberships').select('organization_id,role,organizations!inner(organization_type,approval_status)').eq('user_id',user.id).eq('organizations.organization_type','company').limit(1).maybeSingle()
-  if(membershipError||!membership?.organization_id){setError('لم نتمكن من تحديد شركة مرتبطة بحسابك.');setLoading(false);return}
-  setOrganizationId(membership.organization_id)
-  const [{data:planRows,error:planError},{data:subRows,error:subError},{data:payRows,error:payError}]=await Promise.all([
+  // Load the public active plans independently: a company-membership lookup must
+  // never prevent the plan catalogue from rendering.
+  const [{data:planRows,error:planError},{data:membership,error:membershipError},{data:payRows,error:payError}]=await Promise.all([
    supabase.from('platform_subscription_plans').select('id,name,slug,description,monthly_price,yearly_price,currency,features,limits,is_popular').eq('is_active',true).order('display_order'),
-   supabase.from('company_subscriptions').select('id,plan_name,billing_cycle,amount_egp,original_amount_egp,discount_amount_egp,coupon_code,status,payment_status,payment_reference,payment_transfer_date,starts_at,ends_at,created_at').eq('organization_id',membership.organization_id).order('created_at',{ascending:false}),
+   supabase.from('organization_memberships').select('organization_id,role').eq('user_id',user.id).limit(1).maybeSingle(),
    supabase.rpc('get_public_payment_details')
   ])
-  if(planError)setError('تعذر تحميل الباقات: '+planError.message)
-  else {setPlans((planRows||[]) as Plan[]);if(planRows?.length)setSelected(planRows[0].id)}
-  if(subError)setError('تعذر تحميل سجل الاشتراكات: '+subError.message)
-  else setHistory((subRows||[]) as Subscription[])
+  if(planError){
+   setError('تعذر تحميل الباقات: '+planError.message)
+   setPlans([])
+  }else{
+   const activePlans=(planRows||[]) as Plan[]
+   setPlans(activePlans)
+   setSelected(current=>activePlans.some(plan=>plan.id===current)?current:(activePlans[0]?.id||''))
+  }
   if(!payError&&payRows){const d=Array.isArray(payRows)?payRows[0]:payRows;setPayment((d||{}) as PaymentDetails)}
+  if(membershipError||!membership?.organization_id){
+   if(!planError)setError('يمكنك استعراض الباقات، لكن تعذر تحديد الشركة المرتبطة بالحساب لإرسال طلب الاشتراك. حدّث الصفحة أو تواصل مع الدعم.')
+   setLoading(false)
+   return
+  }
+  setOrganizationId(membership.organization_id)
+  const {data:subRows,error:subError}=await supabase.from('company_subscriptions').select('id,plan_name,billing_cycle,amount_egp,original_amount_egp,discount_amount_egp,coupon_code,status,payment_status,payment_reference,payment_transfer_date,starts_at,ends_at,created_at').eq('organization_id',membership.organization_id).order('created_at',{ascending:false})
+  if(subError){
+   if(!planError)setError('تعذر تحميل سجل الاشتراكات: '+subError.message)
+  }else setHistory((subRows||[]) as Subscription[])
   setLoading(false)
  }
  useEffect(()=>{void load()},[])
