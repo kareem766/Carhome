@@ -22,13 +22,13 @@ const sections=[
   {href:'/workspace/admin/employee-requests',title:'الموظفون والطلبات',desc:'حسابات الموظفين وطلبات التأجير المرتبطة بها.',icon:UserCheck,accent:'violet'},
   {href:'/workspace/admin/communications',title:'الإشعارات والبانرات',desc:'رسائل الإدارة والتنبيهات والبانرات داخل المنصة.',icon:BellRing,accent:'rose'},
   {href:'/workspace/admin/analytics',title:'التقارير والتحليلات',desc:'مؤشرات النشاط والتقارير وتصدير البيانات.',icon:FileBarChart,accent:'green'},
-  {href:'/workspace/admin/services',title:'مقدمو الخدمات',desc:'إدارة دليل الخدمات ومراجعة مقدمي الخدمة.',icon:Wrench,accent:'orange'},
+  
  ]},
  {title:'الإدارة المالية والتجارية',description:'إعدادات المنتجات والباقات والمدفوعات الخاصة بخدمات المنصة.',items:[
   {href:'/workspace/admin/subscription-plans',title:'باقات الشركات',desc:'إعداد الباقات الشهرية والسنوية وأسعارها.',icon:CreditCard,accent:'green'},
   {href:'/workspace/admin/advertising-plans',title:'باقات الإعلانات',desc:'إدارة الباقات العادية والمميزة ومددها وأسعارها.',icon:Megaphone,accent:'orange'},
   {href:'/workspace/admin/payment-information',title:'معلومات الدفع',desc:'بيانات التحويل المعتمدة ورسائل تعليمات السداد.',icon:Wallet,accent:'cyan'},
-  {href:'/workspace/admin/promo-codes',title:'أكواد الخصم',desc:'إنشاء أكواد الخصم وضبط صلاحيتها واستخدامها.',icon:Tags,accent:'violet'},
+  {href:'/workspace/admin/discount-codes',title:'أكواد الخصم',desc:'إنشاء أكواد الخصم وضبط صلاحيتها واستخدامها.',icon:Tags,accent:'violet'},
  ]},
  {title:'الإعدادات والحوكمة',description:'إعداد هوية المنصة وأدوات المتابعة والتحكم.',items:[
   {href:'/workspace/admin/platform-settings',title:'إعدادات وهوية المنصة',desc:'هوية My Car وإعدادات التسجيل والتشغيل.',icon:Settings2,accent:'blue'},
