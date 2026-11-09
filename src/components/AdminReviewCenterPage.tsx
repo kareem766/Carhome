@@ -1,5 +1,7 @@
-import { ClipboardCheck, CarFront, Wallet, Users, Megaphone, CreditCard, BriefcaseBusiness, UserCheck, Wrench, Headset, ArrowUpRight, LayoutDashboard } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ClipboardCheck, CarFront, Users, Megaphone, CreditCard, BriefcaseBusiness, UserCheck, Headset, ArrowUpRight, LayoutDashboard } from 'lucide-react'
 import AdminPageNavigation from './AdminPageNavigation'
+import { supabase } from '../lib/supabase'
 
 const groups = [
   { title: 'مراجعة التسجيل والاعتماد', description: 'طلبات تحتاج فحص بيانات أو اتخاذ قرار اعتماد.', items: [
@@ -11,11 +13,14 @@ const groups = [
   { title: 'مراجعة الخدمات والطلبات', description: 'طلبات الخدمات والتشغيل التي تصل إلى الإدارة.', items: [
     { label: 'طلبات الموظفين', detail: 'مراجعة طلبات الموظفين المنشورة من الشركات.', href: '/workspace/admin/employee-requests', icon: UserCheck },
     { label: 'تفويضات البحث', detail: 'متابعة طلبات البحث نيابةً عن الشركات ومراحلها.', href: '/workspace/admin/managed-sourcing', icon: BriefcaseBusiness },
-    { label: 'مقدمو الخدمات', detail: 'إدارة طلبات مقدمي خدمات السيارات.', href: '/services', icon: Wrench },
     { label: 'الدعم والتذاكر', detail: 'متابعة استفسارات ومشكلات المستخدمين.', href: '/workspace/admin/support', icon: Headset },
   ]},
 ]
 export default function AdminReviewCenterPage() {
+  const [authorized, setAuthorized] = useState(false)
+  const [loading, setLoading] = useState(true)
+  useEffect(() => { let active = true; async function verify() { if (!supabase) { window.location.replace('/?login=1'); return } const { data: auth } = await supabase.auth.getUser(); if (!auth.user) { window.location.replace('/?login=1'); return } const { data, error } = await supabase.from('platform_admins').select('user_id').eq('user_id', auth.user.id).maybeSingle(); if (!active) return; if (error || !data) { window.location.replace('/'); return } setAuthorized(true); setLoading(false) } void verify(); return () => { active = false } }, [])
+  if (loading || !authorized) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50"><p className="font-bold text-slate-600">جارٍ التحقق من صلاحيات الإدارة...</p></main>
   return <><AdminPageNavigation/><main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-6 sm:px-7 lg:px-9">
     <div className="mx-auto max-w-7xl space-y-7">
       <header className="rounded-3xl bg-gradient-to-l from-[#102b47] to-[#17466b] p-6 text-white shadow-lg sm:p-8">
