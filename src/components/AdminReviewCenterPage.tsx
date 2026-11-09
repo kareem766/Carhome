@@ -23,24 +23,44 @@ export default function AdminReviewCenterPage() {
   const [counts, setCounts] = useState<Record<string, number | null>>({})
   const [query, setQuery] = useState('')
   const loadCounts = useCallback(async () => {
-    if (!supabase) return
+    const client = supabase
+    if (!client) return
     setRefreshing(true)
-    const checks = [
-      ['vehicles', () => supabase.from('vehicles').select('id', { count: 'exact', head: true }).in('review_status', ['pending_review','pending_payment'])],
-      ['payments', () => supabase.from('vehicle_payment_submissions').select('id', { count: 'exact', head: true }).in('review_status', ['pending','pending_review'])],
-      ['promotions', () => supabase.from('vehicle_promotions').select('id', { count: 'exact', head: true }).eq('status','pending_review').eq('payment_status','pending')],
-      ['companySubscriptions', () => supabase.from('company_subscriptions').select('id', { count: 'exact', head: true }).in('payment_status',['submitted','pending'])],
-      ['employeeRequests', () => supabase.from('employee_rental_requests').select('id', { count: 'exact', head: true }).eq('status','pending_review')],
-      ['sourcingSubscriptions', () => supabase.from('managed_sourcing_subscriptions').select('id', { count: 'exact', head: true }).in('payment_status',['submitted','pending'])],
-    ] as const
-    const results = await Promise.all(checks.map(async ([key, run]) => {
-      const result = await run()
-      return [key, result.error ? null : (result.count ?? 0)] as const
-    }))
-    setCounts(Object.fromEntries(results))
-    setRefreshing(false)
+    try {
+      const checks = [
+        ['vehicles', () => client.from('vehicles').select('id', { count: 'exact', head: true }).in('review_status', ['pending_review','pending_payment'])],
+        ['payments', () => client.from('vehicle_payment_submissions').select('id', { count: 'exact', head: true }).in('review_status', ['pending','pending_review'])],
+        ['promotions', () => client.from('vehicle_promotions').select('id', { count: 'exact', head: true }).eq('status','pending_review').eq('payment_status','pending')],
+        ['companySubscriptions', () => client.from('company_subscriptions').select('id', { count: 'exact', head: true }).in('payment_status',['submitted','pending'])],
+        ['employeeRequests', () => client.from('employee_rental_requests').select('id', { count: 'exact', head: true }).eq('status','pending_review')],
+        ['sourcingSubscriptions', () => client.from('managed_sourcing_subscriptions').select('id', { count: 'exact', head: true }).in('payment_status',['submitted','pending'])],
+      ] as const
+      const results = await Promise.all(checks.map(async ([key, run]) => {
+        const result = await run()
+        return [key, result.error ? null : (result.count ?? 0)] as const
+      }))
+      setCounts(Object.fromEntries(results))
+    } finally {
+      setRefreshing(false)
+    }
   }, [])
-  useEffect(() => { let active = true; async function verify() { if (!supabase) { window.location.replace('/?login=1'); return } const { data: auth } = await supabase.auth.getUser(); if (!auth.user) { window.location.replace('/?login=1'); return } const { data, error } = await supabase.from('platform_admins').select('user_id').eq('user_id', auth.user.id).maybeSingle(); if (!active) return; if (error || !data) { window.location.replace('/'); return } setAuthorized(true); setLoading(false); void loadCounts() } void verify(); return () => { active = false } }, [loadCounts])
+  useEffect(() => {
+    let active = true
+    async function verify() {
+      const client = supabase
+      if (!client) { window.location.replace('/?login=1'); return }
+      const { data: auth } = await client.auth.getUser()
+      if (!auth.user) { window.location.replace('/?login=1'); return }
+      const { data, error } = await client.from('platform_admins').select('user_id').eq('user_id', auth.user.id).maybeSingle()
+      if (!active) return
+      if (error || !data) { window.location.replace('/'); return }
+      setAuthorized(true)
+      setLoading(false)
+      void loadCounts()
+    }
+    void verify()
+    return () => { active = false }
+  }, [loadCounts])
   const searchableGroups = useMemo(() => groups.map(group => ({ ...group, items: group.items.filter(item => (item.label + ' ' + item.detail).toLowerCase().includes(query.trim().toLowerCase())) })).filter(group => group.items.length), [query])
   const countFor = (label: string) => label === 'السيارات والتحويلات' ? (counts.vehicles ?? 0) + (counts.payments ?? 0) : label === 'الإعلانات' ? counts.promotions : label === 'اشتراكات الشركات' ? counts.companySubscriptions : label === 'طلبات الموظفين' ? counts.employeeRequests : label === 'تفويضات البحث' ? counts.sourcingSubscriptions : null
   if (loading || !authorized) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50"><p className="font-bold text-slate-600">جارٍ التحقق من صلاحيات الإدارة...</p></main>
