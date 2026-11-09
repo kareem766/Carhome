@@ -205,7 +205,7 @@ export default function AdminReviewPage() {
     if(status==='approved'&&priorAmount>0&&!String(row.previous_payment_reference||'').trim()){
       setError('لا يمكن اعتماد رصيد تحويل سابق دون وجود مراجع التحويل المحفوظة.');return
     }
-    if(status==='approved'&&dueAmount>0&&!String(row.payment_reference||'').trim()){
+    if(status==='approved'&&dueAmount>0&&(!String(row.payment_reference||'').trim()||String(row.payment_reference||'').startsWith('لا يوجد فرق مستحق'))){
       setError('لا يمكن اعتماد الطلب قبل تسجيل مرجع التحويل الحالي.');return
     }
     if(status==='approved'&&priorAmount>0&&!window.confirm('هذا الطلب يتضمن تحويلات سابقة بقيمة '+priorAmount.toLocaleString('ar-EG')+' جنيه. هل تحققت يدويًا من جميع مراجع التحويل السابقة، بالإضافة إلى التحويل الحالي إن وُجد، قبل اعتماد الإعلان؟'))return
