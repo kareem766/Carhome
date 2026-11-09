@@ -87,14 +87,14 @@ export default function AdminServiceProviderReviewsPage() {
     setNotice('')
     const { data: { user } } = await supabase.auth.getUser()
     const adminNotes = (notes[row.id] || '').trim() || null
-    const { error: updateError } = await supabase.from('service_provider_submissions').update({
+    const { data: updatedRow, error: updateError } = await supabase.from('service_provider_submissions').update({
       status,
       admin_notes: adminNotes,
       reviewed_by: user?.id || null,
       reviewed_at: new Date().toISOString(),
-    }).eq('id', row.id).eq('status', 'pending_review')
-    if (updateError) {
-      setError('تعذر تحديث حالة الطلب: ' + updateError.message)
+    }).eq('id', row.id).eq('status', 'pending_review').select('id').maybeSingle()
+    if (updateError || !updatedRow) {
+      setError(updateError ? 'تعذر تحديث حالة الطلب: ' + updateError.message : 'تمت مراجعة الطلب بالفعل من مسؤول آخر. حدّث القائمة.')
       setBusyId('')
       return
     }
