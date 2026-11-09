@@ -82,6 +82,7 @@ const HOME_CAR_IMAGES = [
     'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg'
   ]
 ]
+const HOME_BANNER_IMAGE = 'https://i.ibb.co/LDtVLtkT/3-E4722-EB-3946-4526-80-D0-87-A0-E48133-C7.png'
 function OwnerPersistentBar() {
   const links = [
     { href: '/workspace/owner/vehicles', label: 'سياراتي', icon: <CarFront size={17}/> },
@@ -228,9 +229,9 @@ export default function App() {
       }
       tryNext()
     })
-    void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
+    void Promise.all([...HOME_CAR_IMAGES.map(loadImage), loadImage([HOME_BANNER_IMAGE])]).then((urls) => {
       if (!active) return
-      setHomeImageUrls(urls)
+      setHomeImageUrls(urls.slice(0, HOME_CAR_IMAGES.length))
       setHomeImagesReady(true)
     }).catch((error) => {
       // Fail closed: the homepage stays on its branded loader instead of showing empty or broken vehicle cards.
@@ -385,7 +386,7 @@ export default function App() {
         <div className="mc-home-content mx-auto max-w-[1400px] px-4 pb-10 pt-8 sm:px-8 sm:pt-10">
           <div className="mc-home-hero-layout">
             <div className="mc-home-hero-visual" aria-label="سيارة مناسبة لتشغيل الشركات">
-              <img src={homeImageUrls[0]} alt="سيارة سيدان مناسبة لتشغيل الشركات" loading="eager" decoding="async"/>
+              <img src={HOME_BANNER_IMAGE} alt="شراكة بين مالك السيارات وممثلي الشركات" loading="eager" decoding="async" fetchPriority="high" className="mc-home-user-banner"/>
               <span className="mc-home-hero-glow" aria-hidden="true"/>
             </div>
             <div className="mc-home-copy">
