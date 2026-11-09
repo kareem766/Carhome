@@ -30,7 +30,11 @@ const groups = [
   ]},
 ]
 const dateLabel = (value: string) => new Date(value).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' })
-const relationField = (value: unknown, field: string) => {\n  if (Array.isArray(value)) return String((value[0] as Record<string, unknown> | undefined)?.[field] || '')\n  return String((value as Record<string, unknown> | null)?.[field] || '')\n}\nconst relationName = (value: unknown) => {
+const relationField = (value: unknown, field: string) => {
+  if (Array.isArray(value)) return String((value[0] as Record<string, unknown> | undefined)?.[field] || '')
+  return String((value as Record<string, unknown> | null)?.[field] || '')
+}
+const relationName = (value: unknown) => {
   if (Array.isArray(value)) return String((value[0] as { name?: string } | undefined)?.name || '')
   return String((value as { name?: string } | null)?.name || '')
 }
