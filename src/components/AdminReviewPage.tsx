@@ -271,6 +271,10 @@ export default function AdminReviewPage() {
     }
     const selectedPlan = advertisingPlans.find(plan => plan.id === promotionEditForm.advertising_plan_id)
     if (!selectedPlan) { setError('باقة الإعلان المحددة غير موجودة. حدّث الصفحة وحاول مرة أخرى.'); return }
+    if (!selectedPlan.is_active && selectedPlan.id !== row.advertising_plan_id) {
+      setError('لا يمكن نقل الإعلان إلى باقة غير مفعّلة. اختر باقة مفعّلة أو اترك الباقة الحالية كما هي.')
+      return
+    }
     setBusyId(row.id); setError(''); setNotice('')
     const { data: auth } = await supabase.auth.getUser()
     const { data: updated, error: updateError } = await supabase.from('vehicle_promotions').update({
