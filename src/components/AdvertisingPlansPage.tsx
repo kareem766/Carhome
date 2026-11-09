@@ -97,7 +97,7 @@ export default function AdvertisingPlansPage(){
     if(pendingRequest){
       const {data:currentPlan,error:currentPlanError}=await supabase
         .from('advertising_plans')
-        .select('id,price_egp')
+        .select('id,price_egp,display_order')
         .eq('id',pendingRequest.advertising_plan_id)
         .maybeSingle()
       if(currentPlanError||!currentPlan){
@@ -105,14 +105,14 @@ export default function AdvertisingPlansPage(){
         setError('تعذر قراءة الباقة المرتبطة بطلبك الحالي. لم يتم تغيير الطلب.')
         return
       }
-      if(pendingRequest.advertising_plan_id===selectedPlan.id||Number(selectedPlan.price_egp)<=Number(currentPlan.price_egp)){
+      if(pendingRequest.advertising_plan_id===selectedPlan.id||Number(selectedPlan.display_order)<=Number(currentPlan.display_order)){
         setSending(false)
         setError(pendingRequest.advertising_plan_id===selectedPlan.id
           ?'لديك بالفعل طلب لهذه الباقة قيد المراجعة. لا يمكن تكرار الطلب قبل انتهاء مراجعته.'
           :'لديك طلب إعلان قيد المراجعة بباقة مساوية أو أعلى. يمكنك اختيار باقة أعلى فقط لترقية الطلب الحالي.')
         return
       }
-      const {error:updateError}=await supabase
+      const {data:updatedRequest,error:updateError}=await supabase
         .from('vehicle_promotions')
         .update({
           advertising_plan_id:selectedPlan.id,
@@ -122,8 +122,10 @@ export default function AdvertisingPlansPage(){
         })
         .eq('id',pendingRequest.id)
         .eq('status','pending_review')
-      requestError=updateError
-      upgradedExistingRequest=!updateError
+        .select('id')
+        .maybeSingle()
+      requestError=updateError||(!updatedRequest?{message:'تغيرت حالة الطلب أثناء التحديث. حدّث الصفحة وحاول مرة أخرى.'}:null)
+      upgradedExistingRequest=!requestError
     }else{
       const {error:insertError}=await supabase.from('vehicle_promotions').insert({
         vehicle_id:vehicleId,
