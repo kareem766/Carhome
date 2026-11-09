@@ -94,18 +94,12 @@ export default function VehicleCatalogPage() {
         const { data: owned } = await supabase.from('vehicles').select('id,make,model,model_year,review_status').eq('organization_id',membership.organization_id).eq('review_status','approved').order('created_at',{ascending:false})
         if (active) setMyVehicles((owned || []) as OwnedVehicle[])
       }
-      const { data: promotions } = await supabase.from('vehicle_promotions').select('vehicle_id,starts_at,ends_at,advertising_plans(placement_type)').eq('status','approved').in('payment_status',['verified','waived'])
+      const { data: promotions } = await supabase.from('vehicle_promotions').select('vehicle_id,starts_at,ends_at,plan_placement_type_snapshot').eq('status','approved').in('payment_status',['verified','waived'])
       if (active) {
         const now = Date.now()
         const activePromotions = (promotions || []).filter(p => Boolean(p.starts_at && p.ends_at) && new Date(p.starts_at as string).getTime() <= now && new Date(p.ends_at as string).getTime() > now)
-        const premium = activePromotions.filter(p => {
-          const plan = Array.isArray(p.advertising_plans) ? p.advertising_plans[0] : p.advertising_plans
-          return plan?.placement_type === 'premium'
-        }).map(p => p.vehicle_id)
-        const promoted = activePromotions.filter(p => {
-          const plan = Array.isArray(p.advertising_plans) ? p.advertising_plans[0] : p.advertising_plans
-          return plan?.placement_type !== 'premium'
-        }).map(p => p.vehicle_id)
+        const premium = activePromotions.filter(p => p.plan_placement_type_snapshot === 'premium').map(p => p.vehicle_id)
+        const promoted = activePromotions.filter(p => p.plan_placement_type_snapshot !== 'premium').map(p => p.vehicle_id)
         setPremiumPromotedIds(premium)
         setPromotedIds(promoted)
         setVehicles(current => [...current].sort((a,b) => Number(premium.includes(b.id))-Number(premium.includes(a.id)) || Number(promoted.includes(b.id))-Number(promoted.includes(a.id))))
