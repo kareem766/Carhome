@@ -229,9 +229,10 @@ export default function App() {
       }
       tryNext()
     })
-    void Promise.all([...HOME_CAR_IMAGES.map(loadImage), loadImage([HOME_BANNER_IMAGE])]).then((urls) => {
+    void loadImage([HOME_BANNER_IMAGE]).catch((error) => console.error('Homepage banner image could not be preloaded:', error))
+    void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
       if (!active) return
-      setHomeImageUrls(urls.slice(0, HOME_CAR_IMAGES.length))
+      setHomeImageUrls(urls)
       setHomeImagesReady(true)
     }).catch((error) => {
       // Fail closed: the homepage stays on its branded loader instead of showing empty or broken vehicle cards.
