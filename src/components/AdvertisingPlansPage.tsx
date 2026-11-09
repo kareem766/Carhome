@@ -64,15 +64,12 @@ export default function AdvertisingPlansPage(){
     if(!active)return
     if(currentError){setPromotionMode('invalid');setPaymentDue(null);setCheckingPromotion(false);return}
     if(current?.advertising_plan_id===selectedPlan.id){setPromotionMode('duplicate');setPaymentDue(null);setPreviousPaymentCredit(0);setCheckingPromotion(false);return}
-    const {data:pending,error:pendingError}=await supabase.from('vehicle_promotions').select('id,advertising_plan_id,final_amount_egp,payment_status,payment_reference,payment_due_egp,previous_payment_reference,previous_payment_amount_egp,previous_payment_credit_egp').eq('vehicle_id',vehicleId).eq('status','pending_review').maybeSingle()
+    const {data:pending,error:pendingError}=await supabase.from('vehicle_promotions').select('id,advertising_plan_id,plan_display_order_snapshot,final_amount_egp,payment_status,payment_reference,payment_due_egp,previous_payment_reference,previous_payment_amount_egp,previous_payment_credit_egp').eq('vehicle_id',vehicleId).eq('status','pending_review').maybeSingle()
     if(!active)return
     if(pendingError){setPromotionMode('invalid');setPaymentDue(null);setCheckingPromotion(false);return}
     const total=Number(couponPreview?.final_amount_egp??selectedPlan.price_egp)
     if(pending){
-      const {data:currentPlan,error:planError}=await supabase.from('advertising_plans').select('display_order').eq('id',pending.advertising_plan_id).maybeSingle()
-      if(!active)return
-      if(planError||!currentPlan){setPromotionMode('invalid');setPaymentDue(null);setCheckingPromotion(false);return}
-      if(Number(selectedPlan.display_order)<=Number(currentPlan.display_order)){setPromotionMode('invalid');setPaymentDue(null);setPreviousPaymentCredit(0);setCheckingPromotion(false);return}
+      if(Number(selectedPlan.display_order)<=Number(pending.plan_display_order_snapshot)){setPromotionMode('invalid');setPaymentDue(null);setPreviousPaymentCredit(0);setCheckingPromotion(false);return}
       const priorRef=String(pending.previous_payment_reference||'').trim()
       const priorAmount=Number(pending.previous_payment_amount_egp||0)
       const currentDue=Number(pending.payment_due_egp??pending.final_amount_egp??0)
@@ -111,7 +108,7 @@ export default function AdvertisingPlansPage(){
     if(activePromotion?.advertising_plan_id===selectedPlan.id){setSending(false);setError('هذه الباقة مفعّلة بالفعل على السيارة. اختر باقة مختلفة أو انتظر انتهاء مدتها.');return}
     const {data:pendingRequest,error:pendingLookupError}=await supabase
       .from('vehicle_promotions')
-      .select('id,advertising_plan_id,payment_status,payment_reference,final_amount_egp,payment_due_egp,previous_payment_reference,previous_payment_amount_egp,previous_payment_credit_egp')
+      .select('id,advertising_plan_id,plan_display_order_snapshot,payment_status,payment_reference,final_amount_egp,payment_due_egp,previous_payment_reference,previous_payment_amount_egp,previous_payment_credit_egp')
       .eq('vehicle_id',vehicleId)
       .eq('status','pending_review')
       .maybeSingle()
@@ -139,17 +136,7 @@ export default function AdvertisingPlansPage(){
       if(pendingRequest.payment_status!=='pending'){
         setSending(false);setError('الطلب السابق ليس في حالة انتظار التحقق من الدفع. لن نعدّل الرصيد تلقائيًا؛ تواصل مع الإدارة لمراجعة حالته.');return
       }
-      const {data:currentPlan,error:currentPlanError}=await supabase
-        .from('advertising_plans')
-        .select('id,price_egp,display_order')
-        .eq('id',pendingRequest.advertising_plan_id)
-        .maybeSingle()
-      if(currentPlanError||!currentPlan){
-        setSending(false)
-        setError('تعذر قراءة الباقة المرتبطة بطلبك الحالي. لم يتم تغيير الطلب.')
-        return
-      }
-      if(pendingRequest.advertising_plan_id===selectedPlan.id||Number(selectedPlan.display_order)<=Number(currentPlan.display_order)){
+      if(pendingRequest.advertising_plan_id===selectedPlan.id||Number(selectedPlan.display_order)<=Number(pendingRequest.plan_display_order_snapshot)){
         setSending(false)
         setError(pendingRequest.advertising_plan_id===selectedPlan.id
           ?'لديك بالفعل طلب لهذه الباقة قيد المراجعة. لا يمكن تكرار الطلب قبل انتهاء مراجعته.'
