@@ -335,7 +335,7 @@ export default function App() {
   if (path === '/services' || path === '/automotive-services') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense>}</>
   if (path === '/workspace/advertising-plans') {
     if (!authLoaded) return <PlatformLoading />
-    if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense>
+    if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense>
     return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense>}</>
   }
   if (path === '/workspace/admin') return <Suspense fallback={<PlatformLoading />}><AdminDashboardPage /></Suspense>
