@@ -188,11 +188,55 @@ export default function App() {
     return () => { active = false; window.removeEventListener('platform-settings-updated', loadSettings) }
   }, [])
 
-  // Apply persisted branding before the browser paints, preventing a fallback-color flash.
+  // Keep page metadata specific to each public route; private workspace routes stay out of search.
   useLayoutEffect(() => {
-    document.title = settings.platform_name || defaults.platform_name
-    const descriptionMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]')
-    if (descriptionMeta) descriptionMeta.content = settings.description || defaults.description
+    const pathname = window.location.pathname.replace(/\\/+$/, '') || '/'
+    const publicSeo: Record<string, { title: string; description: string }> = {
+      '/': {
+        title: 'My Car عربيتي | منصة تأجير السيارات للشركات في مصر',
+        description: 'My Car عربيتي منصة مصرية تربط الشركات بملاك السيارات وموردي الأساطيل للبحث عن سيارات للإيجار الشهري والسنوي وطويل الأجل، مع كتالوج وطلبات وعروض ومراسلات منظمة.'
+      },
+      '/services': {
+        title: 'خدمات السيارات والأساطيل في مصر | My Car عربيتي',
+        description: 'اكتشف خدمات السيارات والأساطيل عبر My Car عربيتي، من الصيانة والتأمين وقطع الغيار إلى خدمات دعم وتشغيل الأساطيل ومقدمي الخدمات.'
+      },
+      '/privacy': {
+        title: 'سياسة الخصوصية وحماية البيانات | My Car عربيتي',
+        description: 'اطّلع على سياسة الخصوصية في My Car عربيتي وكيفية التعامل مع بيانات الحسابات والمعلومات الشخصية داخل المنصة.'
+      },
+      '/terms': {
+        title: 'شروط الاستخدام | My Car عربيتي',
+        description: 'راجع شروط استخدام منصة My Car عربيتي لتنظيم التواصل والطلبات والعروض بين الشركات وملاك السيارات وموردي الأساطيل.'
+      }
+    }
+    const seo = publicSeo[pathname] || {
+      title: 'My Car عربيتي | منصة السيارات للشركات والأساطيل في مصر',
+      description: 'My Car عربيتي منصة تربط الشركات بملاك السيارات وموردي الأساطيل في مصر.'
+    }
+    const isIndexable = Object.prototype.hasOwnProperty.call(publicSeo, pathname)
+    document.title = seo.title
+    document.documentElement.lang = 'ar'
+    document.documentElement.dir = 'rtl'
+    const setMeta = (selector: string, attribute: 'name' | 'property', key: string, content: string) => {
+      let element = document.head.querySelector<HTMLMetaElement>(selector)
+      if (!element) {
+        element = document.createElement('meta')
+        element.setAttribute(attribute, key)
+        document.head.appendChild(element)
+      }
+      element.content = content
+    }
+    setMeta('meta[name="description"]', 'name', 'description', seo.description)
+    setMeta('meta[name="robots"]', 'name', 'robots', isIndexable ? 'index,follow,max-image-preview:large' : 'noindex,nofollow')
+    setMeta('meta[property="og:type"]', 'property', 'og:type', 'website')
+    setMeta('meta[property="og:site_name"]', 'property', 'og:site_name', 'My Car عربيتي')
+    setMeta('meta[property="og:locale"]', 'property', 'og:locale', 'ar_EG')
+    setMeta('meta[property="og:title"]', 'property', 'og:title', seo.title)
+    setMeta('meta[property="og:description"]', 'property', 'og:description', seo.description)
+    setMeta('meta[property="og:image"]', 'property', 'og:image', 'https://i.ibb.co/LDtVLtkT/3-E4722-EB-3946-4526-80-D0-87-A0-E48133-C7.png')
+    setMeta('meta[name="twitter:card"]', 'name', 'twitter:card', 'summary_large_image')
+    setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', seo.title)
+    setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', seo.description)
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
     if (themeMeta) themeMeta.content = settings.primary_color || defaults.primary_color
     document.documentElement.style.setProperty('--platform-primary', settings.primary_color || defaults.primary_color)
