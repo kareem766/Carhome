@@ -97,7 +97,7 @@ const settingLabels: Record<string, string> = { vehicle: 'السيارات', acc
 const auditTypeLabels: Record<string, string> = { vehicle: 'سيارة', account: 'حساب', payment: 'مدفوعات', advertisement: 'إعلان', service_provider: 'مقدم خدمة' }
 const stateText = (state: Record<string, unknown>) => Object.entries(state || {}).map(([key, value]) => ({ review_status: 'مراجعة', approval_status: 'اعتماد الحساب', status: 'الحالة', payment_status: 'الدفع', analysis_enabled: 'الفحص الآلي', risk_threshold: 'حد المخاطر' }[key] || key) + ': ' + String(value)).join(' · ') || '—'
 
-export default function AdminAutomationReviewPage({ onClose }: { onClose: () => void }) {
+export default function AdminAutomationReviewPage({ onClose, embedded = false }: { onClose?: () => void; embedded?: boolean }) {
   const [authorized, setAuthorized] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -239,12 +239,12 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     services: findings.filter(x => x.kind === 'service').length
   }), [findings])
 
-  return <div dir="rtl" className="fixed inset-0 z-[100] overflow-y-auto bg-slate-100 text-slate-900">
-    <div className="[&_.mc-admin-sidebar]:!z-[120]"><AdminPageNavigation /></div>
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-[#102b47] px-4 py-4 text-white shadow-lg sm:px-7">
+  return <div dir="rtl" className={embedded ? 'relative overflow-visible rounded-2xl bg-slate-100 text-slate-900' : 'fixed inset-0 z-[100] overflow-y-auto bg-slate-100 text-slate-900'}>
+    {!embedded && <div className="[&_.mc-admin-sidebar]:!z-[120]"><AdminPageNavigation /></div>}
+    <header className={embedded ? 'relative z-10 rounded-t-2xl border-b border-slate-200 bg-[#102b47] px-4 py-4 text-white shadow-lg sm:px-7' : 'sticky top-0 z-20 border-b border-slate-200 bg-[#102b47] px-4 py-4 text-white shadow-lg sm:px-7'}>
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
         <div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-cyan-400 text-[#102b47]"><ShieldCheck size={24}/></span><div><h1 className="text-lg font-black sm:text-xl">مركز المراجعة الذكية</h1><p className="text-xs text-slate-300">My Car Intelligent Operations · توصيات آلية مع سجل واضح للأسباب</p></div></div>
-        <div className="flex items-center gap-2"><button onClick={() => void load()} disabled={loading} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/20 px-3 text-sm font-bold hover:bg-white/10 disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''}/> تحديث</button><button onClick={onClose} aria-label="إغلاق مركز المراجعة" className="grid h-10 w-10 place-items-center rounded-xl border border-white/20 hover:bg-white/10"><X size={19}/></button></div>
+        <div className="flex items-center gap-2"><button onClick={() => void load()} disabled={loading} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/20 px-3 text-sm font-bold hover:bg-white/10 disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''}/> تحديث</button>{!embedded && onClose && <button onClick={onClose} aria-label="إغلاق مركز المراجعة" className="grid h-10 w-10 place-items-center rounded-xl border border-white/20 hover:bg-white/10"><X size={19}/></button>}</div>
       </div>
     </header>
     <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-7">
