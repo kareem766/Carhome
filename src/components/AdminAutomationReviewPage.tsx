@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Clock3, RefreshCw, ShieldCheck, X, FileSearch, Building2, CarFront, CreditCard, Megaphone, Info } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
-type Vehicle = { id: string; make: string; model: string; model_year: number; vehicle_type: string | null; transmission: string | null; seats: number | null; governorate: string | null; address: string | null; monthly_price_egp: number | null; yearly_price_egp: number | null; review_status: string; payment_status: string; created_at: string; organizations: { name: string } | { name: string }[] | null }\ntype VehicleImage = { vehicle_id: string; storage_path: string; alt_text: string }
+type Vehicle = { id: string; make: string; model: string; model_year: number; vehicle_type: string | null; transmission: string | null; seats: number | null; governorate: string | null; address: string | null; monthly_price_egp: number | null; yearly_price_egp: number | null; review_status: string; payment_status: string; created_at: string; organizations: { name: string } | { name: string }[] | null }
+type VehicleImage = { vehicle_id: string; storage_path: string; alt_text: string }
 type Organization = { id: string; name: string; organization_type: string; approval_status: string; city: string | null; contact_name: string | null; contact_email: string | null; address: string | null; created_at: string }
 type Payment = { id: string; vehicle_id: string; amount_egp: number; period_months: number; transfer_method: string; transfer_reference: string | null; review_status: string; proof_path: string | null; created_at: string; vehicles: { make: string; model: string } | { make: string; model: string }[] | null }
 type Promotion = { id: string; status: string; payment_status: string; payment_reference: string | null; previous_payment_reference: string | null; payment_due_egp: number | null; final_amount_egp: number | null; plan_name_snapshot: string; created_at: string; vehicles: { make: string; model: string } | { make: string; model: string }[] | null; organizations: { name: string } | { name: string }[] | null }
@@ -21,7 +22,9 @@ function assessVehicle(row: Vehicle, duplicates: Set<string>, imageCount: number
   if (!row.model_year || row.model_year < 1950 || row.model_year > new Date().getFullYear() + 1) reasons.push('سنة الصنع تحتاج مراجعة')
   if (!row.vehicle_type || !row.governorate || !row.address) reasons.push('بيانات التصنيف أو الموقع غير مكتملة')
   if (!row.monthly_price_egp || row.monthly_price_egp <= 0) reasons.push('السعر الشهري غير صالح')
-  if (duplicates.has(row.id)) reasons.push('احتمال وجود سيارة مكررة بنفس الماركة والموديل والسنة')\n  if (imageCount === 0) reasons.push('لا توجد صور مسجلة للسيارة')\n  if (duplicateImagePath) reasons.push('ملف صورة مستخدم في أكثر من سيارة')
+  if (duplicates.has(row.id)) reasons.push('احتمال وجود سيارة مكررة بنفس الماركة والموديل والسنة')
+  if (imageCount === 0) reasons.push('لا توجد صور مسجلة للسيارة')
+  if (duplicateImagePath) reasons.push('ملف صورة مستخدم في أكثر من سيارة')
   if (!['verified', 'waived'].includes(String(row.payment_status).toLowerCase())) reasons.push('حالة الدفع لا تثبت اكتمال السداد')
   const level = reasons.some(x => x.includes('مكررة') || x.includes('الدفع')) ? 'review' : reasons.length ? 'blocked' : 'ready'
   return { id: row.id, kind: 'vehicle', title: [row.make, row.model, row.model_year].filter(Boolean).join(' '), subtitle: one(row.organizations)?.name || 'مالك سيارة', status: row.review_status, score: Math.max(0, 100 - reasons.length * 22), level, reasons: reasons.length ? reasons : ['البيانات الأساسية مكتملة؛ يلزم التحقق البشري من الصور والملكية قبل الاعتماد'], created_at: row.created_at }
@@ -103,7 +106,8 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
       supabase.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,period_months,transfer_method,transfer_reference,review_status,proof_path,created_at,vehicles(make,model)').order('created_at', { ascending: false }).limit(150),
       supabase.from('vehicle_promotions').select('id,status,payment_status,payment_reference,previous_payment_reference,payment_due_egp,final_amount_egp,plan_name_snapshot,created_at,vehicles(make,model),organizations(name)').order('created_at', { ascending: false }).limit(150),
       supabase.from('service_provider_submissions').select('id,provider_name,category,governorate,address,contact_name,phone,email,website_url,official_source_url,description,status,created_at').order('created_at', { ascending: false }).limit(150),
-      supabase.from('vehicle_images').select('vehicle_id,storage_path,alt_text').order('created_at', { ascending: false }).limit(1000),\n      supabase.from('admin_review_settings').select('category,analysis_enabled,auto_approval_enabled,risk_threshold,updated_at'),
+      supabase.from('vehicle_images').select('vehicle_id,storage_path,alt_text').order('created_at', { ascending: false }).limit(1000),
+      supabase.from('admin_review_settings').select('category,analysis_enabled,auto_approval_enabled,risk_threshold,updated_at'),
       supabase.from('admin_review_audit_log').select('id,entity_type,entity_id,action,actor_id,previous_state,new_state,created_at').order('created_at', { ascending: false }).limit(40)
     ])
     const errors = [v.error, o.error, p.error, a.error, s.error, imageResult.error, settingResult.error, auditResult.error].filter(Boolean)
@@ -111,7 +115,16 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     const settingRows = (settingResult.data || []) as ReviewSetting[]
     setSettings(Object.fromEntries(settingRows.map(item => [item.category, item])))
     setAuditRows((auditResult.data || []) as AuditRow[])
-    const imageRows = (imageResult.data || []) as VehicleImage[]\n    const imageCounts = new Map<string, number>()\n    const imagePathOwners = new Map<string, Set<string>>()\n    for (const image of imageRows) {\n      imageCounts.set(image.vehicle_id, (imageCounts.get(image.vehicle_id) || 0) + 1)\n      const owners = imagePathOwners.get(image.storage_path) || new Set<string>()\n      owners.add(image.vehicle_id); imagePathOwners.set(image.storage_path, owners)\n    }\n    const duplicateImageVehicles = new Set([...imagePathOwners.values()].filter(owners => owners.size > 1).flatMap(owners => [...owners]))\n    const allVehicles = (v.data || []) as unknown as Vehicle[]
+    const imageRows = (imageResult.data || []) as VehicleImage[]
+    const imageCounts = new Map<string, number>()
+    const imagePathOwners = new Map<string, Set<string>>()
+    for (const image of imageRows) {
+      imageCounts.set(image.vehicle_id, (imageCounts.get(image.vehicle_id) || 0) + 1)
+      const owners = imagePathOwners.get(image.storage_path) || new Set<string>()
+      owners.add(image.vehicle_id); imagePathOwners.set(image.storage_path, owners)
+    }
+    const duplicateImageVehicles = new Set([...imagePathOwners.values()].filter(owners => owners.size > 1).flatMap(owners => [...owners]))
+    const allVehicles = (v.data || []) as unknown as Vehicle[]
     const vehicles = allVehicles.filter(x => isPending(x.review_status))
     const accounts = ((o.data || []) as Organization[]).filter(x => isPending(x.approval_status))
     const allPayments = (p.data || []) as unknown as Payment[]
