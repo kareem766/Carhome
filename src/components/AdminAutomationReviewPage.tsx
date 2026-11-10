@@ -6,7 +6,8 @@ type Vehicle = { id: string; make: string; model: string; model_year: number; ve
 type Organization = { id: string; name: string; organization_type: string; approval_status: string; city: string | null; contact_name: string | null; contact_email: string | null; address: string | null; created_at: string }
 type Payment = { id: string; vehicle_id: string; amount_egp: number; period_months: number; transfer_method: string; transfer_reference: string | null; review_status: string; proof_path: string | null; created_at: string; vehicles: { make: string; model: string } | { make: string; model: string }[] | null }
 type Promotion = { id: string; status: string; payment_status: string; payment_reference: string | null; previous_payment_reference: string | null; payment_due_egp: number | null; final_amount_egp: number | null; plan_name_snapshot: string; created_at: string; vehicles: { make: string; model: string } | { make: string; model: string }[] | null; organizations: { name: string } | { name: string }[] | null }
-type Finding = { id: string; kind: 'vehicle' | 'account' | 'payment' | 'ad'; title: string; subtitle: string; status: string; score: number; level: 'ready' | 'review' | 'blocked'; reasons: string[]; created_at: string }
+type Provider = { id: string; provider_name: string; category: string; governorate: string; address: string; contact_name: string; phone: string; email: string | null; website_url: string | null; official_source_url: string | null; description: string | null; status: string; created_at: string }
+type Finding = { id: string; kind: 'vehicle' | 'account' | 'payment' | 'ad' | 'service'; title: string; subtitle: string; status: string; score: number; level: 'ready' | 'review' | 'blocked'; reasons: string[]; created_at: string }
 
 const one = <T,>(value: T | T[] | null | undefined): T | null => Array.isArray(value) ? value[0] || null : value || null
 const isPending = (value: string | null | undefined) => ['pending', 'pending_review', 'under_review', 'awaiting_review'].includes(String(value || '').toLowerCase())
@@ -47,11 +48,11 @@ function assessPayment(row: Payment, refs: Set<string>): Finding {
   return { id: row.id, kind: 'payment', title: vehicle ? vehicle.make + ' ' + vehicle.model : 'طلب دفع تسجيل سيارة', subtitle: row.amount_egp + ' جنيه · ' + (row.transfer_method || 'وسيلة غير محددة'), status: row.review_status, score: Math.max(0, 100 - reasons.length * 20), level, reasons: reasons.length ? reasons : ['المرفقات والبيانات مكتملة، لكن يلزم إثبات التحويل من مصدر مالي موثوق'], created_at: row.created_at }
 }
 
-function assessPromotion(row: Promotion, refs: Set<string>): Finding {
+function assessPromotion(row: Promotion, duplicateRefs: Set<string>): Finding {
   const reasons: string[] = []
   const allRefs = [row.payment_reference, row.previous_payment_reference].map(cleanRef).filter(Boolean)
   if (!allRefs.length) reasons.push('رقم التحويل غير موجود')
-  if (allRefs.some(ref => refs.has(ref))) reasons.push('رقم التحويل مكرر في طلب إعلان آخر')
+  if (allRefs.some(ref => duplicateRefs.has(ref))) reasons.push('رقم التحويل مكرر في طلب إعلان آخر')
   if (!row.plan_name_snapshot?.trim()) reasons.push('بيانات باقة الإعلان غير مكتملة')
   if ((row.payment_due_egp ?? row.final_amount_egp ?? 0) > 0 && !allRefs.length) reasons.push('لا يوجد مرجع دفع للمبلغ المستحق')
   const vehicle = one(row.vehicles)
@@ -60,7 +61,15 @@ function assessPromotion(row: Promotion, refs: Set<string>): Finding {
   return { id: row.id, kind: 'ad', title: row.plan_name_snapshot || 'طلب إعلان', subtitle: (vehicle ? vehicle.make + ' ' + vehicle.model : 'سيارة') + ' · ' + (org?.name || 'حساب'), status: row.status + ' / ' + row.payment_status, score: Math.max(0, 100 - reasons.length * 22), level, reasons: reasons.length ? reasons : ['بيانات الطلب مكتملة؛ يلزم تحقق مستقل من التحويل قبل التفعيل'], created_at: row.created_at }
 }
 
-const kindLabel: Record<Finding['kind'], string> = { vehicle: 'سيارة', account: 'حساب', payment: 'مدفوعات', ad: 'إعلان' }
+function assessProvider(row: Provider): Finding {
+  const reasons: string[] = []
+  if (!row.provider_name?.trim() || !row.contact_name?.trim() || !row.phone?.trim() || !row.address?.trim() || !row.governorate?.trim()) reasons.push('بيانات المنشأة أو مسؤول التواصل غير مكتملة')
+  if (!row.official_source_url?.trim() && !row.website_url?.trim()) reasons.push('لا يوجد موقع أو مصدر رسمي للتحقق من النشاط')
+  if (!row.description?.trim()) reasons.push('لا توجد نبذة كافية عن النشاط')
+  return { id: row.id, kind: 'service', title: row.provider_name || 'مقدم خدمة', subtitle: row.category + ' · ' + row.governorate, status: row.status, score: Math.max(0, 100 - reasons.length * 25), level: reasons.length ? 'review' : 'ready', reasons: reasons.length ? reasons : ['البيانات ومصدر النشاط متاحان للفحص؛ يلزم التحقق من المصدر قبل النشر'], created_at: row.created_at }
+}
+
+const kindLabel: Record<Finding['kind'], string> = { vehicle: 'سيارة', account: 'حساب', payment: 'مدفوعات', ad: 'إعلان', service: 'مقدم خدمة' }
 const levelLabel: Record<Finding['level'], string> = { ready: 'بيانات مكتملة', review: 'تحتاج مراجعة', blocked: 'استكمال مطلوب' }
 const levelClass: Record<Finding['level'], string> = { ready: 'border-emerald-200 bg-emerald-50 text-emerald-800', review: 'border-amber-200 bg-amber-50 text-amber-800', blocked: 'border-rose-200 bg-rose-50 text-rose-800' }
 
@@ -80,18 +89,20 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     const { data: admin, error: adminError } = await supabase.from('platform_admins').select('user_id').eq('user_id', auth.user.id).maybeSingle()
     if (adminError || !admin) { setError('لا توجد صلاحية لعرض مركز المراجعة الذكية.'); setAuthorized(false); setLoading(false); return }
     setAuthorized(true)
-    const [v, o, p, a] = await Promise.all([
+    const [v, o, p, a, s] = await Promise.all([
       supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,address,monthly_price_egp,yearly_price_egp,review_status,payment_status,created_at,organizations(name)').order('created_at', { ascending: false }).limit(150),
       supabase.from('organizations').select('id,name,organization_type,approval_status,city,contact_name,contact_email,address,created_at').order('created_at', { ascending: false }).limit(150),
       supabase.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,period_months,transfer_method,transfer_reference,review_status,proof_path,created_at,vehicles(make,model)').order('created_at', { ascending: false }).limit(150),
-      supabase.from('vehicle_promotions').select('id,status,payment_status,payment_reference,previous_payment_reference,payment_due_egp,final_amount_egp,plan_name_snapshot,created_at,vehicles(make,model),organizations(name)').order('created_at', { ascending: false }).limit(150)
+      supabase.from('vehicle_promotions').select('id,status,payment_status,payment_reference,previous_payment_reference,payment_due_egp,final_amount_egp,plan_name_snapshot,created_at,vehicles(make,model),organizations(name)').order('created_at', { ascending: false }).limit(150),
+      supabase.from('service_provider_submissions').select('id,provider_name,category,governorate,address,contact_name,phone,email,website_url,official_source_url,description,status,created_at').order('created_at', { ascending: false }).limit(150)
     ])
-    const errors = [v.error, o.error, p.error, a.error].filter(Boolean)
+    const errors = [v.error, o.error, p.error, a.error, s.error].filter(Boolean)
     if (errors.length) { setError('تعذر تحميل بعض سجلات المراجعة: ' + errors.map(x => x!.message).join(' · ')); setLoading(false); return }
     const vehicles = ((v.data || []) as unknown as Vehicle[]).filter(x => isPending(x.review_status))
     const accounts = ((o.data || []) as Organization[]).filter(x => isPending(x.approval_status))
     const payments = ((p.data || []) as unknown as Payment[]).filter(x => isPending(x.review_status))
     const promotions = ((a.data || []) as unknown as Promotion[]).filter(x => isPending(x.status) || isPending(x.payment_status))
+    const providers = ((s.data || []) as Provider[]).filter(x => isPending(x.status))
     const duplicateGroups = new Map<string, string[]>()
     for (const item of vehicles) {
       const key = [item.make, item.model, item.model_year].map(x => String(x || '').trim().toLowerCase()).join('|')
@@ -101,12 +112,15 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     const paymentRefCounts = new Map<string, number>()
     for (const item of payments) { const key = cleanRef(item.transfer_reference); if (key) paymentRefCounts.set(key, (paymentRefCounts.get(key) || 0) + 1) }
     const duplicatePaymentRefs = new Set([...paymentRefCounts].filter(([, count]) => count > 1).map(([key]) => key))
-    const adRefs = new Set(promotions.flatMap(item => [item.payment_reference, item.previous_payment_reference].map(cleanRef).filter(Boolean)))
+    const adRefCounts = new Map<string, number>()
+    for (const item of promotions) for (const ref of [item.payment_reference, item.previous_payment_reference].map(cleanRef).filter(Boolean)) adRefCounts.set(ref, (adRefCounts.get(ref) || 0) + 1)
+    const duplicateAdRefs = new Set([...adRefCounts].filter(([, count]) => count > 1).map(([ref]) => ref))
     const results = [
       ...vehicles.map(item => assessVehicle(item, duplicateVehicleIds)),
       ...accounts.map(assessAccount),
       ...payments.map(item => assessPayment(item, duplicatePaymentRefs)),
-      ...promotions.map(item => assessPromotion(item, adRefs))
+      ...promotions.map(item => assessPromotion(item, duplicateAdRefs)),
+      ...providers.map(assessProvider)
     ].sort((x, y) => new Date(y.created_at).getTime() - new Date(x.created_at).getTime())
     setFindings(results); setRefreshedAt(new Date().toLocaleString('ar-EG')); setLoading(false)
   }
@@ -121,7 +135,8 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     vehicles: findings.filter(x => x.kind === 'vehicle').length,
     accounts: findings.filter(x => x.kind === 'account').length,
     payments: findings.filter(x => x.kind === 'payment').length,
-    ads: findings.filter(x => x.kind === 'ad').length
+    ads: findings.filter(x => x.kind === 'ad').length,
+    services: findings.filter(x => x.kind === 'service').length
   }), [findings])
 
   return <div dir="rtl" className="fixed inset-0 z-[100] overflow-y-auto bg-slate-100 text-slate-900">
@@ -139,14 +154,14 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
         {[{label:'إجمالي الطلبات المعلقة',value:counts.all,icon:FileSearch},{label:'بيانات مكتملة مبدئيًا',value:counts.ready,icon:CheckCircle2},{label:'تحتاج مراجعة بشرية',value:counts.review,icon:AlertTriangle},{label:'تحتاج استكمالًا',value:counts.blocked,icon:Clock3}].map(card=><article key={card.label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex items-center justify-between text-sm font-bold text-slate-500"><span>{card.label}</span><card.icon size={19}/></div><strong className="mt-2 block text-3xl font-black text-[#102b47]">{loading ? '—' : card.value}</strong></article>)}
       </div>
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[{kind:'vehicle' as const,label:'السيارات',count:counts.vehicles,icon:CarFront},{kind:'account' as const,label:'الحسابات',count:counts.accounts,icon:Building2},{kind:'payment' as const,label:'المدفوعات',count:counts.payments,icon:CreditCard},{kind:'ad' as const,label:'الإعلانات',count:counts.ads,icon:Megaphone}].map(card=><button key={card.kind} onClick={() => setFilter(filter === card.kind ? 'all' : card.kind)} className={`flex items-center justify-between rounded-xl border p-4 text-right transition ${filter === card.kind ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-white hover:border-blue-300'}`}><span className="flex items-center gap-2 font-extrabold"><card.icon size={19} className="text-[#1d4ed8]"/>{card.label}</span><strong className="text-xl">{card.count}</strong></button>)}
+        {[{kind:'vehicle' as const,label:'السيارات',count:counts.vehicles,icon:CarFront},{kind:'account' as const,label:'الحسابات',count:counts.accounts,icon:Building2},{kind:'payment' as const,label:'المدفوعات',count:counts.payments,icon:CreditCard},{kind:'ad' as const,label:'الإعلانات',count:counts.ads,icon:Megaphone},{kind:'service' as const,label:'مقدمو الخدمات',count:counts.services,icon:Building2}].map(card=><button key={card.kind} onClick={() => setFilter(filter === card.kind ? 'all' : card.kind)} className={`flex items-center justify-between rounded-xl border p-4 text-right transition ${filter === card.kind ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-white hover:border-blue-300'}`}><span className="flex items-center gap-2 font-extrabold"><card.icon size={19} className="text-[#1d4ed8]"/>{card.label}</span><strong className="text-xl">{card.count}</strong></button>)}
       </section>
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 p-4"><div><h2 className="font-black">نتائج الفحص الأولي</h2><p className="mt-1 text-xs text-slate-500">مرتبة بالأحدث · لا يتم تنفيذ أي قرار تلقائي</p></div><button onClick={() => setFilter('all')} className="text-sm font-bold text-blue-700">عرض الكل</button></div>
         {loading ? <div className="p-10 text-center text-slate-500">جارٍ تحليل سجلات المراجعة...</div> : visible.length === 0 ? <div className="p-10 text-center text-slate-500">لا توجد طلبات معلقة ضمن هذا التصنيف حاليًا.</div> : <div className="divide-y divide-slate-100">{visible.map(item=><article key={item.kind + item.id} className="grid gap-3 p-4 lg:grid-cols-[minmax(0,1fr)_150px] lg:items-center"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-extrabold text-slate-600">{kindLabel[item.kind]}</span><h3 className="font-black text-[#102b47]">{item.title}</h3><span className={`rounded-full border px-2.5 py-1 text-xs font-extrabold ${levelClass[item.level]}`}>{levelLabel[item.level]}</span></div><p className="mt-1 text-sm text-slate-500">{item.subtitle} · الحالة الحالية: {item.status}</p><ul className="mt-2 flex flex-wrap gap-2">{item.reasons.map(reason=><li key={reason} className="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs leading-5 text-slate-700">{reason}</li>)}</ul><p className="mt-2 text-[11px] text-slate-400">{new Date(item.created_at).toLocaleString('ar-EG')} · رقم السجل: {item.id.slice(0, 8)}</p></div><div className="rounded-xl bg-slate-50 p-3 text-center"><strong className="block text-2xl font-black text-[#102b47]">{item.score}%</strong><span className="text-xs text-slate-500">اكتمال مبدئي للبيانات</span></div></article>)}</div>}
       </section>
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500"><span>آخر تحديث: {refreshedAt || '—'}</span><span>عدد السجلات المعروضة: {visible.length}</span></div>
-      <section className="rounded-2xl border border-slate-200 bg-white p-4"><h2 className="font-black text-[#102b47]">حدود المراجعة الآلية الحالية</h2><ul className="mt-2 list-disc space-y-1 pr-5 text-sm leading-6 text-slate-600"><li>فحص الحقول والتكرار لا يثبت ملكية المركبة أو صحة المستندات.</li><li>مراجع التحويل والإيصالات تحتاج تكامل تحقق مباشر مع مزود الدفع أو مراجعة كشف الحساب.</li><li>مراجعة الصور والمستندات تحتاج طبقة فحص محتوى مخصصة قبل السماح بالاعتماد الآلي.</li><li>الطلبات غير الموجودة في الجداول الأربع المعروضة لا تتأثر بهذا المركز ولا يتغير مسارها الحالي.</li></ul></section>
+      <section className="rounded-2xl border border-slate-200 bg-white p-4"><h2 className="font-black text-[#102b47]">حدود المراجعة الآلية الحالية</h2><ul className="mt-2 list-disc space-y-1 pr-5 text-sm leading-6 text-slate-600"><li>فحص الحقول والتكرار لا يثبت ملكية المركبة أو صحة المستندات.</li><li>مراجع التحويل والإيصالات تحتاج تكامل تحقق مباشر مع مزود الدفع أو مراجعة كشف الحساب.</li><li>مراجعة الصور والمستندات تحتاج طبقة فحص محتوى مخصصة قبل السماح بالاعتماد الآلي.</li><li>الطلبات غير الموجودة في الجداول المعروضة لا تتأثر بهذا المركز ولا يتغير مسارها الحالي.</li></ul></section>
     </main>
   </div>
 }
