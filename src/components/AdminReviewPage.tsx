@@ -3,6 +3,8 @@ import { Building2, CheckCircle2, LogOut, Pencil, Plus, RefreshCw, Settings, Use
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 import AdminPageNavigation from './AdminPageNavigation'
+import EmployeeAdminRequestsPage from './EmployeeAdminRequestsPage'
+import AdminAutomationReviewPage from './AdminAutomationReviewPage'
 import { supabase } from '../lib/supabase'
 
 type ProfileRow = { id: string; display_name: string; phone: string | null; contact_email: string | null; address: string | null; created_at: string }
@@ -32,7 +34,7 @@ function hasDuplicateTransferReference(row: PromotionRow, rows: PromotionRow[]) 
   return rows.some(other => other.id !== row.id && [...promotionTransferKeys(other.payment_reference), ...promotionTransferKeys(other.previous_payment_reference)].some(key => ownKeys.includes(key)))
 }
 
-export default function AdminReviewPage() {
+export default function AdminReviewPage({ initialSection }: { initialSection?: string } = {}) {
   const [authorized, setAuthorized] = useState(false)
   const [loading, setLoading] = useState(true)
   const [vehicles, setVehicles] = useState<VehicleRow[]>([])
@@ -108,6 +110,11 @@ export default function AdminReviewPage() {
     setLoading(false)
   }
   useEffect(() => { void load() }, [])
+  useEffect(() => {
+    if (!initialSection || loading) return
+    const target = document.getElementById(initialSection)
+    if (target) window.setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120)
+  }, [initialSection, loading])
   function startProfileEdit(row: ProfileRow) {
     setEditingProfileId(row.id)
     setProfileForm({ display_name: row.display_name || '', phone: row.phone || '', contact_email: row.contact_email || '', address: row.address || '' })
@@ -385,9 +392,9 @@ export default function AdminReviewPage() {
   async function signOut() { if (supabase) await supabase.auth.signOut(); window.location.replace('/') }
   const methodName: Record<string,string> = { instapay:'InstaPay', vodafone_cash:'Vodafone Cash', bank_transfer:'تحويل بنكي' }
   return <main dir="rtl" className="mc-admin-main min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/60 px-4 py-6 sm:px-6 sm:py-8"><div className="mx-auto max-w-6xl">
-    <header className="mc-admin-header flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white bg-white/95 p-5 shadow-md shadow-slate-200/50"><div><div className="flex items-center gap-2"><PlatformBrand compact /><span className="text-sm font-bold text-slate-500">· الإدارة</span></div><h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">مراجعة السيارات والتحويلات</h1><p className="mt-2 text-sm text-slate-500">لا يتم اعتماد السيارة أو تأكيد الدفع إلا بمراجعة المسؤول.</p></div><div className="mc-admin-actions flex flex-wrap items-center gap-2"><AccountNotifications/><a href="/workspace/admin/platform-settings" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> إعدادات المنصة</a><a href="/workspace/admin/subscription-plans" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> أسعار الاشتراكات</a><a href="/workspace/admin/advertising-plans" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> باقات الإعلانات</a><button onClick={() => void load()} className="rounded-xl border p-3" aria-label="تحديث"><RefreshCw size={17}/></button><button onClick={signOut} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold"><LogOut size={16}/> خروج</button></div></header>
+    <header className="mc-admin-header flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white bg-white/95 p-5 shadow-md shadow-slate-200/50"><div><div className="flex items-center gap-2"><PlatformBrand compact /><span className="text-sm font-bold text-slate-500">· الإدارة</span></div><h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">مركز المراجعات الموحد</h1><p className="mt-2 text-sm text-slate-500">جميع مراجعات المنصة وطلبات الاعتماد في صفحة واحدة، مع الحفاظ على إجراءات كل نوع وصلاحياته.</p></div><div className="mc-admin-actions flex flex-wrap items-center gap-2"><AccountNotifications/><a href="/workspace/admin/platform-settings" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> إعدادات المنصة</a><a href="/workspace/admin/subscription-plans" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> أسعار الاشتراكات</a><a href="/workspace/admin/advertising-plans" className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold"><Settings size={16}/> باقات الإعلانات</a><button onClick={() => void load()} className="rounded-xl border p-3" aria-label="تحديث"><RefreshCw size={17}/></button><button onClick={signOut} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold"><LogOut size={16}/> خروج</button></div></header>
     <AdminPageNavigation />
-    <nav aria-label="أقسام لوحة الإدارة" className="mc-admin-anchor-nav sticky top-2 z-20 mt-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-sm backdrop-blur">{[{href:"#admin-accounts",label:"الحسابات"},{href:"#admin-organizations",label:"المؤسسات"},{href:"#admin-rental-requests",label:"طلبات التأجير"},{href:"#admin-rental-offers",label:"العروض"},{href:"#admin-vehicles",label:"السيارات"},{href:"#admin-payments",label:"طلبات تسجيل السيارات والدفع"}].map(item=><a key={item.href} href={item.href} className="inline-flex min-h-10 items-center rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800">{item.label}</a>)}</nav>
+    <nav aria-label="أقسام مركز المراجعات" className="mc-admin-anchor-nav sticky top-2 z-20 mt-4 flex gap-2 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-sm backdrop-blur">{[{href:"#admin-accounts",label:"الحسابات"},{href:"#admin-organizations",label:"اعتماد الحسابات"},{href:"#admin-vehicles",label:"السيارات"},{href:"#admin-payments",label:"رسوم التسجيل"},{href:"#admin-advertising-reviews",label:"طلبات الإعلانات"},{href:"#admin-published-advertisements",label:"الإعلانات المنشورة"},{href:"#admin-rental-requests",label:"طلبات التأجير"},{href:"#admin-rental-offers",label:"العروض"},{href:"#admin-employee-requests",label:"طلبات الموظفين"},{href:"#admin-smart-review",label:"الفحص الذكي"}].map(item=><a key={item.href} href={item.href} className="inline-flex min-h-10 shrink-0 items-center rounded-xl px-3 py-2 text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-800">{item.label}</a>)}</nav>
     {error && <p role="alert" className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}{notice && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-800">{notice}</p>}
     {loading ? <p className="py-12 text-center text-slate-500">جارٍ تحميل المراجعات...</p> : authorized && <>
 
@@ -486,6 +493,8 @@ export default function AdminReviewPage() {
         </div>
       </section>
     </>}
+      <section id="admin-employee-requests" className="mt-8 scroll-mt-24 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-md sm:p-5"><div className="mb-4"><h2 className="text-xl font-black text-[#102b47]">مراجعة طلبات الموظفين</h2><p className="mt-1 text-sm text-slate-500">طلبات السيارات الشهرية المقدمة من موظفي الشركات؛ لا يتم نشر أي طلب قبل موافقة الإدارة.</p></div><EmployeeAdminRequestsPage embedded /></section>
+      <section id="admin-smart-review" className="mt-8 scroll-mt-24 rounded-3xl border border-slate-200 bg-white/95 p-2 shadow-md sm:p-4"><AdminAutomationReviewPage embedded /></section>
     <p className="mt-8 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-8 text-sky-900">لأسباب أمنية، لا يمكن لأي مستخدم تفعيل صلاحية الإدارة من داخل الواجهة. يجب إضافة حساب المسؤول إلى جدول platform_admins من خلال إجراء إداري موثوق.</p>
   </div></main>
 }
