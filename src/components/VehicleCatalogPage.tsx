@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CircleUserRound, ArrowLeft, BadgeCheck, Heart, Bot, CarFront, Check, ChevronDown, Filter, Menu, Megaphone, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { CircleUserRound, ArrowLeft, Eye, BadgeCheck, Heart, Bot, CarFront, Check, ChevronDown, Filter, Menu, Megaphone, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
@@ -258,6 +258,7 @@ export default function VehicleCatalogPage() {
 
 
   return <main dir="rtl" className="mc-catalog-main min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_48%,#f8fafc_100%)] text-slate-900">
+    {orgType === 'individual_owner' && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6"><div className="flex items-start gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-cyan-950"><span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-cyan-800"><Eye size={18}/></span><div><strong className="block text-sm font-extrabold">كتالوج السيارات — وضع المشاهدة فقط</strong><p className="mt-1 text-xs leading-6 text-cyan-900">يمكنك تصفح السيارات ومقارنة الأسعار والمواصفات ومشاهدة طريقة ظهور السيارات أمام الشركات. لا يمكنك تقديم عروض أو بدء محادثات من هذا الكتالوج بحساب المالك.</p></div></div></div>}
     {orgType !== 'individual_owner' && <>
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
