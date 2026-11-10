@@ -202,6 +202,10 @@ export default function AuthPanel({ onClose, initialMode = 'signin', redirectTo 
           setMode('signin')
           throw new Error('هذا الإيميل لديه حساب بالفعل في قاعدة بيانات My Car. برجاء تسجيل الدخول أو استخدام «نسيت كلمة السر».')
         }
+        // Persist a one-time welcome for newly registered company accounts until their first workspace visit.
+        if (data.user && accountType === 'company' && !invitationId) {
+          localStorage.setItem('mycar_company_free_welcome_pending_' + data.user.id, '1')
+        }
         if (data.session && data.user) {
           if (!invitationId) await prepareAccount(data.user, name)
           // Invitation signups must join the inviting company, never create a separate organization.
