@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://carhome-lime.vercel.app/sitemap.xml
