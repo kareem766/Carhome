@@ -467,22 +467,31 @@ export default function WorkspacePage({ role }: { role: Role }) {
       governorate: String(form.get('governorate') || ''), with_driver: form.get('with_driver') === 'on',
       details: String(form.get('details') || '').trim() || null, status: 'open'
     }
-    // Pre-check the active plan's monthly request allowance so the user gets a clear upgrade prompt before submitting.
-    const { data: hasCurrentPlan } = await supabase.rpc('company_subscription_is_current', { p_organization_id: organization.id })
+    // Pre-check the monthly request allowance for both free and subscribed companies.
+    const { data: hasCurrentPlan, error: subscriptionCheckError } = await supabase.rpc('company_subscription_is_current', { p_organization_id: organization.id })
+    if (subscriptionCheckError) { setSaving(false); setError('تعذر التحقق من حالة اشتراك الشركة. حاول مرة أخرى.'); return }
+    let monthlyLimit = 3
+    let periodStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+    let periodEnd = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString()
     if (hasCurrentPlan === true) {
-      const { data: limits } = await supabase.rpc('company_current_plan_limits', { p_organization_id: organization.id })
-      const rawLimit = limits?.monthly_requests
-      const monthlyLimit = rawLimit === 'unlimited' ? Number.POSITIVE_INFINITY : Number(rawLimit)
-      if (Number.isFinite(monthlyLimit)) {
-        const { data: period, error: periodError } = await supabase.rpc('company_current_subscription_period', { p_organization_id: organization.id })
-        if (periodError || !period?.starts_at || !period?.ends_at) { setSaving(false); setError('تعذر التحقق من مدة الاشتراك الحالية. حاول مرة أخرى.'); return }
-        const { count, error: countError } = await supabase.from('rental_requests').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).gte('created_at', period.starts_at).lt('created_at', period.ends_at)
-        if (countError) { setSaving(false); setError('تعذر التحقق من حد الطلبات في باقتك. حاول مرة أخرى.'); return }
-        if ((count || 0) >= monthlyLimit) {
-          setSaving(false)
-          setPlanLimitNotice('وصلت إلى الحد المسموح به في باقتك (' + monthlyLimit + ' طلبات) خلال مدة الاشتراك الحالية البالغة 30 يومًا. يمكنك ترقية الباقة لمتابعة إضافة طلبات جديدة.')
-          return
-        }
+      const { data: limits, error: limitsError } = await supabase.rpc('company_current_plan_limits', { p_organization_id: organization.id })
+      if (limitsError || !limits) { setSaving(false); setError('تعذر قراءة حدود الباقة الحالية. حاول مرة أخرى.'); return }
+      const rawLimit = limits.monthly_requests
+      monthlyLimit = rawLimit === 'unlimited' ? Number.POSITIVE_INFINITY : Number(rawLimit)
+      const { data: period, error: periodError } = await supabase.rpc('company_current_subscription_period', { p_organization_id: organization.id })
+      if (periodError || !period?.starts_at || !period?.ends_at) { setSaving(false); setError('تعذر التحقق من مدة الاشتراك الحالية. حاول مرة أخرى.'); return }
+      periodStart = period.starts_at
+      periodEnd = period.ends_at
+    }
+    if (Number.isFinite(monthlyLimit)) {
+      const { count, error: countError } = await supabase.from('rental_requests').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).gte('created_at', periodStart).lt('created_at', periodEnd)
+      if (countError) { setSaving(false); setError('تعذر التحقق من حد الطلبات الشهري. حاول مرة أخرى.'); return }
+      if ((count || 0) >= monthlyLimit) {
+        setSaving(false)
+        setPlanLimitNotice(hasCurrentPlan === true
+          ? 'وصلت إلى الحد المسموح به في باقتك (' + monthlyLimit + ' طلبات) خلال مدة الاشتراك الحالية. يمكنك ترقية الباقة لمتابعة إضافة طلبات جديدة.'
+          : 'استخدمت الحد المجاني المسموح به (3 طلبات خلال الشهر الحالي). اشترك في إحدى باقات الشركات لمتابعة نشر الطلبات وزيادة حدود الاستخدام.')
+        return
       }
     }
     const { error: saveError } = await supabase.from('rental_requests').insert(payload)
