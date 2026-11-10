@@ -92,6 +92,7 @@ function OwnerPersistentBar() {
     { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
     { href: '/messages', label: 'المراسلات', icon: <MessageCircle size={17}/> },
     { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: <UserRound size={17}/> },
+    { href: '/workspace/owner/offers', label: 'عروضي', icon: <ClipboardList size={17}/> },
     { href: '/assistant', label: 'مساعد My Car', icon: <Bot size={17}/> },
   ]
   return <header dir="rtl" className="mc-owner-persistent-bar">
