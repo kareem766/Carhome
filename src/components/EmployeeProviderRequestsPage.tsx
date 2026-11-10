@@ -128,7 +128,7 @@ export default function EmployeeProviderRequestsPage() {
       && vehicle.with_driver
       && (vehicle.payment_status === 'verified' || vehicle.payment_status === 'waived')
       && (!vehicle.license_expiry_date || vehicle.license_expiry_date >= today)
-      && (providerType !== 'individual_owner' || !vehicle.registration_expires_at || new Date(vehicle.registration_expires_at).getTime() > Date.now())
+      && (providerType !== 'individual_owner' || (!!vehicle.registration_expires_at && new Date(vehicle.registration_expires_at).getTime() > Date.now()))
       && vehicle.governorate === request.governorate
       && matchesVehicleType(vehicle.vehicle_type, request.vehicle_type)
       && vehicle.seats >= request.seats
@@ -145,8 +145,8 @@ export default function EmployeeProviderRequestsPage() {
     const today = new Date().toLocaleDateString('en-CA')
     const licensed = paid.filter(vehicle => !vehicle.license_expiry_date || vehicle.license_expiry_date >= today)
     if (!licensed.length) return 'رخص السيارات المعتمدة بسائق منتهية؛ حدّث بيانات الترخيص أولًا.'
-    const registered = licensed.filter(vehicle => providerType !== 'individual_owner' || !vehicle.registration_expires_at || new Date(vehicle.registration_expires_at).getTime() > Date.now())
-    if (!registered.length) return 'انتهت مدة تسجيل السيارة؛ جدّد التسجيل لتتمكن من تقديم عرض.'
+    const registered = licensed.filter(vehicle => providerType !== 'individual_owner' || (!!vehicle.registration_expires_at && new Date(vehicle.registration_expires_at).getTime() > Date.now()))
+    if (!registered.length) return 'تسجيل المنصة للسيارة غير مفعل أو انتهت مدته؛ جدّد التسجيل لتتمكن من تقديم عرض.'
     const sameGovernorate = registered.filter(vehicle => vehicle.governorate === request.governorate)
     if (!sameGovernorate.length) return 'لا توجد سيارة مطابقة للمحافظة المطلوبة: ' + request.governorate + '.'
     const sameType = sameGovernorate.filter(vehicle => matchesVehicleType(vehicle.vehicle_type, request.vehicle_type))
