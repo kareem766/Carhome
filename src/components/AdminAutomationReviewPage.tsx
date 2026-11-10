@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 
 type Vehicle = { id: string; make: string; model: string; model_year: number; vehicle_type: string | null; transmission: string | null; seats: number | null; governorate: string | null; address: string | null; monthly_price_egp: number | null; yearly_price_egp: number | null; review_status: string; payment_status: string; created_at: string; organizations: { name: string } | { name: string }[] | null }
 type VehicleImage = { vehicle_id: string; storage_path: string; alt_text: string }
+type FileAudit = { entity_type: string; entity_id: string; file_path: string; file_exists: boolean; content_type: string; file_size_bytes: number | null }
 type Organization = { id: string; name: string; organization_type: string; approval_status: string; city: string | null; contact_name: string | null; contact_email: string | null; address: string | null; created_at: string }
 type Payment = { id: string; vehicle_id: string; amount_egp: number; period_months: number; transfer_method: string; transfer_reference: string | null; review_status: string; proof_path: string | null; created_at: string; vehicles: { make: string; model: string } | { make: string; model: string }[] | null }
 type Promotion = { id: string; status: string; payment_status: string; payment_reference: string | null; previous_payment_reference: string | null; payment_due_egp: number | null; final_amount_egp: number | null; plan_name_snapshot: string; created_at: string; vehicles: { make: string; model: string } | { make: string; model: string }[] | null; organizations: { name: string } | { name: string }[] | null }
@@ -16,7 +17,7 @@ const one = <T,>(value: T | T[] | null | undefined): T | null => Array.isArray(v
 const isPending = (value: string | null | undefined) => ['pending', 'pending_review', 'under_review', 'awaiting_review'].includes(String(value || '').toLowerCase())
 const cleanRef = (value: string | null | undefined) => String(value || '').replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '').replace(/\s/g, '').toLowerCase()
 
-function assessVehicle(row: Vehicle, duplicates: Set<string>, imageCount: number, duplicateImagePath: boolean): Finding {
+function assessVehicle(row: Vehicle, duplicates: Set<string>, imageCount: number, duplicateImagePath: boolean, imageIssues: string[]): Finding {
   const reasons: string[] = []
   if (!row.make?.trim() || !row.model?.trim()) reasons.push('بيانات الماركة أو الموديل غير مكتملة')
   if (!row.model_year || row.model_year < 1950 || row.model_year > new Date().getFullYear() + 1) reasons.push('سنة الصنع تحتاج مراجعة')
@@ -25,6 +26,7 @@ function assessVehicle(row: Vehicle, duplicates: Set<string>, imageCount: number
   if (duplicates.has(row.id)) reasons.push('احتمال وجود سيارة مكررة بنفس الماركة والموديل والسنة')
   if (imageCount === 0) reasons.push('لا توجد صور مسجلة للسيارة')
   if (duplicateImagePath) reasons.push('ملف صورة مستخدم في أكثر من سيارة')
+  reasons.push(...imageIssues)
   if (!['verified', 'waived'].includes(String(row.payment_status).toLowerCase())) reasons.push('حالة الدفع لا تثبت اكتمال السداد')
   const level = reasons.some(x => x.includes('مكررة') || x.includes('الدفع')) ? 'review' : reasons.length ? 'blocked' : 'ready'
   return { id: row.id, kind: 'vehicle', title: [row.make, row.model, row.model_year].filter(Boolean).join(' '), subtitle: one(row.organizations)?.name || 'مالك سيارة', status: row.review_status, score: Math.max(0, 100 - reasons.length * 22), level, reasons: reasons.length ? reasons : ['البيانات الأساسية مكتملة؛ يلزم التحقق البشري من الصور والملكية قبل الاعتماد'], created_at: row.created_at }
@@ -40,7 +42,7 @@ function assessAccount(row: Organization): Finding {
   return { id: row.id, kind: 'account', title: row.name || 'حساب بدون اسم', subtitle: row.organization_type === 'company' ? 'شركة' : row.organization_type === 'fleet_supplier' ? 'مورد أسطول' : 'مالك سيارة', status: row.approval_status, score: Math.max(0, 100 - reasons.length * 25), level, reasons: reasons.length ? reasons : ['الحقول المطلوبة مكتملة؛ لا يثبت ذلك هوية صاحب الحساب أو مستنداته'], created_at: row.created_at }
 }
 
-function assessPayment(row: Payment, refs: Set<string>): Finding {
+function assessPayment(row: Payment, refs: Set<string>, proofAudit?: FileAudit): Finding {
   const reasons: string[] = []
   const ref = cleanRef(row.transfer_reference)
   if (!ref) reasons.push('رقم التحويل غير موجود')
@@ -48,6 +50,10 @@ function assessPayment(row: Payment, refs: Set<string>): Finding {
   if (!row.amount_egp || row.amount_egp <= 0) reasons.push('قيمة التحويل غير صالحة')
   if (!row.transfer_method?.trim()) reasons.push('وسيلة الدفع غير محددة')
   if (!row.proof_path) reasons.push('لا يوجد إيصال مرفق')
+  else if (!proofAudit) reasons.push('تعذر التحقق من وجود ملف الإيصال في التخزين')
+  else if (!proofAudit.file_exists) reasons.push('مسار الإيصال لا يقابله ملف محفوظ فعليًا')
+  else if (!['image/jpeg','image/png','image/webp','application/pdf'].includes(proofAudit.content_type)) reasons.push('نوع ملف الإيصال غير مسموح به')
+  if (proofAudit?.file_size_bytes && proofAudit.file_size_bytes > 5 * 1024 * 1024) reasons.push('حجم الإيصال يتجاوز الحد المسموح')
   const level = reasons.some(x => x.includes('مكرر')) ? 'review' : reasons.length ? 'blocked' : 'review'
   const vehicle = one(row.vehicles)
   return { id: row.id, kind: 'payment', title: vehicle ? vehicle.make + ' ' + vehicle.model : 'طلب دفع تسجيل سيارة', subtitle: row.amount_egp + ' جنيه · ' + (row.transfer_method || 'وسيلة غير محددة'), status: row.review_status, score: Math.max(0, 100 - reasons.length * 20), level, reasons: reasons.length ? reasons : ['المرفقات والبيانات مكتملة، لكن يلزم إثبات التحويل من مصدر مالي موثوق'], created_at: row.created_at }
@@ -100,22 +106,33 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     const { data: admin, error: adminError } = await supabase.from('platform_admins').select('user_id').eq('user_id', auth.user.id).maybeSingle()
     if (adminError || !admin) { setError('لا توجد صلاحية لعرض مركز المراجعة الذكية.'); setAuthorized(false); setLoading(false); return }
     setAuthorized(true)
-    const [v, o, p, a, s, imageResult, settingResult, auditResult] = await Promise.all([
+    const [v, o, p, a, s, imageResult, fileAuditResult, settingResult, auditResult] = await Promise.all([
       supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,address,monthly_price_egp,yearly_price_egp,review_status,payment_status,created_at,organizations(name)').order('created_at', { ascending: false }).limit(150),
       supabase.from('organizations').select('id,name,organization_type,approval_status,city,contact_name,contact_email,address,created_at').order('created_at', { ascending: false }).limit(150),
       supabase.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,period_months,transfer_method,transfer_reference,review_status,proof_path,created_at,vehicles(make,model)').order('created_at', { ascending: false }).limit(150),
       supabase.from('vehicle_promotions').select('id,status,payment_status,payment_reference,previous_payment_reference,payment_due_egp,final_amount_egp,plan_name_snapshot,created_at,vehicles(make,model),organizations(name)').order('created_at', { ascending: false }).limit(150),
       supabase.from('service_provider_submissions').select('id,provider_name,category,governorate,address,contact_name,phone,email,website_url,official_source_url,description,status,created_at').order('created_at', { ascending: false }).limit(150),
       supabase.from('vehicle_images').select('vehicle_id,storage_path,alt_text').order('created_at', { ascending: false }).limit(1000),
+      supabase.rpc('mycar_admin_get_review_file_audit'),
       supabase.from('admin_review_settings').select('category,analysis_enabled,auto_approval_enabled,risk_threshold,updated_at'),
       supabase.from('admin_review_audit_log').select('id,entity_type,entity_id,action,actor_id,previous_state,new_state,created_at').order('created_at', { ascending: false }).limit(40)
     ])
-    const errors = [v.error, o.error, p.error, a.error, s.error, imageResult.error, settingResult.error, auditResult.error].filter(Boolean)
+    const errors = [v.error, o.error, p.error, a.error, s.error, imageResult.error, fileAuditResult.error, settingResult.error, auditResult.error].filter(Boolean)
     if (errors.length) { setError('تعذر تحميل بعض سجلات المراجعة: ' + errors.map(x => x!.message).join(' · ')); setLoading(false); return }
     const settingRows = (settingResult.data || []) as ReviewSetting[]
     setSettings(Object.fromEntries(settingRows.map(item => [item.category, item])))
     setAuditRows((auditResult.data || []) as AuditRow[])
     const imageRows = (imageResult.data || []) as VehicleImage[]
+    const fileAudits = (fileAuditResult.data || []) as FileAudit[]
+    const imageIssuesByVehicle = new Map<string, string[]>()
+    for (const file of fileAudits.filter(item => item.entity_type === 'vehicle')) {
+      const issues = imageIssuesByVehicle.get(file.entity_id) || []
+      if (!file.file_exists) issues.push('ملف الصورة غير موجود فعليًا في التخزين')
+      else if (!['image/jpeg','image/png','image/webp'].includes(file.content_type)) issues.push('نوع ملف الصورة غير مسموح به')
+      if (file.file_size_bytes && file.file_size_bytes > 8 * 1024 * 1024) issues.push('حجم الصورة يتجاوز الحد المسموح')
+      imageIssuesByVehicle.set(file.entity_id, issues)
+    }
+    const proofAuditBySubmission = new Map(fileAudits.filter(item => item.entity_type === 'payment').map(item => [item.entity_id, item]))
     const imageCounts = new Map<string, number>()
     const imagePathOwners = new Map<string, Set<string>>()
     for (const image of imageRows) {
@@ -138,17 +155,21 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
       if (key.replace(/\|/g, '').length) duplicateGroups.set(key, [...(duplicateGroups.get(key) || []), item.id])
     }
     const duplicateVehicleIds = new Set([...duplicateGroups.values()].filter(ids => ids.length > 1).flat())
-    const paymentRefCounts = new Map<string, number>()
-    for (const item of allPayments) { const key = cleanRef(item.transfer_reference); if (key) paymentRefCounts.set(key, (paymentRefCounts.get(key) || 0) + 1) }
-    const duplicatePaymentRefs = new Set([...paymentRefCounts].filter(([, count]) => count > 1).map(([key]) => key))
-    const adRefCounts = new Map<string, number>()
-    for (const item of allPromotions) for (const ref of [item.payment_reference, item.previous_payment_reference].map(cleanRef).filter(Boolean)) adRefCounts.set(ref, (adRefCounts.get(ref) || 0) + 1)
-    const duplicateAdRefs = new Set([...adRefCounts].filter(([, count]) => count > 1).map(([ref]) => ref))
+    const referenceOwners = new Map<string, Set<string>>()
+    const addReferenceOwner = (reference: string | null | undefined, owner: string) => {
+      const normalized = cleanRef(reference)
+      if (!normalized) return
+      const owners = referenceOwners.get(normalized) || new Set<string>()
+      owners.add(owner); referenceOwners.set(normalized, owners)
+    }
+    for (const item of allPayments) addReferenceOwner(item.transfer_reference, 'payment:' + item.id)
+    for (const item of allPromotions) for (const reference of new Set([item.payment_reference, item.previous_payment_reference].map(cleanRef).filter(Boolean))) addReferenceOwner(reference, 'ad:' + item.id)
+    const duplicateRefs = new Set([...referenceOwners].filter(([, owners]) => owners.size > 1).map(([reference]) => reference))
     const results = [
-      ...vehicles.map(item => assessVehicle(item, duplicateVehicleIds, imageCounts.get(item.id) || 0, duplicateImageVehicles.has(item.id))),
+      ...vehicles.map(item => assessVehicle(item, duplicateVehicleIds, imageCounts.get(item.id) || 0, duplicateImageVehicles.has(item.id), imageIssuesByVehicle.get(item.id) || [])), 
       ...accounts.map(assessAccount),
-      ...payments.map(item => assessPayment(item, duplicatePaymentRefs)),
-      ...promotions.map(item => assessPromotion(item, duplicateAdRefs)),
+      ...payments.map(item => assessPayment(item, duplicateRefs, proofAuditBySubmission.get(item.id))),
+      ...promotions.map(item => assessPromotion(item, duplicateRefs)),
       ...providers.map(assessProvider)
     ].sort((x, y) => new Date(y.created_at).getTime() - new Date(x.created_at).getTime())
     setFindings(results.filter(item => settingRows.find(setting => setting.category === item.kind)?.analysis_enabled !== false)); setRefreshedAt(new Date().toLocaleString('ar-EG')); setLoading(false)
@@ -226,7 +247,7 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
           <div className="text-xs text-slate-500 sm:text-left"><span className="block">{new Date(row.created_at).toLocaleString('ar-EG')}</span><span className="mt-1 block">المنفذ: {row.actor_id ? row.actor_id.slice(0,8) : 'نظام / غير محدد'}</span></div>
         </article>)}</div>}
       </section>
-      <section className="rounded-2xl border border-slate-200 bg-white p-4"><h2 className="font-black text-[#102b47]">حدود المراجعة الآلية الحالية</h2><ul className="mt-2 list-disc space-y-1 pr-5 text-sm leading-6 text-slate-600"><li>فحص الحقول والتكرار لا يثبت ملكية المركبة أو صحة المستندات.</li><li>مراجع التحويل والإيصالات تحتاج تكامل تحقق مباشر مع مزود الدفع أو مراجعة كشف الحساب.</li><li>مراجعة الصور والمستندات تحتاج طبقة فحص محتوى مخصصة قبل السماح بالاعتماد الآلي.</li><li>الطلبات غير الموجودة في الجداول المعروضة لا تتأثر بهذا المركز ولا يتغير مسارها الحالي.</li></ul></section>
+      <section className="rounded-2xl border border-slate-200 bg-white p-4"><h2 className="font-black text-[#102b47]">حدود المراجعة الآلية الحالية</h2><ul className="mt-2 list-disc space-y-1 pr-5 text-sm leading-6 text-slate-600"><li>فحص الحقول والتكرار لا يثبت ملكية المركبة أو صحة المستندات.</li><li>مراجع التحويل والإيصالات تحتاج تكامل تحقق مباشر مع مزود الدفع أو مراجعة كشف الحساب.</li><li>تمت إضافة فحوصات وجود ملفات الصور والإيصالات ونوعها وحجمها؛ أما فهم محتوى الصور وقراءة الإيصالات ضوئيًا فيحتاج خدمة ذكاء اصطناعي ومفتاح تشغيل مخصص.</li><li>الطلبات غير الموجودة في الجداول المعروضة لا تتأثر بهذا المركز ولا يتغير مسارها الحالي.</li></ul></section>
     </main>
   </div>
 }
