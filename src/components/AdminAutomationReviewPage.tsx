@@ -8,6 +8,8 @@ type Payment = { id: string; vehicle_id: string; amount_egp: number; period_mont
 type Promotion = { id: string; status: string; payment_status: string; payment_reference: string | null; previous_payment_reference: string | null; payment_due_egp: number | null; final_amount_egp: number | null; plan_name_snapshot: string; created_at: string; vehicles: { make: string; model: string } | { make: string; model: string }[] | null; organizations: { name: string } | { name: string }[] | null }
 type Provider = { id: string; provider_name: string; category: string; governorate: string; address: string; contact_name: string; phone: string; email: string | null; website_url: string | null; official_source_url: string | null; description: string | null; status: string; created_at: string }
 type Finding = { id: string; kind: 'vehicle' | 'account' | 'payment' | 'ad' | 'service'; title: string; subtitle: string; status: string; score: number; level: 'ready' | 'review' | 'blocked'; reasons: string[]; created_at: string }
+type ReviewSetting = { category: string; analysis_enabled: boolean; auto_approval_enabled: boolean; risk_threshold: number; updated_at: string }
+type AuditRow = { id: number; entity_type: string; entity_id: string; action: string; actor_id: string | null; previous_state: Record<string, unknown>; new_state: Record<string, unknown>; created_at: string }
 
 const one = <T,>(value: T | T[] | null | undefined): T | null => Array.isArray(value) ? value[0] || null : value || null
 const isPending = (value: string | null | undefined) => ['pending', 'pending_review', 'under_review', 'awaiting_review'].includes(String(value || '').toLowerCase())
@@ -72,6 +74,9 @@ function assessProvider(row: Provider): Finding {
 const kindLabel: Record<Finding['kind'], string> = { vehicle: 'سيارة', account: 'حساب', payment: 'مدفوعات', ad: 'إعلان', service: 'مقدم خدمة' }
 const levelLabel: Record<Finding['level'], string> = { ready: 'بيانات مكتملة', review: 'تحتاج مراجعة', blocked: 'استكمال مطلوب' }
 const levelClass: Record<Finding['level'], string> = { ready: 'border-emerald-200 bg-emerald-50 text-emerald-800', review: 'border-amber-200 bg-amber-50 text-amber-800', blocked: 'border-rose-200 bg-rose-50 text-rose-800' }
+const settingLabels: Record<string, string> = { vehicle: 'السيارات', account: 'الحسابات', payment: 'المدفوعات', ad: 'الإعلانات', service: 'مقدمو الخدمات' }
+const auditTypeLabels: Record<string, string> = { vehicle: 'سيارة', account: 'حساب', payment: 'مدفوعات', advertisement: 'إعلان', service_provider: 'مقدم خدمة' }
+const stateText = (state: Record<string, unknown>) => Object.entries(state || {}).map(([key, value]) => ({ review_status: 'مراجعة', approval_status: 'اعتماد الحساب', status: 'الحالة', payment_status: 'الدفع', analysis_enabled: 'الفحص الآلي', risk_threshold: 'حد المخاطر' }[key] || key) + ': ' + String(value)).join(' · ') || '—'
 
 export default function AdminAutomationReviewPage({ onClose }: { onClose: () => void }) {
   const [authorized, setAuthorized] = useState(false)
@@ -80,6 +85,9 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
   const [findings, setFindings] = useState<Finding[]>([])
   const [filter, setFilter] = useState<'all' | Finding['kind']>('all')
   const [refreshedAt, setRefreshedAt] = useState('')
+  const [settings, setSettings] = useState<Record<string, ReviewSetting>>({})
+  const [auditRows, setAuditRows] = useState<AuditRow[]>([])
+  const [savingSetting, setSavingSetting] = useState<string | null>(null)
 
   async function load() {
     if (!supabase) { setError('اتصال قاعدة البيانات غير متاح.'); setLoading(false); return }
@@ -89,15 +97,20 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     const { data: admin, error: adminError } = await supabase.from('platform_admins').select('user_id').eq('user_id', auth.user.id).maybeSingle()
     if (adminError || !admin) { setError('لا توجد صلاحية لعرض مركز المراجعة الذكية.'); setAuthorized(false); setLoading(false); return }
     setAuthorized(true)
-    const [v, o, p, a, s] = await Promise.all([
+    const [v, o, p, a, s, settingResult, auditResult] = await Promise.all([
       supabase.from('vehicles').select('id,make,model,model_year,vehicle_type,transmission,seats,governorate,address,monthly_price_egp,yearly_price_egp,review_status,payment_status,created_at,organizations(name)').order('created_at', { ascending: false }).limit(150),
       supabase.from('organizations').select('id,name,organization_type,approval_status,city,contact_name,contact_email,address,created_at').order('created_at', { ascending: false }).limit(150),
       supabase.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,period_months,transfer_method,transfer_reference,review_status,proof_path,created_at,vehicles(make,model)').order('created_at', { ascending: false }).limit(150),
       supabase.from('vehicle_promotions').select('id,status,payment_status,payment_reference,previous_payment_reference,payment_due_egp,final_amount_egp,plan_name_snapshot,created_at,vehicles(make,model),organizations(name)').order('created_at', { ascending: false }).limit(150),
-      supabase.from('service_provider_submissions').select('id,provider_name,category,governorate,address,contact_name,phone,email,website_url,official_source_url,description,status,created_at').order('created_at', { ascending: false }).limit(150)
+      supabase.from('service_provider_submissions').select('id,provider_name,category,governorate,address,contact_name,phone,email,website_url,official_source_url,description,status,created_at').order('created_at', { ascending: false }).limit(150),
+      supabase.from('admin_review_settings').select('category,analysis_enabled,auto_approval_enabled,risk_threshold,updated_at'),
+      supabase.from('admin_review_audit_log').select('id,entity_type,entity_id,action,actor_id,previous_state,new_state,created_at').order('created_at', { ascending: false }).limit(40)
     ])
-    const errors = [v.error, o.error, p.error, a.error, s.error].filter(Boolean)
+    const errors = [v.error, o.error, p.error, a.error, s.error, settingResult.error, auditResult.error].filter(Boolean)
     if (errors.length) { setError('تعذر تحميل بعض سجلات المراجعة: ' + errors.map(x => x!.message).join(' · ')); setLoading(false); return }
+    const settingRows = (settingResult.data || []) as ReviewSetting[]
+    setSettings(Object.fromEntries(settingRows.map(item => [item.category, item])))
+    setAuditRows((auditResult.data || []) as AuditRow[])
     const allVehicles = (v.data || []) as unknown as Vehicle[]
     const vehicles = allVehicles.filter(x => isPending(x.review_status))
     const accounts = ((o.data || []) as Organization[]).filter(x => isPending(x.approval_status))
@@ -125,7 +138,19 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
       ...promotions.map(item => assessPromotion(item, duplicateAdRefs)),
       ...providers.map(assessProvider)
     ].sort((x, y) => new Date(y.created_at).getTime() - new Date(x.created_at).getTime())
-    setFindings(results); setRefreshedAt(new Date().toLocaleString('ar-EG')); setLoading(false)
+    setFindings(results.filter(item => settingRows.find(setting => setting.category === item.kind)?.analysis_enabled !== false)); setRefreshedAt(new Date().toLocaleString('ar-EG')); setLoading(false)
+  }
+
+  async function toggleAnalysis(category: string) {
+    if (!supabase || savingSetting) return
+    setSavingSetting(category); setError('')
+    const { data: auth } = await supabase.auth.getUser()
+    if (!auth.user) { setError('انتهت جلسة الإدارة. سجل الدخول مرة أخرى.'); setSavingSetting(null); return }
+    const current = settings[category]?.analysis_enabled !== false
+    const { error: updateError } = await supabase.from('admin_review_settings').update({ analysis_enabled: !current, updated_by: auth.user.id, updated_at: new Date().toISOString() }).eq('category', category)
+    if (updateError) { setError('تعذر حفظ إعداد الفحص: ' + updateError.message); setSavingSetting(null); return }
+    setSavingSetting(null)
+    await load()
   }
 
   useEffect(() => { void load() }, [])
