@@ -12,6 +12,7 @@ type Provider = { id: string; provider_name: string; category: string; governora
 type Finding = { id: string; kind: 'vehicle' | 'account' | 'payment' | 'ad' | 'service'; title: string; subtitle: string; status: string; score: number; level: 'ready' | 'review' | 'blocked'; reasons: string[]; created_at: string }
 type ReviewSetting = { category: string; analysis_enabled: boolean; auto_approval_enabled: boolean; risk_threshold: number; updated_at: string }
 type AuditRow = { id: number; entity_type: string; entity_id: string; action: string; actor_id: string | null; previous_state: Record<string, unknown>; new_state: Record<string, unknown>; created_at: string }
+type VisionResult = { analysis?: Record<string, unknown>; warning?: string; error?: string; code?: string; model?: string; analyzed_at?: string }
 
 const one = <T,>(value: T | T[] | null | undefined): T | null => Array.isArray(value) ? value[0] || null : value || null
 const isPending = (value: string | null | undefined) => ['pending', 'pending_review', 'under_review', 'awaiting_review'].includes(String(value || '').toLowerCase())
@@ -105,6 +106,8 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
   const [settings, setSettings] = useState<Record<string, ReviewSetting>>({})
   const [auditRows, setAuditRows] = useState<AuditRow[]>([])
   const [savingSetting, setSavingSetting] = useState<string | null>(null)
+  const [visionResults, setVisionResults] = useState<Record<string, VisionResult>>({})
+  const [visionLoading, setVisionLoading] = useState<string | null>(null)
 
   async function load() {
     if (!supabase) { setError('اتصال قاعدة البيانات غير متاح.'); setLoading(false); return }
@@ -204,6 +207,23 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     await load()
   }
 
+  async function runVisionReview(item: Finding) {
+    if (!supabase || !['vehicle', 'payment'].includes(item.kind) || visionLoading) return
+    const key = item.kind + ':' + item.id
+    setVisionLoading(key)
+    setVisionResults(previous => ({ ...previous, [key]: {} }))
+    const { data, error: invokeError } = await supabase.functions.invoke('mycar-admin-vision-review', {
+      body: { entity_type: item.kind, entity_id: item.id }
+    })
+    if (invokeError) {
+      const message = data?.error || invokeError.message || 'تعذر تشغيل الفحص الذكي.'
+      setVisionResults(previous => ({ ...previous, [key]: { error: message, code: data?.code } }))
+    } else {
+      setVisionResults(previous => ({ ...previous, [key]: data as VisionResult }))
+    }
+    setVisionLoading(null)
+  }
+
   useEffect(() => { void load() }, [])
   const visible = useMemo(() => findings.filter(item => filter === 'all' || item.kind === filter), [findings, filter])
   const counts = useMemo(() => ({
@@ -253,7 +273,7 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
       </section>
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 p-4"><div><h2 className="font-black">نتائج الفحص الأولي</h2><p className="mt-1 text-xs text-slate-500">مرتبة بالأحدث · آخر 150 سجلًا لكل نوع · لا يتم تنفيذ أي قرار تلقائي</p></div><button onClick={() => setFilter('all')} className="text-sm font-bold text-blue-700">عرض الكل</button></div>
-        {loading ? <div className="p-10 text-center text-slate-500">جارٍ تحليل سجلات المراجعة...</div> : visible.length === 0 ? <div className="p-10 text-center text-slate-500">لا توجد طلبات معلقة ضمن هذا التصنيف حاليًا.</div> : <div className="divide-y divide-slate-100">{visible.map(item=><article key={item.kind + item.id} className="grid gap-3 p-4 lg:grid-cols-[minmax(0,1fr)_150px] lg:items-center"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-extrabold text-slate-600">{kindLabel[item.kind]}</span><h3 className="font-black text-[#102b47]">{item.title}</h3><span className={`rounded-full border px-2.5 py-1 text-xs font-extrabold ${levelClass[item.level]}`}>{levelLabel[item.level]}</span></div><p className="mt-1 text-sm text-slate-500">{item.subtitle} · الحالة الحالية: {item.status}</p><ul className="mt-2 flex flex-wrap gap-2">{item.reasons.map(reason=><li key={reason} className="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs leading-5 text-slate-700">{reason}</li>)}</ul><p className="mt-2 text-[11px] text-slate-400">{new Date(item.created_at).toLocaleString('ar-EG')} · رقم السجل: {item.id.slice(0, 8)}</p></div><div className="rounded-xl bg-slate-50 p-3 text-center"><strong className="block text-2xl font-black text-[#102b47]">{item.score}%</strong><span className="text-xs text-slate-500">اكتمال مبدئي للبيانات</span></div></article>)}</div>}
+        {loading ? <div className="p-10 text-center text-slate-500">جارٍ تحليل سجلات المراجعة...</div> : visible.length === 0 ? <div className="p-10 text-center text-slate-500">لا توجد طلبات معلقة ضمن هذا التصنيف حاليًا.</div> : <div className="divide-y divide-slate-100">{visible.map(item=><article key={item.kind + item.id} className="grid gap-3 p-4 lg:grid-cols-[minmax(0,1fr)_150px] lg:items-center"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-extrabold text-slate-600">{kindLabel[item.kind]}</span><h3 className="font-black text-[#102b47]">{item.title}</h3><span className={`rounded-full border px-2.5 py-1 text-xs font-extrabold ${levelClass[item.level]}`}>{levelLabel[item.level]}</span></div><p className="mt-1 text-sm text-slate-500">{item.subtitle} · الحالة الحالية: {item.status}</p><ul className="mt-2 flex flex-wrap gap-2">{item.reasons.map(reason=><li key={reason} className="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs leading-5 text-slate-700">{reason}</li>)}</ul>{['vehicle','payment'].includes(item.kind) && <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50/50 p-3"><button type="button" onClick={() => void runVisionReview(item)} disabled={visionLoading !== null} className="rounded-lg bg-indigo-700 px-3 py-2 text-xs font-extrabold text-white hover:bg-indigo-800 disabled:opacity-50">{visionLoading === item.kind + ':' + item.id ? 'جارٍ فحص الملفات...' : 'تشغيل الفحص البصري بالذكاء الاصطناعي'}</button>{visionResults[item.kind + ':' + item.id]?.error && <p className="mt-2 text-xs font-bold text-rose-700">{visionResults[item.kind + ':' + item.id]?.error}</p>}{visionResults[item.kind + ':' + item.id]?.analysis && <div className="mt-3 space-y-2 text-xs leading-6 text-slate-700"><p className="font-bold text-indigo-950">{String(visionResults[item.kind + ':' + item.id]?.analysis?.summary || 'اكتمل الفحص.')}</p><p>مستوى المخاطر المقترح: <strong>{String(visionResults[item.kind + ':' + item.id]?.analysis?.risk_level || 'غير محدد')}</strong></p>{Array.isArray(visionResults[item.kind + ':' + item.id]?.analysis?.human_review_reasons) && <ul className="list-disc space-y-1 pr-5">{(visionResults[item.kind + ':' + item.id]?.analysis?.human_review_reasons as string[]).map((reason, index) => <li key={index}>{reason}</li>)}</ul>}{Array.isArray(visionResults[item.kind + ':' + item.id]?.analysis?.limitations) && <p className="text-slate-500">حدود الفحص: {(visionResults[item.kind + ':' + item.id]?.analysis?.limitations as string[]).join(' · ')}</p>}<p className="font-bold text-amber-800">{visionResults[item.kind + ':' + item.id]?.warning}</p></div>}</div>}<p className="mt-2 text-[11px] text-slate-400">{new Date(item.created_at).toLocaleString('ar-EG')} · رقم السجل: {item.id.slice(0, 8)}</p></div><div className="rounded-xl bg-slate-50 p-3 text-center"><strong className="block text-2xl font-black text-[#102b47]">{item.score}%</strong><span className="text-xs text-slate-500">اكتمال مبدئي للبيانات</span></div></article>)}</div>}
       </section>
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500"><span>آخر تحديث: {refreshedAt || '—'}</span><span>عدد السجلات المعروضة: {visible.length}</span></div>
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
