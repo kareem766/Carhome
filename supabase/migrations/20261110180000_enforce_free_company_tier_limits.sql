@@ -16,7 +16,7 @@ DECLARE
   v_raw_limit text;
   v_count integer;
 BEGIN
-  IF NEW.organization_id IS NULL OR auth.uid() IS NULL THEN
+  IF NEW.organization_id IS NULL THEN
     RETURN NEW;
   END IF;
 
