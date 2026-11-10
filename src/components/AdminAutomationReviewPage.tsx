@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Clock3, RefreshCw, ShieldCheck, X, FileSearch, Building2, CarFront, CreditCard, Megaphone, Info } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import AdminPageNavigation from './AdminPageNavigation'
 
 type Vehicle = { id: string; organization_id: string; make: string; model: string; model_year: number; vehicle_type: string | null; transmission: string | null; seats: number | null; governorate: string | null; address: string | null; monthly_price_egp: number | null; yearly_price_egp: number | null; review_status: string; payment_status: string; created_at: string; organizations: { name: string } | { name: string }[] | null }
 type VehicleImage = { vehicle_id: string; storage_path: string; alt_text: string }
@@ -239,6 +240,7 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
   }), [findings])
 
   return <div dir="rtl" className="fixed inset-0 z-[100] overflow-y-auto bg-slate-100 text-slate-900">
+    <div className="[&_.mc-admin-sidebar]:!z-[120]"><AdminPageNavigation /></div>
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-[#102b47] px-4 py-4 text-white shadow-lg sm:px-7">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
         <div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-cyan-400 text-[#102b47]"><ShieldCheck size={24}/></span><div><h1 className="text-lg font-black sm:text-xl">مركز المراجعة الذكية</h1><p className="text-xs text-slate-300">My Car Intelligent Operations · توصيات آلية مع سجل واضح للأسباب</p></div></div>
