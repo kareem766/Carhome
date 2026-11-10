@@ -11,7 +11,8 @@ const groups = [
   {href:'/workspace/admin/managed-sourcing',label:'خدمة البحث نيابة عن الشركات',icon:BriefcaseBusiness},
   {href:'/workspace/admin/managed-accounts',label:'حسابات المستخدمين',icon:UserPlus},
   {href:'/workspace/admin/communications',label:'الإشعارات والبانرات',icon:BellRing},
-  {href:'/workspace/admin/analytics',label:'التقارير والتحليلات',icon:Activity}
+  {href:'/workspace/admin/analytics',label:'التقارير والتحليلات',icon:Activity},
+  {href:'/workspace/admin/automation-review',label:'مركز المراجعة الذكية',icon:ShieldCheck}
  ]},
  { title:'الاشتراكات والإعدادات', links:[
   {href:'/workspace/admin/subscription-plans',label:'إدارة الباقات والأسعار',icon:CreditCard},
@@ -31,7 +32,6 @@ export default function AdminPageNavigation(){
   <aside data-open={open?'true':'false'} className="mc-admin-sidebar fixed right-0 top-0 z-40 flex h-screen w-[256px] flex-col border-l border-slate-200 bg-[#102b47] p-4 text-white shadow-xl">
    <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-4"><a href="/workspace/admin" className="flex items-center gap-2"><span className="grid h-10 w-10 place-items-center rounded-xl bg-cyan-400 font-black text-[#102b47]">MC</span><span><b className="block text-lg font-black">My Car</b><small className="text-xs text-slate-300">مركز الإدارة</small></span></a><button className="mc-admin-mobile-toggle hidden rounded-lg border border-white/20 px-3 py-2 text-sm" onClick={()=>setOpen(!open)}>{open?'إغلاق':'القائمة'}</button></div>
    <div className="mc-admin-sidebar-inner mt-5 flex-1 space-y-6 overflow-y-auto">{groups.map(group=><section key={group.title}><p className="mb-2 px-3 text-[11px] font-extrabold text-cyan-300">{group.title}</p><div className="space-y-1">{group.links.map(({href,label,icon:Icon})=><a key={href} href={href} aria-current={path===href?'page':undefined} className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-bold transition ${path===href?'bg-cyan-400 text-[#102b47] shadow':'text-slate-200 hover:bg-white/10 hover:text-white'}`}><Icon size={18}/>{label}</a>)}</div></section>)}</div>
-   <a href="/workspace/admin/automation-review" aria-current={path==="/workspace/admin/automation-review"?"page":undefined} className={`mt-4 flex min-h-12 w-full items-center gap-3 rounded-xl border border-cyan-300/30 px-3 text-sm font-extrabold transition ${path==="/workspace/admin/automation-review"?"bg-cyan-400 text-[#102b47]":"bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/20"}`}><ShieldCheck size={19}/>مركز المراجعة الذكية</a>
    <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-6 text-slate-300"><BarChart3 size={16} className="mb-1 text-cyan-300"/>لوحة متابعة تشغيلية مبنية على بيانات المنصة الفعلية.</div>
   </aside> </>
 }
