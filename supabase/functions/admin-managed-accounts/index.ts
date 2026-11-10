@@ -48,17 +48,14 @@ Deno.serve(async(req:Request)=>{
   const org=Array.isArray(membership.organizations)?membership.organizations[0]:membership.organizations;
   if(!org||org.organization_type!=="company")return send({error:"الحساب المرتبط ليس حساب شركة."},403);
   if(org.approval_status!=="approved")return send({error:"يجب اعتماد حساب الشركة أولًا قبل إدارة أعضاء الفريق."},403);
-  // Read the global subscription gate before allowing any company-only paid action.
-  const {data:platformSettings,error:settingsError}=await db.from("platform_settings").select("company_subscription_required").eq("id",true).maybeSingle();
-  if(settingsError||!platformSettings)return send({error:"تعذر التحقق من إعدادات اشتراك الشركات. حاول مرة أخرى."},500);
-  // Enforce the active subscription's team-member allowance on the server.
+  // The free company tier is limited to the company owner: adding managers or employees requires an active paid plan.
   const nowIso=new Date().toISOString();
   const {data:activeSubscription,error:subscriptionError}=await db.from("company_subscriptions")
    .select("plan_id").eq("organization_id",membership.organization_id).eq("status","active")
    .in("payment_status",["verified","waived"]).lte("starts_at",nowIso).gt("ends_at",nowIso)
    .order("ends_at",{ascending:false}).limit(1).maybeSingle();
   if(subscriptionError)return send({error:"تعذر التحقق من اشتراك الشركة. حاول مرة أخرى."},500);
-  if(platformSettings?.company_subscription_required===true&&!activeSubscription)return send({error:"يلزم تفعيل اشتراك شركة سارٍ قبل إضافة أعضاء جدد. اختر باقة من صفحة اشتراك الشركة وأرسل بيانات التحويل للمراجعة."},403);
+  if(!activeSubscription)return send({error:"إضافة أعضاء الفريق (مديرين أو موظفين) متاحة بعد تفعيل باقة مدفوعة. يمكنك الاشتراك من صفحة باقات الشركات."},403);
   if(activeSubscription){
    const {data:plan,error:planError}=await db.from("platform_subscription_plans").select("limits,is_active").eq("id",activeSubscription.plan_id).maybeSingle();
    if(planError||!plan?.is_active)return send({error:"تعذر التحقق من صلاحيات الباقة الحالية."},500);
