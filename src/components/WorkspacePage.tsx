@@ -82,6 +82,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const [user, setUser] = useState<{ id: string; name: string; email: string } | null>(null)
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [showReviewModal, setShowReviewModal] = useState(false)
+  const [showCompanyFreeWelcome, setShowCompanyFreeWelcome] = useState(false)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [activeAdsCount, setActiveAdsCount] = useState(0)
   const [requests, setRequests] = useState<RentalRequest[]>([])
@@ -137,6 +138,11 @@ export default function WorkspacePage({ role }: { role: Role }) {
     setUser({ id: authUser.id, name: String(authUser.user_metadata?.display_name || authUser.user_metadata?.organization_name || 'مستخدم My Car'), email: authUser.email || authUser.phone || '' })
     const welcomePending = localStorage.getItem('mycar_welcome_banner') === '1'
     const vehiclePaymentPending = localStorage.getItem('mycar_vehicle_payment_banner') === '1'
+    const companyFreeWelcomeKey = 'mycar_company_free_welcome_pending_' + authUser.id
+    const companyFreeWelcomeSeenKey = 'mycar_company_free_welcome_seen_' + authUser.id
+    const companyFreeWelcomePending = role === 'company'
+      && localStorage.getItem(companyFreeWelcomeKey) === '1'
+      && localStorage.getItem(companyFreeWelcomeSeenKey) !== '1'
     if (vehiclePaymentPending) {
       setNotice('تم استلام بيانات السيارة والتحويل بنجاح. طلبك الآن قيد مراجعة الإدارة، وستظهر حالة السيارة هنا حتى اكتمال المراجعة.')
     } else if (welcomePending) {
@@ -154,6 +160,11 @@ export default function WorkspacePage({ role }: { role: Role }) {
       return
     }
     setOrganization({ ...org, id: member.organization_id })
+    if (companyFreeWelcomePending) {
+      localStorage.setItem(companyFreeWelcomeSeenKey, '1')
+      localStorage.removeItem(companyFreeWelcomeKey)
+      setShowCompanyFreeWelcome(true)
+    }
     if (role === 'company') {
       const { data: reuseAllowed } = await client.rpc('company_has_plan_feature', { p_organization_id: member.organization_id, p_feature: 'request_reuse' })
       setCanReuseRequests(reuseAllowed === true)
@@ -297,6 +308,11 @@ export default function WorkspacePage({ role }: { role: Role }) {
     }, 120)
     return () => window.clearTimeout(timer)
   }, [submittedOffers])
+  useEffect(() => {
+    if (!showCompanyFreeWelcome) return
+    const timer = window.setTimeout(() => setShowCompanyFreeWelcome(false), 10000)
+    return () => window.clearTimeout(timer)
+  }, [showCompanyFreeWelcome])
   useEffect(() => { const timer = window.setInterval(() => setAgeClock(Date.now()), 60000); return () => window.clearInterval(timer) }, [])
 
   const vehicleFieldClass = (name: string) => `${fieldClass} ${invalidVehicleFields.includes(name) ? '!border-rose-500 !bg-rose-50/60 !ring-2 !ring-rose-100 placeholder:!text-rose-300' : ''}`
@@ -796,6 +812,35 @@ export default function WorkspacePage({ role }: { role: Role }) {
 <label className="block text-sm font-bold">كود الخصم (اختياري)<div className="mt-2 flex gap-2"><input name="coupon_code" maxLength={60} autoCapitalize="characters" onChange={() => { setDiscountPreview(null); setDiscountFeedback(null) }} className="mt-0 min-h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm uppercase outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100" placeholder="أدخل البروموكود"/><button type="button" disabled={discountLoading} onClick={(event) => { const form = event.currentTarget.form; if (form) void previewVehicleDiscount(v, form) }} className="min-h-12 shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-extrabold text-blue-800 disabled:opacity-50">{discountLoading ? 'جارٍ التحقق...' : 'تطبيق'}</button></div></label>{discountFeedback && <p role="status" className={`-mt-2 text-sm font-bold leading-6 ${discountFeedback.type === 'success' ? 'text-emerald-700' : 'text-rose-700'}`}>{discountFeedback.text}</p>}
 {discountPreview && <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm"><p className="font-extrabold text-emerald-900">تم تطبيق كود {discountPreview.code} بنجاح</p><div className="mt-2 flex justify-between text-slate-600"><span>قبل الخصم</span><span>{discountPreview.original.toLocaleString('ar-EG')} جنيه</span></div><div className="mt-1 flex justify-between font-bold text-emerald-800"><span>قيمة الخصم</span><span>−{discountPreview.discount.toLocaleString('ar-EG')} جنيه</span></div><div className="mt-2 flex justify-between border-t border-emerald-200 pt-2 font-black text-slate-900"><span>المبلغ المطلوب تحويله</span><span>{discountPreview.final.toLocaleString('ar-EG')} جنيه</span></div></div>}<label className="block text-sm font-bold">طريقة التحويل *<select name="transfer_method" defaultValue={paymentDetails.instapay_number ? 'instapay' : 'vodafone_cash'} className={fieldClass}><option value="instapay" disabled={!paymentDetails.instapay_number}>InstaPay</option><option value="vodafone_cash" disabled={!paymentDetails.vodafone_cash_number}>Vodafone Cash</option></select></label><label className="block text-sm font-bold">رقم العملية *<input name="transfer_reference" required minLength={3} maxLength={100} className={fieldClass} placeholder="أدخل رقم العملية كما يظهر في تطبيق التحويل"/></label><label className="block text-sm font-bold">تاريخ التحويل *<input name="transfer_date" type="date" required max={new Date().toISOString().slice(0,10)} className={fieldClass}/></label><label className="block text-sm font-bold">إثبات التحويل (اختياري)<input name="payment_proof" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className={fieldClass}/><span className="mt-1 block text-xs font-normal text-slate-500">صورة أو PDF، بحد أقصى 5 ميجابايت. يُتاح الملف لصاحب الطلب ومسؤولي المنصة فقط.</span></label><label className="block text-sm font-bold">الملاحظات<textarea name="transfer_notes" rows={2} maxLength={1000} className={fieldClass} placeholder="ملاحظات إضافية (اختياري)"/></label><button disabled={saving||(!paymentDetails.instapay_number&&!paymentDetails.vodafone_cash_number)} className={primaryClass+" w-full"}>{saving ? 'جارٍ الإرسال...' : 'تسجيل السيارة'}</button></form>}</>}</article>)}{vehicles.length===0 && <p className="rounded-2xl border border-dashed bg-white p-6 text-sm text-slate-600">لم تسجل سيارات بعد. ابدأ بإضافة أول سيارة.</p>}</div></>}
     {deleteVehicleTarget && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !deletingVehicle) setDeleteVehicleTarget(null) }}><section role="dialog" aria-modal="true" aria-labelledby="delete-vehicle-title" className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl sm:p-7"><div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-rose-50 text-rose-600"><Trash2 size={26}/></div><h2 id="delete-vehicle-title" className="mt-4 text-center text-xl font-black text-slate-900">حذف السيارة من حسابك</h2><p className="mt-2 text-center text-sm leading-6 text-slate-600">أخبرنا بسبب حذف <strong>{deleteVehicleTarget.make} {deleteVehicleTarget.model} · {deleteVehicleTarget.model_year}</strong>، ثم أكد العملية.</p><div className="mt-5 space-y-2">{[{value:'تم تأجير السيارة أو لم تعد متاحة',label:'تم تأجير السيارة أو لم تعد متاحة'},{value:'لم أعد أرغب في عرض السيارة على المنصة',label:'لم أعد أرغب في عرض السيارة على المنصة'},{value:'بيانات السيارة أو السعر غير صحيحة',label:'أحتاج إلى تعديل بيانات السيارة أو السعر'},{value:'سأستبدل السيارة بسيارة أخرى',label:'سأستبدل السيارة بسيارة أخرى'},{value:'تجربة المنصة فقط',label:'كانت السيارة مضافة بغرض التجربة'},{value:'سبب آخر',label:'سبب آخر'}].map(option=><label key={option.value} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm font-semibold transition ${deleteVehicleReason===option.value?'border-blue-500 bg-blue-50 text-blue-900':'border-slate-200 hover:border-slate-300'}`}><input type="radio" name="delete_vehicle_reason" value={option.value} checked={deleteVehicleReason===option.value} onChange={()=>setDeleteVehicleReason(option.value)} className="h-4 w-4 accent-blue-700"/><span>{option.label}</span></label>)}</div><div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-6 text-amber-900">تنبيه: حذف السيارة سيزيلها من قائمة سياراتك، ويحذف الصور وبيانات الدفع المرتبطة بها. لا يمكن التراجع عن هذه العملية.</div><div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2"><button type="button" disabled={deletingVehicle} onClick={()=>setDeleteVehicleTarget(null)} className="min-h-12 rounded-xl border border-slate-200 px-4 font-bold text-slate-700 disabled:opacity-50">إلغاء</button><button type="button" disabled={!deleteVehicleReason||deletingVehicle} onClick={()=>void deleteVehicle()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-50">{deletingVehicle?'جارٍ حذف السيارة...':<><Trash2 size={17}/> تأكيد الحذف النهائي</>}</button></div></section></div>}
+    {showCompanyFreeWelcome && role === 'company' && <div className="fixed inset-0 z-[140] grid place-items-center bg-slate-950/70 p-4 backdrop-blur-md" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowCompanyFreeWelcome(false) }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="company-free-welcome-title" className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-sky-200/70 bg-white shadow-[0_28px_90px_rgba(2,12,38,0.38)]">
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-orange-400 via-sky-500 to-blue-700"/>
+        <button type="button" aria-label="إغلاق" onClick={() => setShowCompanyFreeWelcome(false)} className="absolute left-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100"><X size={18}/></button>
+        <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 px-6 pb-7 pt-9 text-center text-white sm:px-9">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-white/20 bg-white/10 text-sky-200 shadow-lg shadow-blue-950/30"><Building2 size={31}/></div>
+          <p className="mt-4 text-xs font-black tracking-[.18em] text-sky-200">MY CAR · عربيتي</p>
+          <h2 id="company-free-welcome-title" className="mt-2 text-2xl font-black leading-tight sm:text-3xl">أهلًا بك في مساحة شركتك</h2>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-blue-100">ابدأ رحلتك مع My Car مجانًا، واستكشف السيارات وتواصل مع مقدمي الخدمة واطلب احتياجات شركتك.</p>
+        </div>
+        <div className="px-6 py-6 sm:px-9">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-base font-black text-slate-900">مميزات اشتراكك المجاني</h3>
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">مجاني</span>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[
+              'تصفح كتالوج السيارات المعتمدة',
+              'التواصل مع الملاك وموردي الأساطيل',
+              'متابعة الطلبات والعروض والردود',
+              'إنشاء 3 طلبات تأجير كل شهر'
+            ].map(item => <div key={item} className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-bold leading-6 text-slate-700"><CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-600"/><span>{item}</span></div>)}
+          </div>
+          <div className="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm leading-6 text-orange-900"><strong>معلومة مهمة:</strong> الباقة المجانية تتيح حساب مالك الشركة فقط، وإضافة المديرين والموظفين متاحة مع الباقات المدفوعة.</div>
+          <a href="/workspace/company/subscriptions" className="mt-5 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-700 to-sky-600 px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:shadow-xl">اشترك في باقة الآن <ArrowLeft size={18}/></a>
+          <p className="mt-3 text-center text-xs text-slate-400">ستغلق هذه الرسالة تلقائيًا خلال 10 ثوانٍ.</p>
+        </div>
+      </section>
+    </div>}
     {showVehicleSuccess && <div className="fixed inset-0 z-[120] grid place-items-center bg-slate-950/65 p-4 backdrop-blur-md" role="presentation"><section role="alertdialog" aria-modal="true" aria-labelledby="vehicle-success-title" className="w-full max-w-md overflow-hidden rounded-3xl border border-emerald-100 bg-white text-center shadow-2xl"><div className="h-2 bg-gradient-to-l from-emerald-500 via-teal-500 to-blue-600"/><div className="px-6 py-9 sm:px-9"><div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/70"><CheckCircle2 size={42} strokeWidth={2.2}/></div><h2 id="vehicle-success-title" className="mt-6 text-xl font-black leading-8 text-slate-900 sm:text-2xl">تم تسجيل السيارة وبيانات تأكيد الدفع بنجاح</h2><p className="mt-3 text-base font-bold leading-7 text-slate-700">شكرًا لاستخدامك منصة <span className="text-blue-700">My Car</span></p><p className="mt-4 text-sm leading-6 text-slate-500">سيتم توجيهك الآن إلى صفحة سياراتي لمتابعة حالة سيارتك.</p><div className="mx-auto mt-6 flex items-center justify-center gap-2 text-xs font-bold text-emerald-700"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"/> جارٍ الانتقال إلى سياراتي...</div></div></section></div>}
     <footer className="mt-8 flex flex-wrap gap-4 border-t py-5 text-sm text-slate-500">{role === 'company' && <><a href="/workspace/company/requests" className="hover:text-blue-700">طلبات التأجير</a><a href="/workspace/catalog" className="hover:text-blue-700">السيارات المتاحة</a></>}<span className="inline-flex items-center gap-2"><Building2 size={15}/> مساحة عمل آمنة</span><a href={'/workspace/'+role+'/messages'} className="inline-flex items-center gap-2 hover:text-blue-700"><MessageCircle size={15}/> المراسلات الداخلية</a><span><FileText size={15} className="inline"/> مع My Car، طريقك أسهل للوصول إلى فرص تأجير السيارات المناسبة لأعمالك.</span></footer>
   </div></div></main>
