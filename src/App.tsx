@@ -190,7 +190,8 @@ export default function App() {
 
   // Keep page metadata specific to each public route; private workspace routes stay out of search.
   useLayoutEffect(() => {
-    const pathname = window.location.pathname.replace(/\\/+$/, '') || '/'
+    const rawPathname = window.location.pathname
+    const pathname = rawPathname.length > 1 && rawPathname.endsWith('/') ? rawPathname.slice(0, -1) : rawPathname
     const publicSeo: Record<string, { title: string; description: string }> = {
       '/': {
         title: 'My Car عربيتي | منصة تأجير السيارات للشركات في مصر',
