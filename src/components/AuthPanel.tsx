@@ -6,7 +6,7 @@ import { isValidEmailAddress, normalizeEmailAddress } from '../lib/email'
 import PlatformBrand from './PlatformBrand'
 
 type AccountType = 'individual_owner' | 'fleet_supplier' | 'company'
-type Props = { onClose: () => void; initialMode?: 'signin' | 'signup' }
+type Props = { onClose: () => void; initialMode?: 'signin' | 'signup'; redirectTo?: string }
 
 function isStrongPassword(value: string) { return value.length >= 8 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value) }
 
@@ -86,7 +86,7 @@ async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: 
   if (membershipInsert.error && membershipInsert.error.code !== '23505') throw membershipInsert.error
 }
 
-export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
+export default function AuthPanel({ onClose, initialMode = 'signin', redirectTo }: Props) {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
   const [forgotPassword, setForgotPassword] = useState(() => window.location.search.includes('reset-password=1'))
   const [settingNewPassword, setSettingNewPassword] = useState(false)
@@ -223,7 +223,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin' }: Props) {
           window.location.replace('/first-login-password')
           return
         }
-        window.location.replace(invitationId ? `/workspace/company/team?invitation=${encodeURIComponent(invitationId)}` : '/auth/callback')
+        const safeRedirect = redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/auth/callback'
+        window.location.replace(invitationId ? `/workspace/company/team?invitation=${encodeURIComponent(invitationId)}` : safeRedirect)
         return
       }
     } catch (caught) {
