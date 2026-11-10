@@ -1,11 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /workspace
-Disallow: /workspace/
-Disallow: /messages
-Disallow: /auth/
-Disallow: /reset-password
-Disallow: /first-login-password
-Disallow: /register/
 
 Sitemap: https://carhome-lime.vercel.app/sitemap.xml
