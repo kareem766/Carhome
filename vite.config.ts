@@ -9,13 +9,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['carhome-icon.svg'],
       manifest: {
-        name: 'Carhome',
-        short_name: 'Carhome',
-        description: 'منصة تأجير السيارات طويل الأجل للشركات في مصر',
+        name: 'My Car عربيتي',
+        short_name: 'My Car',
+        description: 'منصة My Car عربيتي لخدمات السيارات والشركات والأساطيل في مصر',
         lang: 'ar',
         dir: 'rtl',
         theme_color: '#142D4E',
-        background_color: '#F4F7FB',
+        background_color: '#142D4E',
         display: 'standalone',
         start_url: '/',
         icons: [
