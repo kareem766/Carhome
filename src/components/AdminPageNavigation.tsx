@@ -1,4 +1,5 @@
 import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing, Wallet, UserPlus, ClipboardCheck, BarChart3, Activity, BriefcaseBusiness, Users, Headset, TicketPercent, ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
 import PlatformEntryBanner from './PlatformEntryBanner'
 
 const groups = [
