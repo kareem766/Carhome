@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.enforce_company_rental_request_quota() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.enforce_company_team_member_quota() FROM PUBLIC, anon, authenticated;
