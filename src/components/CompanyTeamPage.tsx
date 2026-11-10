@@ -47,7 +47,7 @@ export default function CompanyTeamPage(){
   const validEmail=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i.test(normalizedEmail)
   if(!validEmail){setError('صيغة البريد الإلكتروني غير صحيحة. تأكد من كتابته بالشكل name@example.com ومن عدم وجود مسافات.');setSaving(false);return}
   const {data,error:invokeError}=await supabase.functions.invoke('admin-managed-accounts',{body:{action:'create_company_member',display_name:displayName.trim(),email:normalizedEmail,role}})
-  if(invokeError||data?.error){const message=String(data?.error||invokeError?.message||'تعذر إنشاء حساب الموظف.');if(message.includes('الحد الأقصى')||message.includes('حد أعضاء الفريق')||message.includes('يلزم تفعيل اشتراك شركة'))setPlanLimitNotice(message);else setError(message);setSaving(false);return}
+  if(invokeError||data?.error){const message=String(data?.error||invokeError?.message||'تعذر إنشاء حساب الموظف.');if(message.includes('الحد الأقصى')||message.includes('حد أعضاء الفريق')||message.includes('يلزم تفعيل اشتراك شركة')||message.includes('إضافة أعضاء الفريق'))setPlanLimitNotice(message);else setError(message);setSaving(false);return}
   setTemporaryPassword(String(data.temporary_password||''))
   setNotice('تم إنشاء حساب الموظف وربطه بالشركة. انسخ كلمة المرور المؤقتة وشاركها معه؛ لن تظهر مرة أخرى بعد مغادرة هذه الصفحة.')
   setDisplayName('');setEmail('');setRole('member');setSaving(false);setRefresh(v=>v+1)
