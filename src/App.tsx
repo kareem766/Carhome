@@ -24,6 +24,7 @@ const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const AdminAnalyticsPage = lazy(() => import('./components/AdminAnalyticsPage'))
 const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'))
+const AdminAutomationReviewPage = lazy(() => import('./components/AdminAutomationReviewPage'))
 const PlatformSettingsPage = lazy(() => import('./components/PlatformSettingsPage'))
 const SubscriptionPlansPage = lazy(() => import('./components/SubscriptionPlansPage'))
 const AdminCompanySubscriptionsPage = lazy(() => import('./components/AdminCompanySubscriptionsPage'))
@@ -400,6 +401,7 @@ export default function App() {
     if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense>
     return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense>}</>
   }
+  if (path === '/workspace/admin/automation-review') return <Suspense fallback={<PlatformLoading />}><AdminAutomationReviewPage onClose={() => window.location.assign('/workspace/admin')} /></Suspense>
   if (path === '/workspace/admin') return <Suspense fallback={<PlatformLoading />}><AdminDashboardPage /></Suspense>
   if (path === '/workspace/admin/analytics') return <Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense>
   if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense>
