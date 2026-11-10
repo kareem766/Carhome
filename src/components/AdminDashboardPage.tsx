@@ -19,6 +19,7 @@ const shortcuts = [
  { href: '/workspace/admin/platform-settings', title: 'إعدادات وهوية المنصة', desc: 'الاسم والشعار والألوان وإعدادات التسجيل', icon: Settings2, tone: 'from-slate-600 to-slate-800' },
  { href: '/workspace/admin/communications', title: 'الإشعارات والبانرات', desc: 'إدارة الرسائل والإعلانات داخل المنصة', icon: BellRing, tone: 'from-pink-500 to-rose-700' },
  { href: '/workspace/admin/analytics', title: 'التقارير والتحليلات', desc: 'تصفية البيانات وتصدير تقارير CSV وPDF', icon: Activity, tone: 'from-violet-500 to-purple-700' },
+ { href: '/workspace/admin/automation-review', title: 'مركز المراجعة الذكية', desc: 'فحص اكتمال الطلبات واكتشاف الملاحظات والتكرارات ومراجعة سجل التدقيق', icon: ShieldCheck, tone: 'from-cyan-500 to-blue-700' },
 ]
 export default function AdminDashboardPage() {
  const [authorized, setAuthorized] = useState(false)
