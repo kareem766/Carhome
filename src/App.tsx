@@ -235,6 +235,20 @@ export default function App() {
     setMeta('meta[property="og:title"]', 'property', 'og:title', seo.title)
     setMeta('meta[property="og:description"]', 'property', 'og:description', seo.description)
     setMeta('meta[property="og:image"]', 'property', 'og:image', 'https://i.ibb.co/LDtVLtkT/3-E4722-EB-3946-4526-80-D0-87-A0-E48133-C7.png')
+    const canonicalPath = pathname === '/' ? '/' : pathname
+    let canonicalLink = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+    if (isIndexable) {
+      if (!canonicalLink) {
+        canonicalLink = document.createElement('link')
+        canonicalLink.rel = 'canonical'
+        document.head.appendChild(canonicalLink)
+      }
+      canonicalLink.href = `https://carhome-lime.vercel.app${canonicalPath}`
+      setMeta('meta[property="og:url"]', 'property', 'og:url', `https://carhome-lime.vercel.app${canonicalPath}`)
+    } else {
+      canonicalLink?.remove()
+      document.head.querySelector('meta[property="og:url"]')?.remove()
+    }
     setMeta('meta[name="twitter:card"]', 'name', 'twitter:card', 'summary_large_image')
     setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', seo.title)
     setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', seo.description)
