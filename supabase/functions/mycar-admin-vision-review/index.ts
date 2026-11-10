@@ -85,7 +85,7 @@ Deno.serve(async (req: Request) => {
       if (error) throw error;
       if (data?.proof_path) paths = [data.proof_path];
     }
-    if (!paths.length) return json({ error: "لا توجد ملفات مرفقة بهذا السجل." }, 404);
+    if (!paths.length) return json({ code: "NO_FILES", error: "لا توجد ملفات مرفقة بهذا السجل؛ أرفق الملف أولًا ثم أعد الفحص." });
 
     const parts: Array<Record<string, unknown>> = [];
     const fileSummaries: Array<{ file_number: number; mime_type: string; size_bytes: number }> = [];
@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
       parts.push({ inline_data: { mime_type: mimeType, data: toBase64(bytes) } });
       fileSummaries.push({ file_number: index + 1, mime_type: mimeType, size_bytes: file.size });
     }
-    if (!parts.length) return json({ error: "لم نعثر على ملفات صالحة للفحص." }, 422);
+    if (!parts.length) return json({ code: "NO_VALID_FILES", error: "لم نعثر على ملفات صالحة للفحص؛ تحقق من نوع الملف وحجمه ثم أعد المحاولة." });
 
     const prompt = entityType === "vehicle"
       ? `أنت مساعد تدقيق بصري لمراجعة تسجيل مركبة في مصر. افحص الصور بصريًا فقط. لا تستنتج ملكية أو هوية أو أصالة أو قانونية، ولا تؤكد الماركة أو الموديل إلا إذا كان ظاهرًا بوضوح. ابحث عن: هل تظهر مركبة؟ عدد المركبات الظاهرة؟ جودة الصور ووضوحها؟ صور مكررة أو زوايا متشابهة جدًا؟ أضرار ظاهرة واضحة دون مبالغة؟ هل توجد صور شاشة أو صور دعائية/مخزنية ظاهرة؟ لا تصنف ذلك تزويرًا. أخرج JSON فقط بالشكل: {"summary":"...","vehicle_visible":true,"vehicle_count_estimate":1,"visible_details":["..."],"quality_issues":["..."],"possible_duplicates":false,"stock_or_screenshot_suspected":false,"risk_level":"low|medium|high","human_review_reasons":["..."],"limitations":["..."]}. اعتبر كل نتيجة احتمالية وتوصية للمراجع.`
