@@ -20,7 +20,7 @@ function assessVehicle(row: Vehicle, duplicates: Set<string>): Finding {
   if (!row.vehicle_type || !row.governorate || !row.address) reasons.push('بيانات التصنيف أو الموقع غير مكتملة')
   if (!row.monthly_price_egp || row.monthly_price_egp <= 0) reasons.push('السعر الشهري غير صالح')
   if (duplicates.has(row.id)) reasons.push('احتمال وجود سيارة مكررة بنفس الماركة والموديل والسنة')
-  if (String(row.payment_status).toLowerCase() !== 'paid') reasons.push('حالة الدفع لا تثبت اكتمال السداد')
+  if (!['verified', 'waived'].includes(String(row.payment_status).toLowerCase())) reasons.push('حالة الدفع لا تثبت اكتمال السداد')
   const level = reasons.some(x => x.includes('مكررة') || x.includes('الدفع')) ? 'review' : reasons.length ? 'blocked' : 'ready'
   return { id: row.id, kind: 'vehicle', title: [row.make, row.model, row.model_year].filter(Boolean).join(' '), subtitle: one(row.organizations)?.name || 'مالك سيارة', status: row.review_status, score: Math.max(0, 100 - reasons.length * 22), level, reasons: reasons.length ? reasons : ['البيانات الأساسية مكتملة؛ يلزم التحقق البشري من الصور والملكية قبل الاعتماد'], created_at: row.created_at }
 }
@@ -98,10 +98,13 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     ])
     const errors = [v.error, o.error, p.error, a.error, s.error].filter(Boolean)
     if (errors.length) { setError('تعذر تحميل بعض سجلات المراجعة: ' + errors.map(x => x!.message).join(' · ')); setLoading(false); return }
-    const vehicles = ((v.data || []) as unknown as Vehicle[]).filter(x => isPending(x.review_status))
+    const allVehicles = (v.data || []) as unknown as Vehicle[]
+    const vehicles = allVehicles.filter(x => isPending(x.review_status))
     const accounts = ((o.data || []) as Organization[]).filter(x => isPending(x.approval_status))
-    const payments = ((p.data || []) as unknown as Payment[]).filter(x => isPending(x.review_status))
-    const promotions = ((a.data || []) as unknown as Promotion[]).filter(x => isPending(x.status) || isPending(x.payment_status))
+    const allPayments = (p.data || []) as unknown as Payment[]
+    const payments = allPayments.filter(x => isPending(x.review_status))
+    const allPromotions = (a.data || []) as unknown as Promotion[]
+    const promotions = allPromotions.filter(x => isPending(x.status) || isPending(x.payment_status))
     const providers = ((s.data || []) as Provider[]).filter(x => isPending(x.status))
     const duplicateGroups = new Map<string, string[]>()
     for (const item of vehicles) {
@@ -110,10 +113,10 @@ export default function AdminAutomationReviewPage({ onClose }: { onClose: () => 
     }
     const duplicateVehicleIds = new Set([...duplicateGroups.values()].filter(ids => ids.length > 1).flat())
     const paymentRefCounts = new Map<string, number>()
-    for (const item of payments) { const key = cleanRef(item.transfer_reference); if (key) paymentRefCounts.set(key, (paymentRefCounts.get(key) || 0) + 1) }
+    for (const item of allPayments) { const key = cleanRef(item.transfer_reference); if (key) paymentRefCounts.set(key, (paymentRefCounts.get(key) || 0) + 1) }
     const duplicatePaymentRefs = new Set([...paymentRefCounts].filter(([, count]) => count > 1).map(([key]) => key))
     const adRefCounts = new Map<string, number>()
-    for (const item of promotions) for (const ref of [item.payment_reference, item.previous_payment_reference].map(cleanRef).filter(Boolean)) adRefCounts.set(ref, (adRefCounts.get(ref) || 0) + 1)
+    for (const item of allPromotions) for (const ref of [item.payment_reference, item.previous_payment_reference].map(cleanRef).filter(Boolean)) adRefCounts.set(ref, (adRefCounts.get(ref) || 0) + 1)
     const duplicateAdRefs = new Set([...adRefCounts].filter(([, count]) => count > 1).map(([ref]) => ref))
     const results = [
       ...vehicles.map(item => assessVehicle(item, duplicateVehicleIds)),
