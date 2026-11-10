@@ -86,7 +86,7 @@ function OwnerPersistentBar() {
   const links = [
     { href: '/workspace/owner/vehicles', label: 'سياراتي', icon: <CarFront size={17}/> },
     { href: '/workspace/owner/offers', label: 'عروضي', icon: <ClipboardList size={17}/> },
-    { href: '/workspace/catalog', label: 'كتالوج السيارات', icon: <Search size={17}/> },
+    { href: '/workspace/catalog', label: 'كتالوج السيارات · عرض فقط', icon: <Search size={17}/> },
     { href: '/services', label: 'خدمات السيارات', icon: <Wrench size={17}/> },
     { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
     { href: '/messages', label: 'المراسلات', icon: <MessageCircle size={17}/> },
