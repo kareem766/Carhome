@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
-import { ArrowLeft, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, RefreshCw, MessageCircle, Wrench, Megaphone, Bot } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, ClipboardList, RefreshCw, MessageCircle, Wrench, Megaphone, Bot } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
@@ -86,6 +86,7 @@ const HOME_BANNER_IMAGE = 'https://i.ibb.co/LDtVLtkT/3-E4722-EB-3946-4526-80-D0-
 function OwnerPersistentBar() {
   const links = [
     { href: '/workspace/owner/vehicles', label: 'سياراتي', icon: <CarFront size={17}/> },
+    { href: '/workspace/owner/offers', label: 'عروضي', icon: <ClipboardList size={17}/> },
     { href: '/workspace/catalog', label: 'كتالوج السيارات', icon: <Search size={17}/> },
     { href: '/services', label: 'خدمات السيارات', icon: <Wrench size={17}/> },
     { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
