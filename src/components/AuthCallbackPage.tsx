@@ -180,6 +180,11 @@ export default function AuthCallbackPage() {
           return
         }
         const role = await finishAccount(data.session.user)
+        if (role === 'fleet_supplier' && sessionStorage.getItem('mycar_supplier_google_welcome_pending') === '1') {
+          localStorage.setItem('mycar_supplier_welcome_pending_' + data.session.user.id, '1')
+        }
+        sessionStorage.removeItem('mycar_supplier_google_welcome_pending')
+        sessionStorage.removeItem('mycar_google_pending_role')
         if (!active) return
         // Send every newly registered or authenticated user straight to their own workspace.
         const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
