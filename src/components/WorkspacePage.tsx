@@ -244,7 +244,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
         if (promotions.error) setError('تعذر تحميل عدد الإعلانات النشطة: ' + promotions.error.message)
         else {
           const now = Date.now()
-          const isActivePromotion = (ad: (typeof promotions.data)[number]) =>
+          const isActivePromotion = (ad: NonNullable<typeof promotions.data>[number]) =>
             ad.status === 'approved'
             && (ad.payment_status === 'verified' || ad.payment_status === 'waived')
             && (!ad.starts_at || new Date(ad.starts_at).getTime() <= now)
