@@ -15,13 +15,16 @@ export default function PlatformEntryBanner() {
    const now=Date.now()
    const eligible=(data as (Banner & {starts_at:string|null;ends_at:string|null})[]).filter(item=>(!item.starts_at||new Date(item.starts_at).getTime()<=now)&&(!item.ends_at||new Date(item.ends_at).getTime()>now))
    let selected:Banner|undefined
+   const nowMs=Date.now()
    for(const item of eligible){
-    let seen=false
-    try{seen=sessionStorage.getItem('mycar-banner-seen-'+item.id)==='1'}catch{}
-    if(!seen){selected=item;break}
+    let lastShown=0
+    try{lastShown=Number(localStorage.getItem('mycar-banner-last-shown-'+item.id)||0)}catch{}
+    // Keep the banner from reopening during login redirects, auth refreshes,
+    // or route remounts; allow it to appear again on a later visit.
+    if(!lastShown||nowMs-lastShown>=30*60*1000){selected=item;break}
    }
    if(!selected)return
-   try{sessionStorage.setItem('mycar-banner-seen-'+selected.id,'1')}catch{}
+   try{localStorage.setItem('mycar-banner-last-shown-'+selected.id,String(nowMs))}catch{}
    setBanner(selected);setVisible(true)
    const duration=10
    window.setTimeout(()=>{if(active)setVisible(false)},duration*1000)
