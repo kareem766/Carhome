@@ -118,6 +118,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
         legal_acceptance: { terms_version: '2026-11-06', privacy_version: '2026-11-06', accepted_at: new Date().toISOString() }
       }
       const { data, error: signUpError } = await supabase.auth.signUp({ email, password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
+      if (data.user && role === 'individual_owner') localStorage.setItem('mycar_owner_welcome_pending_' + data.user.id, '1')
       if (signUpError) throw signUpError
       if (data.session && data.user) {
         if ((isCompany || role === 'fleet_supplier') && companyLogo) {
