@@ -206,6 +206,9 @@ export default function AuthPanel({ onClose, initialMode = 'signin', redirectTo 
         if (data.user && accountType === 'company' && !invitationId) {
           localStorage.setItem('mycar_company_free_welcome_pending_' + data.user.id, '1')
         }
+        if (data.user && (accountType === 'individual_owner' || accountType === 'owner') && !invitationId) {
+          localStorage.setItem('mycar_owner_welcome_pending_' + data.user.id, '1')
+        }
         if (data.session && data.user) {
           if (!invitationId) await prepareAccount(data.user, name)
           // Invitation signups must join the inviting company, never create a separate organization.
