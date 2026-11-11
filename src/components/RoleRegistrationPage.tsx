@@ -59,6 +59,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
     setBusy(true)
     try {
       sessionStorage.setItem('mycar_google_pending_role', role)
+      if (role === 'fleet_supplier') sessionStorage.setItem('mycar_supplier_google_welcome_pending', '1')
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: { prompt: 'select_account' } }
@@ -119,6 +120,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
       }
       const { data, error: signUpError } = await supabase.auth.signUp({ email, password, options: { data: metadata, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       if (data.user && role === 'individual_owner') localStorage.setItem('mycar_owner_welcome_pending_' + data.user.id, '1')
+      if (data.user && role === 'fleet_supplier') localStorage.setItem('mycar_supplier_welcome_pending_' + data.user.id, '1')
       if (signUpError) throw signUpError
       if (data.session && data.user) {
         if ((isCompany || role === 'fleet_supplier') && companyLogo) {
