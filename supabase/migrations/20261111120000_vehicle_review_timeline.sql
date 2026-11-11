@@ -82,3 +82,14 @@ create trigger vehicle_review_events_capture
 after insert or update of review_status, make, model, model_year, vehicle_type, governorate, address, monthly_price_egp, yearly_price_egp, notes
 on public.vehicles
 for each row execute function public.capture_vehicle_review_event();
+
+-- Preserve a baseline event for vehicles that existed before the timeline was enabled.
+insert into public.vehicle_review_events (vehicle_id, organization_id, event_type, previous_status, new_status, summary, actor_id, created_at)
+select v.id, v.organization_id, 'submitted', null, v.review_status,
+       'تم تسجيل السيارة قبل تفعيل السجل الزمني؛ هذا تاريخ التسجيل الأساسي المتاح',
+       v.created_by, coalesce(v.created_at, now())
+from public.vehicles v
+where not exists (
+  select 1 from public.vehicle_review_events e
+  where e.vehicle_id = v.id and e.event_type = 'submitted'
+);
