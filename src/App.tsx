@@ -440,7 +440,7 @@ export default function App() {
   if (path === '/register/supplier') return <RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} />
 
   return (
-    <main dir="rtl" className="min-h-screen overflow-hidden bg-[#061b36] text-slate-900">{!authUser && <PlatformEntryBanner/>}
+    <main dir="rtl" className="min-h-screen overflow-hidden bg-[#061b36] text-slate-900">{authLoaded && !authUser && <PlatformEntryBanner/>}
       {settings.announcement_text && <div className="px-4 py-2 text-center text-sm font-bold text-white" style={{backgroundColor:settings.primary_color}}>{settings.announcement_text}</div>}
       <section className="mc-home-hero-section relative isolate overflow-hidden bg-[#061b36] text-white">
         <div className="absolute inset-0 -z-20 bg-cover bg-center" style={{backgroundImage:"url(https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=2200&q=90)"}}/>
