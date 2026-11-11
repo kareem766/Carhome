@@ -1,8 +1,8 @@
 import { BarChart3, Bell, Building2, CarFront, ClipboardList, FileText, LayoutGrid, Megaphone, MessageCircle, Wrench } from 'lucide-react'
 
 const links = [
-  { href: '/workspace/supplier/vehicles', label: 'أسطولي', icon: CarFront, match: (path: string) => path.startsWith('/workspace/supplier') && !path.includes('/offers') && !path.includes('employee-requests') && !path.endsWith('/account') },
-  { href: '/workspace/supplier/requests', label: 'طلبات الشركات', icon: Building2, match: (path: string) => path === '/workspace/supplier/requests' },
+  { href: '/workspace/supplier/vehicles', label: 'أسطولي', icon: CarFront, match: (path: string) => path.startsWith('/workspace/supplier/vehicles') || path === '/workspace/supplier' },
+  { href: '/workspace/supplier/requests', label: 'طلبات الشركات', icon: Building2, match: (path: string) => path.startsWith('/workspace/supplier/requests') },
   { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: ClipboardList, match: (path: string) => path === '/workspace/provider-employee-requests' || path === '/workspace/supplier/employee-requests' },
   { href: '/workspace/supplier/offers', label: 'عروضي', icon: FileText, match: (path: string) => path.startsWith('/workspace/supplier/offers') },
   { href: '/workspace/supplier/insights', label: 'تقارير الأسطول', icon: BarChart3, match: (path: string) => path.startsWith('/workspace/supplier/insights') },
