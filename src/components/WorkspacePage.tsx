@@ -84,6 +84,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [showReviewModal, setShowReviewModal] = useState(false)
   const [showCompanyFreeWelcome, setShowCompanyFreeWelcome] = useState(false)
+  const [showSupplierWelcome, setShowSupplierWelcome] = useState(false)
   const [showOwnerWelcome, setShowOwnerWelcome] = useState(false)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [vehicleSearch, setVehicleSearch] = useState('')
@@ -163,6 +164,11 @@ export default function WorkspacePage({ role }: { role: Role }) {
     const companyFreeWelcomePending = role === 'company'
       && localStorage.getItem(companyFreeWelcomeKey) === '1'
       && localStorage.getItem(companyFreeWelcomeSeenKey) !== '1'
+    const supplierWelcomeKey = 'mycar_supplier_welcome_pending_' + authUser.id
+    const supplierWelcomeSeenKey = 'mycar_supplier_welcome_seen_' + authUser.id
+    const supplierWelcomePending = role === 'supplier'
+      && localStorage.getItem(supplierWelcomeKey) === '1'
+      && localStorage.getItem(supplierWelcomeSeenKey) !== '1'
     if (vehiclePaymentPending) {
       setNotice('تم استلام بيانات السيارة والتحويل بنجاح. طلبك الآن قيد مراجعة الإدارة، وستظهر حالة السيارة هنا حتى اكتمال المراجعة.')
     } else if (welcomePending) {
@@ -189,6 +195,11 @@ export default function WorkspacePage({ role }: { role: Role }) {
       localStorage.setItem(companyFreeWelcomeSeenKey, '1')
       localStorage.removeItem(companyFreeWelcomeKey)
       setShowCompanyFreeWelcome(true)
+    }
+    if (supplierWelcomePending) {
+      localStorage.setItem(supplierWelcomeSeenKey, '1')
+      localStorage.removeItem(supplierWelcomeKey)
+      setShowSupplierWelcome(true)
     }
     if (role === 'company') {
       const { data: reuseAllowed } = await client.rpc('company_has_plan_feature', { p_organization_id: member.organization_id, p_feature: 'request_reuse' })
@@ -419,6 +430,11 @@ export default function WorkspacePage({ role }: { role: Role }) {
     const timer = window.setTimeout(() => setShowCompanyFreeWelcome(false), 10000)
     return () => window.clearTimeout(timer)
   }, [showCompanyFreeWelcome])
+  useEffect(() => {
+    if (!showSupplierWelcome) return
+    const timer = window.setTimeout(() => setShowSupplierWelcome(false), 10000)
+    return () => window.clearTimeout(timer)
+  }, [showSupplierWelcome])
   useEffect(() => { const timer = window.setInterval(() => setAgeClock(Date.now()), 60000); return () => window.clearInterval(timer) }, [])
 
   const vehicleFieldClass = (name: string) => `${fieldClass} ${invalidVehicleFields.includes(name) ? '!border-rose-500 !bg-rose-50/60 !ring-2 !ring-rose-100 placeholder:!text-rose-300' : ''}`
@@ -1044,6 +1060,34 @@ export default function WorkspacePage({ role }: { role: Role }) {
           </div>
           <div className="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-xs leading-6 text-orange-950"><strong>مهم تعرف:</strong> ظهور السيارة واستقبال العروض لا يعني ضمان إتمام التأجير؛ الاتفاق والتعاقد يتمان مباشرة بين المالك والشركة، والمنصة تنظّم التواصل ولا تتولى مدفوعات الإيجار بين الطرفين.</div>
           <a href="/workspace/owner/vehicles/new" className="mt-5 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-700 to-sky-600 px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:shadow-xl">ابدأ بإضافة سيارتك <ArrowLeft size={18}/></a>
+          <p className="mt-3 text-center text-xs text-slate-400">ستغلق رسالة الترحيب تلقائيًا خلال 10 ثوانٍ.</p>
+        </div>
+      </section>
+    </div>}
+    {showSupplierWelcome && role === 'supplier' && <div className="fixed inset-0 z-[146] grid place-items-center bg-slate-950/75 p-4 backdrop-blur-md" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowSupplierWelcome(false) }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="supplier-welcome-title" className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-sky-200/70 bg-white shadow-[0_28px_90px_rgba(2,12,38,0.42)]">
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-orange-400 via-sky-500 to-blue-700"/>
+        <button type="button" aria-label="إغلاق" onClick={() => setShowSupplierWelcome(false)} className="absolute left-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-full border border-white/30 bg-white/95 text-slate-600 shadow-sm transition hover:bg-slate-100"><X size={18}/></button>
+        <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 px-6 pb-7 pt-9 text-center text-white sm:px-9">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-white/20 bg-white/10 text-sky-200 shadow-lg shadow-blue-950/30"><Building2 size={31}/></div>
+          <p className="mt-4 text-xs font-black tracking-[.18em] text-sky-200">MY CAR · عربيتي</p>
+          <h2 id="supplier-welcome-title" className="mt-2 text-2xl font-black leading-tight sm:text-3xl">أهلًا بك في مساحة مورد الأسطول</h2>
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-blue-100">أدر أسطولك باحتراف، ووسّع فرص وصول سياراتك إلى الشركات الباحثة عن حلول تأجير طويلة الأجل.</p>
+        </div>
+        <div className="px-6 py-6 sm:px-9">
+          <h3 className="text-base font-black text-slate-900">مميزات حسابك على المنصة</h3>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[
+              'إضافة سيارات الأسطول وإدارة بياناتها وصورها وأسعارها من مكان واحد',
+              'متابعة حالة مراجعة كل سيارة ومعرفة أسباب الرفض وإعادة إرسالها بعد التصحيح',
+              'استقبال طلبات التأجير من الشركات والموظفين في مساحة موحدة',
+              'تقديم عروضك ومتابعة حالتها والردود عليها بسهولة',
+              'متابعة أداء الأسطول ومؤشرات المشاهدة والاهتمام بالسيارات',
+              'عرض تقارير الأسطول وتصدير بيانات السيارات والعروض لمتابعة نشاطك'
+            ].map(item => <div key={item} className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-bold leading-6 text-slate-700"><CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-600"/><span>{item}</span></div>)}
+          </div>
+          <div className="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-xs leading-6 text-orange-950"><strong>معلومة مهمة:</strong> المنصة تنظّم عرض السيارات والتواصل وتبادل العروض، ولا تضمن إتمام التأجير أو تتولى مدفوعات الإيجار بين المورد والشركة.</div>
+          <a href="/workspace/supplier/vehicles" className="mt-5 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-700 to-sky-600 px-5 font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl">ابدأ بإدارة أسطولك <ArrowLeft size={18}/></a>
           <p className="mt-3 text-center text-xs text-slate-400">ستغلق رسالة الترحيب تلقائيًا خلال 10 ثوانٍ.</p>
         </div>
       </section>
