@@ -148,8 +148,11 @@ export default function VehicleCatalogPage() {
   const visibleRegularVehicles = regularVehicles.slice((page-1)*pageSize, page*pageSize)
   const impressionVehicleIds = useMemo(() => {
     if (!['company', 'fleet_supplier'].includes(orgType)) return [] as string[]
-    return Array.from(new Set([...premiumVehicles, ...featuredVehicles, ...visibleRegularVehicles].map(vehicle => vehicle.id)))
-  }, [orgType, premiumVehicles, featuredVehicles, visibleRegularVehicles])
+    const premiumVisible = vehicles.filter(vehicle => premiumPromotedIds.includes(vehicle.id))
+    const featuredVisible = filtered.filter(vehicle => promotedIds.includes(vehicle.id) && !premiumPromotedIds.includes(vehicle.id))
+    const regularVisible = filtered.filter(vehicle => !promotedIds.includes(vehicle.id) && !premiumPromotedIds.includes(vehicle.id)).slice((page - 1) * pageSize, page * pageSize)
+    return Array.from(new Set([...premiumVisible, ...featuredVisible, ...regularVisible].map(vehicle => vehicle.id)))
+  }, [orgType, vehicles, filtered, promotedIds, premiumPromotedIds, page, pageSize])
   useEffect(() => {
     if (!supabase || impressionVehicleIds.length === 0) return
     // The database deduplicates impressions per vehicle, organization, and UTC day.
