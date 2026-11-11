@@ -146,6 +146,15 @@ export default function VehicleCatalogPage() {
   const regularVehicles = filtered.filter(v => !promotedIds.includes(v.id) && !premiumPromotedIds.includes(v.id))
   const totalPages = Math.max(1, Math.ceil(regularVehicles.length / pageSize))
   const visibleRegularVehicles = regularVehicles.slice((page-1)*pageSize, page*pageSize)
+  const impressionVehicleIds = useMemo(() => {
+    if (!['company', 'fleet_supplier'].includes(orgType)) return [] as string[]
+    return Array.from(new Set([...premiumVehicles, ...featuredVehicles, ...visibleRegularVehicles].map(vehicle => vehicle.id)))
+  }, [orgType, premiumVehicles, featuredVehicles, visibleRegularVehicles])
+  useEffect(() => {
+    if (!supabase || impressionVehicleIds.length === 0) return
+    // The database deduplicates impressions per vehicle, organization, and UTC day.
+    void supabase.rpc('record_vehicle_catalog_impressions', { p_vehicle_ids: impressionVehicleIds })
+  }, [impressionVehicleIds, orgId])
   const types = useMemo(() => ['الكل',...Array.from(new Set([...vehicles.map(v=>v.vehicle_type),'فان / ميكروباص','نقل']))], [vehicles])
   const cities = useMemo(() => ['الكل',...Array.from(new Set(vehicles.map(v=>v.governorate)))], [vehicles])
 
