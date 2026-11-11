@@ -287,7 +287,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
               setError(previous => previous ? previous + ' · تعذر تحميل مشاهدات الكتالوج: ' + catalogMetrics.error.message : 'تعذر تحميل مشاهدات الكتالوج: ' + catalogMetrics.error.message)
             } else {
               const metrics: Record<string, { impressions: number; uniqueViewers: number; impressions30d: number }> = {}
-              for (const row of catalogMetrics.data || []) metrics[row.vehicle_id] = { impressions: Number(row.impressions || 0), uniqueViewers: Number(row.unique_viewers || 0), impressions30d: Number(row.impressions_30d || 0) }
+              const catalogMetricRows = (catalogMetrics.data || []) as unknown as Array<{ vehicle_id: string; impressions: number; unique_viewers: number; impressions_30d: number }>
+              for (const row of catalogMetricRows) metrics[row.vehicle_id] = { impressions: Number(row.impressions || 0), uniqueViewers: Number(row.unique_viewers || 0), impressions30d: Number(row.impressions_30d || 0) }
               setVehicleCatalogMetrics(metrics)
             }
           } else setVehicleEngagement({})
