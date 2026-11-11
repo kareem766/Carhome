@@ -16,6 +16,7 @@ const EmployeeRequestsOffersPage = lazy(() => import('./components/EmployeeReque
 const EmployeeAccountPage = lazy(() => import('./components/EmployeeAccountPage'))
 const EmployeeRentalMessagesPage = lazy(() => import('./components/EmployeeRentalMessagesPage'))
 const EmployeeProviderRequestsPage = lazy(() => import('./components/EmployeeProviderRequestsPage'))
+const FleetSupplierInsightsPage = lazy(() => import('./components/FleetSupplierInsightsPage'))
 const CompanyInsightsPage = lazy(() => import('./components/CompanyInsightsPage'))
 const CompanyTeamPage = lazy(() => import('./components/CompanyTeamPage'))
 const CompanySubscriptionsPage = lazy(() => import('./components/CompanySubscriptionsPage'))
@@ -364,6 +365,7 @@ export default function App() {
   if (path === '/auth/callback') return <Suspense fallback={<PlatformLoading />}><AuthCallbackPage /></Suspense>
   if (path === '/complete-profile') return <Suspense fallback={<PlatformLoading />}><GoogleProfileCompletionPage /></Suspense>
   if (path === '/workspace/notifications') return authUser ? authUser.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإعداد الإشعارات" message="يمكنك التحكم في قنوات الإشعارات بعد تسجيل الدخول." />
+  if (path === '/workspace/supplier/insights') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><FleetSupplierInsightsPage /></Suspense></SupplierPageShell> : <ServiceNotice settings={settings} title="تقارير الأسطول" message="هذه الصفحة متاحة لموردي الأساطيل المعتمدين بعد تسجيل الدخول." />
   if (path === '/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لمركز الدعم" message="مركز الدعم الفني متاح للمستخدمين المسجلين لمتابعة تذاكرهم والردود." />
   if (path === '/workspace/admin/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage admin /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الدعم" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
   if (path === '/workspace/employee/messages' || path === '/workspace/provider/employee-messages') return <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
