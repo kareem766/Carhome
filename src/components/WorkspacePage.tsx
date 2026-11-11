@@ -114,6 +114,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null)
   const [editPhotoFiles, setEditPhotoFiles] = useState<File[]>([])
   const [ownerOfferStats, setOwnerOfferStats] = useState({ pending: 0, accepted: 0, declined: 0 })
+  const [supplierOfferStats, setSupplierOfferStats] = useState({ pending: 0, accepted: 0, declined: 0, company: 0, employee: 0 })
   const [vehicleEngagement, setVehicleEngagement] = useState<Record<string, { conversations: number; directOffers: number }>>({})
   const [vehicleCatalogMetrics, setVehicleCatalogMetrics] = useState<Record<string, { impressions: number; uniqueViewers: number; impressions30d: number }>>({})
   const [vehiclePromotionStats, setVehiclePromotionStats] = useState<Record<string, { status: string; endsAt: string | null; active: boolean; placementType: string | null; planName: string | null }>>({})
@@ -278,17 +279,19 @@ export default function WorkspacePage({ role }: { role: Role }) {
           if (!openRequests.error) {
              const availableRequests = (openRequests.data || []) as RentalRequest[]
              setRequests(availableRequests)
-             if (role === 'owner') {
+             if (role === 'owner' || role === 'supplier') {
                const [companyOffers, employeeOffers] = await Promise.all([
                  client.from('rental_offers').select('id,status').eq('organization_id', member.organization_id),
                  client.from('employee_rental_offers').select('id,status').eq('created_by', authUser.id)
                ])
                const statuses = [...(companyOffers.data || []), ...(employeeOffers.data || [])].map(item => item.status)
-               setOwnerOfferStats({
+               const stats = {
                  pending: statuses.filter(status => status === 'submitted').length,
                  accepted: statuses.filter(status => status === 'accepted').length,
                  declined: statuses.filter(status => status === 'rejected' || status === 'withdrawn').length
-               })
+               }
+               if (role === 'owner') setOwnerOfferStats(stats)
+               else setSupplierOfferStats({ ...stats, company: (companyOffers.data || []).length, employee: (employeeOffers.data || []).length })
              }
            }
         }
@@ -821,7 +824,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
         {label:'سيارات نشطة',value:activeVehicles,detail:'معتمدة ومفعّلة للشركات',icon:Building2,tone:'bg-emerald-50 text-emerald-700'},
         {label:'تحت المراجعة',value:pendingVehicles,detail:'تحتاج متابعة الإدارة',icon:ClipboardList,tone:'bg-amber-50 text-amber-700'},
         {label:'الإعلانات النشطة',value:activeAdsCount,detail:'إعلانات سياراتك الظاهرة للشركات',icon:Megaphone,tone:'bg-indigo-50 text-indigo-700',href:'/workspace/advertising-plans'},
-        ...(role === 'owner' ? [{label:'عروض بانتظار الرد',value:ownerOfferStats.pending,detail:'عروض أرسلتها ولم تتلق ردًا بعد',icon:Clock3,tone:'bg-blue-50 text-blue-700'},{label:'تسجيلات قاربت على الانتهاء',value:expiringVehicles.length + expiredVehicles.length,detail:'سيارات تحتاج إلى تجديد التسجيل',icon:CalendarClock,tone:'bg-amber-50 text-amber-700'},{label:'فرص مطابقة لسياراتك',value:matchingOwnerRequests,detail:'طلبات شركات تستوفي شروط سياراتك',icon:Eye,tone:'bg-cyan-50 text-cyan-700'},{label:'عروض مقبولة',value:ownerOfferStats.accepted,detail:'عروض وافقت عليها الشركات',icon:CheckCircle2,tone:'bg-emerald-50 text-emerald-700'}] : role === 'supplier' ? [{label:'طلبات مطابقة لأسطولك',value:matchingSupplierRequests,detail:'طلبات مفتوحة تناسب سياراتك المعتمدة',icon:Eye,tone:'bg-cyan-50 text-cyan-700'}] : [])
+        ...(role === 'owner' ? [{label:'عروض بانتظار الرد',value:ownerOfferStats.pending,detail:'عروض أرسلتها ولم تتلق ردًا بعد',icon:Clock3,tone:'bg-blue-50 text-blue-700'},{label:'تسجيلات قاربت على الانتهاء',value:expiringVehicles.length + expiredVehicles.length,detail:'سيارات تحتاج إلى تجديد التسجيل',icon:CalendarClock,tone:'bg-amber-50 text-amber-700'},{label:'فرص مطابقة لسياراتك',value:matchingOwnerRequests,detail:'طلبات شركات تستوفي شروط سياراتك',icon:Eye,tone:'bg-cyan-50 text-cyan-700'},{label:'عروض مقبولة',value:ownerOfferStats.accepted,detail:'عروض وافقت عليها الشركات',icon:CheckCircle2,tone:'bg-emerald-50 text-emerald-700'}] : role === 'supplier' ? [{label:'طلبات مطابقة لأسطولك',value:matchingSupplierRequests,detail:'طلبات مفتوحة تناسب سياراتك المعتمدة',icon:Eye,tone:'bg-cyan-50 text-cyan-700'},{label:'عروض بانتظار الرد',value:supplierOfferStats.pending,detail:'عروض الشركات والموظفين التي تنتظر الرد',icon:Clock3,tone:'bg-amber-50 text-amber-700'},{label:'عروض مقبولة',value:supplierOfferStats.accepted,detail:'عروض وافقت عليها الجهات الطالبة',icon:CheckCircle2,tone:'bg-emerald-50 text-emerald-700'}] : [])
       ]).map((item,index)=><article key={item.label} className={`group relative isolate overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_18px_rgba(15,40,75,0.06)] transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_12px_28px_rgba(15,40,75,0.11)] sm:rounded-3xl sm:p-5 ${index===3?'ring-1 ring-indigo-100':''}`}><div className="pointer-events-none absolute -right-8 -top-10 -z-10 h-28 w-28 rounded-full bg-slate-100/70 blur-2xl transition group-hover:bg-blue-100/80"/><div className="flex items-start justify-between gap-2"><div className="min-w-0"><span className="block text-xs font-extrabold tracking-wide text-slate-500 sm:text-sm">{item.label}</span><strong className="mt-3 block text-3xl font-black leading-none tracking-tight text-slate-950 sm:text-4xl">{item.value.toLocaleString('ar-EG')}</strong></div><span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ring-1 ring-inset ring-black/5 ${item.tone}`}><item.icon size={20} strokeWidth={2.2}/></span></div><p className="mt-3 border-t border-slate-100 pt-3 text-[11px] font-medium leading-5 text-slate-500 sm:text-xs">{item.detail}</p>{'href' in item && <a href={item.href} aria-label="الانتقال إلى باقات الإعلانات" className="absolute inset-0 z-10 rounded-2xl sm:rounded-3xl focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-300" />}{'href' in item && <span className="mt-2 inline-flex items-center gap-1 text-xs font-extrabold text-indigo-700"><Megaphone size={14}/> اضغط لعرض باقات الإعلانات <span aria-hidden="true">←</span></span>}</article>)}
     </div>
     <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
@@ -837,7 +840,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
           {href:role === 'supplier' ? '/workspace/supplier/requests' : '/workspace/owner/requests',title:'طلبات الشركات',desc:'استكشف احتياجات الشركات وقدّم عروضك المناسبة',icon:ClipboardList},
           {href:role === 'supplier' ? '/workspace/supplier/offers' : '/workspace/owner/offers',title:'متابعة العروض المقدمة',desc:'تابع رد الشركات وحالة كل عرض أرسلته',icon:Clock3},
           {href:'/messages',title:'المحادثات',desc:'تابع رسائلك وتواصل بأمان',icon:MessageCircle},
-          ...(role === 'supplier' ? [{href:'/workspace/provider-employee-requests',title:'طلبات الموظفين',desc:'استعرض طلبات الموظفين المطابقة لسياراتك',icon:UserRound},{href:'/workspace/catalog',title:'كتالوج السيارات',desc:'تعرّف على السيارات المنشورة',icon:Building2},{href:'/services',title:'خدمات السيارات',desc:'استكشف خدمات دعم وصيانة الأساطيل',icon:Wrench}] : [])
+          ...(role === 'supplier' ? [{href:'/workspace/provider-employee-requests',title:'طلبات الموظفين',desc:'استعرض طلبات الموظفين المطابقة لسياراتك',icon:UserRound},{href:'/workspace/catalog',title:'كتالوج السيارات',desc:'تعرّف على السيارات المنشورة',icon:Building2},{href:'/workspace/supplier/insights',title:'تقارير وتحليلات الأسطول',desc:'راجع أداء السيارات والعروض والإعلانات وصدّر التقارير',icon:Eye},{href:'/services',title:'خدمات السيارات',desc:'استكشف خدمات دعم وصيانة الأساطيل',icon:Wrench}] : [])
         ]).map(item=><a key={item.href} href={item.href} className="group flex min-h-[88px] items-center gap-3 rounded-xl border border-slate-200 p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/60 hover:shadow-sm"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700 transition group-hover:bg-blue-700 group-hover:text-white"><item.icon size={20}/></span><span className="min-w-0"><strong className="block text-sm font-extrabold text-slate-900">{item.title}</strong><span className="mt-1 block text-xs leading-5 text-slate-500">{item.desc}</span></span><ArrowLeft size={16} className="mr-auto shrink-0 text-slate-400 transition group-hover:-translate-x-1 group-hover:text-blue-700"/></a>)}
       </div>
     </div>
