@@ -6,9 +6,8 @@ import type { User } from '@supabase/supabase-js'
 type AccountRole = 'individual_owner' | 'fleet_supplier' | 'company'
 
 function workspaceFor(role: unknown) {
-  if (role === 'company') return '/workspace/company'
-  if (role === 'fleet_supplier') return '/workspace/supplier/vehicles'
-  return '/workspace/owner/vehicles'
+  void role
+  return '/workspace/catalog'
 }
 
 async function finishAccount(user: User) {
