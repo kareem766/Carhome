@@ -249,7 +249,15 @@ export default function AuthPanel({ onClose, initialMode = 'signin', redirectTo 
     }
     setLoading(true)
     try {
-      const redirectTo = 'https://carhome-lime.vercel.app/auth/callback'
+      // Keep Google OAuth on the same deployment the user started from (including Preview deployments).
+      // Preserve an admin deep link so the callback can return to the requested page after role verification.
+      const currentPath = window.location.pathname + window.location.search
+      if (currentPath.startsWith('/workspace/admin/')) {
+        sessionStorage.setItem('mycar_auth_return_to', currentPath)
+      } else {
+        sessionStorage.removeItem('mycar_auth_return_to')
+      }
+      const redirectTo = new URL('/auth/callback', window.location.origin).toString()
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
