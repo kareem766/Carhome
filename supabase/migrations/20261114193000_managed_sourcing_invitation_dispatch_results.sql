@@ -42,6 +42,9 @@ alter table public.managed_sourcing_offers
 create unique index if not exists managed_sourcing_offers_invite_id_uidx
   on public.managed_sourcing_offers(invite_id)
   where invite_id is not null;
+create unique index if not exists managed_sourcing_offers_request_vehicle_uidx
+  on public.managed_sourcing_offers(request_id,vehicle_id)
+  where vehicle_id is not null;
 create index if not exists managed_sourcing_invites_user_status_idx
   on public.managed_sourcing_invites(user_id, status, sent_at desc);
 create index if not exists managed_sourcing_invites_request_idx
@@ -148,7 +151,11 @@ begin
           then 'الماركة أو الموديل مناسب' end,
         case when v_request.budget_per_vehicle_egp is null
           or v.monthly_price_egp <= v_request.budget_per_vehicle_egp then 'السعر ضمن الميزانية' end
-      ], null) as match_reasons
+      ], null) as match_reasons,
+      row_number() over (
+        partition by v.id
+        order by case m.role::text when 'owner' then 1 when 'manager' then 2 else 3 end, m.user_id
+      ) as recipient_order
     from public.vehicles v
     join public.organizations o on o.id = v.organization_id
     join public.organization_memberships m on m.organization_id = v.organization_id
@@ -194,6 +201,7 @@ begin
       v_request.budget_per_vehicle_egp,v_request.requirements,e.match_score,e.match_reasons,
       'sent',v_now
     from eligible e
+    where e.recipient_order = 1
     on conflict (request_id,user_id,vehicle_id) do nothing
     returning id,user_id
   )
