@@ -1039,3 +1039,12 @@ main.min-h-screen :is(input, select, textarea):disabled {
 /* User-provided homepage banner: preserve the complete image with a polished responsive frame. */
 .mc-home-hero-visual img.mc-home-user-banner{width:100%;max-width:100%;height:auto;max-height:30rem;aspect-ratio:16/9;object-fit:contain;border:1px solid rgba(255,255,255,.22);border-radius:1.65rem;background:rgba(7,27,49,.72);box-shadow:0 22px 48px rgba(0,0,0,.32),0 0 0 1px rgba(255,173,10,.14);filter:none;mask-image:none}
 @media(max-width:760px){.mc-home-hero-visual{min-height:0;padding:.25rem 0}.mc-home-hero-visual img.mc-home-user-banner{width:100%;max-height:none;border-radius:1.15rem;aspect-ratio:16/9}}
+
+
+/* Managed sourcing hero: enforce dark contrast even when global workspace styles override utility backgrounds. */
+.mc-managed-sourcing-hero{position:relative!important;isolation:isolate;background:linear-gradient(115deg,#071b32 0%,#103b66 55%,#176db4 100%)!important;color:#fff!important;border:1px solid rgba(147,197,253,.28)!important;box-shadow:0 18px 42px rgba(7,27,50,.22)!important}
+.mc-managed-sourcing-hero h2,.mc-managed-sourcing-hero p,.mc-managed-sourcing-hero span{color:#fff!important}
+.mc-managed-sourcing-hero p{color:#e2efff!important}
+.mc-managed-sourcing-hero button:first-of-type{background:#ffb21c!important;color:#10233f!important;border:1px solid #ffca62!important}
+.mc-managed-sourcing-hero button:last-of-type{background:rgba(255,255,255,.12)!important;color:#fff!important;border:1px solid rgba(255,255,255,.48)!important}
+.mc-managed-sourcing-hero button:last-of-type:hover{background:rgba(255,255,255,.2)!important}
