@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowLeft, Building2, CarFront, Wrench, ClipboardList, FileText, ImagePlus, LogOut, MessageCircle, Plus, RefreshCw, X, Clock3, CheckCircle2, XCircle, Send, Trash2, Megaphone, Bot, UserRound, AlertTriangle, Pencil, CalendarClock, Eye } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, Wrench, ClipboardList, FileText, ImagePlus, LogOut, MessageCircle, Plus, RefreshCw, X, Clock3, CheckCircle2, XCircle, Send, Trash2, Megaphone, Bot, UserRound, AlertTriangle, CreditCard, Pencil, CalendarClock, Eye } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { vehicleCatalog } from '../data/vehicleCatalog'
 import PlatformBrand from './PlatformBrand'
