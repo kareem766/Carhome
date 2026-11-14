@@ -9,18 +9,19 @@ export default function PlatformEntryBanner() {
  useEffect(()=>{
   let active=true
   if(!supabase)return
+  const client = supabase
   // This component is a public-entry promotion only. Verify the real Supabase
   // session here as a second guard; the parent auth state can briefly lag during
   // initial hydration or an auth redirect.
-  const { data: authListener } = supabase.auth.onAuthStateChange((_event, session)=>{
+  const { data: authListener } = client.auth.onAuthStateChange((_event, session)=>{
    if(session?.user){active=false;setVisible(false);setBanner(null)}
   })
   async function load(){
-   const {data: initialAuth}=await supabase.auth.getSession()
+   const {data: initialAuth}=await client.auth.getSession()
    if(!active||initialAuth.session?.user)return
-   const {data,error}=await supabase.from('platform_banners').select('id,title,body,image_url,button_label,button_url,duration_seconds,starts_at,ends_at').eq('enabled',true).order('display_order',{ascending:true}).order('created_at',{ascending:false}).limit(20)
+   const {data,error}=await client.from('platform_banners').select('id,title,body,image_url,button_label,button_url,duration_seconds,starts_at,ends_at').eq('enabled',true).order('display_order',{ascending:true}).order('created_at',{ascending:false}).limit(20)
    if(!active||error||!data?.length)return
-   const {data: latestAuth}=await supabase.auth.getSession()
+   const {data: latestAuth}=await client.auth.getSession()
    if(!active||latestAuth.session?.user)return
    const now=Date.now()
    const eligible=(data as (Banner & {starts_at:string|null;ends_at:string|null})[]).filter(item=>(!item.starts_at||new Date(item.starts_at).getTime()<=now)&&(!item.ends_at||new Date(item.ends_at).getTime()>now))
