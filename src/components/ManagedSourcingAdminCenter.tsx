@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { BellRing, CheckCircle2, ClipboardList, Download, Filter, RefreshCw, Search, Send, ShieldCheck, Users, CarFront } from 'lucide-react'
+import { BellRing, CheckCircle2, ClipboardList, Download, RefreshCw, Search, Send, ShieldCheck, Users, CarFront } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
