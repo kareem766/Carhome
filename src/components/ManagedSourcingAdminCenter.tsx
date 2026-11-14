@@ -62,7 +62,7 @@ export default function ManagedSourcingAdminCenter() {
 
  const current=requests.find(x=>x.id===selected)
  const canStartSubscription=!!current&&current.payment_model==='subscription'&&['new','under_review'].includes(current.status)&&current.payment_status==='not_required'
- const canVerifyPayment=!!current&&current.payment_model==='per_request'&&current.status==='awaiting_payment'&&['awaiting_payment','payment_submitted','rejected'].includes(current.payment_status)&&!!current.company_approved_at&&!!current.payment_reference&&!!current.payment_submitted_at
+ const canVerifyPayment=!!current&&current.payment_model==='per_request'&&current.status==='awaiting_payment'&&['awaiting_payment','payment_submitted','rejected'].includes(current.payment_status)&&!!current.company_approved_at&&!!current.payment_reference&&!!current.payment_submitted_at&&!!current.payment_transfer_date
  const filteredRequests=useMemo(()=>requests.filter(r=>{
   const q=search.trim().toLocaleLowerCase('ar')
   const org=Array.isArray(r.organizations)?r.organizations[0]:r.organizations
