@@ -30,11 +30,9 @@ begin
          where s.id=old.subscription_id
            and s.organization_id=old.company_organization_id
            and s.package_id=old.package_id
-           and s.status='active'
            and s.payment_status='verified'
-           and s.starts_at<=now()
-           and s.ends_at>now()
-           and s.requests_used<=s.requests_included
+           and s.starts_at<=old.created_at
+           and s.ends_at>old.created_at
        ) then
       null;
     else
@@ -83,11 +81,9 @@ begin
     where s.id=v_request.subscription_id
       and s.organization_id=v_request.company_organization_id
       and s.package_id=v_request.package_id
-      and s.status='active'
       and s.payment_status='verified'
-      and s.starts_at<=now()
-      and s.ends_at>now()
-      and s.requests_used<=s.requests_included
+      and s.starts_at<=v_request.created_at
+      and s.ends_at>v_request.created_at
   ) then
     raise exception 'اشتراك الشركة غير نشط أو لا يحتوي على طلبات متاحة';
   end if;
