@@ -101,7 +101,7 @@ export default function ManagedSourcingAdminCenter() {
  async function dispatch(requestId=selected){
   if(!supabase||!requestId)return
   setSaving(true);setError('');setNotice('')
-  const {data,error:e}=await supabase.rpc('dispatch_managed_sourcing_request',{p_request_id:selected})
+  const {data,error:e}=await supabase.rpc('dispatch_managed_sourcing_request',{p_request_id:requestId})
   setSaving(false)
   if(e){setError(e.message);return}
   const invitedUsers=Number(data?.invited_users||0), invitedVehicles=Number(data?.invited_vehicles||0)
