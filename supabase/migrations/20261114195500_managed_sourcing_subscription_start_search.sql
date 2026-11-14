@@ -210,3 +210,76 @@ begin
   return jsonb_build_object('published_offers',v_selected,'published_at',now());
 end;
 $function$;
+
+
+-- Accept the existing company payment submission state while still requiring a real transfer reference and timestamp.
+create or replace function public.managed_sourcing_admin_verify_payment(
+  p_request_id uuid,
+  p_verified boolean
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_user uuid := (select auth.uid());
+  v_request public.managed_sourcing_requests%rowtype;
+  v_next text;
+  v_pay text;
+begin
+  if v_user is null or not exists(
+    select 1 from public.platform_admins where user_id=v_user
+  ) then
+    raise exception 'غير مصرح بهذا الإجراء الإداري';
+  end if;
+
+  select * into v_request
+  from public.managed_sourcing_requests
+  where id=p_request_id
+  for update;
+
+  if not found then
+    raise exception 'الطلب غير موجود';
+  end if;
+
+  if v_request.status<>'awaiting_payment'
+     or v_request.company_approved_at is null
+     or v_request.payment_status not in ('awaiting_payment','payment_submitted','rejected')
+     or nullif(btrim(v_request.payment_reference),'') is null
+     or v_request.payment_submitted_at is null then
+    raise exception 'لا يمكن اعتماد التحويل قبل موافقة الشركة وإرسال مرجع التحويل وتاريخه';
+  end if;
+
+  if p_verified then
+    v_next:='searching'; v_pay:='verified';
+  else
+    v_next:='awaiting_payment'; v_pay:='rejected';
+  end if;
+
+  update public.managed_sourcing_requests
+  set status=v_next,
+      payment_status=v_pay,
+      payment_verified_at=case when p_verified then now() else null end,
+      updated_at=now()
+  where id=p_request_id;
+
+  insert into public.managed_sourcing_updates(
+    request_id,created_by,visibility,title,body,status_from,status_to
+  ) values (
+    p_request_id,v_user,'company',
+    case when p_verified then 'تم تأكيد رسوم الخدمة' else 'تعذر تأكيد رسوم الخدمة' end,
+    case when p_verified then 'تم تأكيد السداد وبدأ فريق My Car العمل وفق حالة الطلب.' else 'لم يتم اعتماد التحويل. يرجى مراجعة بيانات العملية وإعادة إرسالها.' end,
+    v_request.status,v_next
+  );
+
+  insert into public.managed_sourcing_internal_notes(request_id,created_by,note)
+  values(
+    p_request_id,v_user,
+    case when p_verified then 'ADMIN AUDIT: payment verified; request moved to searching.' else 'ADMIN AUDIT: payment rejected; request remains awaiting payment.' end
+  );
+end;
+$function$;
+
+revoke execute on function public.managed_sourcing_admin_verify_payment(uuid,boolean) from public,anon;
+grant execute on function public.managed_sourcing_admin_verify_payment(uuid,boolean) to authenticated;
