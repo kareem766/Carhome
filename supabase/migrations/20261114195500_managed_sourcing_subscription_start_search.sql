@@ -247,7 +247,8 @@ begin
      or v_request.company_approved_at is null
      or v_request.payment_status not in ('awaiting_payment','payment_submitted','rejected')
      or nullif(btrim(v_request.payment_reference),'') is null
-     or v_request.payment_submitted_at is null then
+     or v_request.payment_submitted_at is null
+     or v_request.payment_transfer_date is null then
     raise exception 'لا يمكن اعتماد التحويل قبل موافقة الشركة وإرسال مرجع التحويل وتاريخه';
   end if;
 
