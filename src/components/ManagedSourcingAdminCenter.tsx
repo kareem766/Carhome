@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, BellRing, CheckCircle2, ClipboardList, Download, Filter, RefreshCw, Search, Send, ShieldCheck, Users, CarFront, Clock3 } from 'lucide-react'
+import { BellRing, CheckCircle2, ClipboardList, Download, Filter, RefreshCw, Search, Send, ShieldCheck, Users, CarFront } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
@@ -12,7 +12,6 @@ const availabilityLabels: Record<string,string> = {available:'متاحة',limite
 const money = (value:any) => value == null ? '—' : Number(value).toLocaleString('ar-EG')+' ج.م'
 
 export default function ManagedSourcingAdminCenter() {
- const [user,setUser]=useState<Row|null>(null)
  const [requests,setRequests]=useState<Row[]>([])
  const [offers,setOffers]=useState<Row[]>([])
  const [invites,setInvites]=useState<Row[]>([])
@@ -33,7 +32,6 @@ export default function ManagedSourcingAdminCenter() {
   setLoading(true);setError('')
   const {data:{user:u},error:authError}=await supabase.auth.getUser()
   if(authError||!u){window.location.replace('/?login=1');return}
-  setUser(u)
   const {data:admin}=await supabase.from('platform_admins').select('user_id').eq('user_id',u.id).maybeSingle()
   if(!admin){setError('غير مصرح لك بإدارة تفويضات البحث.');setLoading(false);return}
   const {data,error:loadError}=await supabase.from('managed_sourcing_requests').select('*,organizations!managed_sourcing_requests_company_organization_id_fkey(name)').order('created_at',{ascending:false})
