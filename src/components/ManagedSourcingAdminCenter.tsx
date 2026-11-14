@@ -45,11 +45,11 @@ export default function ManagedSourcingAdminCenter() {
   setLoading(false)
  },[selected])
 
- const loadDetails=useCallback(async()=>{
-  if(!supabase||!selected)return
+ const loadDetails=useCallback(async(requestId=selected)=>{
+  if(!supabase||!requestId)return
   const [o,i]=await Promise.all([
-   supabase.from('managed_sourcing_offers').select('*,organizations!managed_sourcing_offers_supplier_organization_id_fkey(name,organization_type)').eq('request_id',selected).order('created_at',{ascending:false}),
-   supabase.from('managed_sourcing_invites').select('*,organizations!managed_sourcing_invites_organization_id_fkey(name,organization_type),vehicles!managed_sourcing_invites_vehicle_id_fkey(make,model,model_year,governorate)').eq('request_id',selected).order('sent_at',{ascending:false})
+   supabase.from('managed_sourcing_offers').select('*,organizations!managed_sourcing_offers_supplier_organization_id_fkey(name,organization_type)').eq('request_id',requestId).order('created_at',{ascending:false}),
+   supabase.from('managed_sourcing_invites').select('*,organizations!managed_sourcing_invites_organization_id_fkey(name,organization_type),vehicles!managed_sourcing_invites_vehicle_id_fkey(make,model,model_year,governorate)').eq('request_id',requestId).order('sent_at',{ascending:false})
   ])
   if(o.error||i.error){setError(o.error?.message||i.error?.message||'تعذر تحميل تفاصيل التفويض');return}
   const offerRows=(o.data||[]) as Row[]
@@ -98,14 +98,15 @@ export default function ManagedSourcingAdminCenter() {
   await loadRequests();await loadDetails()
  }
 
- async function dispatch(){
-  if(!supabase||!selected)return
+ async function dispatch(requestId=selected){
+  if(!supabase||!requestId)return
   setSaving(true);setError('');setNotice('')
-  const {data,error:e}=await supabase.rpc('dispatch_managed_sourcing_request',{p_request_id:selected})
+  const {data,error:e}=await supabase.rpc('dispatch_managed_sourcing_request',{p_request_id:requestId})
   setSaving(false)
   if(e){setError(e.message);return}
+  setSelected(requestId)
   setNotice('تم إرسال العرض بنجاح إلى '+Number(data?.invited_users||0).toLocaleString('ar-EG')+' مالك سيارة أو مورد أسطول مؤهل، عبر '+Number(data?.invited_vehicles||0).toLocaleString('ar-EG')+' سيارة.')
-  await loadRequests();await loadDetails()
+  await loadRequests();await loadDetails(requestId)
  }
 
  async function publish(){
@@ -135,7 +136,7 @@ export default function ManagedSourcingAdminCenter() {
      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1"><label className="relative"><Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="ابحث باسم الشركة أو التفويض" className="min-h-11 w-full rounded-xl border border-slate-200 bg-white pr-10 pl-3 text-sm outline-none focus:border-blue-500"/></label><select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)} className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm"><option value="all">كل الحالات</option>{Object.entries(statusLabels).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></div>
      </div>
-     {loading?<div className="rounded-2xl border bg-white p-8 text-center text-slate-500">جارٍ تحميل التفويضات...</div>:filteredRequests.map(r=>{const org=Array.isArray(r.organizations)?r.organizations[0]:r.organizations;return <button key={r.id} onClick={()=>{setSelected(r.id);setCompanyMessage('');setSelectedOfferIds([])}} className={'w-full rounded-2xl border p-4 text-right shadow-sm transition '+(selected===r.id?'border-blue-400 bg-blue-50':'border-slate-200 bg-white hover:border-blue-300')}><div className="flex items-start justify-between gap-2"><b className="text-sm">{r.title}</b><span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold">{statusLabels[r.status]||r.status}</span></div><p className="mt-2 text-xs text-slate-500">{org?.name||'شركة'} · {r.quantity} سيارة · {(r.governorates||[]).join('، ')||'كل المحافظات'}</p><p className="mt-1 text-[11px] text-slate-400">{new Date(r.created_at).toLocaleDateString('ar-EG')} · {r.id.slice(0,8)}</p></button>})}
+     {loading?<div className="rounded-2xl border bg-white p-8 text-center text-slate-500">جارٍ تحميل التفويضات...</div>:filteredRequests.map(r=>{const org=Array.isArray(r.organizations)?r.organizations[0]:r.organizations;const canDispatch=['searching','gathering_offers'].includes(r.status)&&['verified','not_required'].includes(r.payment_status);return <article key={r.id} className={'w-full rounded-2xl border p-4 text-right shadow-sm transition '+(selected===r.id?'border-blue-400 bg-blue-50':'border-slate-200 bg-white hover:border-blue-300')}><button type="button" onClick={()=>{setSelected(r.id);setCompanyMessage('');setSelectedOfferIds([])}} className="w-full text-right"><div className="flex items-start justify-between gap-2"><b className="text-sm">{r.title}</b><span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold">{statusLabels[r.status]||r.status}</span></div><p className="mt-2 text-xs text-slate-500">{org?.name||'شركة'} · {r.quantity} سيارة · {(r.governorates||[]).join('، ')||'كل المحافظات'}</p><p className="mt-1 text-[11px] text-slate-400">{new Date(r.created_at).toLocaleDateString('ar-EG')} · {r.id.slice(0,8)}</p></button><div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3"><span className="text-[11px] text-slate-500">{canDispatch?'جاهز لإرسال الدعوات':'الإرسال بعد اعتماد الدفع وبدء البحث'}</span><button type="button" disabled={saving||!canDispatch} onClick={()=>{setSelected(r.id);void dispatch(r.id)}} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-700 px-3 py-2 text-xs font-extrabold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40"><Send size={14}/>{'إرسال العرض للملاك والموردين'}</button></div></article>})}
      {!loading&&!filteredRequests.length&&<div className="rounded-2xl border border-dashed bg-white p-8 text-center text-sm text-slate-500">لا توجد تفويضات مطابقة للفلاتر.</div>}
     </section>
     <section className="min-w-0 space-y-4">
