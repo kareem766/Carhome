@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BadgeCheck, Building2, CarFront, CreditCard, Megaphone, Percent, ReceiptText, Search, Settings2, ShieldCheck, Wallet } from 'lucide-react'
+import { Building2, CarFront, CreditCard, Megaphone, Percent, ReceiptText, Search, ShieldCheck, Wallet } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
