@@ -117,6 +117,7 @@ begin
     'managed_sourcing_update','/workspace/company/managed-sourcing',v_user
   from public.organization_memberships m
   where m.organization_id=v_request.company_organization_id
+    and m.user_id <> v_request.created_by
   on conflict do nothing;
 
   return jsonb_build_object('request_id',p_request_id,'status','searching','started_at',now());
@@ -125,3 +126,87 @@ $function$;
 
 revoke execute on function public.managed_sourcing_admin_start_search(uuid) from public,anon;
 grant execute on function public.managed_sourcing_admin_start_search(uuid) to authenticated;
+
+
+-- Avoid duplicate company notifications: the existing request trigger already notifies the request creator.
+create or replace function public.publish_managed_sourcing_results(
+  p_request_id uuid,
+  p_offer_ids uuid[],
+  p_company_message text default ''
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_request public.managed_sourcing_requests%rowtype;
+  v_selected integer;
+begin
+  if (select auth.uid()) is null or not exists (
+    select 1 from public.platform_admins pa
+    where pa.user_id = (select auth.uid())
+  ) then
+    raise exception 'غير مصرح لك بإرسال نتائج البحث';
+  end if;
+
+  if coalesce(cardinality(p_offer_ids),0) = 0 then
+    raise exception 'اختر عرضًا واحدًا على الأقل لإرساله للشركة';
+  end if;
+
+  select * into v_request
+  from public.managed_sourcing_requests r
+  where r.id = p_request_id
+  for update;
+
+  if not found then
+    raise exception 'تفويض البحث غير موجود';
+  end if;
+
+  select count(*) into v_selected
+  from public.managed_sourcing_offers o
+  where o.request_id = p_request_id
+    and o.id = any(p_offer_ids);
+
+  if v_selected <> cardinality(p_offer_ids) then
+    raise exception 'توجد عروض مختارة لا تتبع هذا التفويض';
+  end if;
+
+  update public.managed_sourcing_offers o
+  set company_decision = case when o.id = any(p_offer_ids) then 'selected' else 'rejected' end,
+      recommendation_rank = case
+        when o.id = any(p_offer_ids) then array_position(p_offer_ids,o.id)
+        else o.recommendation_rank
+      end,
+      updated_at = now()
+  where o.request_id = p_request_id;
+
+  update public.managed_sourcing_requests
+  set status = 'results_ready',
+      results_published_at = now(),
+      results_published_by = (select auth.uid()),
+      updated_at = now()
+  where id = p_request_id;
+
+  insert into public.managed_sourcing_updates(
+    request_id,created_by,visibility,title,body,status_from,status_to
+  ) values (
+    p_request_id,(select auth.uid()),'company','نتيجة البحث جاهزة لشركتك',
+    coalesce(nullif(left(btrim(p_company_message),2000),''),'أنهى فريق My Car مراجعة العروض وتجهيز الخيارات المرشحة. يمكنك مراجعة المقارنة واتخاذ قرارك من حساب الشركة.'),
+    v_request.status,'results_ready'
+  );
+
+  insert into public.platform_notifications(user_id,title,body,notification_type,action_url,created_by)
+  select m.user_id,'نتيجة البحث أصبحت جاهزة',
+    'تم تجهيز العروض المرشحة لتفويض البحث الخاص بشركتك. افتح حسابك لمراجعة التقرير.',
+    'managed_sourcing_update',
+    '/workspace/company/managed-sourcing',
+    (select auth.uid())
+  from public.organization_memberships m
+  where m.organization_id = v_request.company_organization_id
+    and m.user_id <> v_request.created_by
+  on conflict do nothing;
+
+  return jsonb_build_object('published_offers',v_selected,'published_at',now());
+end;
+$function$;
