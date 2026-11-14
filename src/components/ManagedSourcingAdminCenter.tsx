@@ -117,9 +117,32 @@ export default function ManagedSourcingAdminCenter() {
   if(!supabase||!selected||!selectedOfferIds.length)return
   setSaving(true);setError('');setNotice('')
   const {data,error:e}=await supabase.rpc('publish_managed_sourcing_results',{p_request_id:selected,p_offer_ids:selectedOfferIds,p_company_message:companyMessage})
+  if(e){setSaving(false);setError(e.message);return}
+
+  // Notify every active company member in-app; the request URL/type pair prevents duplicate alerts.
+  const request=current
+  const actionUrl='/workspace/company/managed-sourcing?request='+encodeURIComponent(selected)
+  const {data:members,error:membersError}=await supabase.from('organization_memberships').select('user_id').eq('organization_id',request.company_organization_id)
+  if(membersError){setSaving(false);setError('تم نشر النتائج، لكن تعذر تحميل أعضاء الشركة لإرسال الإشعار: '+membersError.message);await loadRequests();await loadDetails();return}
+  const recipientIds=[...new Set((members||[]).map((member:any)=>member.user_id).filter(Boolean))]
+  if(recipientIds.length){
+   const {data:existingNotifications,error:existingError}=await supabase.from('platform_notifications').select('user_id').in('user_id',recipientIds).eq('notification_type','managed_sourcing_results').eq('action_url',actionUrl)
+   if(existingError){setSaving(false);setError('تم نشر النتائج، لكن تعذر التحقق من الإشعارات السابقة: '+existingError.message);await loadRequests();await loadDetails();return}
+   const alreadyNotified=new Set((existingNotifications||[]).map((notification:any)=>notification.user_id))
+   const notificationRows=recipientIds.filter(id=>!alreadyNotified.has(id)).map(user_id=>({
+    user_id,
+    title:'نتائج البحث أصبحت جاهزة',
+    body:'أرسل فريق My Car نتائج البحث لطلب «'+request.title+'». افتح الطلب لمراجعة السيارات المرشحة والتواصل مع مقدميها.',
+    notification_type:'managed_sourcing_results',
+    action_url:actionUrl
+   }))
+   if(notificationRows.length){
+    const {error:notificationError}=await supabase.from('platform_notifications').insert(notificationRows)
+    if(notificationError){setSaving(false);setError('تم نشر النتائج، لكن تعذر إرسال إشعار الشركة: '+notificationError.message);await loadRequests();await loadDetails();return}
+   }
+  }
   setSaving(false)
-  if(e){setError(e.message);return}
-  setNotice('تم إرسال نتيجة البحث للشركة بنجاح. عدد العروض المنشورة: '+Number(data?.published_offers||0).toLocaleString('ar-EG')+'.')
+  setNotice('تم نشر نتيجة البحث وإرسال إشعار داخل المنصة إلى '+recipientIds.length.toLocaleString('ar-EG')+' عضو بالشركة. عدد العروض المنشورة: '+Number(data?.published_offers||0).toLocaleString('ar-EG')+'.')
   await loadRequests();await loadDetails()
  }
 
