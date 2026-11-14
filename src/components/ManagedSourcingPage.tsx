@@ -107,13 +107,16 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  }
  async function adminUpdateRequest(e:FormEvent<HTMLFormElement>,r:Row){
   e.preventDefault();if(!supabase||!user)return;const f=new FormData(e.currentTarget);setSaving(true)
-  const status=String(f.get('status')),fee=f.get('fee')?Number(f.get('fee')):null
+  const selectedStatus=String(f.get('status'))
+  const fee=f.get('fee')!==null&&String(f.get('fee')).trim()!==''?Number(f.get('fee')):null
+  const status=fee!==null&&fee>0&&['new','under_review','quote_ready'].includes(selectedStatus)?'awaiting_company_approval':selectedStatus
   const patch:Row={status,quoted_fee_egp:fee,updated_at:new Date().toISOString()}
-  if(status==='awaiting_company_approval')patch.company_approved_at=new Date().toISOString()
   if(status==='completed')patch.completed_at=new Date().toISOString()
   if(status==='awaiting_payment')patch.payment_status='awaiting_payment'
   const {error:e1}=await supabase.from('managed_sourcing_requests').update(patch).eq('id',r.id)
-  if(!e1){await supabase.from('managed_sourcing_updates').insert({request_id:r.id,created_by:user.id,visibility:'company',title:String(f.get('update_title')||'تحديث حالة الطلب'),body:String(f.get('update_body')||''),status_from:r.status,status_to:status})}
+  const updateTitle=String(f.get('update_title')|| (status==='awaiting_company_approval'?'تمت مراجعة طلب البحث وتحديد رسوم الخدمة':'تحديث حالة الطلب'))
+  const updateBody=String(f.get('update_body')|| (status==='awaiting_company_approval'?'راجعت الإدارة طلبك وحددت رسوم الخدمة بمبلغ '+money(fee)+'. يرجى مراجعة عرض السعر والموافقة عليه لاستكمال الدفع.':'تم تحديث حالة طلب البحث إلى: '+(statuses[status]||status)+'.'))
+  if(!e1){await supabase.from('managed_sourcing_updates').insert({request_id:r.id,created_by:user.id,visibility:'company',title:updateTitle,body:updateBody,status_from:r.status,status_to:status})}
   setSaving(false);if(e1)setError(e1.message);else{setNotice('تم تحديث الطلب وإرسال التحديث للشركة.');await load()}
  }
  async function addOffer(e:FormEvent<HTMLFormElement>,r:Row){
