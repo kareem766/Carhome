@@ -10,7 +10,6 @@ const money = (value:any) => value == null ? 'غير محدد' : Number(value).t
 const statusLabel:Record<string,string>={sent:'دعوة جديدة',viewed:'تمت المشاهدة',responded:'تم تقديم العرض',expired:'انتهت الدعوة',withdrawn:'تم إلغاء الدعوة'}
 
 export default function ManagedSourcingInvitationsPage(){
- const [user,setUser]=useState<Row|null>(null)
  const [organizationType,setOrganizationType]=useState('')
  const [invites,setInvites]=useState<Row[]>([])
  const [vehicles,setVehicles]=useState<Record<string,Row>>({})
@@ -25,7 +24,6 @@ export default function ManagedSourcingInvitationsPage(){
   setLoading(true);setError('')
   const {data:{user:u},error:authError}=await supabase.auth.getUser()
   if(authError||!u){window.location.replace('/?login=1');return}
-  setUser(u)
   const {data:members,error:memberError}=await supabase.from('organization_memberships').select('organization_id,organizations!inner(organization_type)').eq('user_id',u.id)
   if(memberError){setError(memberError.message);setLoading(false);return}
   const member=(members||[]).find((m:any)=>['individual_owner','fleet_supplier'].includes((Array.isArray(m.organizations)?m.organizations[0]:m.organizations)?.organization_type))
