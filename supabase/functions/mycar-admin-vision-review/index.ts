@@ -23,7 +23,7 @@ function toBase64(bytes: Uint8Array) {
 }
 
 function parseModelJson(raw: string) {
-  const cleaned = raw.trim().replace(/^```(?:json)?s*/i, "").replace(/s*```$/, "");
+  const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
   const start = cleaned.indexOf("{");
   const end = cleaned.lastIndexOf("}");
   if (start < 0 || end <= start) throw new Error("Model response was not valid JSON");
@@ -35,7 +35,7 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   const authHeader = req.headers.get("Authorization") ?? "";
-  const token = authHeader.replace(/^Bearers+/i, "");
+  const token = authHeader.replace(/^Bearer\s+/i, "");
   if (!token || token === authHeader) return json({ error: "يلزم تسجيل الدخول." }, 401);
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
