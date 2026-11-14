@@ -20,6 +20,7 @@ const FleetSupplierInsightsPage = lazy(() => import('./components/FleetSupplierI
 const CompanyInsightsPage = lazy(() => import('./components/CompanyInsightsPage'))
 const CompanyTeamPage = lazy(() => import('./components/CompanyTeamPage'))
 const CompanySubscriptionsPage = lazy(() => import('./components/CompanySubscriptionsPage'))
+const SubscriptionHubPage = lazy(() => import('./components/SubscriptionHubPage'))
 const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'))
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const AdminAnalyticsPage = lazy(() => import('./components/AdminAnalyticsPage'))
@@ -375,6 +376,8 @@ export default function App() {
   if (path === '/workspace/provider-employee-requests' || path === '/workspace/owner/employee-requests' || path === '/workspace/supplier/employee-requests') return <Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense>
   if (path === '/workspace/admin/employee-requests') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-employee-requests" /></Suspense>
   if (path === '/workspace/company/team') return <Suspense fallback={<PlatformLoading />}><CompanyTeamPage /></Suspense>
+  if (path === '/workspace/admin/subscriptions') return authUser ? <Suspense fallback={<PlatformLoading />}><SubscriptionHubPage admin /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الاشتراكات" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
+  if (path === '/workspace/subscriptions') return <Suspense fallback={<PlatformLoading />}><SubscriptionHubPage /></Suspense>
   if (path === '/workspace/company/subscriptions') return <Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense>
   if (path === '/workspace/company/insights') return <Suspense fallback={<PlatformLoading />}><CompanyInsightsPage /></Suspense>
   if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage admin /></Suspense>
