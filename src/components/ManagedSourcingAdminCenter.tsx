@@ -45,10 +45,10 @@ export default function ManagedSourcingAdminCenter() {
   setLoading(false)
  },[selected])
 
- const loadDetails=useCallback(async()=>{
-  if(!supabase||!selected)return
+ const loadDetails=useCallback(async(requestId=selected)=>{
+  if(!supabase||!requestId)return
   const [o,i]=await Promise.all([
-   supabase.from('managed_sourcing_offers').select('*,organizations!managed_sourcing_offers_supplier_organization_id_fkey(name,organization_type)').eq('request_id',selected).order('created_at',{ascending:false}),
+   supabase.from('managed_sourcing_offers').select('*,organizations!managed_sourcing_offers_supplier_organization_id_fkey(name,organization_type)').eq('request_id',requestId).order('created_at',{ascending:false}),
    supabase.from('managed_sourcing_invites').select('*,organizations!managed_sourcing_invites_organization_id_fkey(name,organization_type),vehicles!managed_sourcing_invites_vehicle_id_fkey(make,model,model_year,governorate)').eq('request_id',selected).order('sent_at',{ascending:false})
   ])
   if(o.error||i.error){setError(o.error?.message||i.error?.message||'تعذر تحميل تفاصيل التفويض');return}
