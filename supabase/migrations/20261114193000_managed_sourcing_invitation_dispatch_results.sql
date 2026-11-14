@@ -74,7 +74,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $$
+as $function$
 declare
   v_request public.managed_sourcing_requests%rowtype;
   v_invites integer := 0;
@@ -233,14 +233,14 @@ begin
     'dispatched_at',v_now
   );
 end;
-$$;
+$function$;
 
 create or replace function public.mark_managed_sourcing_invite_viewed(p_invite_id uuid)
 returns boolean
 language plpgsql
 security definer
 set search_path = ''
-as $$
+as $function$
 begin
   update public.managed_sourcing_invites
   set status = case when status = 'sent' then 'viewed' else status end,
@@ -250,7 +250,7 @@ begin
     and status in ('sent','viewed');
   return found;
 end;
-$$;
+$function$;
 
 create or replace function public.submit_managed_sourcing_invite_offer(
   p_invite_id uuid,
@@ -264,7 +264,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = ''
-as $$
+as $function$
 declare
   v_invite public.managed_sourcing_invites%rowtype;
   v_vehicle public.vehicles%rowtype;
@@ -346,7 +346,7 @@ begin
 
   return v_offer_id;
 end;
-$$;
+$function$;
 
 create or replace function public.publish_managed_sourcing_results(
   p_request_id uuid,
@@ -357,7 +357,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $$
+as $function$
 declare
   v_request public.managed_sourcing_requests%rowtype;
   v_selected integer;
@@ -427,7 +427,7 @@ begin
 
   return jsonb_build_object('published_offers',v_selected,'published_at',now());
 end;
-$$;
+$function$;
 
 revoke execute on function public.dispatch_managed_sourcing_request(uuid) from public, anon;
 revoke execute on function public.mark_managed_sourcing_invite_viewed(uuid) from public, anon;
