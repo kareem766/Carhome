@@ -114,7 +114,7 @@ export default function ManagedSourcingAdminCenter() {
  }
 
  async function publish(){
-  if(!supabase||!selected||!selectedOfferIds.length)return
+  if(!supabase||!selected||!current||!selectedOfferIds.length)return
   setSaving(true);setError('');setNotice('')
   const {data,error:e}=await supabase.rpc('publish_managed_sourcing_results',{p_request_id:selected,p_offer_ids:selectedOfferIds,p_company_message:companyMessage})
   if(e){setSaving(false);setError(e.message);return}
