@@ -61,6 +61,8 @@ export default function ManagedSourcingAdminCenter() {
  useEffect(()=>{void loadDetails()},[loadDetails])
 
  const current=requests.find(x=>x.id===selected)
+ const canStartSubscription=!!current&&current.payment_model==='subscription'&&['new','under_review'].includes(current.status)&&current.payment_status==='not_required'
+ const canVerifyPayment=!!current&&current.payment_model==='per_request'&&current.status==='awaiting_payment'&&['payment_submitted','rejected'].includes(current.payment_status)&&!!current.company_approved_at&&!!current.payment_reference&&!!current.payment_submitted_at
  const filteredRequests=useMemo(()=>requests.filter(r=>{
   const q=search.trim().toLocaleLowerCase('ar')
   const org=Array.isArray(r.organizations)?r.organizations[0]:r.organizations
@@ -84,15 +86,15 @@ export default function ManagedSourcingAdminCenter() {
  const matched=offers.filter(x=>x.availability_status!=='unavailable').length
 
  async function startSearch(){
-  if(!supabase||!selected)return
+  if(!supabase||!selected||!current)return
   setSaving(true);setError('');setNotice('')
-  const {data:{user:u},error:authError}=await supabase.auth.getUser()
-  if(authError||!u){setSaving(false);setError('انتهت جلسة الدخول. سجّل الدخول مرة أخرى.');return}
-  const previousStatus=current?.status||'under_review'
-  const {error:e}=await supabase.from('managed_sourcing_requests').update({status:'searching',assigned_to:u.id,updated_at:new Date().toISOString()}).eq('id',selected)
-  if(e){setSaving(false);setError(e.message);return}
-  await supabase.from('managed_sourcing_updates').insert({request_id:selected,created_by:u.id,visibility:'internal',title:'اعتماد التفويض وبدء البحث',body:'اعتمدت الإدارة التفويض وتم تعيين مسؤول البحث وبدء تجهيز الإرسال للمؤهلين.',status_from:previousStatus,status_to:'searching'})
-  setSaving(false);setNotice('تم اعتماد التفويض وبدء البحث. يمكنك الآن إرسال الطلب للمؤهلين.')
+  const isSubscription=current.payment_model==='subscription'
+  const result=isSubscription
+   ? await supabase.rpc('managed_sourcing_admin_start_search',{p_request_id:selected})
+   : await supabase.rpc('managed_sourcing_admin_verify_payment',{p_request_id:selected,p_verified:true})
+  setSaving(false)
+  if(result.error){setError(result.error.message);return}
+  setNotice(isSubscription?'تم اعتماد طلب البحث ضمن اشتراك الشركة وبدأ التنفيذ.':'تم تأكيد التحويل واعتماد بدء البحث.')
   await loadRequests();await loadDetails()
  }
 
@@ -145,7 +147,7 @@ export default function ManagedSourcingAdminCenter() {
        </div>
        <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2"><p><b>المناطق:</b> {(current.governorates||[]).join('، ')||'كل المحافظات'}</p><p><b>المدة:</b> {current.duration_months} شهر</p><p><b>الميزانية للسيارة:</b> {money(current.budget_per_vehicle_egp)}</p><p><b>حالة السداد:</b> {current.payment_status}</p></div>
        {current.requirements&&<p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-7 text-slate-600">{current.requirements}</p>}
-       <div className="mt-4 flex flex-wrap gap-2">{['new','under_review','quote_ready','awaiting_company_approval','awaiting_payment'].includes(current.status)&&<button disabled={saving||!['verified','not_required'].includes(current.payment_status)} onClick={()=>void startSearch()} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-600 px-4 font-extrabold text-white hover:bg-emerald-700 disabled:opacity-40"><CheckCircle2 size={16}/> اعتماد التفويض وبدء البحث</button>}<button disabled={saving||!['searching','gathering_offers'].includes(current.status)||!['verified','not_required'].includes(current.payment_status)} onClick={()=>void dispatch()} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-blue-700 px-4 font-extrabold text-white hover:bg-blue-800 disabled:opacity-40"><Send size={16}/> إرسال للمؤهلين بضغطة واحدة</button><button onClick={()=>void loadDetails()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 px-4 font-bold text-slate-700"><RefreshCw size={15}/> تحديث الردود</button></div>
+       <div className="mt-4 flex flex-wrap gap-2">{(canStartSubscription||canVerifyPayment)&&<button disabled={saving} onClick={()=>void startSearch()} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-600 px-4 font-extrabold text-white hover:bg-emerald-700 disabled:opacity-40"><CheckCircle2 size={16}/>{canStartSubscription?'بدء البحث ضمن الاشتراك':'تأكيد التحويل وبدء البحث'}</button>}<button disabled={saving||!['searching','gathering_offers'].includes(current.status)||!['verified','not_required'].includes(current.payment_status)} onClick={()=>void dispatch()} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-blue-700 px-4 font-extrabold text-white hover:bg-blue-800 disabled:opacity-40"><Send size={16}/> إرسال للمؤهلين بضغطة واحدة</button><button onClick={()=>void loadDetails()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 px-4 font-bold text-slate-700"><RefreshCw size={15}/> تحديث الردود</button></div>
        <p className="mt-2 text-xs leading-6 text-slate-400">الإرسال متاح بعد اعتماد التفويض وتأكيد رسوم الخدمة. يعيد النظام إرسال الدعوات الجديدة فقط دون تكرار الإشعارات للمستلمين السابقين.</p>
       </article>
       <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
