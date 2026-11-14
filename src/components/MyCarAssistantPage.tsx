@@ -55,7 +55,7 @@ export default function MyCarAssistantPage() {
       <section aria-live="polite" className="flex-1 space-y-4 overflow-y-auto !bg-[#10243d] p-4 sm:p-6">
         <div className="mb-4 rounded-2xl border border-amber-300/20 bg-amber-300/5 p-3 text-xs leading-6 text-amber-100"><Sparkles size={15} className="ml-1 inline"/> المساعد يجيب عن أسئلة المنصة ويقرأ الملخصات المسموح بها لحسابك. تنفيذ التعديلات والإجراءات سيُضاف بعد استكمال بوابة الصلاحيات واختبارها.</div>
         {messages.map((message, index) => <div key={index} className={`flex ${message.role === 'user' ? 'justify-start' : 'justify-end'}`}><article className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-7 ${message.role === 'user' ? '!bg-[#1558a6] !text-white' : 'border border-blue-200/15 !bg-[#1b3554] !text-[#f1f6ff]'}`}><div className="mb-1 flex items-center gap-2 text-[11px] font-bold opacity-70">{message.role === 'user' ? <UserRound size={13}/> : <Bot size={13}/>} {message.role === 'user' ? 'أنت' : 'مساعد My Car'}</div><p className="whitespace-pre-wrap">{message.content}</p></article></div>)}
-        {loading && <div className="text-sm text-blue-200">Gemini بيجهز الرد...</div>}
+        {loading && <div className="text-sm text-blue-200">المساعد الذكي بيجهز الرد...</div>}
         {error && <p role="alert" className="rounded-xl border border-red-400/30 bg-red-950/40 p-3 text-sm text-red-200">{error}</p>}
       </section>
       <form onSubmit={sendMessage} className="border-t border-white/10 !bg-[#09182b] p-3 sm:p-4">
