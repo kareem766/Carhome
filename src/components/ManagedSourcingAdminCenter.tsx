@@ -173,9 +173,3 @@ export default function ManagedSourcingAdminCenter() {
   </div>
  </main>
 }
-     </>}
-    </section>
-   </div>
-  </div>
- </main>
-}
