@@ -189,8 +189,14 @@ export default function AuthCallbackPage() {
         // Send every newly registered or authenticated user straight to their own workspace.
         const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
         if (!active) return
+        const requestedDestination = sessionStorage.getItem('mycar_auth_return_to') || ''
+        sessionStorage.removeItem('mycar_auth_return_to')
+        // Only trusted platform admins may resume a deep link under the admin workspace.
+        const safeAdminDestination = requestedDestination.startsWith('/workspace/admin/') && !requestedDestination.startsWith('//')
+          ? requestedDestination
+          : '/workspace/admin'
         const destination = adminRecord
-          ? '/workspace/admin'
+          ? safeAdminDestination
           : role === 'company' ? '/workspace/company'
           : role === 'fleet_supplier' ? '/workspace/supplier'
           : role === 'employee' ? '/workspace/employee'
