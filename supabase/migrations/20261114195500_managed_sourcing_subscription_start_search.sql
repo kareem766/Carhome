@@ -2,7 +2,7 @@
 create or replace function public.guard_managed_sourcing_request_lifecycle()
 returns trigger
 language plpgsql
-set search_path to 'public','pg_temp'
+set search_path = ''
 as $function$
 begin
   if new.status='awaiting_payment' and new.company_approved_at is null then
