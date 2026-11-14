@@ -210,9 +210,7 @@ export default function AuthCallbackPage() {
           : role === 'fleet_supplier' ? '/workspace/supplier'
           : role === 'employee' ? '/workspace/employee'
           : '/workspace/owner'
-        setMessage(adminRecord
-          ? 'تم تأكيد الحساب بنجاح. جارٍ فتح لوحة الإدارة...'
-          : 'تم تجهيز حسابك بنجاح. جارٍ فتح مساحة العمل الخاصة بك...')
+        setMessage('تم تجهيز حسابك بنجاح. جارٍ فتح مساحة العمل الخاصة بك...')
         window.location.replace(destination)
       } catch (caught) {
         if (!active) return
