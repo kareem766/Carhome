@@ -116,6 +116,8 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
    setSaving(false)
    if(actionError)setError('تم تسجيل الموافقة وفتح خطوة الدفع، لكن تعذر إرسال إشعار الإدارة: '+actionError.message)
    setNotice('تمت الموافقة على عرض السعر. أكمل بيانات التحويل لإرسالها إلى الإدارة.')
+   setSelected(r.id)
+   setTab('requests')
    setPaymentModalOpen(true)
    await load()
    return
