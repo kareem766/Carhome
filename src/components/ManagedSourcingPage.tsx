@@ -18,8 +18,9 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  const [requests,setRequests]=useState<Row[]>([]), [offers,setOffers]=useState<Row[]>([]), [updates,setUpdates]=useState<Row[]>([])
  const [pricing,setPricing]=useState<Row[]>([]), [packages,setPackages]=useState<Row[]>([]), [subscriptions,setSubscriptions]=useState<Row[]>([])
  const [paymentDetails,setPaymentDetails]=useState<{instapay_number:string;vodafone_cash_number:string}>({instapay_number:'',vodafone_cash_number:''})
- const [selected,setSelected]=useState(''), [loading,setLoading]=useState(true), [saving,setSaving]=useState(false), [error,setError]=useState(''), [notice,setNotice]=useState('')
- const [tab,setTab]=useState(admin?'requests':'overview')
+ const initialRequestId = new URLSearchParams(window.location.search).get('request') || new URLSearchParams(window.location.search).get('request_id') || ''
+ const [selected,setSelected]=useState(initialRequestId), [loading,setLoading]=useState(true), [saving,setSaving]=useState(false), [error,setError]=useState(''), [notice,setNotice]=useState('')
+ const [tab,setTab]=useState(admin||initialRequestId?'requests':'overview')
  const [requestSearch,setRequestSearch]=useState('')
  const [requestStatus,setRequestStatus]=useState('all')
  const [editing,setEditing]=useState<Row|null>(null)
