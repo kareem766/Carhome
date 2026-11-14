@@ -1,4 +1,4 @@
-import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing, Wallet, UserPlus, ClipboardCheck, BarChart3, Activity, BriefcaseBusiness, Headset, TicketPercent } from 'lucide-react'
+import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing, Wallet, UserPlus, ClipboardCheck, BarChart3, Activity, BriefcaseBusiness, Headset, TicketPercent, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import PlatformEntryBanner from './PlatformEntryBanner'
 
@@ -6,6 +6,7 @@ const groups = [
  { title:'الرئيسية', links:[{href:'/workspace/admin',label:'لوحة التحكم',icon:LayoutDashboard}] },
  { title:'إدارة المنصة', links:[
   {href:'/workspace/admin/vehicle-reviews',label:'مركز المراجعات الموحد',icon:ClipboardCheck},
+  {href:'/workspace/admin/automation-review',label:'مركز المراجعة الذكية',icon:Sparkles},
   {href:'/workspace/admin/support',label:'مركز الدعم والتذاكر',icon:Headset},
   {href:'/workspace/admin/managed-sourcing',label:'خدمة البحث نيابة عن الشركات',icon:BriefcaseBusiness},
   {href:'/workspace/admin/managed-accounts',label:'حسابات المستخدمين',icon:UserPlus},

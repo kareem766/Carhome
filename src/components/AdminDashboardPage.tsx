@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Activity, ArrowLeft, BellRing, Building2, CarFront, CheckCircle2, ClipboardCheck, CreditCard, Gauge, Megaphone, RefreshCw, Settings2, ShieldCheck, Users, Wallet, BriefcaseBusiness } from 'lucide-react'
+import { Activity, ArrowLeft, BellRing, Building2, CarFront, CheckCircle2, ClipboardCheck, CreditCard, Gauge, Megaphone, RefreshCw, Settings2, ShieldCheck, Users, Wallet, BriefcaseBusiness, Sparkles } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 import AdminPageNavigation from './AdminPageNavigation'
@@ -10,7 +10,8 @@ type Counts = { users: number; organizations: number; companyAccounts: number; a
 const initial: Counts = { users: 0, organizations: 0, companyAccounts: 0, approvedOrganizations: 0, pendingOrganizations: 0, vehicles: 0, approvedVehicles: 0, pendingVehicles: 0, pendingPayments: 0, subscriptions: 0, activeAds: 0, requests: 0, suppliers: 0, employees: 0, employeeRequests: 0, pendingEmployeeRequests: 0 }
 const shortcuts = [
  { href: '/workspace/admin/managed-sourcing', title: 'خدمة البحث نيابة عن الشركات', desc: 'إدارة التفويضات والتسعير والمدفوعات والعروض', icon: BriefcaseBusiness, tone: 'from-cyan-600 to-blue-800' },
- { href: '/workspace/admin/vehicle-reviews', title: 'مركز المراجعات الموحد', desc: 'مراجعة الحسابات والسيارات والمدفوعات والإعلانات والطلبات والفحص الذكي من صفحة واحدة', icon: ClipboardCheck, tone: 'from-sky-500 to-blue-700' },
+ { href: '/workspace/admin/vehicle-reviews', title: 'مركز المراجعات الموحد', desc: 'مراجعة الحسابات والسيارات والمدفوعات والإعلانات والطلبات', icon: ClipboardCheck, tone: 'from-sky-500 to-blue-700' },
+ { href: '/workspace/admin/automation-review', title: 'مركز المراجعة الذكية', desc: 'فحص اكتمال البيانات والصور والإيصالات وتوصيات المخاطر', icon: Sparkles, tone: 'from-violet-500 to-indigo-700' },
  { href: '/workspace/admin/managed-accounts', title: 'إدارة حسابات المستخدمين', desc: 'إنشاء الحسابات وتعديلها وتعطيلها أو حذفها', icon: Users, tone: 'from-indigo-500 to-violet-700' },
  { href: '/workspace/admin/subscription-plans', title: 'اشتراكات الشركات', desc: 'التحكم في الباقات والأسعار', icon: CreditCard, tone: 'from-emerald-500 to-teal-700' },
  { href: '/workspace/admin/advertising-plans', title: 'باقات الإعلانات', desc: 'إدارة باقات الترويج وأسعارها', icon: Megaphone, tone: 'from-orange-500 to-amber-600' },
