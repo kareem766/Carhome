@@ -19,7 +19,7 @@ export default function EmployeeWorkspaceHeader({active='home'}:{active?:ActiveP
   <aside className="mc-employee-sidebar" dir="rtl">
    <a href="/workspace/employee" className="mb-5 flex items-center justify-between border-b border-white/15 pb-4"><PlatformBrand compact/><span className="text-xs font-bold text-cyan-200">مساحة الموظف</span></a>
    <nav aria-label="القائمة الجانبية للموظف" className="space-y-1">
-    {links.map(({key,href,label,icon:Icon})=><a key={key} href={href} aria-current={window.location.pathname===href?'page':undefined}><Icon size={18}/>{label}</a>)}
+    {links.map(({key,href,label,icon:Icon})=><a key={key} href={href} aria-current={window.location.pathname===href||key===active?'page':undefined}><Icon size={18}/>{label}</a>)}
    </nav>
    <a href="#new-request" className="mt-5 flex items-center gap-2 rounded-xl bg-orange-500 px-3 py-3 text-sm font-extrabold text-white"><CarFront size={18}/> طلب سيارة</a>
   </aside>
