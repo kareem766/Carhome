@@ -15,6 +15,7 @@ export default function ManagedSourcingAdminCenter() {
  const [requests,setRequests]=useState<Row[]>([])
  const [offers,setOffers]=useState<Row[]>([])
  const [invites,setInvites]=useState<Row[]>([])
+ const [eligibility,setEligibility]=useState<{eligible_users:number;eligible_vehicles:number}>({eligible_users:0,eligible_vehicles:0})
  const [selected,setSelected]=useState('')
  const [selectedOfferIds,setSelectedOfferIds]=useState<string[]>([])
  const [search,setSearch]=useState('')
@@ -47,13 +48,15 @@ export default function ManagedSourcingAdminCenter() {
 
  const loadDetails=useCallback(async(requestId=selected)=>{
   if(!supabase||!requestId)return
-  const [o,i]=await Promise.all([
+  const [o,i,eligibilityResult]=await Promise.all([
    supabase.from('managed_sourcing_offers').select('*,organizations!managed_sourcing_offers_supplier_organization_id_fkey(name,organization_type)').eq('request_id',requestId).order('created_at',{ascending:false}),
-   supabase.from('managed_sourcing_invites').select('*,organizations!managed_sourcing_invites_organization_id_fkey(name,organization_type),vehicles!managed_sourcing_invites_vehicle_id_fkey(make,model,model_year,governorate)').eq('request_id',selected).order('sent_at',{ascending:false})
+   supabase.from('managed_sourcing_invites').select('*,organizations!managed_sourcing_invites_organization_id_fkey(name,organization_type),vehicles!managed_sourcing_invites_vehicle_id_fkey(make,model,model_year,governorate)').eq('request_id',requestId).order('sent_at',{ascending:false}),
+   supabase.rpc('preview_managed_sourcing_eligibility',{p_request_id:requestId})
   ])
-  if(o.error||i.error){setError(o.error?.message||i.error?.message||'تعذر تحميل تفاصيل التفويض');return}
+  if(o.error||i.error||eligibilityResult.error){setError(o.error?.message||i.error?.message||eligibilityResult.error?.message||'تعذر تحميل تفاصيل التفويض');return}
   const offerRows=(o.data||[]) as Row[]
   setOffers(offerRows);setInvites((i.data||[]) as Row[])
+  setEligibility({eligible_users:Number(eligibilityResult.data?.eligible_users||0),eligible_vehicles:Number(eligibilityResult.data?.eligible_vehicles||0)})
   setSelectedOfferIds(offerRows.filter(x=>x.company_decision==='selected').map(x=>x.id))
  },[selected])
 
@@ -144,8 +147,8 @@ export default function ManagedSourcingAdminCenter() {
      {!current?<div className="rounded-2xl border border-dashed bg-white p-10 text-center text-slate-500">اختر تفويضًا لعرض تفاصيله وإدارته.</div>:<>
       <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
        <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-bold text-blue-700">تفويض رقم {current.id.slice(0,8)}</p><h2 className="mt-1 text-xl font-black">{current.title}</h2><p className="mt-1 text-sm text-slate-500">{(Array.isArray(current.organizations)?current.organizations[0]:current.organizations)?.name||'الشركة'} · {current.quantity} مركبة · {current.vehicle_type}</p></div><span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-extrabold text-blue-800">{statusLabels[current.status]||current.status}</span></div>
-       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {[{n:invites.length,l:'دعوات المركبات',i:CarFront},{n:invitedUsers,l:'مستخدمون مؤهلون',i:Users},{n:responded,l:'ردود مستلمة',i:BellRing},{n:matched,l:'عروض قابلة للفرز',i:ClipboardList}].map(x=><div key={x.l} className="rounded-xl bg-slate-50 p-3"><x.i size={17} className="text-blue-700"/><b className="mt-2 block text-2xl">{x.n.toLocaleString('ar-EG')}</b><span className="text-[11px] text-slate-500">{x.l}</span></div>)}
+       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+        {[{n:eligibility.eligible_users,l:'مستخدمون مؤهلون للإرسال',i:Users},{n:eligibility.eligible_vehicles,l:'سيارات مؤهلة',i:CarFront},{n:invitedUsers,l:'مستخدمون تمت دعوتهم',i:Send},{n:invites.length,l:'دعوات المركبات المرسلة',i:CarFront},{n:responded,l:'ردود مستلمة',i:BellRing},{n:matched,l:'عروض قابلة للفرز',i:ClipboardList}].map(x=><div key={x.l} className="rounded-xl bg-slate-50 p-3"><x.i size={17} className="text-blue-700"/><b className="mt-2 block text-2xl">{x.n.toLocaleString('ar-EG')}</b><span className="text-[11px] text-slate-500">{x.l}</span></div>)}
        </div>
        <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2"><p><b>المناطق:</b> {(current.governorates||[]).join('، ')||'كل المحافظات'}</p><p><b>المدة:</b> {current.duration_months} شهر</p><p><b>الميزانية للسيارة:</b> {money(current.budget_per_vehicle_egp)}</p><p><b>حالة السداد:</b> {current.payment_status}</p><p><b>مرجع التحويل:</b> {current.payment_reference||'—'}</p><p><b>تاريخ التحويل:</b> {current.payment_transfer_date?new Date(current.payment_transfer_date+'T00:00:00').toLocaleDateString('ar-EG'):'—'}</p></div>
        {current.requirements&&<p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-7 text-slate-600">{current.requirements}</p>}
