@@ -8,7 +8,7 @@ const links = [
   { id: 'assistant', href: '/assistant', label: 'مساعد My Car', icon: Bot },
   { id: 'overview', href: '/workspace/company', label: 'الرئيسية', icon: Building2 },
   { id: 'team', href: '/workspace/company/team', label: 'إدارة موظفي الشركة', icon: Users },
-  { id: 'subscriptions', href: '/workspace/company/subscriptions', label: 'اشتراك الشركة والباقات', icon: CreditCard },
+  { id: 'subscriptions', href: '/workspace/subscriptions', label: 'الاشتراكات', icon: CreditCard },
   { id: 'alerts', href: '/workspace/company/alerts', label: 'التنبيهات الذكية', icon: BellRing },
   { id: 'insights', href: '/workspace/company/insights', label: 'المؤشرات والتقارير', icon: FileText },
   { id: 'requests', href: '/workspace/company/requests', label: 'طلبات التأجير', icon: ClipboardList },
@@ -17,7 +17,7 @@ const links = [
   { id: 'catalog', href: '/workspace/catalog', label: 'السيارات المتاحة', icon: CarFront },
   { id: 'services', href: '/services', label: 'خدمات السيارات', icon: Wrench },
   { id: 'messages', href: '/messages', label: 'المحادثات', icon: MessageCircle },
-  { id: 'ads', href: '/workspace/company/subscriptions', label: 'باقات الإعلانات', icon: Megaphone },
+  { id: 'ads', href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: Megaphone },
   { id: 'account', href: '/workspace/company/account', label: 'الحساب', icon: UserRound },
 ]
 
