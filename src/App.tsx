@@ -21,6 +21,8 @@ const CompanyInsightsPage = lazy(() => import('./components/CompanyInsightsPage'
 const CompanyTeamPage = lazy(() => import('./components/CompanyTeamPage'))
 const CompanySubscriptionsPage = lazy(() => import('./components/CompanySubscriptionsPage'))
 const ManagedSourcingPage = lazy(() => import('./components/ManagedSourcingPage'))
+const ManagedSourcingAdminCenter = lazy(() => import('./components/ManagedSourcingAdminCenter'))
+const ManagedSourcingInvitationsPage = lazy(() => import('./components/ManagedSourcingInvitationsPage'))
 const AdminReviewPage = lazy(() => import('./components/AdminReviewPage'))
 const AdminAnalyticsPage = lazy(() => import('./components/AdminAnalyticsPage'))
 const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'))
@@ -377,6 +379,8 @@ export default function App() {
   if (path === '/workspace/company/team') return <Suspense fallback={<PlatformLoading />}><CompanyTeamPage /></Suspense>
   if (path === '/workspace/company/subscriptions') return <Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense>
   if (path === '/workspace/company/insights') return <Suspense fallback={<PlatformLoading />}><CompanyInsightsPage /></Suspense>
+  if (path === '/workspace/admin/managed-sourcing-center') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingAdminCenter /></Suspense>
+  if (path === '/workspace/provider/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense>
   if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage admin /></Suspense>
   if (path === '/workspace/company/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense>
   if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<PlatformLoading />}><PlatformSettingsPage /></Suspense>
