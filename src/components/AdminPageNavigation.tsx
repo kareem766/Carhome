@@ -14,7 +14,8 @@ const groups = [
   {href:'/workspace/admin/analytics',label:'التقارير والتحليلات',icon:Activity},
   
  ]},
- { title:'الاشتراكات والإعدادات', links:[
+ { title:'الاشتراكات', links:[
+  {href:'/workspace/admin/subscriptions',label:'مركز الاشتراكات',icon:CreditCard},
   {href:'/workspace/admin/subscription-plans',label:'إدارة الباقات والأسعار',icon:CreditCard},
   {href:'/workspace/admin/company-subscriptions',label:'مراجعة طلبات الاشتراك',icon:ClipboardCheck},
   {href:'/workspace/admin/discount-codes',label:'أكواد الخصم والبروموكود',icon:TicketPercent},
