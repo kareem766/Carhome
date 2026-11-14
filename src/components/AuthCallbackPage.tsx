@@ -149,6 +149,25 @@ export default function AuthCallbackPage() {
           window.location.replace('/first-login-password')
           return
         }
+        // Resolve trusted platform-admin access before Google role onboarding.
+        // Admin accounts may not have an organization membership and must never be sent
+        // through the regular owner/company onboarding flow.
+        const { data: earlyAdminRecord, error: earlyAdminError } = await supabase
+          .from('platform_admins')
+          .select('user_id')
+          .eq('user_id', data.session.user.id)
+          .maybeSingle()
+        if (earlyAdminError) throw earlyAdminError
+        if (earlyAdminRecord) {
+          const requestedDestination = sessionStorage.getItem('mycar_auth_return_to') || ''
+          sessionStorage.removeItem('mycar_auth_return_to')
+          const safeAdminDestination = requestedDestination.startsWith('/workspace/admin/') && !requestedDestination.startsWith('//')
+            ? requestedDestination
+            : '/workspace/admin'
+          setMessage('تم التحقق من صلاحيات مدير المنصة. جارٍ فتح الصفحة المطلوبة...')
+          window.location.replace(safeAdminDestination)
+          return
+        }
         // New Google identities must complete role-specific onboarding before any workspace is created.
         if (data.session.user.app_metadata?.provider === 'google') {
           const existingMembership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', data.session.user.id).limit(1).maybeSingle()
@@ -187,17 +206,7 @@ export default function AuthCallbackPage() {
         sessionStorage.removeItem('mycar_google_pending_role')
         if (!active) return
         // Send every newly registered or authenticated user straight to their own workspace.
-        const { data: adminRecord } = await supabase.from('platform_admins').select('user_id').eq('user_id', data.session.user.id).maybeSingle()
-        if (!active) return
-        const requestedDestination = sessionStorage.getItem('mycar_auth_return_to') || ''
-        sessionStorage.removeItem('mycar_auth_return_to')
-        // Only trusted platform admins may resume a deep link under the admin workspace.
-        const safeAdminDestination = requestedDestination.startsWith('/workspace/admin/') && !requestedDestination.startsWith('//')
-          ? requestedDestination
-          : '/workspace/admin'
-        const destination = adminRecord
-          ? safeAdminDestination
-          : role === 'company' ? '/workspace/company'
+        const destination = role === 'company' ? '/workspace/company'
           : role === 'fleet_supplier' ? '/workspace/supplier'
           : role === 'employee' ? '/workspace/employee'
           : '/workspace/owner'
