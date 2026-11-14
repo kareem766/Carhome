@@ -101,9 +101,8 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   setSaving(false);if(up)setError(up.message);else{setNotice('تم إرسال بيانات التحويل، والطلب الآن بانتظار مراجعة الإدارة.');await load()}
  }
  async function startProviderConversation(offer:Row){
-  if(!supabase||!user||!org)return
+  if(!supabase||!user||!org||!current)return
   const vehicle=Array.isArray(offer.vehicles)?offer.vehicles[0]:offer.vehicles
-  const supplier=Array.isArray(offer.organizations)?offer.organizations[0]:offer.organizations
   const providerOrganizationId=offer.supplier_organization_id||vehicle?.organization_id
   if(!offer.vehicle_id||!providerOrganizationId){setError('لا تتوفر بيانات ربط السيارة بمقدمها لبدء المحادثة. يرجى التواصل مع فريق My Car لتحديث بيانات الترشيح.');return}
   if(providerOrganizationId===org.id){setError('لا يمكن بدء محادثة مع نفس حساب الشركة.');return}
@@ -117,7 +116,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
    if(createError||!created?.id){setSaving(false);setError(createError?.message||'تعذر إنشاء محادثة مع مقدم السيارة.');return}
    conversationId=created.id
    const vehicleName=[offer.make||vehicle?.make,offer.model||vehicle?.model,offer.model_year||vehicle?.model_year].filter(Boolean).join(' ')
-   const {error:messageError}=await supabase.from('messages').insert({conversation_id:conversationId,sender_organization_id:org.id,sender_id:user.id,body:'مرحبًا، نرغب في متابعة عرض السيارة '+vehicleName+' المقدم ضمن ترشيحات فريق My Car لطلب '+current?.title+'. برجاء تأكيد التوافر والتفاصيل لاستكمال التنسيق.'})
+   const {error:messageError}=await supabase.from('messages').insert({conversation_id:conversationId,sender_organization_id:org.id,sender_id:user.id,body:'مرحبًا، نرغب في متابعة عرض السيارة '+vehicleName+' المقدم ضمن ترشيحات فريق My Car لطلب '+current.title+'. برجاء تأكيد التوافر والتفاصيل لاستكمال التنسيق.'})
    if(messageError){setSaving(false);setError('تم فتح المحادثة، لكن تعذر إرسال رسالة البداية: '+messageError.message);window.location.href='/messages?conversation='+encodeURIComponent(conversationId);return}
   }
   const {error:actionError}=await supabase.from('managed_sourcing_actions').insert({request_id:current.id,offer_id:offer.id,created_by:user.id,action_type:'contact_provider',message:'بدأت الشركة متابعة مقدم السيارة عبر محادثة المنصة: '+conversationId})
