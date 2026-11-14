@@ -7,7 +7,6 @@ import AdminPageNavigation from './AdminPageNavigation'
 
 type Row = Record<string, any>
 const statusLabels: Record<string,string> = {new:'طلب جديد',under_review:'مراجعة الإدارة',quote_ready:'عرض السعر جاهز',awaiting_company_approval:'بانتظار موافقة الشركة',awaiting_payment:'بانتظار السداد',searching:'جاري البحث',gathering_offers:'تجميع العروض',results_ready:'النتائج جاهزة',awaiting_company_choice:'بانتظار اختيار الشركة',completed:'مكتمل',unable_to_fulfill:'تعذر توفير المطلوب',cancelled:'ملغي'}
-const inviteLabels: Record<string,string> = {sent:'تم الإرسال',viewed:'تمت المشاهدة',responded:'تم تقديم عرض',expired:'منتهية',withdrawn:'ملغاة'}
 const availabilityLabels: Record<string,string> = {available:'متاحة',limited:'متاحة بشروط',awaiting_confirmation:'بانتظار التأكيد',unavailable:'غير متاحة'}
 const money = (value:any) => value == null ? '—' : Number(value).toLocaleString('ar-EG')+' ج.م'
 
