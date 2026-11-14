@@ -74,7 +74,7 @@ begin
     raise exception 'الطلبات المستقلة يجب اعتماد تحويلها من إجراء مراجعة الدفع';
   end if;
 
-  if v_request.status not in ('new','under_review','quote_ready','awaiting_company_approval') then
+  if v_request.status not in ('new','under_review') then
     raise exception 'حالة الطلب الحالية لا تسمح ببدء البحث';
   end if;
 
