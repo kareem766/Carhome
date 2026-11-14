@@ -8,13 +8,13 @@ const groups = [
   {href:'/workspace/admin/vehicle-reviews',label:'مركز المراجعات الموحد',icon:ClipboardCheck},
   {href:'/workspace/admin/automation-review',label:'مركز المراجعة الذكية',icon:Sparkles},
   {href:'/workspace/admin/support',label:'مركز الدعم والتذاكر',icon:Headset},
-  {href:'/workspace/admin/managed-sourcing',label:'خدمة البحث نيابة عن الشركات',icon:BriefcaseBusiness},
   {href:'/workspace/admin/managed-accounts',label:'حسابات المستخدمين',icon:UserPlus},
   {href:'/workspace/admin/communications',label:'الإشعارات والبانرات',icon:BellRing},
   {href:'/workspace/admin/analytics',label:'التقارير والتحليلات',icon:Activity},
   
  ]},
  { title:'الاشتراكات', links:[
+  {href:'/workspace/admin/managed-sourcing',label:'خدمة البحث نيابة عن الشركات',icon:BriefcaseBusiness},
   {href:'/workspace/admin/subscriptions',label:'مركز الاشتراكات',icon:CreditCard},
   {href:'/workspace/admin/subscription-plans',label:'إدارة الباقات والأسعار',icon:CreditCard},
   {href:'/workspace/admin/company-subscriptions',label:'مراجعة طلبات الاشتراك',icon:ClipboardCheck},
