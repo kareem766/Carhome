@@ -35,13 +35,9 @@ create table if not exists public.managed_sourcing_invites (
   unique (request_id, user_id, vehicle_id)
 );
 
-do $ begin
-  if not exists (select 1 from pg_constraint where conname = 'managed_sourcing_offers_invite_id_fkey') then
-    alter table public.managed_sourcing_offers
-      add constraint managed_sourcing_offers_invite_id_fkey
-      foreign key (invite_id) references public.managed_sourcing_invites(id) on delete set null;
-  end if;
-end $;
+alter table public.managed_sourcing_offers
+  add constraint managed_sourcing_offers_invite_id_fkey
+  foreign key (invite_id) references public.managed_sourcing_invites(id) on delete set null;
 
 create unique index if not exists managed_sourcing_offers_invite_id_uidx
   on public.managed_sourcing_offers(invite_id)
