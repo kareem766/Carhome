@@ -1,6 +1,7 @@
-import { BarChart3, Bell, Building2, CarFront, ClipboardList, FileText, LayoutGrid, Megaphone, MessageCircle, Wrench } from 'lucide-react'
+import { BarChart3, Bell, Building2, CarFront, ClipboardList, FileText, LayoutGrid, Megaphone, MessageCircle, Wrench, CreditCard } from 'lucide-react'
 
 const links = [
+  { href: '/workspace/subscriptions', label: 'الاشتراكات', icon: CreditCard, match: (path: string) => path.startsWith('/workspace/subscriptions') },
   { href: '/workspace/supplier/vehicles', label: 'أسطولي', icon: CarFront, match: (path: string) => path.startsWith('/workspace/supplier/vehicles') || path === '/workspace/supplier' },
   { href: '/workspace/supplier/requests', label: 'طلبات الشركات', icon: Building2, match: (path: string) => path.startsWith('/workspace/supplier/requests') },
   { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: ClipboardList, match: (path: string) => path === '/workspace/provider-employee-requests' || path === '/workspace/supplier/employee-requests' },
