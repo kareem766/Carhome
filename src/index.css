@@ -274,7 +274,7 @@ main.min-h-screen > section.bg-white h3,
 main.min-h-screen > section.bg-white h4 {
   color: #102642;
 }
-main.min-h-screen article {
+main.min-h-screen article:not([class*="bg-"]) {
   background: rgba(255,255,255,.88);
   border-color: rgba(143, 164, 190, .28);
   box-shadow: 0 12px 30px rgba(15, 39, 69, .075);
@@ -333,7 +333,7 @@ form,
   border-color: var(--mc-line) !important;
   box-shadow: 0 12px 36px rgba(20, 45, 84, .075);
 }
-article.group {
+article.group:not([class*="bg-"]) {
   border-radius: 1.35rem !important;
   overflow: hidden;
   background: linear-gradient(155deg, rgba(255,255,255,.98), rgba(239,246,255,.96)) !important;
@@ -1048,3 +1048,22 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-managed-sourcing-hero button:first-of-type{background:#ffb21c!important;color:#10233f!important;border:1px solid #ffca62!important}
 .mc-managed-sourcing-hero button:last-of-type{background:rgba(255,255,255,.12)!important;color:#fff!important;border:1px solid rgba(255,255,255,.48)!important}
 .mc-managed-sourcing-hero button:last-of-type:hover{background:rgba(255,255,255,.2)!important}
+
+
+/* Preserve intentional dark card surfaces across every workspace route.
+   Generic workspace card styling must never replace a component's explicit bg-* utility. */
+.mc-advertising-plans-main article.mc-ad-premium-plan-card{
+  isolation:isolate!important;
+  background:linear-gradient(145deg,#0b2542 0%,#07182c 58%,#102f50 100%)!important;
+  color:#f8fafc!important;
+  border:1px solid rgba(251,191,36,.58)!important;
+  box-shadow:0 22px 54px rgba(4,18,35,.28),0 0 0 1px rgba(251,191,36,.12)!important;
+}
+.mc-advertising-plans-main article.mc-ad-premium-plan-card>h3{color:#fff!important}
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .text-slate-500,
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .text-slate-600,
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .text-gray-500,
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .text-gray-600{color:#d3deeb!important}
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .text-emerald-600{color:#6ee7b7!important}
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .text-blue-100{color:#dbeafe!important}
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .border-amber-200\/25{border-color:rgba(252,211,77,.28)!important}
