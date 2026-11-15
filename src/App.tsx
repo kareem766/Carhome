@@ -100,7 +100,12 @@ function OwnerPersistentBar() {
   return <header dir="rtl" className="mc-owner-persistent-bar">
     <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car <span className="text-cyan-300">عربيتي</span></strong><small>مساحة مالك السيارة</small></span></a>
     <nav aria-label="التنقل الرئيسي" className="mc-owner-main-links">{links.map(link => {
-      const active = currentPath === link.href || (link.href === '/workspace/owner/vehicles' && currentPath === '/workspace/owner')
+      const active = currentPath === link.href
+        || (link.href === '/workspace/owner/vehicles' && (currentPath === '/workspace/owner' || currentPath.startsWith('/workspace/owner/vehicles')))
+        || (link.href === '/workspace/owner/offers' && currentPath.startsWith('/workspace/owner/offers'))
+        || (link.href === '/workspace/catalog' && currentPath.startsWith('/workspace/catalog'))
+        || (link.href === '/services' && (currentPath === '/automotive-services' || currentPath.startsWith('/services')))
+        || (link.href === '/messages' && currentPath.startsWith('/messages'))
       return <a key={link.href} href={link.href} aria-current={active ? 'page' : undefined} className={`mc-owner-main-link ${active ? 'is-active' : ''}`}>{link.icon}<span>{link.label}</span></a>
     })}</nav>
     <div className="mc-owner-bar-actions">
