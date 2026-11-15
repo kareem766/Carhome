@@ -4,6 +4,7 @@ import { AlertCircle, ArrowRight, CheckCircle2, Headset, MessageSquare, Plus, Re
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
+import AdminPageNavigation from './AdminPageNavigation'
 
 type TicketRow = {
   id: string
@@ -150,7 +151,7 @@ export default function SupportCenterPage({ admin = false }: Props) {
   if (loading) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#f3f7fc] text-slate-600"><div className="text-center"><RefreshCw className="mx-auto animate-spin text-blue-700" size={30}/><p className="mt-3 text-sm font-bold">جارٍ تحميل مركز الدعم...</p></div></main>
   if (!authorized) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#f3f7fc] p-5"><section className="max-w-lg rounded-3xl border border-amber-200 bg-white p-8 text-center shadow-xl"><ShieldCheck className="mx-auto text-amber-500" size={38}/><h1 className="mt-3 text-xl font-black text-slate-900">تعذر فتح مركز الدعم</h1><p className="mt-2 text-sm leading-7 text-slate-600">{error || 'تحقق من تسجيل الدخول وصلاحيات الحساب.'}</p><a href={admin ? "/workspace/admin" : "/workspace"} className="mt-5 inline-flex rounded-xl bg-[#102b47] px-5 py-3 font-bold text-white">{admin ? "العودة للوحة الإدارة" : "العودة لمساحة العمل"}</a></section></main>
 
-  return <main dir="rtl" className="min-h-screen bg-[#f3f7fc] px-3 py-4 text-slate-900 sm:px-6 lg:px-8">
+  return <>{admin && <AdminPageNavigation/>}<main dir="rtl" className="min-h-screen bg-[#f3f7fc] px-3 py-4 text-slate-900 sm:px-6 lg:px-8">
     <div className="mx-auto max-w-[1440px]">
       <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
         <div className="flex items-center gap-3"><PlatformBrand/><span className="hidden rounded-full bg-blue-50 px-3 py-2 text-xs font-extrabold text-blue-800 sm:inline-flex"><Headset size={15} className="ml-2"/> {admin ? 'إدارة الدعم الفني' : 'مركز الدعم الفني'}</span></div>
@@ -188,5 +189,5 @@ export default function SupportCenterPage({ admin = false }: Props) {
       </section>
       <p className="mt-4 text-center text-[11px] text-slate-400">يتم حفظ التذاكر والردود داخل حسابك، ولا يمكن للمستخدمين الآخرين الاطلاع عليها.</p>
     </div>
-  </main>
+  </main></>
 }

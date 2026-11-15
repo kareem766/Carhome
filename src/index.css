@@ -1067,3 +1067,37 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-advertising-plans-main article.mc-ad-premium-plan-card .text-emerald-600{color:#6ee7b7!important}
 .mc-advertising-plans-main article.mc-ad-premium-plan-card .text-blue-100{color:#dbeafe!important}
 .mc-advertising-plans-main article.mc-ad-premium-plan-card .border-amber-200\/25{border-color:rgba(252,211,77,.28)!important}
+
+/* UX accessibility pass: keep existing role navigation intact while improving touch and keyboard access. */
+@media (max-width: 760px) {
+  .mc-owner-main-link,
+  .mc-supplier-navigation-link {
+    min-height: 44px;
+  }
+}
+.mc-owner-main-link:focus-visible,
+.mc-supplier-navigation-link:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+
+/* Active destination feedback for the owner workspace navigation. */
+.mc-owner-main-link.is-active,
+.mc-owner-main-link[aria-current="page"] {
+  border-color: rgba(37, 99, 235, .24);
+  background: #eaf2ff;
+  color: #124f9b;
+  box-shadow: inset 0 -2px 0 #2459a9;
+}
+
+
+/* Company shared navigation remains available on small screens when the desktop sidebar is hidden. */
+.mc-company-mobile-nav{display:none}
+@media(max-width:760px){
+  .mc-company-mobile-nav{position:sticky;top:0;z-index:90;display:flex;align-items:center;gap:.35rem;overflow-x:auto;overscroll-behavior-x:contain;border-bottom:1px solid #dbe6f2;background:rgba(248,251,255,.97);padding:.55rem .7rem;scrollbar-width:none;backdrop-filter:blur(14px)}
+  .mc-company-mobile-nav::-webkit-scrollbar{display:none}
+  .mc-company-mobile-link{display:inline-flex;min-height:44px;flex:0 0 auto;align-items:center;justify-content:center;gap:.4rem;border:1px solid #e3eaf3;border-radius:11px;background:#fff;padding:.55rem .8rem;color:#526982;font-size:.75rem;font-weight:850;white-space:nowrap;text-decoration:none}
+  .mc-company-mobile-link.is-active{border-color:#b9d7fa;background:#e7f1ff;color:#124f99;box-shadow:inset 0 -2px 0 #2459a9}
+  .mc-company-mobile-link:focus-visible{outline:3px solid #60a5fa;outline-offset:2px}
+}

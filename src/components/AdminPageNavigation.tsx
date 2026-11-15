@@ -26,7 +26,7 @@ const groups = [
 ]
 export default function AdminPageNavigation(){
  const path=window.location.pathname
- const activePath=['/workspace/admin/vehicle-reviews','/workspace/admin/employee-requests','/workspace/admin/automation-review'].includes(path) ? '/workspace/admin/vehicle-reviews' : path
+ const activePath=['/workspace/admin/vehicle-reviews','/workspace/admin/employee-requests'].includes(path) ? '/workspace/admin/vehicle-reviews' : path
  const [open,setOpen]=useState(false)
  return <>
   <PlatformEntryBanner/>

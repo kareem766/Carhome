@@ -1,8 +1,8 @@
-import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, Megaphone, MessageCircle, Plus, Search, UserRound, Users, Wrench, CreditCard, BellRing } from 'lucide-react'
+import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, MessageCircle, Plus, Search, UserRound, Users, Wrench, CreditCard, BellRing } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
-type Section = 'team' | 'insights' | 'managed-sourcing' | 'subscriptions' | 'alerts'
+type Section = 'assistant' | 'team' | 'insights' | 'managed-sourcing' | 'subscriptions' | 'alerts'
 
 const links = [
   { id: 'assistant', href: '/assistant', label: 'مساعد My Car', icon: Bot },
@@ -17,7 +17,6 @@ const links = [
   { id: 'catalog', href: '/workspace/catalog', label: 'السيارات المتاحة', icon: CarFront },
   { id: 'services', href: '/services', label: 'خدمات السيارات', icon: Wrench },
   { id: 'messages', href: '/messages', label: 'المحادثات', icon: MessageCircle },
-  { id: 'ads', href: '/workspace/company/subscriptions', label: 'باقات الإعلانات', icon: Megaphone },
   { id: 'account', href: '/workspace/company/account', label: 'الحساب', icon: UserRound },
 ]
 
@@ -29,30 +28,43 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
   }
 
   const currentPath = window.location.pathname
-  return <aside dir="rtl" className="mc-workspace-sidebar mc-company-shared-sidebar" aria-label="قائمة مساحة العمل">
-    <div className="mc-sidebar-brand">
-      <PlatformBrand compact />
-      <span className="mc-sidebar-tag">مساحة العمل</span>
-    </div>
-    <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">
-      {links.map(({ id, href, label, icon: Icon }) => {
-        const selected = id === active || currentPath === href
-        return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-sidebar-link ' + (selected ? 'is-active' : '')}>
-          <Icon size={19} />
-          <span>{label}</span>
-        </a>
-      })}
-      <div className="mc-sidebar-divider" />
-      <button type="button" onClick={() => void signOut()} className="mc-sidebar-link mc-sidebar-logout">
-        <LogOut size={19} />
-        <span>تسجيل الخروج</span>
-      </button>
+  const exactMatch = links.find(link => link.href === currentPath)
+  const mobileNavigation = links.map(({ id, href, label, icon: Icon }) => {
+    const selected = exactMatch ? id === exactMatch.id : id === active
+    return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-company-mobile-link ' + (selected ? 'is-active' : '')}>
+      <Icon size={17} />
+      <span>{label}</span>
+    </a>
+  })
+  return <>
+    <aside dir="rtl" className="mc-workspace-sidebar mc-company-shared-sidebar" aria-label="قائمة مساحة العمل">
+      <div className="mc-sidebar-brand">
+        <PlatformBrand compact />
+        <span className="mc-sidebar-tag">مساحة العمل</span>
+      </div>
+      <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">
+        {links.map(({ id, href, label, icon: Icon }) => {
+          const selected = exactMatch ? id === exactMatch.id : id === active
+          return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-sidebar-link ' + (selected ? 'is-active' : '')}>
+            <Icon size={19} />
+            <span>{label}</span>
+          </a>
+        })}
+        <div className="mc-sidebar-divider" />
+        <button type="button" onClick={() => void signOut()} className="mc-sidebar-link mc-sidebar-logout">
+          <LogOut size={19} />
+          <span>تسجيل الخروج</span>
+        </button>
+      </nav>
+      <div className="mc-sidebar-promo">
+        <CarFront size={27} />
+        <strong>كل خدمات السيارات في مكان واحد</strong>
+        <p>إدارة أسهل وفرص تشغيل أكثر مع My Car.</p>
+        <a href="/workspace/catalog">استكشف الكتالوج ←</a>
+      </div>
+    </aside>
+    <nav dir="rtl" aria-label="التنقل داخل مساحة الشركة" className="mc-company-mobile-nav">
+      {mobileNavigation}
     </nav>
-    <div className="mc-sidebar-promo">
-      <CarFront size={27} />
-      <strong>كل خدمات السيارات في مكان واحد</strong>
-      <p>إدارة أسهل وفرص تشغيل أكثر مع My Car.</p>
-      <a href="/workspace/catalog">استكشف الكتالوج ←</a>
-    </div>
-  </aside>
+  </>
 }

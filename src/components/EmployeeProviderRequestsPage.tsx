@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, CarFront, ClipboardList, MessageCircle } from 'lucide-react'
+import { CarFront, ClipboardList } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import PlatformBrand from './PlatformBrand'
-import AccountNotifications from './AccountNotifications'
-import SupplierNavigation from './SupplierNavigation'
 
 type Req = {
   id: string
@@ -185,24 +182,6 @@ export default function EmployeeProviderRequestsPage() {
   const eligibleRequestCount = requests.filter(request => eligibleVehiclesFor(request).length > 0).length
 
   return <main dir="rtl" className="min-h-screen bg-slate-50">
-    <header className="mc-supplier-topbar flex min-h-[68px] items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-2 sm:px-5">
-      <a href="/workspace/supplier/vehicles" aria-label="My Car عربيتي" className="mc-supplier-brand min-w-0 shrink"><PlatformBrand compact /></a>
-      <div className="mc-workspace-header-actions">
-        <a href="/messages" aria-label="المحادثات" title="المحادثات" className="mc-top-icon"><MessageCircle size={19} /></a>
-        <AccountNotifications />
-      </div>
-    </header>
-    <SupplierNavigation />
-    <div className="mx-auto max-w-6xl px-4 pt-3">
-      <button type="button" onClick={() => {
-        const fallback = '/workspace/supplier/vehicles'
-        if (document.referrer && new URL(document.referrer).origin === window.location.origin && window.history.length > 1) window.history.back()
-        else window.location.assign(fallback)
-      }} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm hover:border-blue-300 hover:bg-blue-50">
-        <ArrowLeft size={17} /> رجوع
-      </button>
-    </div>
-
     <div className="mx-auto max-w-6xl space-y-5 p-4 py-7">
       <section className="rounded-3xl bg-gradient-to-l from-[#102b47] to-[#176b9a] p-7 text-white">
         <h1 className="text-3xl font-black">طلبات الموظفين المتاحة</h1>
