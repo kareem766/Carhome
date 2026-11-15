@@ -55,6 +55,26 @@ export default function MessagingPage() {
   useEffect(() => { void loadConversations() }, [])
   useEffect(() => { if (activeId) void loadMessages(activeId); else setMessages([]) }, [activeId])
 
+  // Keep the active company/provider/owner conversation live without broad table subscriptions.
+  useEffect(() => {
+    if (!supabase || !activeId) return
+    const channel = supabase
+      .channel(`conversation-messages-${activeId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${activeId}`
+      }, (payload) => {
+        const incoming = payload.new as Message
+        setMessages(current => current.some(message => message.id === incoming.id)
+          ? current
+          : [...current, incoming].sort((a, b) => a.created_at.localeCompare(b.created_at)))
+      })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [activeId])
+
   async function refreshMessages() {
     setRefreshing(true)
     setError('')
