@@ -4,6 +4,7 @@ import AuthPanel from './components/AuthPanel'
 import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
 import SupplierPageShell from './components/SupplierPageShell'
+import EmployeeWorkspaceHeader from './components/EmployeeWorkspaceHeader'
 import PlatformEntryBanner from './components/PlatformEntryBanner'
 import MyCarAssistantPage from './components/MyCarAssistantPage'
 const SupportCenterPage = lazy(() => import('./components/SupportCenterPage'))
@@ -108,6 +109,9 @@ function OwnerPersistentBar() {
         || (link.href === '/workspace/catalog' && currentPath.startsWith('/workspace/catalog'))
         || (link.href === '/services' && (currentPath === '/automotive-services' || currentPath.startsWith('/services')))
         || (link.href === '/messages' && currentPath.startsWith('/messages'))
+        || (link.href === '/workspace/advertising-plans' && currentPath.startsWith('/workspace/advertising-plans'))
+        || (link.href === '/workspace/provider-employee-requests' && ['/workspace/provider-employee-requests','/workspace/owner/employee-requests','/workspace/supplier/employee-requests'].includes(currentPath))
+        || (link.href === '/assistant' && currentPath === '/assistant')
       return <a key={link.href} href={link.href} aria-current={active ? 'page' : undefined} className={`mc-owner-main-link ${active ? 'is-active' : ''}`}>{link.icon}<span>{link.label}</span></a>
     })}</nav>
     <div className="mc-owner-bar-actions">
@@ -368,7 +372,7 @@ export default function App() {
   if (pathIsHome(window.location.pathname) && !homeImagesReady) return <PlatformLoading />
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (authUser && adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات لوحة التحكم</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
-  if (path === '/assistant') return authUser ? <MyCarAssistantPage /> : <ServiceNotice settings={settings} title="سجّل الدخول لاستخدام المساعد" message="مساعد My Car متاح للمستخدمين المسجلين فقط، ويعمل وفق صلاحيات الحساب." />
+  if (path === '/assistant') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><MyCarAssistantPage /></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><MyCarAssistantPage /></> : authUser?.user_metadata?.organization_type === 'employee' ? <><EmployeeWorkspaceHeader active="assistant"/><MyCarAssistantPage /></> : authUser ? <MyCarAssistantPage /> : <ServiceNotice settings={settings} title="سجّل الدخول لاستخدام المساعد" message="مساعد My Car متاح للمستخدمين المسجلين فقط، ويعمل وفق صلاحيات الحساب." />
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/workspace' && !authLoaded) return <PlatformLoading />
