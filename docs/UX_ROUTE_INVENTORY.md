@@ -62,6 +62,14 @@ This is a route-name inventory extracted from the current `src/App.tsx` on `main
 - `/workspace/admin/analytics`
 - `/workspace/admin/vehicle-reviews`
 
+
+## Navigation destinations confirmed during the follow-up audit
+- Owner persistent navigation: `/workspace/owner/vehicles`, `/workspace/owner/offers`, `/workspace/catalog` (read-only catalog for owners), `/services`, `/workspace/advertising-plans`, `/messages`, `/workspace/provider-employee-requests`, and `/assistant`.
+- Supplier navigation: `/workspace/supplier/vehicles`, `/workspace/supplier/requests`, `/workspace/provider-employee-requests`, `/workspace/supplier/offers`, `/workspace/provider/managed-sourcing`, `/workspace/supplier/insights`, `/workspace/catalog`, `/workspace/advertising-plans`, `/messages`, `/services`, and `/workspace/notifications`.
+- `/workspace/supplier/requests` and `/workspace/supplier/offers` are resolved by the supplier workspace fallback in `src/App.tsx` and are therefore easy to miss in a route list based only on exact-match conditions.
+- `/automotive-services` is an alias for `/services`.
+- Navigation visibility is not an authorization boundary. The destination page and its data access must continue to enforce the account role and Supabase policies.
+
 ## Verification still required
 For every destination above, inspect the corresponding route condition and component to record:
 - allowed account role(s) and any admin override;
