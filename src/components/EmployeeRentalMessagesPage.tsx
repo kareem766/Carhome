@@ -31,7 +31,8 @@ export default function EmployeeRentalMessagesPage() {
     const { data: account } = await supabase.from('employee_accounts').select('account_status').eq('user_id', user.id).maybeSingle()
     // Use the authenticated account type as the routing source of truth; an RLS/read issue
     // must not send an employee into the provider-only workspace.
-    const isEmployee = user.user_metadata?.organization_type === 'employee' || Boolean(account)
+    // Database-backed employee status is authoritative; user-editable metadata is not.
+    const isEmployee = account?.account_status === 'active'
     if (!offerId) {
       setRole(isEmployee ? 'employee' : 'provider')
       if (isEmployee) {
@@ -85,6 +86,26 @@ export default function EmployeeRentalMessagesPage() {
   }
 
   useEffect(() => { void load() }, [offerId])
+
+  // Subscribe only to the selected offer so employee/provider chats update immediately.
+  useEffect(() => {
+    if (!supabase || !offerId) return
+    const channel = supabase
+      .channel(`employee-offer-messages-${offerId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'employee_rental_offer_messages',
+        filter: `offer_id=eq.${offerId}`
+      }, (payload) => {
+        const incoming = payload.new as Message
+        setMessages(current => current.some(message => message.id === incoming.id)
+          ? current
+          : [...current, incoming].sort((a, b) => a.created_at.localeCompare(b.created_at)))
+      })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [offerId])
 
   async function refresh() {
     setRefreshing(true)
