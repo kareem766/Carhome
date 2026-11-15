@@ -58,7 +58,8 @@ export default function MessagingPage() {
   // Keep the active company/provider/owner conversation live without broad table subscriptions.
   useEffect(() => {
     if (!supabase || !activeId) return
-    const channel = supabase
+    const client = supabase
+    const channel = client
       .channel(`conversation-messages-${activeId}`)
       .on('postgres_changes', {
         event: 'INSERT',
@@ -72,7 +73,7 @@ export default function MessagingPage() {
           : [...current, incoming].sort((a, b) => a.created_at.localeCompare(b.created_at)))
       })
       .subscribe()
-    return () => { void supabase.removeChannel(channel) }
+    return () => { void client.removeChannel(channel) }
   }, [activeId])
 
   async function refreshMessages() {
