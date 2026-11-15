@@ -2,7 +2,7 @@ import { LayoutDashboard, ClipboardList, MessageCircle, UserRound, CarFront, Bot
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 
-type ActivePage = 'home' | 'requests' | 'messages' | 'account'
+type ActivePage = 'home' | 'assistant' | 'requests' | 'messages' | 'account'
 const links = [
  {key:'home',href:'/workspace/employee',label:'الرئيسية',icon:LayoutDashboard},
  {key:'assistant',href:'/assistant',label:'مساعد My Car',icon:Bot},
