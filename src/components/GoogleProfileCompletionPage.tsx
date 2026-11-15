@@ -57,6 +57,11 @@ export default function GoogleProfileCompletionPage() {
       }
       const { error: updateError } = await supabase.auth.updateUser({ data: metadata })
       if (updateError) throw updateError
+      // Match the email/password signup flow: queue the one-time owner welcome
+      // for the authenticated workspace after Google profile completion.
+      if (role === 'individual_owner') {
+        localStorage.setItem('mycar_owner_welcome_pending_' + sessionData.session.user.id, '1')
+      }
       window.location.replace('/auth/callback')
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'تعذر حفظ بيانات الحساب.')
