@@ -2,7 +2,7 @@ import { BarChart3, Bell, Bot, Building2, CarFront, ClipboardList, FileText, Lay
 
 const links = [
   { href: '/assistant', label: 'مساعد My Car', icon: Bot, match: (path: string) => path === '/assistant' },
-  { href: '/workspace/supplier/vehicles', label: 'أسطولي', icon: CarFront, match: (path: string) => path === '/workspace/supplier/vehicles' || path === '/workspace/supplier' },
+  { href: '/workspace/supplier/vehicles', label: 'أسطولي', icon: CarFront, match: (path: string) => (path.startsWith('/workspace/supplier/vehicles') && path !== '/workspace/supplier/vehicles/new') || path === '/workspace/supplier' },
   { href: '/workspace/supplier/vehicles/new', label: 'إضافة سيارة', icon: Plus, match: (path: string) => path === '/workspace/supplier/vehicles/new' },
   { href: '/workspace/supplier/requests', label: 'طلبات الشركات', icon: Building2, match: (path: string) => path.startsWith('/workspace/supplier/requests') },
   { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: ClipboardList, match: (path: string) => path === '/workspace/provider-employee-requests' || path === '/workspace/supplier/employee-requests' },
