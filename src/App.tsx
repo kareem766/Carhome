@@ -96,9 +96,13 @@ function OwnerPersistentBar() {
     { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: <UserRound size={17}/> },
     { href: '/assistant', label: 'مساعد My Car', icon: <Bot size={17}/> },
   ]
+  const currentPath = window.location.pathname
   return <header dir="rtl" className="mc-owner-persistent-bar">
     <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car <span className="text-cyan-300">عربيتي</span></strong><small>مساحة مالك السيارة</small></span></a>
-    <nav aria-label="التنقل الرئيسي" className="mc-owner-main-links">{links.map(link => <a key={link.href} href={link.href} className="mc-owner-main-link">{link.icon}<span>{link.label}</span></a>)}</nav>
+    <nav aria-label="التنقل الرئيسي" className="mc-owner-main-links">{links.map(link => {
+      const active = currentPath === link.href || (link.href === '/workspace/owner/vehicles' && currentPath === '/workspace/owner')
+      return <a key={link.href} href={link.href} aria-current={active ? 'page' : undefined} className={`mc-owner-main-link ${active ? 'is-active' : ''}`}>{link.icon}<span>{link.label}</span></a>
+    })}</nav>
     <div className="mc-owner-bar-actions">
       <button type="button" aria-label="تحديث الصفحة" title="تحديث الصفحة" onClick={()=>window.location.reload()} className="mc-owner-bar-action"><RefreshCw size={18}/><span>تحديث</span></button>
       <AccountNotifications/>
