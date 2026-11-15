@@ -414,11 +414,11 @@ export default function App() {
   if (path === '/workspace/catalog') {
     if (!authLoaded) return <PlatformLoading />
     if (!authUser || !['company','fleet_supplier','individual_owner'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للحسابات المعتمدة" message="سجّل الدخول بحساب مالك سيارة أو شركة أو مورد أسطول معتمد لاستعراض السيارات والإعلانات." />
-    if (authUser.user_metadata?.organization_type === 'individual_owner') return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense></>
+    if (authUser.user_metadata?.organization_type === 'individual_owner') return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage hideHeader /></Suspense></>
     return authUser.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense>
   }
   if (path === '/services/provider/register') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<Suspense fallback={<PlatformLoading />}><ServiceProviderRegistrationPage /></Suspense></>
-  if (path === '/services' || path === '/automotive-services') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense>}</>
+  if (path === '/services' || path === '/automotive-services') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage hideHeader={authUser?.user_metadata?.organization_type === 'individual_owner'} /></Suspense>}</>
   if (path === '/workspace/advertising-plans') {
     if (!authLoaded) return <PlatformLoading />
     if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense>
