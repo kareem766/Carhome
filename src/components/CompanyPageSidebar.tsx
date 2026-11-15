@@ -29,30 +29,42 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
 
   const currentPath = window.location.pathname
   const exactMatch = links.find(link => link.href === currentPath)
-  return <aside dir="rtl" className="mc-workspace-sidebar mc-company-shared-sidebar" aria-label="قائمة مساحة العمل">
-    <div className="mc-sidebar-brand">
-      <PlatformBrand compact />
-      <span className="mc-sidebar-tag">مساحة العمل</span>
-    </div>
-    <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">
-      {links.map(({ id, href, label, icon: Icon }) => {
-        const selected = exactMatch ? id === exactMatch.id : id === active
-        return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-sidebar-link ' + (selected ? 'is-active' : '')}>
-          <Icon size={19} />
-          <span>{label}</span>
-        </a>
-      })}
-      <div className="mc-sidebar-divider" />
-      <button type="button" onClick={() => void signOut()} className="mc-sidebar-link mc-sidebar-logout">
-        <LogOut size={19} />
-        <span>تسجيل الخروج</span>
-      </button>
+  const mobileNavigation = links.map(({ id, href, label, icon: Icon }) => {
+    const selected = exactMatch ? id === exactMatch.id : id === active
+    return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-company-mobile-link ' + (selected ? 'is-active' : '')}>
+      <Icon size={17} />
+      <span>{label}</span>
+    </a>
+  })
+  return <>
+    <aside dir="rtl" className="mc-workspace-sidebar mc-company-shared-sidebar" aria-label="قائمة مساحة العمل">
+      <div className="mc-sidebar-brand">
+        <PlatformBrand compact />
+        <span className="mc-sidebar-tag">مساحة العمل</span>
+      </div>
+      <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">
+        {links.map(({ id, href, label, icon: Icon }) => {
+          const selected = exactMatch ? id === exactMatch.id : id === active
+          return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-sidebar-link ' + (selected ? 'is-active' : '')}>
+            <Icon size={19} />
+            <span>{label}</span>
+          </a>
+        })}
+        <div className="mc-sidebar-divider" />
+        <button type="button" onClick={() => void signOut()} className="mc-sidebar-link mc-sidebar-logout">
+          <LogOut size={19} />
+          <span>تسجيل الخروج</span>
+        </button>
+      </nav>
+      <div className="mc-sidebar-promo">
+        <CarFront size={27} />
+        <strong>كل خدمات السيارات في مكان واحد</strong>
+        <p>إدارة أسهل وفرص تشغيل أكثر مع My Car.</p>
+        <a href="/workspace/catalog">استكشف الكتالوج ←</a>
+      </div>
+    </aside>
+    <nav dir="rtl" aria-label="التنقل داخل مساحة الشركة" className="mc-company-mobile-nav">
+      {mobileNavigation}
     </nav>
-    <div className="mc-sidebar-promo">
-      <CarFront size={27} />
-      <strong>كل خدمات السيارات في مكان واحد</strong>
-      <p>إدارة أسهل وفرص تشغيل أكثر مع My Car.</p>
-      <a href="/workspace/catalog">استكشف الكتالوج ←</a>
-    </div>
-  </aside>
+  </>
 }
