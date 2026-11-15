@@ -1,7 +1,9 @@
-import { BarChart3, Bell, Building2, CarFront, ClipboardList, FileText, LayoutGrid, Megaphone, MessageCircle, Wrench, Search } from 'lucide-react'
+import { BarChart3, Bell, Bot, Building2, CarFront, ClipboardList, FileText, LayoutGrid, Megaphone, MessageCircle, Wrench, Search, Plus, UserRound } from 'lucide-react'
 
 const links = [
+  { href: '/assistant', label: 'مساعد My Car', icon: Bot, match: (path: string) => path === '/assistant' },
   { href: '/workspace/supplier/vehicles', label: 'أسطولي', icon: CarFront, match: (path: string) => path.startsWith('/workspace/supplier/vehicles') || path === '/workspace/supplier' },
+  { href: '/workspace/supplier/vehicles/new', label: 'إضافة سيارة', icon: Plus, match: (path: string) => path === '/workspace/supplier/vehicles/new' },
   { href: '/workspace/supplier/requests', label: 'طلبات الشركات', icon: Building2, match: (path: string) => path.startsWith('/workspace/supplier/requests') },
   { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: ClipboardList, match: (path: string) => path === '/workspace/provider-employee-requests' || path === '/workspace/supplier/employee-requests' },
   { href: '/workspace/supplier/offers', label: 'عروضي', icon: FileText, match: (path: string) => path.startsWith('/workspace/supplier/offers') },
@@ -12,6 +14,7 @@ const links = [
   { href: '/messages', label: 'المحادثات', icon: MessageCircle, match: (path: string) => path.startsWith('/messages') },
   { href: '/services', label: 'خدمات السيارات', icon: Wrench, match: (path: string) => path === '/services' || path === '/automotive-services' },
   { href: '/workspace/notifications', label: 'إعدادات الإشعارات', icon: Bell, match: (path: string) => path === '/workspace/notifications' },
+  { href: '/workspace/supplier/account', label: 'الحساب', icon: UserRound, match: (path: string) => path === '/workspace/supplier/account' },
 ]
 
 export default function SupplierNavigation() {
