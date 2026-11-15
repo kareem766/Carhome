@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { ArrowLeft, BellRing, CalendarDays, CarFront, CheckCircle2, Clock3, MapPin, Send, ShieldCheck, Sparkles } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import PlatformBrand from './PlatformBrand'
-import AccountNotifications from './AccountNotifications'
-import SupplierNavigation from './SupplierNavigation'
 
 type Row = Record<string, any>
 const money = (value:any) => value == null ? 'غير محدد' : Number(value).toLocaleString('ar-EG')+' ج.م'
@@ -74,9 +71,7 @@ export default function ManagedSourcingInvitationsPage(){
  const vehicleName=(invite:Row)=>{const v=vehicles[invite.vehicle_id];return v?[v.make,v.model,v.model_year].filter(Boolean).join(' '):'سيارتك المسجلة'}
  return <main dir="rtl" className="min-h-screen bg-[#f3f7fc] text-slate-900">
   <div className="mx-auto max-w-5xl px-3 py-4 sm:px-6 sm:py-6">
-   <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm"><PlatformBrand/><div className="flex items-center gap-2"><a href={organizationType==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'} className="rounded-xl border px-3 py-2 text-sm font-bold">العودة لمساحة العمل</a><AccountNotifications/></div></header>
-   {organizationType==='fleet_supplier'&&<SupplierNavigation/>}
-   <section className="mt-5 rounded-3xl bg-gradient-to-l from-[#0b2340] via-[#123a61] to-[#1768a6] p-6 text-white shadow-lg sm:p-8"><span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold"><Sparkles size={15}/> فرص بحث موجهة حسب أسطولك</span><h1 className="mt-3 text-2xl font-black sm:text-3xl">تفويضات البحث المرسلة إليك</h1><p className="mt-2 text-sm leading-7 text-blue-100">تظهر هنا فقط طلبات البحث التي تم ترشيح سياراتك لها. راجع احتياج الشركة وقدّم عرضًا واضحًا لفريق My Car.</p><div className="mt-4 flex flex-wrap gap-3 text-sm"><span className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">دعوات مفتوحة: {openCount.toLocaleString('ar-EG')}</span><span className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">إجمالي الدعوات: {invites.length.toLocaleString('ar-EG')}</span></div></section>
+   <section className="mt-0 rounded-3xl bg-gradient-to-l from-[#0b2340] via-[#123a61] to-[#1768a6] p-6 text-white shadow-lg sm:p-8"><span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold"><Sparkles size={15}/> فرص بحث موجهة حسب أسطولك</span><h1 className="mt-3 text-2xl font-black sm:text-3xl">تفويضات البحث المرسلة إليك</h1><p className="mt-2 text-sm leading-7 text-blue-100">تظهر هنا فقط طلبات البحث التي تم ترشيح سياراتك لها. راجع احتياج الشركة وقدّم عرضًا واضحًا لفريق My Car.</p><div className="mt-4 flex flex-wrap gap-3 text-sm"><span className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">دعوات مفتوحة: {openCount.toLocaleString('ar-EG')}</span><span className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">إجمالي الدعوات: {invites.length.toLocaleString('ar-EG')}</span></div></section>
    {error&&<div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</div>}
    {notice&&<div role="status" className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{notice}</div>}
    {loading?<div className="mt-5 rounded-2xl border bg-white p-10 text-center text-slate-500">جارٍ تحميل الدعوات الموجهة إليك...</div>:<div className="mt-5 space-y-3">
