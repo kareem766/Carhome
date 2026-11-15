@@ -194,7 +194,7 @@ export default function AuthCallbackPage() {
           : role === 'company' ? '/workspace/company'
           : role === 'fleet_supplier' ? '/workspace/supplier'
           : role === 'employee' ? '/workspace/employee'
-          : '/workspace/owner'
+          : '/workspace/owner/vehicles'
         setMessage(adminRecord
           ? 'تم تأكيد الحساب بنجاح. جارٍ فتح لوحة الإدارة...'
           : 'تم تجهيز حسابك بنجاح. جارٍ فتح مساحة العمل الخاصة بك...')
