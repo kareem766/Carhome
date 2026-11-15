@@ -1,4 +1,4 @@
-import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, Megaphone, MessageCircle, Plus, Search, UserRound, Users, Wrench, CreditCard, BellRing } from 'lucide-react'
+import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, MessageCircle, Plus, Search, UserRound, Users, Wrench, CreditCard, BellRing } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
@@ -17,7 +17,6 @@ const links = [
   { id: 'catalog', href: '/workspace/catalog', label: 'السيارات المتاحة', icon: CarFront },
   { id: 'services', href: '/services', label: 'خدمات السيارات', icon: Wrench },
   { id: 'messages', href: '/messages', label: 'المحادثات', icon: MessageCircle },
-  { id: 'ads', href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: Megaphone },
   { id: 'account', href: '/workspace/company/account', label: 'الحساب', icon: UserRound },
 ]
 
@@ -29,6 +28,7 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
   }
 
   const currentPath = window.location.pathname
+  const exactMatch = links.find(link => link.href === currentPath)
   return <aside dir="rtl" className="mc-workspace-sidebar mc-company-shared-sidebar" aria-label="قائمة مساحة العمل">
     <div className="mc-sidebar-brand">
       <PlatformBrand compact />
@@ -36,7 +36,6 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
     </div>
     <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">
       {links.map(({ id, href, label, icon: Icon }) => {
-        const exactMatch = links.find(link => link.href === currentPath)
         const selected = exactMatch ? id === exactMatch.id : id === active
         return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-sidebar-link ' + (selected ? 'is-active' : '')}>
           <Icon size={19} />
