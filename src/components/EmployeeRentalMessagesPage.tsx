@@ -90,7 +90,8 @@ export default function EmployeeRentalMessagesPage() {
   // Subscribe only to the selected offer so employee/provider chats update immediately.
   useEffect(() => {
     if (!supabase || !offerId) return
-    const channel = supabase
+    const client = supabase
+    const channel = client
       .channel(`employee-offer-messages-${offerId}`)
       .on('postgres_changes', {
         event: 'INSERT',
@@ -104,7 +105,7 @@ export default function EmployeeRentalMessagesPage() {
           : [...current, incoming].sort((a, b) => a.created_at.localeCompare(b.created_at)))
       })
       .subscribe()
-    return () => { void supabase.removeChannel(channel) }
+    return () => { void client.removeChannel(channel) }
   }, [offerId])
 
   async function refresh() {
