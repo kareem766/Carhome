@@ -17,7 +17,7 @@ const links = [
   { id: 'catalog', href: '/workspace/catalog', label: 'السيارات المتاحة', icon: CarFront },
   { id: 'services', href: '/services', label: 'خدمات السيارات', icon: Wrench },
   { id: 'messages', href: '/messages', label: 'المحادثات', icon: MessageCircle },
-  { id: 'ads', href: '/workspace/company/subscriptions', label: 'باقات الإعلانات', icon: Megaphone },
+  { id: 'ads', href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: Megaphone },
   { id: 'account', href: '/workspace/company/account', label: 'الحساب', icon: UserRound },
 ]
 
@@ -36,7 +36,8 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
     </div>
     <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">
       {links.map(({ id, href, label, icon: Icon }) => {
-        const selected = id === active || currentPath === href
+        const exactMatch = links.find(link => link.href === currentPath)
+        const selected = exactMatch ? id === exactMatch.id : id === active
         return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-sidebar-link ' + (selected ? 'is-active' : '')}>
           <Icon size={19} />
           <span>{label}</span>
