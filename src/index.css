@@ -1067,3 +1067,16 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-advertising-plans-main article.mc-ad-premium-plan-card .text-emerald-600{color:#6ee7b7!important}
 .mc-advertising-plans-main article.mc-ad-premium-plan-card .text-blue-100{color:#dbeafe!important}
 .mc-advertising-plans-main article.mc-ad-premium-plan-card .border-amber-200\/25{border-color:rgba(252,211,77,.28)!important}
+
+/* UX accessibility pass: keep existing role navigation intact while improving touch and keyboard access. */
+@media (max-width: 760px) {
+  .mc-owner-main-link,
+  .mc-supplier-navigation-link {
+    min-height: 44px;
+  }
+}
+.mc-owner-main-link:focus-visible,
+.mc-supplier-navigation-link:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 2px;
+}
