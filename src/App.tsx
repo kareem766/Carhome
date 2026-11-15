@@ -97,6 +97,7 @@ function OwnerPersistentBar() {
     { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
     { href: '/messages', label: 'المراسلات', icon: <MessageCircle size={17}/> },
     { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: <UserRound size={17}/> },
+    { href: '/workspace/provider/managed-sourcing', label: 'تفويضات البحث', icon: <Search size={17}/> },
     { href: '/assistant', label: 'مساعد My Car', icon: <Bot size={17}/> },
   ]
   const currentPath = window.location.pathname
@@ -112,6 +113,7 @@ function OwnerPersistentBar() {
         || (link.href === '/messages' && currentPath.startsWith('/messages'))
         || (link.href === '/workspace/advertising-plans' && currentPath.startsWith('/workspace/advertising-plans'))
         || (link.href === '/workspace/provider-employee-requests' && ['/workspace/provider-employee-requests','/workspace/owner/employee-requests','/workspace/supplier/employee-requests'].includes(currentPath))
+        || (link.href === '/workspace/provider/managed-sourcing' && currentPath.startsWith('/workspace/provider/managed-sourcing'))
         || (link.href === '/assistant' && currentPath === '/assistant')
       return <a key={link.href} href={link.href} aria-current={active ? 'page' : undefined} className={`mc-owner-main-link ${active ? 'is-active' : ''}`}>{link.icon}<span>{link.label}</span></a>
     })}</nav>
