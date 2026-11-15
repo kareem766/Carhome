@@ -1101,3 +1101,19 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-company-mobile-link.is-active{border-color:#b9d7fa;background:#e7f1ff;color:#124f99;box-shadow:inset 0 -2px 0 #2459a9}
   .mc-company-mobile-link:focus-visible{outline:3px solid #60a5fa;outline-offset:2px}
 }
+
+
+/* Homepage desktop hero: place the campaign image on the left and Arabic copy on the right. */
+@media (min-width: 901px) {
+  .mc-home-hero-layout {
+    direction: ltr;
+  }
+  .mc-home-copy {
+    direction: rtl;
+    text-align: right;
+  }
+  .mc-home-copy > p:last-child {
+    margin-inline-start: auto;
+    margin-inline-end: 0;
+  }
+}
