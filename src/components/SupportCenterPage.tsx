@@ -190,3 +190,4 @@ export default function SupportCenterPage({ admin = false }: Props) {
       <p className="mt-4 text-center text-[11px] text-slate-400">يتم حفظ التذاكر والردود داخل حسابك، ولا يمكن للمستخدمين الآخرين الاطلاع عليها.</p>
     </div>
   </main></>
+}
