@@ -89,6 +89,7 @@ function OwnerPersistentBar() {
   const links = [
     { href: '/workspace/owner/vehicles', label: 'سياراتي', icon: <CarFront size={17}/> },
     { href: '/workspace/owner/offers', label: 'عروضي', icon: <ClipboardList size={17}/> },
+    { href: '/workspace/owner/requests', label: 'طلبات الشركات', icon: <Building2 size={17}/> },
     { href: '/workspace/catalog', label: 'كتالوج السيارات · عرض فقط', icon: <Search size={17}/> },
     { href: '/services', label: 'خدمات السيارات', icon: <Wrench size={17}/> },
     { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
@@ -103,6 +104,7 @@ function OwnerPersistentBar() {
       const active = currentPath === link.href
         || (link.href === '/workspace/owner/vehicles' && (currentPath === '/workspace/owner' || currentPath.startsWith('/workspace/owner/vehicles')))
         || (link.href === '/workspace/owner/offers' && currentPath.startsWith('/workspace/owner/offers'))
+        || (link.href === '/workspace/owner/requests' && currentPath.startsWith('/workspace/owner/requests'))
         || (link.href === '/workspace/catalog' && currentPath.startsWith('/workspace/catalog'))
         || (link.href === '/services' && (currentPath === '/automotive-services' || currentPath.startsWith('/services')))
         || (link.href === '/messages' && currentPath.startsWith('/messages'))
