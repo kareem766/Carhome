@@ -294,29 +294,83 @@ export default function App() {
   useEffect(() => {
     if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
-    const loadImage = (sources: string[]) => new Promise<string>((resolve, reject) => {
+    const loadImage = (sources: string[], reservedSources?: Set<string>) => new Promise<string>((resolve) => {
+      const fallbackSource = '/carhome-icon.svg'
       let index = 0
+      let finished = false
+      const timers: number[] = []
+      const finish = (source: string) => {
+        if (finished) return
+        finished = true
+        timers.forEach((timer) => window.clearTimeout(timer))
+        resolve(source)
+      }
+      const finishWithFallback = () => {
+        const fallback = new Image()
+        let fallbackSettled = false
+        const settleFallback = () => {
+          if (fallbackSettled) return
+          fallbackSettled = true
+          finish(fallbackSource)
+        }
+        timers.push(window.setTimeout(settleFallback, 1500))
+        fallback.onload = () => {
+          if (fallbackSettled) return
+          const decode = typeof fallback.decode === 'function' ? fallback.decode().catch(() => undefined) : Promise.resolve()
+          const decodeTimeout = window.setTimeout(settleFallback, 1000)
+          timers.push(decodeTimeout)
+          void decode.then(() => settleFallback())
+        }
+        fallback.onerror = settleFallback
+        fallback.src = fallbackSource
+      }
       const tryNext = () => {
-        const source = sources[index++]
+        let source = sources[index++]
+        while (source && reservedSources?.has(source)) source = sources[index++]
         if (!source) {
-          reject(new Error('Homepage vehicle photography could not be loaded.'))
+          finishWithFallback()
           return
         }
+        reservedSources?.add(source)
         const image = new Image()
-        image.onload = () => { void image.decode().catch(() => undefined).then(() => resolve(source)) }
-        image.onerror = tryNext
+        let attemptSettled = false
+        const timeout = window.setTimeout(() => {
+          if (attemptSettled) return
+          attemptSettled = true
+          reservedSources?.delete(source)
+          tryNext()
+        }, 4500)
+        image.onload = () => {
+          if (attemptSettled) return
+          attemptSettled = true
+          window.clearTimeout(timeout)
+          const decode = typeof image.decode === 'function' ? image.decode().catch(() => undefined) : Promise.resolve()
+          const decodeTimeout = window.setTimeout(() => finish(source), 2000)
+          timers.push(decodeTimeout)
+          void decode.then(() => finish(source))
+        }
+        image.onerror = () => {
+          if (attemptSettled) return
+          attemptSettled = true
+          window.clearTimeout(timeout)
+          reservedSources?.delete(source)
+          tryNext()
+        }
         image.src = source
       }
       tryNext()
     })
     void loadImage([HOME_BANNER_IMAGE]).catch((error) => console.error('Homepage banner image could not be preloaded:', error))
-    void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
+    const reservedCarImages = new Set<string>()
+    void Promise.all(HOME_CAR_IMAGES.map((sources) => loadImage(sources, reservedCarImages))).then((urls) => {
       if (!active) return
       setHomeImageUrls(urls)
       setHomeImagesReady(true)
     }).catch((error) => {
-      // Fail closed: the homepage stays on its branded loader instead of showing empty or broken vehicle cards.
-      console.error(error)
+      if (!active) return
+      console.error('Homepage vehicle images could not be prepared:', error)
+      setHomeImageUrls(HOME_CAR_IMAGES.map(() => '/carhome-icon.svg'))
+      setHomeImagesReady(true)
     })
     return () => { active = false }
   }, [])
