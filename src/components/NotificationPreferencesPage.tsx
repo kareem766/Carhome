@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, Mail, Smartphone, Save, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Bell, Mail, Smartphone, Save, ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 function withTimeout<T>(task: Promise<T>, message: string, ms = 15000): Promise<T> {
@@ -21,7 +21,7 @@ function urlBase64ToUint8Array(value: string) {
   return Uint8Array.from([...raw].map(char => char.charCodeAt(0)))
 }
 
-export default function NotificationPreferencesPage() {
+export default function NotificationPreferencesPage({ backHref }: { backHref?: string } = {}) {
   const [push, setPush] = useState(true)
   const [email, setEmail] = useState(true)
   const [marketing, setMarketing] = useState(true)
@@ -179,6 +179,11 @@ export default function NotificationPreferencesPage() {
 
   return <main dir="rtl" className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900">
     <div className="mx-auto max-w-3xl space-y-6">
+      {backHref && <div className="sticky top-0 z-50 -mx-4 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur-xl sm:mx-0 sm:rounded-2xl sm:border">
+        <a href={backHref} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+          <ArrowLeft size={17}/> العودة إلى لوحة الإدارة
+        </a>
+      </div>}
       <header className="rounded-3xl bg-gradient-to-l from-[#09233e] to-[#126b9c] p-6 text-white sm:p-8">
         <div className="flex items-center gap-3"><Bell size={28}/><div><p className="text-sm text-cyan-200">My Car عربيتي</p><h1 className="text-2xl font-black">إعدادات الإشعارات</h1></div></div>
         <p className="mt-3 text-sm leading-7 text-blue-100">إشعارات الحساب والطلبات والعروض مفعّلة افتراضيًا على الهاتف والبريد الإلكتروني، وكذلك رسائل العروض التسويقية. يمكنك إيقاف أي خيار في أي وقت.</p>
