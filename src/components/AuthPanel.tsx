@@ -249,7 +249,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin', redirectTo 
     }
     setLoading(true)
     try {
-      const redirectTo = 'https://carhome-lime.vercel.app/auth/callback'
+      const redirectTo = `${window.location.origin}/auth/callback`
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
