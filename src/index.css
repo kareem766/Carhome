@@ -1901,3 +1901,44 @@ main.min-h-screen :is(input, select, textarea):disabled {
   z-index: 1;
   margin: 1rem clamp(.75rem, 2vw, 1.5rem) 0;
 }
+
+
+/* FINAL company mobile chrome order: platform title bar first, company page rail second. */
+:root {
+  --mc-company-platform-bar-height: 66px;
+  --mc-company-mobile-nav-height: 58px;
+}
+@media (max-width: 760px) {
+  /* The platform title/account bar owns the first row. */
+  .mc-company-workspace-main .mc-workspace-topbar.mc-company-topbar,
+  .mc-company-page-with-sidebar .mc-workspace-topbar.mc-company-topbar,
+  .mc-company-page-with-sidebar > header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 150 !important;
+  }
+
+  /* Company page navigation is always directly UNDER the platform bar. */
+  .mc-company-mobile-nav {
+    position: fixed !important;
+    inset: var(--mc-company-platform-bar-height) 0 auto 0 !important;
+    top: var(--mc-company-platform-bar-height) !important;
+    z-index: 140 !important;
+    height: var(--mc-company-mobile-nav-height) !important;
+    min-height: var(--mc-company-mobile-nav-height) !important;
+  }
+
+  /* Keep page content clear of both persistent rows. */
+  .mc-company-workspace-main {
+    padding-top: calc(var(--mc-company-platform-bar-height) + var(--mc-company-mobile-nav-height)) !important;
+  }
+  .mc-company-page-with-sidebar {
+    padding-top: calc(var(--mc-company-platform-bar-height) + var(--mc-company-mobile-nav-height)) !important;
+  }
+  .mc-company-workspace-main .mc-workspace-topbar.mc-company-topbar {
+    top: 0 !important;
+  }
+  .mc-company-mobile-more[open] .mc-company-mobile-more-menu {
+    top: calc(var(--mc-company-platform-bar-height) + var(--mc-company-mobile-nav-height) + 6px) !important;
+  }
+}
