@@ -1776,7 +1776,7 @@ main.min-h-screen :is(input, select, textarea):disabled {
   border-bottom: 1px solid #d8e3ef !important;
   background: rgba(255,255,255,.98) !important;
   box-shadow: 0 5px 18px rgba(13,39,71,.09) !important;
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
