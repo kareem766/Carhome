@@ -1654,10 +1654,6 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-company-page-with-sidebar > div.mx-auto {
   width: min(100%, 1440px);
 }
-.mc-company-page-with-sidebar .relative.isolate.overflow-hidden.rounded-\\[26px\\],
-.mc-company-page-with-sidebar .relative.isolate.overflow-hidden.rounded-\\[28px\\] {
-  box-shadow: 0 18px 44px rgba(13, 48, 87, .14);
-}
 .mc-company-page-with-sidebar :is(section.rounded-2xl, section.rounded-3xl, article.rounded-2xl, article.rounded-3xl) {
   border-color: #e0e8f2;
 }
