@@ -303,6 +303,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
       if (result.error) setError(result.error.message)
       else {
         const vehicleRows = (result.data || []) as Vehicle[]
+        // Clear previous card metrics before refreshing so an earlier result can never linger.
+        if (role === 'owner') setVehicleEngagement({})
         if (path === '/workspace/owner/vehicles' || path === '/workspace/supplier/vehicles') {
           const openRequests = await client.from('rental_requests').select('id,title,details,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,status,created_at').eq('status','open').order('created_at',{ascending:false}).limit(20)
           if (!openRequests.error) {
@@ -329,14 +331,19 @@ export default function WorkspacePage({ role }: { role: Role }) {
             const vehicleIds = vehicleRows.map(vehicle => vehicle.id)
             const [conversationRows, directOfferRows, catalogMetrics] = await Promise.all([
               client.rpc('get_owner_vehicle_catalog_metrics', { p_vehicle_ids: vehicleIds }),
-              client.from('conversations').select('id,vehicle_id').eq('provider_organization_id', member.organization_id).in('vehicle_id', vehicleIds),
+              client.from('conversations').select('id,vehicle_id,company_organization_id').eq('provider_organization_id', member.organization_id).not('company_organization_id', 'is', null).in('vehicle_id', vehicleIds),
               client.from('vehicle_offers').select('id,vehicle_id').eq('provider_organization_id', member.organization_id).in('vehicle_id', vehicleIds)
             ])
             if (conversationRows.error) setError('تعذر تحميل مؤشرات محادثات الشركات: ' + conversationRows.error.message)
             if (directOfferRows.error) setError(previous => previous ? previous + ' · تعذر تحميل العروض المباشرة: ' + directOfferRows.error.message : 'تعذر تحميل العروض المباشرة: ' + directOfferRows.error.message)
             const engagement: Record<string, { conversations: number; directOffers: number }> = {}
             for (const vehicle of vehicleRows) engagement[vehicle.id] = { conversations: 0, directOffers: 0 }
-            for (const row of conversationRows.data || []) if (row.vehicle_id && engagement[row.vehicle_id]) engagement[row.vehicle_id].conversations += 1
+            const countedConversationIds = new Set<string>()
+            for (const row of conversationRows.data || []) {
+              if (!row.id || !row.vehicle_id || !row.company_organization_id || !engagement[row.vehicle_id] || countedConversationIds.has(row.id)) continue
+              countedConversationIds.add(row.id)
+              engagement[row.vehicle_id].conversations += 1
+            }
             for (const row of directOfferRows.data || []) if (row.vehicle_id && engagement[row.vehicle_id]) engagement[row.vehicle_id].directOffers += 1
             setVehicleEngagement(engagement)
             if (catalogMetrics.error) {
