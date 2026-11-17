@@ -1254,3 +1254,19 @@ main.min-h-screen :is(input, select, textarea):disabled {
   line-height: 1.65;
 }
 [aria-invalid="true"] { border-color: #e11d48 !important; }
+
+
+/* Keep the company dashboard title on one readable horizontal line. */
+.mc-company-dashboard-heading { flex: 1 1 auto; min-width: 0; }
+.mc-company-dashboard-heading h1 {
+  display: block;
+  max-width: 100%;
+  overflow: hidden !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis;
+  line-height: 1.5;
+}
+.mc-company-dashboard-topbar-inner { min-width: 0; }
+.mc-company-dashboard-topbar-inner > div:last-child { flex: 0 0 auto; }

@@ -158,9 +158,9 @@ export default function CompanyDashboardPage() {
   return <>
     <CompanyPageSidebar active="overview" />
     <main dir="rtl" className="mc-company-page-with-sidebar min-h-screen bg-[linear-gradient(180deg,#f3f7fd_0%,#f8fbff_44%,#eef3fa_100%)] text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 shadow-[0_8px_30px_rgba(20,55,95,.05)] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="min-w-0">
+      <header className="mc-company-dashboard-topbar sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 shadow-[0_8px_30px_rgba(20,55,95,.05)] backdrop-blur-xl">
+        <div className="mc-company-dashboard-topbar-inner mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <div className="mc-company-dashboard-heading min-w-0 flex-1">
             <span className="text-[11px] font-bold text-slate-400">MY CAR · مساحة الشركات</span>
             <h1 className="mt-0.5 truncate text-base font-black text-slate-900 sm:text-lg">لوحة متابعة الشركة</h1>
           </div>
