@@ -30,13 +30,15 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
 
   const currentPath = window.location.pathname
   const exactMatch = links.find(link => link.href === currentPath)
-  const mobileNavigation = links.map(({ id, href, label, icon: Icon }) => {
+  const renderMobileLink = ({ id, href, label, icon: Icon }: typeof links[number]) => {
     const selected = exactMatch ? id === exactMatch.id : id === active
     return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-company-mobile-link ' + (selected ? 'is-active' : '')}>
       <Icon size={17} />
       <span>{label}</span>
     </a>
-  })
+  }
+  const primaryMobileLinks = links.filter(link => ['overview', 'requests', 'new-request', 'catalog', 'messages'].includes(link.id))
+  const secondaryMobileLinks = links.filter(link => !['overview', 'requests', 'new-request', 'catalog', 'messages'].includes(link.id))
   return <>
     <aside dir="rtl" className="mc-workspace-sidebar mc-company-shared-sidebar" aria-label="قائمة مساحة العمل">
       <div className="mc-sidebar-brand">
@@ -65,7 +67,13 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
       </div>
     </aside>
     <nav dir="rtl" aria-label="التنقل داخل مساحة الشركة" className="mc-company-mobile-nav">
-      {mobileNavigation}
+      {primaryMobileLinks.map(renderMobileLink)}
+      <details className="mc-company-mobile-more">
+        <summary aria-label="المزيد من صفحات الشركة"><span>المزيد</span></summary>
+        <div className="mc-company-mobile-more-menu">
+          {secondaryMobileLinks.map(renderMobileLink)}
+        </div>
+      </details>
     </nav>
   </>
 }
