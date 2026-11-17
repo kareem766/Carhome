@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Activity, ArrowLeft, BadgeCheck, BellRing, Building2, CalendarClock, CarFront, CheckCircle2, Clock3, CreditCard, FileBarChart, FileText, MessageCircle, Plus, RefreshCw, Search, ShieldCheck, Sparkles, Users, Wrench, XCircle } from 'lucide-react'
+import { Activity, ArrowLeft, BadgeCheck, BellRing, Building2, CarFront, CheckCircle2, Clock3, CreditCard, FileBarChart, FileText, MessageCircle, Plus, RefreshCw, Search, ShieldCheck, Sparkles, Users, Wrench, XCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import AccountNotifications from './AccountNotifications'
 import CompanyPageSidebar from './CompanyPageSidebar'
