@@ -41,6 +41,20 @@ export default function AdminDashboardPage() {
    if (result.error) throw new Error(table + ': ' + result.error.message)
    return result.count || 0
   }
+  const countOrganizations = async (filters: Array<[string, string]> = []) => {
+   let q = supabase!.from('organizations').select('*', { count: 'exact', head: true }).not('created_by', 'is', null)
+   for (const [column, value] of filters) q = q.eq(column, value)
+   const result = await q
+   if (result.error) throw new Error('organizations: ' + result.error.message)
+   return result.count || 0
+  }
+  const countRegisteredVehicles = async (filters: Array<[string, string]> = []) => {
+   let q = supabase!.from('vehicles').select('*', { count: 'exact', head: true }).in('payment_status', ['paid', 'verified', 'waived'])
+   for (const [column, value] of filters) q = q.eq(column, value)
+   const result = await q
+   if (result.error) throw new Error('vehicles: ' + result.error.message)
+   return result.count || 0
+  }
   const countActiveAds = async () => {
    const now = new Date().toISOString()
    const result = await supabase!.from('vehicle_promotions').select('*', { count: 'exact', head: true })
@@ -53,18 +67,18 @@ export default function AdminDashboardPage() {
   try {
    const values = await Promise.all([
     count('profiles'),
-    count('organizations'),
-    count('organizations', [['organization_type', 'company']]),
-    count('organizations', [['approval_status', 'approved']]),
-    count('organizations', [['approval_status', 'pending_review']]),
-    count('vehicles'),
-    count('vehicles', [['review_status', 'approved']]),
-    count('vehicles', [['review_status', 'pending_review']]),
+    countOrganizations(),
+    countOrganizations([['organization_type', 'company']]),
+    countOrganizations([['approval_status', 'approved']]),
+    countOrganizations([['approval_status', 'pending_review']]),
+    countRegisteredVehicles(),
+    countRegisteredVehicles([['review_status', 'approved']]),
+    countRegisteredVehicles([['review_status', 'pending_review']]),
     count('vehicle_payment_submissions', [['review_status', 'pending']]),
     count('company_subscriptions'),
     countActiveAds(),
     count('rental_requests'),
-    count('organizations', [['organization_type', 'fleet_supplier']]),
+    countOrganizations([['organization_type', 'fleet_supplier']]),
     count('employee_accounts'),
     count('employee_rental_requests'),
     count('employee_rental_requests', [['status', 'pending_review']]),
@@ -79,7 +93,7 @@ export default function AdminDashboardPage() {
   { key: 'orgs', label: 'حسابات المؤسسات', value: counts.organizations, note: `${counts.approvedOrganizations} معتمد · ${counts.pendingOrganizations} بانتظار المراجعة`, icon: Building2, tone: 'blue' },
   { key: 'vehicles', label: 'السيارات المسجلة', value: counts.vehicles, note: `${counts.approvedVehicles} معتمد · ${counts.pendingVehicles} قيد المراجعة`, icon: CarFront, tone: 'cyan' },
   { key: 'users', label: 'ملفات المستخدمين', value: counts.users, note: 'إجمالي الملفات المسجلة على المنصة', icon: Users, tone: 'violet' },
-  { key: 'payments', label: 'تحويلات تنتظر المراجعة', value: counts.pendingPayments, note: 'إثباتات دفع رسوم تسجيل السيارات', icon: Wallet, tone: 'amber' },
+  { key: 'payments', label: 'تحويلات تنتظر المراجعة', value: counts.pendingPayments, note: 'إثباتات دفع لم تُعتمد بعد؛ لا تُحتسب سياراتها ضمن التسجيل المكتمل', icon: Wallet, tone: 'amber' },
   { key: 'requests', label: 'طلبات التأجير', value: counts.requests, note: 'كل طلبات التأجير المسجلة', icon: ClipboardCheck, tone: 'emerald' },
   { key: 'ads', label: 'الإعلانات النشطة', value: counts.activeAds, note: 'إعلانات ترويج السيارات النشطة', icon: Megaphone, tone: 'rose' },
  ]
