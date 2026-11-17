@@ -88,44 +88,57 @@ const HOME_CAR_IMAGES = [
   ]
 ]
 const HOME_BANNER_IMAGE = 'https://i.ibb.co/LDtVLtkT/3-E4722-EB-3946-4526-80-D0-87-A0-E48133-C7.png'
-function OwnerPersistentBar() {
-  const links = [
-    { href: '/workspace/owner/vehicles', label: 'سياراتي', icon: <CarFront size={17}/> },
-    { href: '/workspace/owner/offers', label: 'عروضي', icon: <ClipboardList size={17}/> },
-    { href: '/workspace/owner/requests', label: 'طلبات الشركات', icon: <Building2 size={17}/> },
-    { href: '/workspace/catalog', label: 'كتالوج السيارات · عرض فقط', icon: <Search size={17}/> },
-    { href: '/services', label: 'خدمات السيارات', icon: <Wrench size={17}/> },
-    { href: '/workspace/advertising-plans', label: 'باقات الإعلانات', icon: <Megaphone size={17}/> },
-    { href: '/messages', label: 'المراسلات', icon: <MessageCircle size={17}/> },
-    { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: <UserRound size={17}/> },
-    { href: '/workspace/provider/managed-sourcing', label: 'تفويضات البحث', icon: <Search size={17}/> },
-    { href: '/assistant', label: 'مساعد My Car', icon: <Bot size={17}/> },
-    { href: '/workspace/notifications', label: 'إعدادات الإشعارات', icon: <Bell size={17}/> },
-  ]
+function OwnerPersistentBar({ role = 'owner' }: { role?: 'owner' | 'company' | 'supplier' | 'employee' | 'admin' }) {
   const currentPath = window.location.pathname
-  return <header dir="rtl" className="mc-owner-persistent-bar">
-    <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car <span className="text-cyan-300">عربيتي</span></strong><small>مساحة مالك السيارة</small></span></a>
-    <nav aria-label="التنقل الرئيسي" className="mc-owner-main-links">{links.map(link => {
-      const active = currentPath === link.href
-        || (link.href === '/workspace/owner/vehicles' && (currentPath === '/workspace/owner' || currentPath.startsWith('/workspace/owner/vehicles')))
-        || (link.href === '/workspace/owner/offers' && currentPath.startsWith('/workspace/owner/offers'))
-        || (link.href === '/workspace/owner/requests' && currentPath.startsWith('/workspace/owner/requests'))
-        || (link.href === '/workspace/catalog' && currentPath.startsWith('/workspace/catalog'))
-        || (link.href === '/services' && (currentPath === '/automotive-services' || currentPath.startsWith('/services')))
-        || (link.href === '/messages' && currentPath.startsWith('/messages'))
-        || (link.href === '/workspace/advertising-plans' && currentPath.startsWith('/workspace/advertising-plans'))
-        || (link.href === '/workspace/provider-employee-requests' && ['/workspace/provider-employee-requests','/workspace/owner/employee-requests','/workspace/supplier/employee-requests'].includes(currentPath))
-        || (link.href === '/workspace/provider/managed-sourcing' && currentPath.startsWith('/workspace/provider/managed-sourcing'))
-        || (link.href === '/assistant' && currentPath === '/assistant')
-      return <a key={link.href} href={link.href} aria-current={active ? 'page' : undefined} className={`mc-owner-main-link ${active ? 'is-active' : ''}`}>{link.icon}<span>{link.label}</span></a>
-    })}</nav>
-    <div className="mc-owner-bar-actions">
-      <button type="button" aria-label="تحديث الصفحة" title="تحديث الصفحة" onClick={()=>window.location.reload()} className="mc-owner-bar-action"><RefreshCw size={18}/><span>تحديث</span></button>
-      <AccountNotifications/>
-    </div>
-  </header>
+  const linksByRole = {
+    owner: [
+      ['/workspace/owner/vehicles','سياراتي'], ['/workspace/owner/offers','عروضي'], ['/workspace/owner/requests','طلبات الشركات'],
+      ['/workspace/catalog','كتالوج السيارات'], ['/services','خدمات السيارات'], ['/workspace/advertising-plans','باقات الإعلانات'],
+      ['/workspace/provider-employee-requests','طلبات الموظفين'], ['/workspace/provider/managed-sourcing','تفويضات البحث'],
+      ['/assistant','مساعد My Car']
+    ],
+    company: [
+      ['/workspace/company','الرئيسية'], ['/workspace/company/requests','طلبات التأجير'], ['/workspace/company/requests/new','طلب جديد'],
+      ['/workspace/catalog','السيارات المتاحة'], ['/workspace/company/managed-sourcing','فوّض My Car للبحث'],
+      ['/workspace/company/subscriptions','الاشتراكات والباقات'], ['/workspace/company/insights','التقارير والمؤشرات'],
+      ['/workspace/company/team','فريق العمل'], ['/workspace/company/alerts','التنبيهات الذكية'], ['/assistant','مساعد My Car']
+    ],
+    supplier: [
+      ['/workspace/supplier/vehicles','سيارات الأسطول'], ['/workspace/supplier/vehicles/new','إضافة سيارة'],
+      ['/workspace/supplier/requests','طلبات الشركات'], ['/workspace/supplier/offers','عروضي'],
+      ['/workspace/provider/managed-sourcing','تفويضات البحث'], ['/workspace/catalog','كتالوج السيارات'],
+      ['/services','خدمات السيارات'], ['/workspace/advertising-plans','باقات الإعلانات'], ['/assistant','مساعد My Car']
+    ],
+    employee: [
+      ['/workspace/employee','الرئيسية'], ['/workspace/employee/requests','طلباتي'], ['/workspace/employee/messages','المراسلات'],
+      ['/workspace/employee/account','حسابي'], ['/assistant','مساعد My Car']
+    ],
+    admin: [
+      ['/workspace/admin','لوحة الإدارة'], ['/workspace/admin/vehicle-reviews','مراجعة السيارات'],
+      ['/workspace/admin/employee-requests','طلبات الموظفين'], ['/workspace/admin/managed-accounts','الحسابات'],
+      ['/workspace/admin/analytics','التحليلات'], ['/workspace/admin/automation-review','المراجعة الذكية'],
+      ['/workspace/admin/platform-settings','إعدادات المنصة']
+    ]
+  } as const
+  const links = linksByRole[role]
+  const active = (href: string) => currentPath === href || (href !== '/workspace/company' && href !== '/workspace/employee' && href !== '/workspace/admin' && currentPath.startsWith(href + '/'))
+  return <div className="mc-platform-workspace-chrome" dir="rtl">
+    <header className="mc-platform-topbar">
+      <a href={role === 'company' ? '/workspace/company' : role === 'supplier' ? '/workspace/supplier/vehicles' : role === 'employee' ? '/workspace/employee' : role === 'admin' ? '/workspace/admin' : '/workspace/owner/vehicles'} className="mc-platform-brand">
+        <img src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png" alt="شعار My Car عربيتي" />
+        <span><strong><span dir="ltr">My Car</span> <b>عربيتي</b></strong><small>منصة إدارة وتأجير السيارات</small></span>
+      </a>
+      <div className="mc-platform-header-actions">
+        <button type="button" aria-label="تحديث الصفحة" title="تحديث الصفحة" onClick={() => window.location.reload()}><RefreshCw size={18}/><span>تحديث الصفحة</span></button>
+        <a href="/messages" aria-label="المراسلات" title="المراسلات"><MessageCircle size={18}/><span>المراسلات</span></a>
+        <AccountNotifications/>
+      </div>
+    </header>
+    <nav className="mc-platform-page-nav" aria-label="التنقل بين صفحات الحساب">
+      {links.map(([href,label]) => <a key={href} href={href} aria-current={active(href) ? 'page' : undefined} className={active(href) ? 'is-active' : ''}>{label}</a>)}
+    </nav>
+  </div>
 }
-
 
 function ServiceNotice({ title, message, settings }: { title: string; message: string; settings: PlatformSettings }) {
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5">
@@ -398,11 +411,11 @@ export default function App() {
   if (path === '/workspace/supplier/insights') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><FleetSupplierInsightsPage /></Suspense></SupplierPageShell> : <ServiceNotice settings={settings} title="تقارير الأسطول" message="هذه الصفحة متاحة لموردي الأساطيل المعتمدين بعد تسجيل الدخول." />
   if (path === '/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لمركز الدعم" message="مركز الدعم الفني متاح للمستخدمين المسجلين لمتابعة تذاكرهم والردود." />
   if (path === '/workspace/admin/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage admin /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الدعم" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
-  if (path === '/workspace/employee/messages') return <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
+  if (path === '/workspace/employee/messages') return <><OwnerPersistentBar role="employee"/><Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense></>
   if (path === '/workspace/provider/employee-messages') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
-  if (path === '/workspace/employee/account') return <Suspense fallback={<PlatformLoading />}><EmployeeAccountPage /></Suspense>
-  if (path === '/workspace/employee/requests') return <Suspense fallback={<PlatformLoading />}><EmployeeRequestsOffersPage /></Suspense>
-  if (path === '/workspace/employee') return <Suspense fallback={<PlatformLoading />}><EmployeeWorkspacePage /></Suspense>
+  if (path === '/workspace/employee/account') return <><OwnerPersistentBar role="employee"/><Suspense fallback={<PlatformLoading />}><EmployeeAccountPage /></Suspense></>
+  if (path === '/workspace/employee/requests') return <><OwnerPersistentBar role="employee"/><Suspense fallback={<PlatformLoading />}><EmployeeRequestsOffersPage /></Suspense></>
+  if (path === '/workspace/employee') return <><OwnerPersistentBar role="employee"/><Suspense fallback={<PlatformLoading />}><EmployeeWorkspacePage /></Suspense></>
   if (path === '/workspace/provider-employee-requests' || path === '/workspace/owner/employee-requests' || path === '/workspace/supplier/employee-requests') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense></> : <Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense>
   if (path === '/workspace/admin/employee-requests') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-employee-requests" /></Suspense>
   if (path === '/workspace/company/team') return <Suspense fallback={<PlatformLoading />}><CompanyTeamPage /></Suspense>
@@ -441,14 +454,14 @@ export default function App() {
     if (!isPlatformAdmin) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#061b36] px-5 text-white"><section className="w-full max-w-lg rounded-3xl border border-rose-400/30 bg-[#102b47] p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-rose-300" size={44}/><h1 className="text-2xl font-black">غير مصرح بالدخول</h1><p className="mt-3 leading-8 text-white/75">هذا المركز متاح لحسابات إدارة المنصة المعتمدة فقط.</p><a href="/" className="mt-6 inline-flex rounded-xl bg-[#ffad0a] px-7 py-3 font-black text-[#142b43]">العودة للرئيسية</a></section></main>
     return <Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-smart-review" /></Suspense>
   }
-  if (path === '/workspace/admin') return <Suspense fallback={<PlatformLoading />}><AdminDashboardPage /></Suspense>
-  if (path === '/workspace/admin/analytics') return <Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense>
-  if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense>
+  if (path === '/workspace/admin') return <><OwnerPersistentBar role="admin"/><Suspense fallback={<PlatformLoading />}><AdminDashboardPage /></Suspense></>
+  if (path === '/workspace/admin/analytics') return <><OwnerPersistentBar role="admin"/><Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense></>
+  if (path === '/workspace/admin/vehicle-reviews') return <><OwnerPersistentBar role="admin"/><Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense></>
   if (path.includes('/messages')) return <>{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPageSidebar active="messages"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></div></> : <Suspense fallback={<PlatformLoading />}>{authUser && authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<MessagingPage /></Suspense>}</>
-  if (path === '/workspace/company') return <Suspense fallback={<PlatformLoading />}><CompanyDashboardPage /></Suspense>
-  if (path.startsWith('/workspace/company/')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense>
+  if (path === '/workspace/company') return <><OwnerPersistentBar role="company"/><Suspense fallback={<PlatformLoading />}><CompanyDashboardPage /></Suspense></>
+  if (path.startsWith('/workspace/company/')) return <><OwnerPersistentBar role="company"/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense></>
   if (path.startsWith('/workspace/owner')) return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="owner" /></Suspense></>
-  if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense>
+  if (path.startsWith('/workspace/supplier')) return <><OwnerPersistentBar role="supplier"/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense></>
 
   if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
   if ((path === '/register' || path.startsWith('/register/')) && !settings.registration_enabled) {
