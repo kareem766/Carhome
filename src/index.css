@@ -1233,3 +1233,24 @@ main.min-h-screen :is(input, select, textarea):disabled {
   background-color: #f1f5f9 !important;
   opacity: 1;
 }
+
+
+/* Consistent field-level validation feedback across My Car forms. */
+.mc-field-error {
+  border-color: #e11d48 !important;
+  background-color: #fff1f2 !important;
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, .12) !important;
+}
+.mc-field-error-message {
+  display: block;
+  margin-top: .4rem;
+  border: 1px solid #fecdd3;
+  border-radius: .65rem;
+  background: #fff1f2;
+  padding: .45rem .7rem;
+  color: #9f1239;
+  font-size: .8rem;
+  font-weight: 750;
+  line-height: 1.65;
+}
+[aria-invalid="true"] { border-color: #e11d48 !important; }
