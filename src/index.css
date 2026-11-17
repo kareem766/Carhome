@@ -2322,3 +2322,7 @@ main:has(.mc-home-hero-section) #services article:hover {
   .mc-home-copy { text-align:right; }
   main:has(.mc-home-hero-section) #services article { min-height:0; }
 }
+
+body:has(.mc-platform-workspace-chrome) .mc-company-dashboard-topbar {
+  display: none !important;
+}
