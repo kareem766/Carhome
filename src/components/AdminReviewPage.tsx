@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabase'
 type ProfileRow = { id: string; display_name: string; phone: string | null; contact_email: string | null; address: string | null; created_at: string }
 type ProfileForm = { display_name: string; phone: string; contact_email: string; address: string }
 const emptyProfile: ProfileForm = { display_name: '', phone: '', contact_email: '', address: '' }
-type OrganizationRow = { id: string; name: string; organization_type: 'individual_owner' | 'company' | 'fleet_supplier'; approval_status: 'pending_review' | 'approved' | 'rejected' | 'suspended'; city: string | null; contact_name: string | null; contact_email: string | null; address: string | null; company_type: string | null; fleet_vehicle_count: number | null; created_at: string }
+type OrganizationRow = { id: string; created_by: string | null; name: string; organization_type: 'individual_owner' | 'company' | 'fleet_supplier'; approval_status: 'pending_review' | 'approved' | 'rejected' | 'suspended'; city: string | null; contact_name: string | null; contact_email: string | null; address: string | null; company_type: string | null; fleet_vehicle_count: number | null; created_at: string }
 type OrganizationForm = { name: string; organization_type: 'individual_owner' | 'company' | 'fleet_supplier'; city: string; contact_name: string; contact_email: string; address: string; company_type: string; fleet_vehicle_count: string }
 const emptyOrganization: OrganizationForm = { name: '', organization_type: 'company', city: '', contact_name: '', contact_email: '', address: '', company_type: '', fleet_vehicle_count: '' }
 type VehicleRow = { id: string; organization_id: string; review_note?: string | null; make: string; model: string; model_year: number; vehicle_type: string; transmission: string; seats: number; governorate: string; address: string; monthly_price_egp: number; yearly_price_egp: number | null; with_driver: boolean; notes: string | null; review_status: string; payment_status: string; organizations: { name: string } | { name: string }[] | null; images?: { url: string; alt_text: string }[] }
@@ -75,7 +75,7 @@ export default function AdminReviewPage({ initialSection }: { initialSection?: s
     const [vehicleResult,paymentResult,organizationResult,profileResult,requestResult,offerResult,promotionResult,advertisingPlanResult] = await Promise.all([
       supabase.from('vehicles').select('id,organization_id,make,model,model_year,vehicle_type,transmission,seats,governorate,address,monthly_price_egp,yearly_price_egp,with_driver,notes,review_status,payment_status,organizations(name)').order('created_at',{ascending:false}),
       supabase.from('vehicle_payment_submissions').select('id,vehicle_id,amount_egp,period_months,transfer_method,transfer_reference,review_status,admin_notes,proof_path,created_at,vehicles(make,model,model_year,vehicle_type,governorate,monthly_price_egp,review_status),organizations(name,organization_type)').order('created_at',{ascending:false}),
-      supabase.from('organizations').select('id,name,organization_type,approval_status,city,contact_name,contact_email,address,company_type,fleet_vehicle_count,created_at').order('created_at',{ascending:false}),
+      supabase.from('organizations').select('id,created_by,name,organization_type,approval_status,city,contact_name,contact_email,address,company_type,fleet_vehicle_count,created_at').eq('approval_status','pending_review').order('created_at',{ascending:false}),
       supabase.from('profiles').select('id,display_name,phone,contact_email,address,created_at').order('created_at',{ascending:false}),
       supabase.from('rental_requests').select('id,title,vehicle_type,quantity,duration_type,duration_months,governorate,with_driver,details,status,created_at,organizations(name)').order('created_at',{ascending:false}),
       supabase.from('rental_offers').select('id,request_id,monthly_price_egp,yearly_price_egp,vehicle_count,message,status,created_at,organizations(name),rental_requests(title)').order('created_at',{ascending:false}),
@@ -113,7 +113,7 @@ export default function AdminReviewPage({ initialSection }: { initialSection?: s
       }))
       setPaymentProofUrls(Object.fromEntries(proofEntries.filter((entry): entry is readonly [string, string] => entry !== null)))
     }
-    if (organizationResult.error) setError('تعذر تحميل المؤسسات: ' + organizationResult.error.message); else setOrganizations((organizationResult.data || []) as OrganizationRow[])
+    if (organizationResult.error) setError('تعذر تحميل المؤسسات: ' + organizationResult.error.message); else { const activeProfileIds = new Set((profileResult.data || []).map(profile => profile.id)); const actionableOrganizations = ((organizationResult.data || []) as OrganizationRow[]).filter(org => Boolean(org.created_by && activeProfileIds.has(org.created_by))); setOrganizations(actionableOrganizations) }
     if (profileResult.error) setError('تعذر تحميل الحسابات: ' + profileResult.error.message); else setProfiles((profileResult.data || []) as ProfileRow[])
     if (requestResult.error) setError('تعذر تحميل طلبات التأجير: ' + requestResult.error.message); else setRentalRequests((requestResult.data || []) as unknown as RentalRequestRow[])
     if (offerResult.error) setError('تعذر تحميل عروض التأجير: ' + offerResult.error.message); else setRentalOffers((offerResult.data || []) as unknown as RentalOfferRow[])
@@ -398,7 +398,7 @@ export default function AdminReviewPage({ initialSection }: { initialSection?: s
     }
     const result = editingOrganizationId
       ? await supabase.from('organizations').update(payload).eq('id', editingOrganizationId)
-      : await supabase.from('organizations').insert(payload)
+      : await supabase.from('organizations').insert({ ...payload, created_by: (await supabase.auth.getUser()).data.user?.id })
     setSavingOrganization(false)
     if (result.error) { setError('تعذر حفظ المؤسسة: ' + result.error.message); return }
     setNotice(editingOrganizationId ? 'تم تحديث بيانات المؤسسة.' : 'تمت إضافة المؤسسة.')
