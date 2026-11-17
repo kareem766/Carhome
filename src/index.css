@@ -1662,3 +1662,95 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-company-page-with-sidebar :is(article,form) { border-radius: 16px !important; }
   .mc-company-page-with-sidebar :is(button,a) { touch-action: manipulation; }
 }
+
+
+/* Company workspace visual consistency pass: scoped to the company shell only. */
+.mc-company-page-with-sidebar {
+  color: #142b46;
+  background:
+    radial-gradient(ellipse at 92% 0%, rgba(45, 112, 190, .075), transparent 34rem),
+    linear-gradient(145deg, #f3f7fc 0%, #edf3fa 52%, #f7f9fc 100%);
+}
+.mc-company-page-with-sidebar :is(h1, h2, h3) {
+  color: #102642;
+  text-wrap: balance;
+}
+.mc-company-page-with-sidebar :is(p, label, small) {
+  line-height: 1.75;
+}
+.mc-company-page-with-sidebar article {
+  min-width: 0;
+  border: 1px solid rgba(190, 207, 229, .72);
+  border-radius: 1.15rem;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 8px 24px rgba(17, 43, 76, .055);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.mc-company-page-with-sidebar article:hover {
+  border-color: rgba(55, 125, 205, .38);
+  box-shadow: 0 14px 32px rgba(17, 43, 76, .09);
+}
+.mc-company-page-with-sidebar :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+  min-width: 0;
+  border: 1px solid #d7e2ef;
+  border-radius: .8rem;
+  background: #fff;
+  color: #193653;
+}
+.mc-company-page-with-sidebar :is(input, select, textarea):focus {
+  border-color: #4388d4;
+  box-shadow: 0 0 0 3px rgba(53, 125, 205, .12);
+  outline: none;
+}
+.mc-company-page-with-sidebar :is(button, a):focus-visible {
+  outline: 3px solid rgba(59, 130, 246, .72);
+  outline-offset: 3px;
+}
+.mc-company-page-with-sidebar table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.mc-company-page-with-sidebar :is(th, td) {
+  border-color: #e5edf6;
+  padding: .8rem .9rem;
+  vertical-align: middle;
+}
+.mc-company-page-with-sidebar th {
+  background: #f4f8fd;
+  color: #35516f;
+  font-size: .78rem;
+  font-weight: 850;
+}
+@media (max-width: 760px) {
+  .mc-company-page-with-sidebar {
+    padding-inline: 0;
+    overflow-x: clip;
+  }
+  .mc-company-page-with-sidebar :is(article, section) {
+    min-width: 0;
+  }
+  .mc-company-page-with-sidebar article {
+    border-radius: 1rem;
+  }
+  .mc-company-page-with-sidebar :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+    min-height: 46px;
+    max-width: 100%;
+    font-size: 16px;
+  }
+  .mc-company-page-with-sidebar :is(button, a) {
+    max-width: 100%;
+  }
+  .mc-company-page-with-sidebar table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc-company-page-with-sidebar article {
+    transition: none;
+  }
+}
