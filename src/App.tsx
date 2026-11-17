@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
-import { ArrowLeft, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, RefreshCw, MessageCircle, Megaphone } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, RefreshCw, MessageCircle, Megaphone, ClipboardList, Wrench, Bot, Bell } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
@@ -128,46 +128,26 @@ function OwnerPersistentBar() {
 
 function CompanyPersistentBar() {
   const currentPath = window.location.pathname
-  const linksByRole = {
-    owner: [
-      ['/workspace/owner/vehicles','سياراتي'], ['/workspace/owner/offers','عروضي'], ['/workspace/owner/requests','طلبات الشركات'],
-      ['/workspace/catalog','كتالوج السيارات'], ['/services','خدمات السيارات'], ['/workspace/advertising-plans','باقات الإعلانات'],
-      ['/workspace/provider-employee-requests','طلبات الموظفين'], ['/workspace/provider/managed-sourcing','تفويضات البحث'],
-      ['/assistant','مساعد My Car']
-    ],
-    company: [
-      ['/workspace/company','الرئيسية'], ['/workspace/company/requests','طلبات التأجير'], ['/workspace/company/requests/new','طلب جديد'],
-      ['/workspace/catalog','السيارات المتاحة'], ['/workspace/company/managed-sourcing','فوّض My Car للبحث'],
-      ['/workspace/company/subscriptions','الاشتراكات والباقات'], ['/workspace/company/insights','التقارير والمؤشرات'],
-      ['/workspace/company/team','فريق العمل'], ['/workspace/company/alerts','التنبيهات الذكية'], ['/assistant','مساعد My Car']
-    ],
-    supplier: [
-      ['/workspace/supplier/vehicles','سيارات الأسطول'], ['/workspace/supplier/vehicles/new','إضافة سيارة'],
-      ['/workspace/supplier/requests','طلبات الشركات'], ['/workspace/supplier/offers','عروضي'],
-      ['/workspace/provider/managed-sourcing','تفويضات البحث'], ['/workspace/catalog','كتالوج السيارات'],
-      ['/services','خدمات السيارات'], ['/workspace/advertising-plans','باقات الإعلانات'], ['/assistant','مساعد My Car']
-    ],
-    employee: [
-      ['/workspace/employee','الرئيسية'], ['/workspace/employee/requests','طلباتي'], ['/workspace/employee/messages','المراسلات'],
-      ['/workspace/employee/account','حسابي'], ['/assistant','مساعد My Car']
-    ],
-    admin: [
-      ['/workspace/admin','لوحة الإدارة'], ['/workspace/admin/vehicle-reviews','مراجعة السيارات'],
-      ['/workspace/admin/employee-requests','طلبات الموظفين'], ['/workspace/admin/managed-accounts','الحسابات'],
-      ['/workspace/admin/analytics','التحليلات'], ['/workspace/admin/automation-review','المراجعة الذكية'],
-      ['/workspace/admin/platform-settings','إعدادات المنصة']
-    ]
-  } as const
-  const links = linksByRole[role]
+  const links = [
+    ['/workspace/company','الرئيسية'],
+    ['/workspace/company/requests','طلبات التأجير'],
+    ['/workspace/company/requests/new','طلب جديد'],
+    ['/workspace/catalog','السيارات المتاحة'],
+    ['/workspace/company/managed-sourcing','فوّض My Car للبحث'],
+    ['/workspace/company/subscriptions','الاشتراكات والباقات'],
+    ['/workspace/company/insights','التقارير والمؤشرات'],
+    ['/workspace/company/team','فريق العمل'],
+    ['/workspace/company/alerts','التنبيهات الذكية'],
+    ['/assistant','مساعد My Car']
+  ] as const
   const active = (href: string) => {
-    if (href === '/workspace/company' || href === '/workspace/employee' || href === '/workspace/admin') return currentPath === href
+    if (href === '/workspace/company') return currentPath === href
     if (href === '/workspace/company/requests') return currentPath.startsWith(href) && currentPath !== '/workspace/company/requests/new'
-    if (href === '/workspace/supplier/vehicles') return currentPath === href || (currentPath.startsWith(href + '/') && currentPath !== '/workspace/supplier/vehicles/new')
     return currentPath === href || currentPath.startsWith(href + '/')
   }
   return <div className="mc-company-only-chrome" dir="rtl">
     <header className="mc-platform-topbar">
-      <a href={role === 'company' ? '/workspace/company' : role === 'supplier' ? '/workspace/supplier/vehicles' : role === 'employee' ? '/workspace/employee' : role === 'admin' ? '/workspace/admin' : '/workspace/owner/vehicles'} className="mc-platform-brand">
+      <a href="/workspace/company" className="mc-platform-brand">
         <img src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png" alt="شعار My Car عربيتي" />
         <span><strong><span dir="ltr">My Car</span> <b>عربيتي</b></strong><small>منصة إدارة وتأجير السيارات</small></span>
       </a>
@@ -177,7 +157,7 @@ function CompanyPersistentBar() {
         <AccountNotifications/>
       </div>
     </header>
-    <nav className="mc-platform-page-nav" aria-label="التنقل بين صفحات الحساب">
+    <nav className="mc-platform-page-nav" aria-label="التنقل بين صفحات حساب الشركة">
       {links.map(([href,label]) => <a key={href} href={href} aria-current={active(href) ? 'page' : undefined} className={active(href) ? 'is-active' : ''}>{label}</a>)}
     </nav>
   </div>
