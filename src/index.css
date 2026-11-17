@@ -1346,7 +1346,7 @@ main.min-h-screen :is(input, select, textarea):disabled {
   }
   .mc-company-dashboard-topbar {
     position: sticky !important;
-    top: 54px !important;
+    top: calc(54px + env(safe-area-inset-top)) !important;
     z-index: 80 !important;
   }
   .mc-company-dashboard-topbar-inner {
