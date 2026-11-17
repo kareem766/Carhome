@@ -1175,3 +1175,41 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-messaging-main .mc-messaging-chat-panel form input{width:0;min-width:0;min-height:48px;flex:1 1 auto;padding-inline:.8rem!important;font-size:16px!important;border-radius:.85rem!important}
   .mc-messaging-main .mc-messaging-chat-panel form button{display:inline-flex;min-width:48px;min-height:48px;flex:0 0 auto;align-items:center;justify-content:center;border-radius:.85rem!important;padding-inline:.8rem!important;font-size:.78rem}
 }
+
+
+/* Employee and provider employee-offer messaging: same mobile inbox/chat pattern. */
+.mc-employee-back-to-inbox{display:none}
+@media(max-width:760px){
+  .mc-employee-messaging{min-height:0!important;width:100%;overflow-x:clip}
+  .mc-employee-messaging-content{width:100%;min-width:0;padding:.7rem .75rem calc(1rem + env(safe-area-inset-bottom))!important;gap:.7rem!important}
+  .mc-employee-messaging-hero{padding:1rem!important;border-radius:1rem!important}
+  .mc-employee-messaging-hero>div:first-child{align-items:center;gap:.65rem}
+  .mc-employee-messaging-hero>div:first-child>span{width:42px;height:42px;border-radius:.8rem}
+  .mc-employee-messaging-hero h1{font-size:1.05rem!important;line-height:1.5}
+  .mc-employee-messaging-hero p:last-child{margin-top:.5rem!important;font-size:.76rem;line-height:1.7}
+  .mc-employee-inbox{padding:.85rem!important;border-radius:1rem!important}
+  .mc-employee-inbox h2{font-size:1rem}
+  .mc-employee-inbox>div:first-child p{font-size:.75rem}
+  .mc-employee-inbox-list{display:flex;flex-direction:column;gap:.6rem}
+  .mc-employee-inbox-list>a{display:flex;flex-direction:column;align-items:stretch;gap:.65rem;padding:.9rem!important;border-radius:.9rem!important}
+  .mc-employee-inbox-list>a>div{min-width:0}
+  .mc-employee-inbox-list>a>div p:first-child{font-size:.85rem;line-height:1.65}
+  .mc-employee-inbox-list>a>div p:last-child{font-size:.72rem;line-height:1.6;overflow-wrap:anywhere}
+  .mc-employee-inbox-list>a>span{display:flex;min-height:42px;align-items:center;justify-content:center;border-radius:.7rem}
+  .mc-employee-offer-summary{display:flex;flex-direction:column;align-items:stretch;gap:.65rem;padding:.85rem!important;border-radius:1rem!important}
+  .mc-employee-offer-summary>div{min-width:0}
+  .mc-employee-offer-summary h2{font-size:.9rem;line-height:1.65}
+  .mc-employee-back-to-inbox{display:inline-flex!important;align-self:flex-start;min-height:44px}
+  .mc-employee-chat-panel{display:flex;flex-direction:column;height:calc(100svh - 275px);min-height:360px;max-height:680px;border-radius:1rem!important;overflow:hidden}
+  .mc-employee-chat-panel>div:nth-child(1){flex:0 0 auto;min-height:54px;padding:.7rem .8rem!important}
+  .mc-employee-chat-panel>div:nth-child(2){flex:1 1 auto;min-height:0;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain;padding:.8rem!important}
+  .mc-employee-chat-panel article{max-width:88%;font-size:.83rem;line-height:1.75}
+  .mc-employee-chat-panel form{display:flex;flex:0 0 auto;align-items:flex-end;gap:.5rem;padding:.6rem!important;padding-bottom:calc(.6rem + env(safe-area-inset-bottom))!important;background:#fff}
+  .mc-employee-chat-panel form textarea{width:0;min-width:0;min-height:48px;max-height:112px;flex:1 1 auto;resize:vertical;padding:.7rem .8rem!important;font-size:16px!important;border-radius:.85rem!important}
+  .mc-employee-chat-panel form button{display:inline-flex;min-width:48px;min-height:48px;flex:0 0 auto;align-items:center;justify-content:center;border-radius:.85rem!important;padding-inline:.8rem!important;font-size:.78rem}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-messaging-hero{display:none!important}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-inbox{display:none!important}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-offer-summary{padding:.65rem .75rem!important}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-offer-summary>div{display:none}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-chat-panel{height:calc(100svh - 235px);min-height:330px}
+}
