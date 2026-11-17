@@ -120,7 +120,12 @@ function OwnerPersistentBar({ role = 'owner' }: { role?: 'owner' | 'company' | '
     ]
   } as const
   const links = linksByRole[role]
-  const active = (href: string) => currentPath === href || (href !== '/workspace/company' && href !== '/workspace/employee' && href !== '/workspace/admin' && currentPath.startsWith(href + '/'))
+  const active = (href: string) => {
+    if (href === '/workspace/company' || href === '/workspace/employee' || href === '/workspace/admin') return currentPath === href
+    if (href === '/workspace/company/requests') return currentPath.startsWith(href) && currentPath !== '/workspace/company/requests/new'
+    if (href === '/workspace/supplier/vehicles') return currentPath === href || (currentPath.startsWith(href + '/') && currentPath !== '/workspace/supplier/vehicles/new')
+    return currentPath === href || currentPath.startsWith(href + '/')
+  }
   return <div className="mc-platform-workspace-chrome" dir="rtl">
     <header className="mc-platform-topbar">
       <a href={role === 'company' ? '/workspace/company' : role === 'supplier' ? '/workspace/supplier/vehicles' : role === 'employee' ? '/workspace/employee' : role === 'admin' ? '/workspace/admin' : '/workspace/owner/vehicles'} className="mc-platform-brand">
