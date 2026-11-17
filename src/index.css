@@ -539,24 +539,41 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-catalog-main > button.fixed { left: .75rem; bottom: max(.75rem, env(safe-area-inset-bottom)); min-height: 3rem; padding-inline: .9rem; font-size: .78rem; }
 }
 
-/* Messaging: conversation selector stays reachable; message composer remains thumb-friendly. */
+/* Messaging: mobile-first conversation list and full-width chat panel. */
 @media (max-width: 767px) {
-  .mc-messaging-main { padding: 1rem .75rem 2rem !important; }
-  .mc-messaging-header { display: grid !important; grid-template-columns: minmax(0, 1fr); gap: .9rem !important; padding: 1rem !important; border-radius: 1.25rem !important; }
-  .mc-messaging-header h1 { font-size: 1.35rem !important; }
-  .mc-messaging-actions { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: .5rem !important; }
-  .mc-messaging-actions > * { min-width: 0; width: 100%; justify-content: center; font-size: .75rem !important; padding-inline: .55rem !important; }
-  .mc-messaging-main > div > div.grid { grid-template-columns: minmax(0, 1fr) !important; min-height: 0 !important; gap: .75rem !important; }
-  .mc-messaging-main aside { display: flex; flex-direction: row; gap: .55rem; overflow-x: auto; overflow-y: hidden; padding-bottom: .25rem; scroll-snap-type: x proximity; }
-  .mc-messaging-main aside > div:first-child { flex: 0 0 10rem; min-width: 10rem; }
-  .mc-messaging-main aside > button { flex: 0 0 min(76vw, 18rem); min-width: 0; padding: .8rem !important; scroll-snap-align: start; }
-  .mc-messaging-main aside > button > span:first-child { align-items: flex-start; line-height: 1.5; }
-  .mc-messaging-main section.flex.min-h-\[60vh\] { min-height: 55svh !important; height: 58svh; border-radius: 1.15rem !important; }
-  .mc-messaging-main section > div.flex-1 { min-height: 0; }
-  .mc-messaging-main section form { padding: .65rem !important; gap: .5rem !important; }
-  .mc-messaging-main section form input { min-height: 48px; font-size: 16px !important; }
-  .mc-messaging-main section form button { min-width: 4rem; min-height: 48px; }
+  .mc-messaging-main { width:100%; max-width:100%; min-width:0; padding: .85rem .7rem 1.5rem !important; overflow-x:clip; }
+  .mc-messaging-main > div { width:100%; min-width:0; }
+  .mc-messaging-header { display:grid !important; grid-template-columns:minmax(0,1fr); gap:.85rem !important; padding:1rem !important; border-radius:1.15rem !important; }
+  .mc-messaging-header h1 { font-size:1.3rem !important; line-height:1.45 !important; }
+  .mc-messaging-actions { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; gap:.5rem !important; }
+  .mc-messaging-actions > * { min-width:0; width:100%; min-height:44px; justify-content:center; font-size:.74rem !important; padding-inline:.5rem !important; }
+  .mc-messaging-main > div > section.relative { padding:1rem !important; border-radius:1.25rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative { flex-direction:row !important; align-items:center !important; gap:.75rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:first-child { min-width:0; gap:.65rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:first-child > div:first-child { width:2.7rem !important; height:2.7rem !important; border-radius:.85rem !important; }
+  .mc-messaging-main > div > section.relative h2 { margin-top:.35rem !important; font-size:1.05rem !important; line-height:1.5 !important; }
+  .mc-messaging-main > div > section.relative p.max-w-2xl { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; margin-top:.3rem !important; font-size:.72rem !important; line-height:1.7 !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:last-child { flex:0 0 auto; gap:.5rem !important; padding:.6rem .7rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:last-child > div:first-child { width:2.2rem !important; height:2.2rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:last-child p.text-2xl { font-size:1.25rem !important; }
+  .mc-messaging-main > div > div.grid { display:grid !important; grid-template-columns:minmax(0,1fr) !important; min-height:0 !important; gap:.75rem !important; margin-top:1rem !important; }
+  .mc-messaging-main aside { display:grid !important; grid-template-columns:minmax(0,1fr); gap:.55rem !important; min-width:0; overflow:visible !important; padding:0 !important; }
+  .mc-messaging-main aside > div:first-child { display:flex; flex:initial !important; min-width:0 !important; width:100%; align-items:center; justify-content:space-between; padding:.8rem .9rem !important; }
+  .mc-messaging-main aside > div:first-child p { display:none; }
+  .mc-messaging-main aside > label { width:100%; min-width:0; min-height:48px; }
+  .mc-messaging-main aside > label input { min-width:0; font-size:16px !important; }
+  .mc-messaging-main aside > button { display:block; flex:initial !important; width:100%; min-width:0; padding:.8rem .9rem !important; text-align:right; }
+  .mc-messaging-main aside > button > span:first-child { align-items:flex-start; line-height:1.5; }
+  .mc-messaging-main aside > p { width:100%; padding:1rem !important; text-align:center; }
+  .mc-messaging-main section.flex.min-h-\[60vh\] { display:flex; min-width:0; min-height:58svh !important; height:62svh; max-height:680px; border-radius:1.15rem !important; }
+  .mc-messaging-main section.flex.min-h-\[60vh\] > div:first-child { padding:.9rem 1rem !important; }
+  .mc-messaging-main section > div.flex-1 { min-height:0; padding:.85rem !important; }
+  .mc-messaging-main section form { padding:.65rem !important; gap:.5rem !important; }
+  .mc-messaging-main section form input { min-height:48px; min-width:0; font-size:16px !important; padding-inline:.8rem !important; }
+  .mc-messaging-main section form button { min-width:3.25rem; min-height:48px; justify-content:center; padding-inline:.8rem !important; }
+  .mc-messaging-main section form button svg { flex:0 0 auto; }
 }
+
 
 
 /* Registration and admin screens: one clear action hierarchy on narrow viewports. */
@@ -1116,4 +1133,83 @@ main.min-h-screen :is(input, select, textarea):disabled {
     margin-inline-start: auto;
     margin-inline-end: 0;
   }
+}
+
+
+/* Mobile messaging app flow: inbox first, then a focused full-screen conversation. */
+.mc-messaging-back-to-list{display:none}
+@media(max-width:760px){
+  .mc-messaging-main{min-height:0!important;width:100%;max-width:100%;padding:.65rem .7rem calc(1rem + env(safe-area-inset-bottom))!important;overflow-x:clip}
+  .mc-messaging-main>.mx-auto{width:100%;min-width:0}
+  .mc-messaging-main .mc-messaging-header{padding:.8rem!important;border-radius:1rem!important;gap:.6rem!important}
+  .mc-messaging-main .mc-messaging-header>div:first-child{min-width:0}
+  .mc-messaging-main .mc-messaging-header h1{margin-top:.35rem!important;font-size:1.12rem!important;line-height:1.45!important}
+  .mc-messaging-main .mc-messaging-header p{margin-top:.2rem!important;font-size:.74rem!important;line-height:1.6!important}
+  .mc-messaging-main .mc-messaging-actions{display:flex!important;flex-wrap:wrap!important;gap:.4rem!important}
+  .mc-messaging-main .mc-messaging-actions>*{min-height:42px!important;font-size:.72rem!important}
+  .mc-messaging-main>.mx-auto>section.relative{display:none!important}
+  .mc-messaging-main>.mx-auto>div.mt-6{display:block!important;min-height:0!important;margin-top:.7rem!important}
+  .mc-messaging-main .mc-messaging-conversation-list{display:flex!important;flex-direction:column!important;gap:.6rem!important;width:100%;min-width:0}
+  .mc-messaging-main .mc-messaging-conversation-list>div:first-child{min-height:58px;padding:.75rem .9rem!important;border-radius:1rem!important}
+  .mc-messaging-main .mc-messaging-conversation-list>div:first-child p{display:none}
+  .mc-messaging-main .mc-messaging-conversation-list>label{width:100%;min-height:50px;padding-inline:.9rem;border-radius:.95rem!important}
+  .mc-messaging-main .mc-messaging-conversation-list>label input{min-width:0;font-size:16px!important}
+  .mc-messaging-main .mc-messaging-conversation-list>button{display:block;width:100%;min-height:82px;padding:.85rem .9rem!important;border-radius:1rem!important;text-align:right}
+  .mc-messaging-main .mc-messaging-conversation-list>button>span:first-child{display:flex;align-items:center;gap:.55rem;font-size:.88rem;line-height:1.6}
+  .mc-messaging-main .mc-messaging-conversation-list>button>span:nth-child(2){margin-top:.25rem;font-size:.77rem}
+  .mc-messaging-main .mc-messaging-conversation-list>button>span:last-child{margin-top:.2rem;font-size:.68rem}
+  .mc-messaging-main .mc-messaging-conversation-list>p{width:100%;padding:1.25rem!important;border-radius:1rem!important;text-align:center;font-size:.84rem;line-height:1.9}
+  .mc-messaging-main .mc-messaging-chat-panel{display:none!important}
+  .mc-messaging-main.mc-mobile-chat-open .mc-messaging-header,
+  .mc-messaging-main.mc-mobile-chat-open .mc-messaging-heading{display:none!important}
+  .mc-messaging-main.mc-mobile-chat-open .mc-messaging-conversation-list{display:none!important}
+  .mc-messaging-main.mc-mobile-chat-open .mc-messaging-chat-panel{display:flex!important;flex-direction:column!important;width:100%;height:calc(100svh - 190px)!important;min-height:430px!important;max-height:780px!important;border-radius:1rem!important;overflow:hidden!important}
+  .mc-messaging-main .mc-messaging-chat-heading{flex:0 0 auto;min-height:72px;padding:.7rem .8rem!important}
+  .mc-messaging-main .mc-messaging-chat-heading>div{min-width:0}
+  .mc-messaging-main .mc-messaging-chat-heading h2{font-size:.9rem;line-height:1.5}
+  .mc-messaging-main .mc-messaging-chat-heading p{font-size:.7rem;line-height:1.5}
+  .mc-messaging-main .mc-messaging-back-to-list{display:inline-flex!important;flex:0 0 44px;width:44px;height:44px}
+  .mc-messaging-main .mc-messaging-chat-panel>div.flex-1{flex:1 1 auto;min-height:0;overflow-y:auto!important;overscroll-behavior:contain;padding:.8rem!important}
+  .mc-messaging-main .mc-messaging-chat-panel>div.flex-1>div{max-width:88%;font-size:.84rem;line-height:1.75}
+  .mc-messaging-main .mc-messaging-chat-panel form{position:relative;z-index:2;display:flex;flex:0 0 auto;align-items:center;gap:.5rem;padding:.65rem!important;padding-bottom:calc(.65rem + env(safe-area-inset-bottom))!important;background:#fff}
+  .mc-messaging-main .mc-messaging-chat-panel form input{width:0;min-width:0;min-height:48px;flex:1 1 auto;padding-inline:.8rem!important;font-size:16px!important;border-radius:.85rem!important}
+  .mc-messaging-main .mc-messaging-chat-panel form button{display:inline-flex;min-width:48px;min-height:48px;flex:0 0 auto;align-items:center;justify-content:center;border-radius:.85rem!important;padding-inline:.8rem!important;font-size:.78rem}
+}
+
+
+/* Employee and provider employee-offer messaging: same mobile inbox/chat pattern. */
+.mc-employee-back-to-inbox{display:none}
+@media(max-width:760px){
+  .mc-employee-messaging{min-height:0!important;width:100%;overflow-x:clip}
+  .mc-employee-messaging-content{width:100%;min-width:0;padding:.7rem .75rem calc(1rem + env(safe-area-inset-bottom))!important;gap:.7rem!important}
+  .mc-employee-messaging-hero{padding:1rem!important;border-radius:1rem!important}
+  .mc-employee-messaging-hero>div:first-child{align-items:center;gap:.65rem}
+  .mc-employee-messaging-hero>div:first-child>span{width:42px;height:42px;border-radius:.8rem}
+  .mc-employee-messaging-hero h1{font-size:1.05rem!important;line-height:1.5}
+  .mc-employee-messaging-hero p:last-child{margin-top:.5rem!important;font-size:.76rem;line-height:1.7}
+  .mc-employee-inbox{padding:.85rem!important;border-radius:1rem!important}
+  .mc-employee-inbox h2{font-size:1rem}
+  .mc-employee-inbox>div:first-child p{font-size:.75rem}
+  .mc-employee-inbox-list{display:flex;flex-direction:column;gap:.6rem}
+  .mc-employee-inbox-list>a{display:flex;flex-direction:column;align-items:stretch;gap:.65rem;padding:.9rem!important;border-radius:.9rem!important}
+  .mc-employee-inbox-list>a>div{min-width:0}
+  .mc-employee-inbox-list>a>div p:first-child{font-size:.85rem;line-height:1.65}
+  .mc-employee-inbox-list>a>div p:last-child{font-size:.72rem;line-height:1.6;overflow-wrap:anywhere}
+  .mc-employee-inbox-list>a>span{display:flex;min-height:42px;align-items:center;justify-content:center;border-radius:.7rem}
+  .mc-employee-offer-summary{display:flex;flex-direction:column;align-items:stretch;gap:.65rem;padding:.85rem!important;border-radius:1rem!important}
+  .mc-employee-offer-summary>div{min-width:0}
+  .mc-employee-offer-summary h2{font-size:.9rem;line-height:1.65}
+  .mc-employee-back-to-inbox{display:inline-flex!important;align-self:flex-start;min-height:44px}
+  .mc-employee-chat-panel{display:flex;flex-direction:column;height:calc(100svh - 275px);min-height:360px;max-height:680px;border-radius:1rem!important;overflow:hidden}
+  .mc-employee-chat-panel>div:nth-child(1){flex:0 0 auto;min-height:54px;padding:.7rem .8rem!important}
+  .mc-employee-chat-panel>div:nth-child(2){flex:1 1 auto;min-height:0;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain;padding:.8rem!important}
+  .mc-employee-chat-panel article{max-width:88%;font-size:.83rem;line-height:1.75}
+  .mc-employee-chat-panel form{display:flex;flex:0 0 auto;align-items:flex-end;gap:.5rem;padding:.6rem!important;padding-bottom:calc(.6rem + env(safe-area-inset-bottom))!important;background:#fff}
+  .mc-employee-chat-panel form textarea{width:0;min-width:0;min-height:48px;max-height:112px;flex:1 1 auto;resize:vertical;padding:.7rem .8rem!important;font-size:16px!important;border-radius:.85rem!important}
+  .mc-employee-chat-panel form button{display:inline-flex;min-width:48px;min-height:48px;flex:0 0 auto;align-items:center;justify-content:center;border-radius:.85rem!important;padding-inline:.8rem!important;font-size:.78rem}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-messaging-hero{display:none!important}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-inbox{display:none!important}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-offer-summary{padding:.65rem .75rem!important}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-offer-summary>div{display:none}
+  .mc-employee-messaging.mc-employee-chat-open .mc-employee-chat-panel{height:calc(100svh - 235px);min-height:330px}
 }
