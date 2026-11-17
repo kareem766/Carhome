@@ -12,6 +12,7 @@ const SupportCenterPage = lazy(() => import('./components/SupportCenterPage'))
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import LegalPages from './components/LegalPages'
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
+const CompanyDashboardPage = lazy(() => import('./components/CompanyDashboardPage'))
 const EmployeeRegistrationPage = lazy(() => import('./components/EmployeeRegistrationPage'))
 const EmployeeWorkspacePage = lazy(() => import('./components/EmployeeWorkspacePage'))
 const EmployeeRequestsOffersPage = lazy(() => import('./components/EmployeeRequestsOffersPage'))
@@ -444,7 +445,8 @@ export default function App() {
   if (path === '/workspace/admin/analytics') return <Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense>
   if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense>
   if (path.includes('/messages')) return <>{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}>{authUser && authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<MessagingPage /></Suspense>}</>
-  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense>
+  if (path === '/workspace/company') return <Suspense fallback={<PlatformLoading />}><CompanyDashboardPage /></Suspense>
+  if (path.startsWith('/workspace/company/')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense>
   if (path.startsWith('/workspace/owner')) return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="owner" /></Suspense></>
   if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense>
 
