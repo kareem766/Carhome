@@ -22,11 +22,9 @@ const links = [
 ]
 
 const pageMeta: Record<string, { title: string; subtitle: string }> = {
-  '/workspace/company/team': { title: 'إدارة فريق الشركة', subtitle: 'إدارة أعضاء الشركة وصلاحيات الوصول' },
   '/workspace/company/subscriptions': { title: 'اشتراك الشركة والباقات', subtitle: 'الباقات، الفوترة، وطلبات تفعيل الاشتراك' },
+  '/workspace/advertising-plans': { title: 'اشتراك الشركة والباقات', subtitle: 'الباقات، الفوترة، وطلبات تفعيل الاشتراك' },
   '/workspace/company/alerts': { title: 'التنبيهات الذكية', subtitle: 'تابع السيارات التي تطابق احتياجات شركتك' },
-  '/workspace/company/managed-sourcing': { title: 'تفويض البحث عن السيارات', subtitle: 'تابع طلبات البحث والعروض المقدمة لشركتك' },
-  '/workspace/company/account': { title: 'بيانات الشركة', subtitle: 'راجع بيانات شركتك ومعلومات الحساب' },
   '/workspace/notifications': { title: 'إعدادات الإشعارات', subtitle: 'تحكم في تنبيهات وتحديثات حساب الشركة' },
 }
 
