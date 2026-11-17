@@ -25,8 +25,8 @@ export default function AdminAnalyticsPage(){
   setAuthorized(true)
   const queries = await Promise.all([
    supabase.from('profiles').select('id,display_name,created_at').order('created_at',{ascending:false}),
-   supabase.from('organizations').select('id,name,organization_type,approval_status,created_at').order('created_at',{ascending:false}),
-   supabase.from('vehicles').select('id,make,model,model_year,review_status,payment_status,monthly_price_egp,created_at').order('created_at',{ascending:false}),
+   supabase.from('organizations').select('id,name,organization_type,approval_status,created_at,created_by').not('created_by','is',null).order('created_at',{ascending:false}),
+   supabase.from('vehicles').select('id,make,model,model_year,review_status,payment_status,monthly_price_egp,created_at').in('payment_status',['paid','verified','waived']).order('created_at',{ascending:false}),
    supabase.from('rental_requests').select('id,title,status,quantity,created_at').order('created_at',{ascending:false}),
    supabase.from('rental_offers').select('id,status,created_at').order('created_at',{ascending:false}),
    supabase.from('vehicle_payment_submissions').select('id,amount_egp,review_status,created_at').order('created_at',{ascending:false}),
@@ -39,8 +39,10 @@ export default function AdminAnalyticsPage(){
    supabase.from('employee_rental_requests').select('id,employee_user_id,title,vehicle_type,governorate,duration_months,budget_min_egp,budget_max_egp,with_driver,status,fee_status,created_at,reviewed_at').order('created_at',{ascending:false})
   ])
   const keys=['profiles','organizations','vehicles','rental_requests','rental_offers','vehicle_payment_submissions','company_subscriptions','vehicle_promotions','managed_sourcing_requests','managed_sourcing_subscriptions','managed_sourcing_offers','employee_accounts','employee_rental_requests']
+  const failedIndex=queries.findIndex(q=>q.error)
+  if(failedIndex>=0){setError('تعذر تحميل '+keys[failedIndex]+': '+queries[failedIndex].error!.message+' — لم نعرض أرقامًا جزئية حتى لا تكون التحليلات مضللة.');setData({});setLoading(false);return}
   const next:Record<string,Row[]>={}
-  queries.forEach((q,i)=>{if(q.error){setError('تعذر تحميل '+keys[i]+': '+q.error!.message)}next[keys[i]]=q.data||[]})
+  queries.forEach((q,i)=>{next[keys[i]]=q.data||[]})
   setData(next);setLoading(false)
  }
  useEffect(()=>{void load()},[])
