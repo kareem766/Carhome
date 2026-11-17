@@ -1752,3 +1752,37 @@ body:has(.mc-company-global-topbar) .mc-company-page-with-sidebar .sticky.top-3 
     scroll-margin-top: 66px;
   }
 }
+
+
+/* Company request, new-request and account routes now use the same shared workspace sidebar. */
+.mc-workspace-main--shared-company {
+  display: block !important;
+  min-width: 0;
+  direction: rtl;
+  background: linear-gradient(180deg, #f3f7fc 0%, #f8faff 45%, #eef3f9 100%) !important;
+}
+.mc-workspace-main--shared-company > .mc-workspace-content {
+  min-width: 0;
+  margin-right: 260px;
+  padding: 0 1.5rem 2rem;
+}
+.mc-workspace-main--shared-company .mc-workspace-topbar {
+  top: 0;
+  border-bottom-color: #dce6f1;
+  box-shadow: 0 7px 22px rgba(15, 39, 78, .055);
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .mc-workspace-main--shared-company > .mc-workspace-content { margin-right: 220px; }
+}
+@media (max-width: 760px) {
+  .mc-workspace-main--shared-company > .mc-workspace-content {
+    margin-right: 0;
+    padding: 0 .75rem 2rem;
+  }
+  .mc-company-mobile-nav ~ .mc-workspace-main--shared-company .mc-workspace-topbar {
+    top: 54px !important;
+  }
+  .mc-workspace-main--shared-company .mc-workspace-page {
+    padding-top: .75rem !important;
+  }
+}
