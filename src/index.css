@@ -1786,3 +1786,23 @@ body:has(.mc-company-global-topbar) .mc-company-page-with-sidebar .sticky.top-3 
     padding-top: .75rem !important;
   }
 }
+
+
+/* Match the shared request/account workspace surfaces to the same company page system. */
+.mc-workspace-main--shared-company :is(section.rounded-2xl, section.rounded-3xl, article.rounded-2xl, article.rounded-3xl) {
+  border-color: #e0e8f2;
+}
+.mc-workspace-main--shared-company :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+  min-width: 0;
+  max-width: 100%;
+  border-color: #d5e0ed;
+  border-radius: .8rem;
+  background: #fff;
+}
+.mc-workspace-main--shared-company :is(input, select, textarea):focus {
+  border-color: #4d91dc;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, .11);
+}
+.mc-workspace-main--shared-company .mc-workspace-page > section {
+  scroll-margin-top: 7rem;
+}
