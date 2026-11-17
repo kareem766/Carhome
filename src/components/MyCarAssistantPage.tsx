@@ -48,7 +48,7 @@ export default function MyCarAssistantPage() {
 
   return <main dir="rtl" className="!min-h-screen !bg-[#071426] px-4 py-6 !text-white sm:px-8">
     <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl flex-col overflow-hidden rounded-3xl border border-blue-400/30 !bg-[#10243d] !text-slate-100 shadow-2xl shadow-blue-950/40">
-      <header className="flex items-center justify-between border-b border-white/10 bg-gradient-to-l from-blue-950 to-slate-900 p-5 sm:p-6">
+      <header className="flex items-center justify-between border-b border-white/10 bg-gradient-to-l from-[#08294f] via-[#10518a] to-[#1479ad] p-5 sm:p-6">
         <div className="flex items-center gap-3"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-400 text-slate-950"><Bot size={26}/></span><div><h1 className="text-xl font-black">مساعد My Car عربيتي</h1><p className="mt-1 text-xs text-blue-200">مدعوم بتقنية Google Gemini</p></div></div>
         <a href="/workspace" className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-sm font-bold hover:bg-white/10"><ArrowRight size={16}/> مساحة العمل</a>
       </header>

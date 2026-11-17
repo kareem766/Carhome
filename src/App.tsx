@@ -12,6 +12,7 @@ const SupportCenterPage = lazy(() => import('./components/SupportCenterPage'))
 import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
 import LegalPages from './components/LegalPages'
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
+const CompanyDashboardPage = lazy(() => import('./components/CompanyDashboardPage'))
 const EmployeeRegistrationPage = lazy(() => import('./components/EmployeeRegistrationPage'))
 const EmployeeWorkspacePage = lazy(() => import('./components/EmployeeWorkspacePage'))
 const EmployeeRequestsOffersPage = lazy(() => import('./components/EmployeeRequestsOffersPage'))
@@ -424,10 +425,10 @@ export default function App() {
     if (!authLoaded) return <PlatformLoading />
     if (!authUser || !['company','fleet_supplier','individual_owner'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للحسابات المعتمدة" message="سجّل الدخول بحساب مالك سيارة أو شركة أو مورد أسطول معتمد لاستعراض السيارات والإعلانات." />
     if (authUser.user_metadata?.organization_type === 'individual_owner') return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage hideHeader /></Suspense></>
-    return authUser.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense>
+    return authUser.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense></SupplierPageShell> : <><CompanyPageSidebar active="catalog"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage hideHeader /></Suspense></div></>
   }
   if (path === '/services/provider/register') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<Suspense fallback={<PlatformLoading />}><ServiceProviderRegistrationPage /></Suspense></>
-  if (path === '/services' || path === '/automotive-services') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage hideHeader={authUser?.user_metadata?.organization_type === 'individual_owner'} /></Suspense>}</>
+  if (path === '/services' || path === '/automotive-services') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPageSidebar active="services"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage hideHeader /></Suspense></div></> : <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage hideHeader={authUser?.user_metadata?.organization_type === 'individual_owner'} /></Suspense>}</>
   if (path === '/workspace/advertising-plans') {
     if (!authLoaded) return <PlatformLoading />
     if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense>
@@ -443,8 +444,9 @@ export default function App() {
   if (path === '/workspace/admin') return <Suspense fallback={<PlatformLoading />}><AdminDashboardPage /></Suspense>
   if (path === '/workspace/admin/analytics') return <Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense>
   if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense>
-  if (path.includes('/messages')) return <>{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}>{authUser && authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<MessagingPage /></Suspense>}</>
-  if (path === '/workspace/company' || path.startsWith('/workspace/company/')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense>
+  if (path.includes('/messages')) return <>{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPageSidebar active="messages"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></div></> : <Suspense fallback={<PlatformLoading />}>{authUser && authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<MessagingPage /></Suspense>}</>
+  if (path === '/workspace/company') return <Suspense fallback={<PlatformLoading />}><CompanyDashboardPage /></Suspense>
+  if (path.startsWith('/workspace/company/')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense>
   if (path.startsWith('/workspace/owner')) return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="owner" /></Suspense></>
   if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense>
 
