@@ -2231,3 +2231,18 @@ main:has(.mc-home-hero-section) :is(.bg-white,.bg-slate-50).rounded-3xl :is(h2,h
   .mc-home-hero-section > header { min-height: 76px; padding-top: .85rem; padding-bottom: .85rem; }
   .mc-home-hero-section .mc-brand-tagline { display:none; }
 }
+
+
+/* Avoid duplicate legacy navigation bars when the shared platform chrome is mounted. */
+body:has(.mc-platform-workspace-chrome) .mc-supplier-topbar,
+body:has(.mc-platform-workspace-chrome) .mc-supplier-navigation,
+body:has(.mc-platform-workspace-chrome) header.sticky.top-0.z-40 {
+  display: none !important;
+}
+body:has(.mc-platform-workspace-chrome) .mc-supplier-page-content,
+body:has(.mc-platform-workspace-chrome) .mc-workspace-content {
+  min-width: 0;
+}
+body:has(.mc-platform-workspace-chrome) .mc-supplier-page-shell {
+  padding-top: 0 !important;
+}
