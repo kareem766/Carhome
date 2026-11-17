@@ -539,24 +539,41 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-catalog-main > button.fixed { left: .75rem; bottom: max(.75rem, env(safe-area-inset-bottom)); min-height: 3rem; padding-inline: .9rem; font-size: .78rem; }
 }
 
-/* Messaging: conversation selector stays reachable; message composer remains thumb-friendly. */
+/* Messaging: mobile-first conversation list and full-width chat panel. */
 @media (max-width: 767px) {
-  .mc-messaging-main { padding: 1rem .75rem 2rem !important; }
-  .mc-messaging-header { display: grid !important; grid-template-columns: minmax(0, 1fr); gap: .9rem !important; padding: 1rem !important; border-radius: 1.25rem !important; }
-  .mc-messaging-header h1 { font-size: 1.35rem !important; }
-  .mc-messaging-actions { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: .5rem !important; }
-  .mc-messaging-actions > * { min-width: 0; width: 100%; justify-content: center; font-size: .75rem !important; padding-inline: .55rem !important; }
-  .mc-messaging-main > div > div.grid { grid-template-columns: minmax(0, 1fr) !important; min-height: 0 !important; gap: .75rem !important; }
-  .mc-messaging-main aside { display: flex; flex-direction: row; gap: .55rem; overflow-x: auto; overflow-y: hidden; padding-bottom: .25rem; scroll-snap-type: x proximity; }
-  .mc-messaging-main aside > div:first-child { flex: 0 0 10rem; min-width: 10rem; }
-  .mc-messaging-main aside > button { flex: 0 0 min(76vw, 18rem); min-width: 0; padding: .8rem !important; scroll-snap-align: start; }
-  .mc-messaging-main aside > button > span:first-child { align-items: flex-start; line-height: 1.5; }
-  .mc-messaging-main section.flex.min-h-\[60vh\] { min-height: 55svh !important; height: 58svh; border-radius: 1.15rem !important; }
-  .mc-messaging-main section > div.flex-1 { min-height: 0; }
-  .mc-messaging-main section form { padding: .65rem !important; gap: .5rem !important; }
-  .mc-messaging-main section form input { min-height: 48px; font-size: 16px !important; }
-  .mc-messaging-main section form button { min-width: 4rem; min-height: 48px; }
+  .mc-messaging-main { width:100%; max-width:100%; min-width:0; padding: .85rem .7rem 1.5rem !important; overflow-x:clip; }
+  .mc-messaging-main > div { width:100%; min-width:0; }
+  .mc-messaging-header { display:grid !important; grid-template-columns:minmax(0,1fr); gap:.85rem !important; padding:1rem !important; border-radius:1.15rem !important; }
+  .mc-messaging-header h1 { font-size:1.3rem !important; line-height:1.45 !important; }
+  .mc-messaging-actions { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; gap:.5rem !important; }
+  .mc-messaging-actions > * { min-width:0; width:100%; min-height:44px; justify-content:center; font-size:.74rem !important; padding-inline:.5rem !important; }
+  .mc-messaging-main > div > section.relative { padding:1rem !important; border-radius:1.25rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative { flex-direction:row !important; align-items:center !important; gap:.75rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:first-child { min-width:0; gap:.65rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:first-child > div:first-child { width:2.7rem !important; height:2.7rem !important; border-radius:.85rem !important; }
+  .mc-messaging-main > div > section.relative h2 { margin-top:.35rem !important; font-size:1.05rem !important; line-height:1.5 !important; }
+  .mc-messaging-main > div > section.relative p.max-w-2xl { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; margin-top:.3rem !important; font-size:.72rem !important; line-height:1.7 !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:last-child { flex:0 0 auto; gap:.5rem !important; padding:.6rem .7rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:last-child > div:first-child { width:2.2rem !important; height:2.2rem !important; }
+  .mc-messaging-main > div > section.relative > div.relative > div:last-child p.text-2xl { font-size:1.25rem !important; }
+  .mc-messaging-main > div > div.grid { display:grid !important; grid-template-columns:minmax(0,1fr) !important; min-height:0 !important; gap:.75rem !important; margin-top:1rem !important; }
+  .mc-messaging-main aside { display:grid !important; grid-template-columns:minmax(0,1fr); gap:.55rem !important; min-width:0; overflow:visible !important; padding:0 !important; }
+  .mc-messaging-main aside > div:first-child { display:flex; flex:initial !important; min-width:0 !important; width:100%; align-items:center; justify-content:space-between; padding:.8rem .9rem !important; }
+  .mc-messaging-main aside > div:first-child p { display:none; }
+  .mc-messaging-main aside > label { width:100%; min-width:0; min-height:48px; }
+  .mc-messaging-main aside > label input { min-width:0; font-size:16px !important; }
+  .mc-messaging-main aside > button { display:block; flex:initial !important; width:100%; min-width:0; padding:.8rem .9rem !important; text-align:right; }
+  .mc-messaging-main aside > button > span:first-child { align-items:flex-start; line-height:1.5; }
+  .mc-messaging-main aside > p { width:100%; padding:1rem !important; text-align:center; }
+  .mc-messaging-main section.flex.min-h-\[60vh\] { display:flex; min-width:0; min-height:58svh !important; height:62svh; max-height:680px; border-radius:1.15rem !important; }
+  .mc-messaging-main section.flex.min-h-\[60vh\] > div:first-child { padding:.9rem 1rem !important; }
+  .mc-messaging-main section > div.flex-1 { min-height:0; padding:.85rem !important; }
+  .mc-messaging-main section form { padding:.65rem !important; gap:.5rem !important; }
+  .mc-messaging-main section form input { min-height:48px; min-width:0; font-size:16px !important; padding-inline:.8rem !important; }
+  .mc-messaging-main section form button { min-width:3.25rem; min-height:48px; justify-content:center; padding-inline:.8rem !important; }
+  .mc-messaging-main section form button svg { flex:0 0 auto; }
 }
+
 
 
 /* Registration and admin screens: one clear action hierarchy on narrow viewports. */
