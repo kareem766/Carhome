@@ -85,8 +85,8 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
     {showGlobalTopbar && <header dir="rtl" className="mc-company-global-topbar">
       <div className="mc-company-global-heading">
         <span>MY CAR · مساحة الشركة</span>
-        <h1>{meta.title}</h1>
-        <p>{meta.subtitle}</p>
+        <h1>{meta?.title}</h1>
+        <p>{meta?.subtitle}</p>
       </div>
       <div className="mc-company-global-actions">
         <a href="/workspace/company" aria-label="لوحة الشركة" title="لوحة الشركة"><Home size={17}/><span>لوحة الشركة</span></a>
