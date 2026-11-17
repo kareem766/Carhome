@@ -1,78 +1,17 @@
-/* Premium card treatment — company account only. */
-body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) {
-  color: #f8fbff !important;
-  border: 1px solid rgba(148, 190, 235, .28) !important;
-  border-radius: 1.15rem !important;
-  background: linear-gradient(145deg, #17395f 0%, #102b4b 58%, #0b203a 100%) !important;
-  box-shadow: 0 12px 30px rgba(8, 27, 49, .16), inset 0 1px 0 rgba(255,255,255,.07) !important;
-  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+/* Company account only: preserve each card's original surface and improve text contrast only on dark cards. */
+body:has(.mc-company-only-chrome) :is(
+  .bg-slate-800, .bg-slate-900, .bg-gray-800, .bg-gray-900,
+  .bg-blue-800, .bg-blue-900, .bg-indigo-800, .bg-indigo-900,
+  .bg-sky-800, .bg-sky-900, .bg-cyan-800, .bg-cyan-900,
+  .bg-\[\#071d38\], .bg-\[\#103d6b\], .bg-\[\#0b203a\]
+) {
+  color: #fff !important;
 }
-body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]):hover {
-  border-color: rgba(117, 181, 246, .58) !important;
-  box-shadow: 0 18px 38px rgba(8, 27, 49, .22), inset 0 1px 0 rgba(255,255,255,.09) !important;
-  transform: translateY(-2px);
-}
-body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) :is(h1,h2,h3,h4,h5,p,span,label,small,strong,b,li,dt,dd,th,td) {
-  color: #f8fbff !important;
-}
-body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) :is(.text-slate-400,.text-slate-500,.text-gray-400,.text-gray-500,.text-blue-700,.text-blue-800,.text-indigo-700) {
-  color: #d5e6fa !important;
-}
-body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) :is(input,select,textarea) {
-  color: #102b49 !important;
-  background: #fff !important;
-  border-color: #b9cde2 !important;
-}
-body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) :is(button,a) {
-  color: #fff;
-}
-body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) :is(button,a).bg-white,
-body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) :is(button,a)[class*="bg-slate-"],
-body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) :is(button,a)[class*="bg-blue-50"] {
-  color: #17395f !important;
-}
-@media (max-width: 760px) {
-  body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) {
-    border-radius: 1rem !important;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  body:has(.mc-company-only-chrome) .mc-workspace-content :is(article, .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border, section[class*="rounded-"][class*="border"]) {
-    transition: none;
-  }
-}
-
-
-/* Company dashboard: fix the actual dashboard card wrapper (not .mc-workspace-content). */
-.mc-company-page-with-sidebar :is(article, section.rounded-2xl.border, section.rounded-3xl.border, div.rounded-xl.border, a.group.rounded-xl.border) {
-  color: #f8fbff !important;
-  background: linear-gradient(145deg, #17395f 0%, #102b4b 58%, #0b203a 100%) !important;
-  border-color: rgba(148, 190, 235, .30) !important;
-  box-shadow: 0 12px 28px rgba(8, 27, 49, .14), inset 0 1px 0 rgba(255,255,255,.07) !important;
-}
-.mc-company-page-with-sidebar :is(article, section.rounded-2xl.border, section.rounded-3xl.border, div.rounded-xl.border, a.group.rounded-xl.border) :is(h1,h2,h3,h4,h5,p,span,label,small,strong,b,li,dt,dd,th,td) {
-  color: #f4f8ff !important;
-}
-.mc-company-page-with-sidebar :is(article, section.rounded-2xl.border, section.rounded-3xl.border, div.rounded-xl.border, a.group.rounded-xl.border) :is(.text-slate-400,.text-slate-500,.text-slate-600,.text-gray-400,.text-gray-500,.text-blue-700,.text-blue-800,.text-violet-700,.text-amber-700,.text-emerald-700,.text-cyan-700,.text-indigo-700,.text-sky-700,.text-orange-700) {
-  color: #d8e8fb !important;
-}
-.mc-company-page-with-sidebar :is(article, section.rounded-2xl.border, section.rounded-3xl.border, div.rounded-xl.border, a.group.rounded-xl.border) :is(.bg-blue-50,.bg-cyan-50,.bg-amber-50,.bg-emerald-50,.bg-violet-50,.bg-slate-50,.bg-slate-100,.bg-indigo-50,.bg-sky-50,.bg-orange-50,.bg-white\/\[0\.06\]) {
-  background: rgba(255,255,255,.10) !important;
-  border-color: rgba(255,255,255,.16) !important;
-}
-.mc-company-page-with-sidebar :is(article, section.rounded-2xl.border, section.rounded-3xl.border, div.rounded-xl.border, a.group.rounded-xl.border) :is(button,a) {
-  color: #f8fbff;
-}
-.mc-company-page-with-sidebar :is(article, section.rounded-2xl.border, section.rounded-3xl.border, div.rounded-xl.border, a.group.rounded-xl.border) :is(button,a).bg-white,
-.mc-company-page-with-sidebar :is(article, section.rounded-2xl.border, section.rounded-3xl.border, div.rounded-xl.border, a.group.rounded-xl.border) :is(button,a)[class*="bg-slate-"] {
-  color: #12304f !important;
-}
-.mc-company-page-with-sidebar :is(article, section.rounded-2xl.border, section.rounded-3xl.border, div.rounded-xl.border, a.group.rounded-xl.border) :is(input,select,textarea) {
-  color: #102b49 !important;
-  background: #fff !important;
-  border-color: #b9cde2 !important;
-}
-.mc-company-page-with-sidebar :is(article, section.rounded-2xl.border, section.rounded-3xl.border, a.group.rounded-xl.border):hover {
-  border-color: rgba(117, 181, 246, .62) !important;
-  box-shadow: 0 17px 36px rgba(8, 27, 49, .20), inset 0 1px 0 rgba(255,255,255,.09) !important;
+body:has(.mc-company-only-chrome) :is(
+  .bg-slate-800, .bg-slate-900, .bg-gray-800, .bg-gray-900,
+  .bg-blue-800, .bg-blue-900, .bg-indigo-800, .bg-indigo-900,
+  .bg-sky-800, .bg-sky-900, .bg-cyan-800, .bg-cyan-900,
+  .bg-\[\#071d38\], .bg-\[\#103d6b\], .bg-\[\#0b203a\]
+) :is(h1,h2,h3,h4,h5,p,span,label,small,strong,b,li,dt,dd,th,td) {
+  color: #fff !important;
 }
