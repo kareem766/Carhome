@@ -2,7 +2,7 @@ import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, MessageCircl
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
-type Section = 'overview' | 'assistant' | 'team' | 'insights' | 'managed-sourcing' | 'subscriptions' | 'alerts' | 'notifications'
+type Section = 'overview' | 'assistant' | 'team' | 'insights' | 'managed-sourcing' | 'subscriptions' | 'alerts' | 'notifications' | 'requests' | 'new-request' | 'catalog' | 'services' | 'messages' | 'account'
 
 const links = [
   { id: 'assistant', href: '/assistant', label: 'مساعد My Car', icon: Bot },
