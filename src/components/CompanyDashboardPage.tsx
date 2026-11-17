@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Activity, ArrowLeft, BadgeCheck, BellRing, Building2, CarFront, CheckCircle2, Clock3, CreditCard, FileBarChart, FileText, MessageCircle, Plus, RefreshCw, Search, ShieldCheck, Sparkles, Users, Wrench, XCircle } from 'lucide-react'
+import { Activity, AlertTriangle, ArrowLeft, BadgeCheck, BellRing, Building2, CarFront, ClipboardList, CheckCircle2, Clock3, CreditCard, FileBarChart, FileText, MessageCircle, Plus, RefreshCw, Search, ShieldCheck, Sparkles, Users, Wrench } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import AccountNotifications from './AccountNotifications'
 import CompanyPageSidebar from './CompanyPageSidebar'
@@ -22,18 +22,6 @@ const requestStatus: Record<string, string> = {
   completed: 'مكتمل',
   cancelled: 'ملغي',
   closed: 'مغلق'
-}
-const managedStatus: Record<string, string> = {
-  new: 'طلب جديد',
-  under_review: 'قيد المراجعة',
-  quote_ready: 'عرض السعر جاهز',
-  awaiting_company_approval: 'بانتظار موافقتك',
-  awaiting_payment: 'بانتظار السداد',
-  searching: 'جارٍ البحث',
-  in_progress: 'جاري التنفيذ',
-  completed: 'مكتمل',
-  cancelled: 'ملغي',
-  rejected: 'مرفوض'
 }
 const money = (value: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(Number(value) || 0)
 const dateLabel = (value: string | null | undefined) => value ? new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : 'غير محدد'
@@ -158,7 +146,7 @@ export default function CompanyDashboardPage() {
     : organization?.approval_status === 'pending_review'
       ? { label: 'الحساب قيد المراجعة', detail: 'فريق My Car يراجع بيانات الشركة حاليًا.', icon: Clock3, tone: 'border-amber-200 bg-amber-50 text-amber-900' }
       : organization?.approval_status === 'rejected'
-        ? { label: 'الحساب يحتاج إلى استكمال', detail: 'راجع بيانات الحساب أو تواصل مع الدعم لمعرفة المطلوب.', icon: AlertTriangleIcon, tone: 'border-rose-200 bg-rose-50 text-rose-800' }
+        ? { label: 'الحساب يحتاج إلى استكمال', detail: 'راجع بيانات الحساب أو تواصل مع الدعم لمعرفة المطلوب.', icon: AlertTriangle, tone: 'border-rose-200 bg-rose-50 text-rose-800' }
         : { label: 'حالة الحساب', detail: 'يمكنك متابعة حالة اعتماد حساب الشركة من هنا.', icon: ShieldCheck, tone: 'border-slate-200 bg-slate-50 text-slate-700' }
   const ApprovalIcon = companyApproval.icon
   const subscriptionLabel = subscription
@@ -219,7 +207,7 @@ export default function CompanyDashboardPage() {
         {loading ? <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className="h-32 animate-pulse rounded-2xl border border-slate-200 bg-white" />)}</section> : <>
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
-              { label: 'الطلبات النشطة', value: stats.activeRequests, note: 'احتياجات ما زالت قيد المتابعة', icon: ClipboardIcon, tone: 'bg-blue-50 text-blue-700' },
+              { label: 'الطلبات النشطة', value: stats.activeRequests, note: 'احتياجات ما زالت قيد المتابعة', icon: ClipboardList, tone: 'bg-blue-50 text-blue-700' },
               { label: 'العروض المستلمة', value: stats.totalOffers, note: 'من ملاك السيارات وموردي الأساطيل', icon: FileText, tone: 'bg-cyan-50 text-cyan-700' },
               { label: 'عروض تحتاج قرارك', value: stats.pendingOffers, note: 'راجع الأسعار والتفاصيل واختر الأنسب', icon: Clock3, tone: 'bg-amber-50 text-amber-700' },
               { label: 'عروض مقبولة', value: stats.acceptedOffers, note: 'العروض التي وافقت عليها شركتك', icon: CheckCircle2, tone: 'bg-emerald-50 text-emerald-700' }
@@ -243,7 +231,7 @@ export default function CompanyDashboardPage() {
 
               <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5 sm:px-6"><div><h3 className="font-black text-slate-950">أحدث طلبات الشركة</h3><p className="mt-1 text-xs text-slate-500">آخر احتياجات التأجير التي سجلتها شركتك.</p></div><a href="/workspace/company/requests/new" className="inline-flex min-h-9 items-center gap-2 rounded-lg bg-blue-700 px-3 text-xs font-extrabold text-white"><Plus size={14} /> طلب جديد</a></div>
-                {requests.length ? <div className="divide-y divide-slate-100">{requests.slice(0, 5).map(request => <article key={request.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"><div className="min-w-0"><h4 className="truncate text-sm font-extrabold text-slate-900">{request.title}</h4><p className="mt-1 text-xs leading-5 text-slate-500">{request.vehicle_type} · {request.quantity} سيارة · {request.governorate} · {request.duration_type === 'yearly' ? 'سنوي' : 'شهري'} · {request.duration_months} شهر{request.with_driver ? ' · بسائق' : ''}</p><p className="mt-1 text-[11px] text-slate-400">تاريخ الطلب: {dateLabel(request.created_at)}</p></div><div className="flex shrink-0 items-center gap-2"><span className="rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-extrabold text-slate-700">{requestStatus[request.status] || request.status}</span><span className="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-extrabold text-blue-800">{(request.rental_offers || []).length} عرض</span></div></article>)}</div> : <div className="p-8 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700"><ClipboardIcon size={22} /></span><h4 className="mt-3 font-extrabold">لم تنشئ طلبات حتى الآن</h4><p className="mt-1 text-sm text-slate-500">ابدأ بطلب سيارات بالمواصفات والمدة التي تحتاجها شركتك.</p><a href="/workspace/company/requests/new" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-700 px-4 text-sm font-bold text-white"><Plus size={15} /> إنشاء أول طلب</a></div>}
+                {requests.length ? <div className="divide-y divide-slate-100">{requests.slice(0, 5).map(request => <article key={request.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"><div className="min-w-0"><h4 className="truncate text-sm font-extrabold text-slate-900">{request.title}</h4><p className="mt-1 text-xs leading-5 text-slate-500">{request.vehicle_type} · {request.quantity} سيارة · {request.governorate} · {request.duration_type === 'yearly' ? 'سنوي' : 'شهري'} · {request.duration_months} شهر{request.with_driver ? ' · بسائق' : ''}</p><p className="mt-1 text-[11px] text-slate-400">تاريخ الطلب: {dateLabel(request.created_at)}</p></div><div className="flex shrink-0 items-center gap-2"><span className="rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-extrabold text-slate-700">{requestStatus[request.status] || request.status}</span><span className="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-extrabold text-blue-800">{(request.rental_offers || []).length} عرض</span></div></article>)}</div> : <div className="p-8 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700"><ClipboardList size={22} /></span><h4 className="mt-3 font-extrabold">لم تنشئ طلبات حتى الآن</h4><p className="mt-1 text-sm text-slate-500">ابدأ بطلب سيارات بالمواصفات والمدة التي تحتاجها شركتك.</p><a href="/workspace/company/requests/new" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-700 px-4 text-sm font-bold text-white"><Plus size={15} /> إنشاء أول طلب</a></div>}
               </section>
 
               <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -303,9 +291,3 @@ export default function CompanyDashboardPage() {
   </>
 }
 
-function AlertTriangleIcon({ size = 17 }: { size?: number }) {
-  return <XCircle size={size} />
-}
-function ClipboardIcon({ size = 17 }: { size?: number }) {
-  return <FileText size={size} />
-}
