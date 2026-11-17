@@ -760,7 +760,15 @@ export default function WorkspacePage({ role }: { role: Role }) {
     if (!code) { setDiscountPreview(null); setDiscountFeedback({ type: 'error', text: 'اكتب كود الخصم أولًا.' }); return }
     setDiscountLoading(true); setError(''); setDiscountFeedback(null)
     const periodMonths = role === 'supplier' ? 1 : Number(form.get('period_months') || 1)
-    const { data, error: previewError } = await supabase.rpc('preview_discount_code', { p_code: code, p_service: 'vehicle_registration', p_reference_id: vehicle.id, p_period: 'monthly', p_period_months: periodMonths })
+    let data: any = null
+    let previewError: { message: string } | null = null
+    try {
+      const result = await supabase.rpc('preview_discount_code', { p_code: code, p_service: 'vehicle_registration', p_reference_id: vehicle.id, p_period: 'monthly', p_period_months: periodMonths })
+      data = result.data
+      previewError = result.error
+    } catch (caught) {
+      previewError = { message: caught instanceof Error ? caught.message : 'تعذر الاتصال بخدمة التحقق من البروموكود.' }
+    }
     setDiscountLoading(false)
     if (previewError || !data) {
       setDiscountPreview(null)
