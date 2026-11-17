@@ -4,6 +4,7 @@ import { registerSW } from 'virtual:pwa-register'
 import App from './App'
 import NotificationOnboardingPrompt from './components/NotificationOnboardingPrompt'
 import './index.css'
+import './company-cards.css'
 
 registerSW({ immediate: true })
 
