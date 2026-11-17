@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import AccountNotifications from './AccountNotifications'
 import CompanyPageSidebar from './CompanyPageSidebar'
 import CompanyPageTitleCard from './CompanyPageTitleCard'
+import PlatformBrand from './PlatformBrand'
 import PlanUpgradeNotice from './PlanUpgradeNotice'
 
 type RequestRow = { id:string; title:string; status:string; created_at:string; quantity:number; governorate:string; vehicle_type:string; rental_offers?: { id:string; status:string; monthly_price_egp:number; yearly_price_egp:number|null }[] }
