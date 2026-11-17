@@ -156,9 +156,8 @@ export default function WorkspacePage({ role }: { role: Role }) {
     const vehiclePaymentPending = localStorage.getItem('mycar_vehicle_payment_banner') === '1'
     const ownerWelcomeKey = 'mycar_owner_welcome_pending_' + authUser.id
     const ownerWelcomeSeenKey = 'mycar_owner_welcome_seen_' + authUser.id
-    const ownerWelcomePending = role === 'owner'
-      && localStorage.getItem(ownerWelcomeKey) === '1'
-      && localStorage.getItem(ownerWelcomeSeenKey) !== '1'
+    const ownerWelcomeQueued = localStorage.getItem(ownerWelcomeKey) === '1'
+    const ownerWelcomeAlreadySeen = localStorage.getItem(ownerWelcomeSeenKey) === '1'
     const companyFreeWelcomeKey = 'mycar_company_free_welcome_pending_' + authUser.id
     const companyFreeWelcomeSeenKey = 'mycar_company_free_welcome_seen_' + authUser.id
     const companyFreeWelcomePending = role === 'company'
@@ -185,6 +184,18 @@ export default function WorkspacePage({ role }: { role: Role }) {
       window.location.replace(correctPath)
       return
     }
+    // Google OAuth can return to the workspace without preserving the queued
+    // localStorage marker in some browser redirect/session paths. For a newly
+    // created owner account awaiting its first review, recover the one-time
+    // welcome from the authenticated account creation timestamp.
+    const accountCreatedAt = Date.parse(authUser.created_at)
+    const accountCreatedWithin24Hours = Number.isFinite(accountCreatedAt)
+      && Date.now() >= accountCreatedAt
+      && Date.now() - accountCreatedAt <= 24 * 60 * 60 * 1000
+    const ownerWelcomePending = role === 'owner'
+      && !ownerWelcomeAlreadySeen
+      && (ownerWelcomeQueued || (accountCreatedWithin24Hours && org.approval_status === 'pending_review'))
+
     setOrganization({ ...org, id: member.organization_id })
     if (ownerWelcomePending) {
       localStorage.setItem(ownerWelcomeSeenKey, '1')
