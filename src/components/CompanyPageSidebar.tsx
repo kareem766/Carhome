@@ -1,8 +1,8 @@
-import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, MessageCircle, Plus, Search, UserRound, Users, Wrench, CreditCard, BellRing } from 'lucide-react'
+import { Bot, Building2, CarFront, ClipboardList, FileText, LogOut, MessageCircle, Plus, Search, UserRound, Users, Wrench, CreditCard, BellRing, Bell } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
 
-type Section = 'assistant' | 'team' | 'insights' | 'managed-sourcing' | 'subscriptions' | 'alerts'
+type Section = 'assistant' | 'team' | 'insights' | 'managed-sourcing' | 'subscriptions' | 'alerts' | 'notifications'
 
 const links = [
   { id: 'assistant', href: '/assistant', label: 'مساعد My Car', icon: Bot },
@@ -18,6 +18,7 @@ const links = [
   { id: 'services', href: '/services', label: 'خدمات السيارات', icon: Wrench },
   { id: 'messages', href: '/messages', label: 'المحادثات', icon: MessageCircle },
   { id: 'account', href: '/workspace/company/account', label: 'الحساب', icon: UserRound },
+  { id: 'notifications', href: '/workspace/notifications', label: 'إعدادات الإشعارات', icon: Bell },
 ]
 
 export default function CompanyPageSidebar({ active }: { active: Section }) {

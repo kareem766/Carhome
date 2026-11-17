@@ -1,14 +1,15 @@
-import { LayoutDashboard, ClipboardList, MessageCircle, UserRound, CarFront, Bot } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, MessageCircle, UserRound, CarFront, Bot, Bell } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 
-type ActivePage = 'home' | 'assistant' | 'requests' | 'messages' | 'account'
+type ActivePage = 'home' | 'assistant' | 'requests' | 'messages' | 'account' | 'notifications'
 const links = [
  {key:'home',href:'/workspace/employee',label:'الرئيسية',icon:LayoutDashboard},
  {key:'assistant',href:'/assistant',label:'مساعد My Car',icon:Bot},
  {key:'requests',href:'/workspace/employee/requests',label:'طلباتي والعروض',icon:ClipboardList},
  {key:'messages',href:'/workspace/employee/messages',label:'المراسلات',icon:MessageCircle},
- {key:'account',href:'/workspace/employee/account',label:'بيانات الحساب',icon:UserRound}
+ {key:'account',href:'/workspace/employee/account',label:'بيانات الحساب',icon:UserRound},
+ {key:'notifications',href:'/workspace/notifications',label:'الإشعارات',icon:Bell}
 ] as const
 
 export default function EmployeeWorkspaceHeader({active='home'}:{active?:ActivePage}){

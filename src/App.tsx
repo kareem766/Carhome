@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
-import { ArrowLeft, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, ClipboardList, RefreshCw, MessageCircle, Wrench, Megaphone, Bot } from 'lucide-react'
+import { ArrowLeft, Bell, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, ClipboardList, RefreshCw, MessageCircle, Wrench, Megaphone, Bot } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
@@ -99,6 +99,7 @@ function OwnerPersistentBar() {
     { href: '/workspace/provider-employee-requests', label: 'طلبات الموظفين', icon: <UserRound size={17}/> },
     { href: '/workspace/provider/managed-sourcing', label: 'تفويضات البحث', icon: <Search size={17}/> },
     { href: '/assistant', label: 'مساعد My Car', icon: <Bot size={17}/> },
+    { href: '/workspace/notifications', label: 'إعدادات الإشعارات', icon: <Bell size={17}/> },
   ]
   const currentPath = window.location.pathname
   return <header dir="rtl" className="mc-owner-persistent-bar">
@@ -384,7 +385,15 @@ export default function App() {
   if (path === '/reset-password') return <Suspense fallback={<PlatformLoading />}><ResetPasswordPage /></Suspense>
   if (path === '/auth/callback') return <Suspense fallback={<PlatformLoading />}><AuthCallbackPage /></Suspense>
   if (path === '/complete-profile') return <Suspense fallback={<PlatformLoading />}><GoogleProfileCompletionPage /></Suspense>
-  if (path === '/workspace/notifications') return authUser ? authUser.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإعداد الإشعارات" message="يمكنك التحكم في قنوات الإشعارات بعد تسجيل الدخول." />
+  if (path === '/workspace/notifications') {
+    if (!authUser) return <ServiceNotice settings={settings} title="سجّل الدخول لإعداد الإشعارات" message="يمكنك التحكم في قنوات الإشعارات بعد تسجيل الدخول." />
+    if (isPlatformAdmin) return <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage backHref="/workspace/admin" /></Suspense>
+    if (authUser.user_metadata?.organization_type === 'fleet_supplier') return <SupplierPageShell><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></SupplierPageShell>
+    if (authUser.user_metadata?.organization_type === 'individual_owner') return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></>
+    if (authUser.user_metadata?.organization_type === 'employee') return <><EmployeeWorkspaceHeader active="notifications"/><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></>
+    if (authUser.user_metadata?.organization_type === 'company') return <div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><CompanyPageSidebar active="notifications"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></div></div>
+    return <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense>
+  }
   if (path === '/workspace/supplier/insights') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><FleetSupplierInsightsPage /></Suspense></SupplierPageShell> : <ServiceNotice settings={settings} title="تقارير الأسطول" message="هذه الصفحة متاحة لموردي الأساطيل المعتمدين بعد تسجيل الدخول." />
   if (path === '/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لمركز الدعم" message="مركز الدعم الفني متاح للمستخدمين المسجلين لمتابعة تذاكرهم والردود." />
   if (path === '/workspace/admin/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage admin /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الدعم" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
