@@ -1213,3 +1213,23 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-employee-messaging.mc-employee-chat-open .mc-employee-offer-summary>div{display:none}
   .mc-employee-messaging.mc-employee-chat-open .mc-employee-chat-panel{height:calc(100svh - 235px);min-height:330px}
 }
+
+
+/* Keep the premium plan's dark surface, but restore readable ink inside its white payment form. */
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .bg-white :is(h1, h2, h3, h4, p, li, label, strong, b) {
+  color: #0f172a !important;
+}
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .bg-white :is(input, select, textarea) {
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .bg-white :is(input, select, textarea)::placeholder {
+  color: #64748b !important;
+  opacity: 1;
+}
+.mc-advertising-plans-main article.mc-ad-premium-plan-card .bg-white :is(input, select, textarea):disabled {
+  color: #64748b !important;
+  background-color: #f1f5f9 !important;
+  opacity: 1;
+}
