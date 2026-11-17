@@ -767,7 +767,9 @@ export default function WorkspacePage({ role }: { role: Role }) {
       const rawMessage = previewError?.message || 'تعذر التحقق من كود الخصم.'
       let message = rawMessage
       if (rawMessage.includes('لقد استخدمت هذا الكود الحد الأقصى')) message = 'تم استخدام هذا البروموكود بالفعل على حسابك، ولا يمكن استخدامه مرة أخرى حسب شروط الكود.'
-      else if (rawMessage.includes('كود الخصم غير صالح أو منتهي الصلاحية')) message = 'هذا البروموكود غير صالح أو انتهت صلاحيته.'
+      else if (rawMessage.includes('كود الخصم غير صالح أو منتهي الصلاحية')) message = 'هذا البروموكود غير موجود أو غير مفعل أو خارج فترة صلاحيته. راجع كتابة الكود أو تواصل مع إدارة المنصة.'
+      else if (/jwt|token|session|auth session|refresh token/i.test(rawMessage)) message = 'تعذر التحقق من جلسة تسجيل الدخول. حدّث الجلسة بتسجيل الدخول مرة أخرى ثم أعد تطبيق الكود؛ لم يتم إرسال طلب الدفع.'
+      else if (/failed to fetch|network|timeout|fetch error/i.test(rawMessage)) message = 'تعذر الاتصال بخدمة التحقق من البروموكود. تحقق من الإنترنت ثم أعد المحاولة؛ لم يتم إرسال طلب الدفع.'
       else if (rawMessage.includes('تم استنفاد عدد مرات استخدام الكود')) message = 'تم استنفاد العدد المسموح لاستخدام هذا البروموكود.'
       else if (rawMessage.includes('كود الخصم غير متاح لهذه الخدمة')) message = 'هذا البروموكود غير متاح لخدمة تسجيل السيارة.'
       else if (rawMessage.includes('كود الخصم غير متاح لنوع حسابك')) message = 'هذا البروموكود غير متاح لنوع حسابك.'
