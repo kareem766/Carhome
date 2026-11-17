@@ -1744,3 +1744,15 @@ body:has(.mc-company-global-topbar) .mc-company-page-with-sidebar .sticky.top-3 
     border-radius: 1.1rem;
   }
 }
+
+
+/* Keep the page heading beneath the mobile company navigation on pages with their own title bars. */
+@media (max-width: 760px) {
+  .mc-company-mobile-nav:not(.mc-company-mobile-nav--with-topbar) ~ main.mc-company-page-with-sidebar > header.sticky,
+  .mc-company-mobile-nav:not(.mc-company-mobile-nav--with-topbar) ~ main.mc-company-page-with-sidebar .mc-company-dashboard-topbar {
+    top: 54px !important;
+  }
+  .mc-company-global-topbar + .mc-company-mobile-nav {
+    scroll-margin-top: 66px;
+  }
+}
