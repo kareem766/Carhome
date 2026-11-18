@@ -2112,3 +2112,57 @@ body:has(.mc-company-only-chrome) :is(article,.rounded-xl.border,.rounded-2xl.bo
 body:has(.mc-company-only-chrome) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border).bg-white :is(.text-slate-500,.text-gray-500) {
   color:#52657c !important;
 }
+
+
+/* Company redesign: enforce readable text contrast on dark cards only. */
+body:has(.mc-company-only-chrome) :is(
+  article, [role="article"],
+  .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border,
+  .rounded-xl, .rounded-2xl, .rounded-3xl
+):is(
+  [class*="bg-slate-900"], [class*="bg-slate-950"],
+  [class*="bg-gray-900"], [class*="bg-gray-950"],
+  [class*="bg-zinc-900"], [class*="bg-zinc-950"],
+  [class*="bg-neutral-900"], [class*="bg-neutral-950"],
+  [class*="bg-blue-900"], [class*="bg-blue-950"],
+  [class*="bg-indigo-900"], [class*="bg-indigo-950"],
+  [class*="bg-violet-900"], [class*="bg-violet-950"],
+  [class*="bg-purple-900"], [class*="bg-purple-950"],
+  [class*="bg-[#0"], [class*="bg-[#1"]
+) {
+  color: #f8fafc !important;
+}
+body:has(.mc-company-only-chrome) :is(
+  article, [role="article"],
+  .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border,
+  .rounded-xl, .rounded-2xl, .rounded-3xl
+):is(
+  [class*="bg-slate-900"], [class*="bg-slate-950"],
+  [class*="bg-gray-900"], [class*="bg-gray-950"],
+  [class*="bg-zinc-900"], [class*="bg-zinc-950"],
+  [class*="bg-neutral-900"], [class*="bg-neutral-950"],
+  [class*="bg-blue-900"], [class*="bg-blue-950"],
+  [class*="bg-indigo-900"], [class*="bg-indigo-950"],
+  [class*="bg-violet-900"], [class*="bg-violet-950"],
+  [class*="bg-purple-900"], [class*="bg-purple-950"],
+  [class*="bg-[#0"], [class*="bg-[#1"]
+) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,b,em,li,dt,dd,div) {
+  color: #f8fafc !important;
+}
+body:has(.mc-company-only-chrome) :is(
+  article, [role="article"],
+  .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border,
+  .rounded-xl, .rounded-2xl, .rounded-3xl
+):is(
+  [class*="bg-slate-900"], [class*="bg-slate-950"],
+  [class*="bg-gray-900"], [class*="bg-gray-950"],
+  [class*="bg-zinc-900"], [class*="bg-zinc-950"],
+  [class*="bg-neutral-900"], [class*="bg-neutral-950"],
+  [class*="bg-blue-900"], [class*="bg-blue-950"],
+  [class*="bg-indigo-900"], [class*="bg-indigo-950"],
+  [class*="bg-violet-900"], [class*="bg-violet-950"],
+  [class*="bg-purple-900"], [class*="bg-purple-950"],
+  [class*="bg-[#0"], [class*="bg-[#1"]
+) :is(.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400,.text-gray-500,.text-blue-100,.text-indigo-100) {
+  color: #e2e8f0 !important;
+}
