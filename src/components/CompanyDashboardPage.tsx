@@ -253,7 +253,7 @@ export default function CompanyDashboardPage() {
                 <a href="/workspace/company/subscriptions" className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 text-xs font-extrabold text-white"><CreditCard size={15} /> عرض الباقات وإدارة الاشتراك</a>
               </section>
 
-              <section className="overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-[#0e3260] via-[#0b2b50] to-[#071a32] p-5 text-white shadow-sm">
+              <section className="mc-company-dark-card overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-[#0e3260] via-[#0b2b50] to-[#071a32] p-5 text-white shadow-sm">
                 <div className="flex items-center justify-between gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl border border-white/15 bg-white/10 text-cyan-200"><Search size={22} /></span><span className="rounded-full border border-cyan-200/20 bg-cyan-200/10 px-3 py-1 text-[10px] font-extrabold text-cyan-100">خدمة اختيارية</span></div>
                 <h3 className="mt-4 text-lg font-black">فوّض My Car للبحث نيابةً عن شركتك</h3>
                 <p className="mt-2 text-xs leading-6 text-blue-100">حدد احتياجك، ودع فريق المنصة يبحث لدى الملاك وموردي الأساطيل ويجهز لك ترشيحات وعروضًا للمقارنة قبل اتخاذ القرار.</p>
