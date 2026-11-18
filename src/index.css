@@ -2189,17 +2189,19 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
 }
 
 
-/* Unified contrast for every explicitly marked dark card in company-account pages. */
-body:has(.mc-company-shared-sidebar) .mc-company-dark-card,
-body:has(.mc-company-shared-sidebar) .mc-company-dark-card :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,b,em,li,dt,dd) {
+/* Unified contrast for explicitly marked dark cards in company-account components.
+   These cards are conditionally marked only for company accounts, so do not require
+   the shared sidebar to be mounted (the vehicle catalog is a standalone route). */
+.mc-company-dark-card,
+.mc-company-dark-card :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,b,em,li,dt,dd) {
   color: #f8fafc !important;
 }
-body:has(.mc-company-shared-sidebar) .mc-company-dark-card :is(.text-blue-100,.text-cyan-100,.text-cyan-200,.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400) {
+.mc-company-dark-card :is(.text-blue-100,.text-cyan-100,.text-cyan-200,.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400) {
   color: #dbeafe !important;
 }
-body:has(.mc-company-shared-sidebar) .mc-company-dark-card :is(a.bg-white,button.bg-white),
-body:has(.mc-company-shared-sidebar) .mc-company-dark-card :is(a.bg-white,button.bg-white) :is(span,strong),
-body:has(.mc-company-shared-sidebar) .mc-company-dark-card button.bg-amber-400,
-body:has(.mc-company-shared-sidebar) .mc-company-dark-card button.bg-amber-400 :is(span,strong) {
+.mc-company-dark-card :is(a.bg-white,button.bg-white),
+.mc-company-dark-card :is(a.bg-white,button.bg-white) :is(span,strong),
+.mc-company-dark-card button.bg-amber-400,
+.mc-company-dark-card button.bg-amber-400 :is(span,strong) {
   color: #102b47 !important;
 }
