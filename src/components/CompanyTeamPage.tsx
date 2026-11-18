@@ -76,7 +76,7 @@ export default function CompanyTeamPage(){
    </div>
   </header>
   <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:py-9">
-   <section className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-l from-[#0b2545] via-[#123b68] to-[#176b9a] px-5 py-7 text-white shadow-[0_22px_55px_-30px_rgba(10,45,85,.55)] sm:px-8 sm:py-9">
+   <section className="mc-company-dark-card relative overflow-hidden rounded-[1.75rem] bg-gradient-to-l from-[#0b2545] via-[#123b68] to-[#176b9a] px-5 py-7 text-white shadow-[0_22px_55px_-30px_rgba(10,45,85,.55)] sm:px-8 sm:py-9">
     <div className="pointer-events-none absolute -left-12 -top-16 h-52 w-52 rounded-full border-[26px] border-cyan-300/10"></div>
     <p className="relative text-sm font-extrabold text-cyan-200">إدارة الفريق</p>
     <h1 className="relative mt-2 text-3xl font-black leading-tight sm:text-4xl">موظفو الشركة وصلاحياتهم</h1>
