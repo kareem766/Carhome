@@ -176,7 +176,7 @@ export default function CompanyDashboardPage() {
       </header>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
-        <section className="relative isolate overflow-hidden rounded-[28px] bg-gradient-to-l from-[#071d38] via-[#103d6b] to-[#087eae] p-5 text-white shadow-[0_22px_55px_-28px_rgba(5,36,75,.55)] sm:p-8">
+        <section className="mc-company-dark-hero relative isolate overflow-hidden rounded-[28px] bg-gradient-to-l from-[#071d38] via-[#103d6b] to-[#087eae] p-5 text-white shadow-[0_22px_55px_-28px_rgba(5,36,75,.55)] sm:p-8">
           <div aria-hidden="true" className="pointer-events-none absolute -left-12 -top-16 -z-10 h-64 w-64 rounded-full border-[30px] border-white/5" />
           <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 right-1/3 -z-10 h-64 w-64 rounded-full bg-cyan-300/10 blur-3xl" />
           <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
