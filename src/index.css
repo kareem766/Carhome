@@ -2166,3 +2166,24 @@ body:has(.mc-company-only-chrome) :is(
 ) :is(.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400,.text-gray-500,.text-blue-100,.text-indigo-100) {
   color: #e2e8f0 !important;
 }
+
+
+/* Company dark gradient cards: restore high-contrast typography without changing card surfaces. */
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero h1,
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero h2,
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero h3,
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero h4,
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero p,
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero strong,
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero small,
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero label,
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero li {
+  color: #f8fafc !important;
+}
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero :is(.text-blue-100,.text-cyan-100,.text-slate-300,.text-slate-400,.text-slate-500) {
+  color: #dbeafe !important;
+}
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero a.bg-white,
+body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero button.bg-white {
+  color: #123b68 !important;
+}
