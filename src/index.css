@@ -1806,3 +1806,55 @@ body:has(.mc-company-global-topbar) .mc-company-page-with-sidebar .sticky.top-3 
 .mc-workspace-main--shared-company .mc-workspace-page > section {
   scroll-margin-top: 7rem;
 }
+
+
+/* Company card contrast repair: keep dark cards dark and force readable typography inside them. */
+.mc-company-page-with-sidebar :is(
+  .bg-slate-900, .bg-slate-950, .bg-gray-900, .bg-gray-950, .bg-zinc-900, .bg-zinc-950,
+  .bg-neutral-900, .bg-neutral-950, .bg-blue-950, .bg-indigo-950, .bg-violet-950,
+  .bg-purple-950, .bg-[#0f172a], .bg-[#111827], .bg-[#172554], .bg-[#1e1b4b],
+  [class*="bg-slate-900"], [class*="bg-slate-950"], [class*="bg-gray-900"],
+  [class*="bg-gray-950"], [class*="bg-zinc-900"], [class*="bg-neutral-900"],
+  [class*="bg-blue-950"], [class*="bg-indigo-950"], [class*="bg-violet-950"],
+  [class*="bg-purple-950"]
+),
+.mc-workspace-main--shared-company :is(
+  .bg-slate-900, .bg-slate-950, .bg-gray-900, .bg-gray-950, .bg-zinc-900, .bg-zinc-950,
+  .bg-neutral-900, .bg-neutral-950, .bg-blue-950, .bg-indigo-950, .bg-violet-950,
+  .bg-purple-950, .bg-[#0f172a], .bg-[#111827], .bg-[#172554], .bg-[#1e1b4b],
+  [class*="bg-slate-900"], [class*="bg-slate-950"], [class*="bg-gray-900"],
+  [class*="bg-gray-950"], [class*="bg-zinc-900"], [class*="bg-neutral-900"],
+  [class*="bg-blue-950"], [class*="bg-indigo-950"], [class*="bg-violet-950"],
+  [class*="bg-purple-950"]
+) {
+  color: #f8fafc !important;
+}
+.mc-company-page-with-sidebar :is(
+  .bg-slate-900, .bg-slate-950, .bg-gray-900, .bg-gray-950, .bg-zinc-900, .bg-zinc-950,
+  .bg-neutral-900, .bg-neutral-950, .bg-blue-950, .bg-indigo-950, .bg-violet-950,
+  .bg-purple-950, .bg-[#0f172a], .bg-[#111827], .bg-[#172554], .bg-[#1e1b4b],
+  [class*="bg-slate-900"], [class*="bg-slate-950"], [class*="bg-gray-900"],
+  [class*="bg-gray-950"], [class*="bg-zinc-900"], [class*="bg-neutral-900"],
+  [class*="bg-blue-950"], [class*="bg-indigo-950"], [class*="bg-violet-950"],
+  [class*="bg-purple-950"]
+) :is(h1,h2,h3,h4,h5,h6,strong,b,p,span,label,small,li,dt,dd,div) {
+  color: #f8fafc !important;
+}
+.mc-workspace-main--shared-company :is(
+  .bg-slate-900, .bg-slate-950, .bg-gray-900, .bg-gray-950, .bg-zinc-900, .bg-zinc-950,
+  .bg-neutral-900, .bg-neutral-950, .bg-blue-950, .bg-indigo-950, .bg-violet-950,
+  .bg-purple-950, .bg-[#0f172a], .bg-[#111827], .bg-[#172554], .bg-[#1e1b4b],
+  [class*="bg-slate-900"], [class*="bg-slate-950"], [class*="bg-gray-900"],
+  [class*="bg-gray-950"], [class*="bg-zinc-900"], [class*="bg-neutral-900"],
+  [class*="bg-blue-950"], [class*="bg-indigo-950"], [class*="bg-violet-950"],
+  [class*="bg-purple-950"]
+) :is(h1,h2,h3,h4,h5,h6,strong,b,p,span,label,small,li,dt,dd,div) {
+  color: #f8fafc !important;
+}
+/* Light cards are intentionally excluded from the rules above and retain dark text. */
+.mc-company-page-with-sidebar :is(button,a) {
+  font-weight: 650;
+}
+.mc-workspace-main--shared-company :is(button,a) {
+  font-weight: 650;
+}
