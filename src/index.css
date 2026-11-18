@@ -2205,3 +2205,14 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
 .mc-company-dark-card button.bg-amber-400 :is(span,strong) {
   color: #102b47 !important;
 }
+
+
+/* Direct, page-specific contrast fix for the company vehicle catalog hero heading. */
+.mc-company-page-with-sidebar .mc-company-catalog-title {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.mc-company-page-with-sidebar .mc-company-catalog-title-accent {
+  color: #bfdbfe !important;
+  -webkit-text-fill-color: #bfdbfe !important;
+}
