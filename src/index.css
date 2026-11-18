@@ -2187,3 +2187,19 @@ body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark
 body:has(.mc-company-only-chrome) .mc-company-page-with-sidebar .mc-company-dark-hero button.bg-white {
   color: #123b68 !important;
 }
+
+
+/* Unified contrast for every explicitly marked dark card in company-account pages. */
+body:has(.mc-company-only-chrome) .mc-company-dark-card,
+body:has(.mc-company-only-chrome) .mc-company-dark-card :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,b,em,li,dt,dd) {
+  color: #f8fafc !important;
+}
+body:has(.mc-company-only-chrome) .mc-company-dark-card :is(.text-blue-100,.text-cyan-100,.text-cyan-200,.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400) {
+  color: #dbeafe !important;
+}
+body:has(.mc-company-only-chrome) .mc-company-dark-card :is(a.bg-white,button.bg-white),
+body:has(.mc-company-only-chrome) .mc-company-dark-card :is(a.bg-white,button.bg-white) :is(span,strong),
+body:has(.mc-company-only-chrome) .mc-company-dark-card button.bg-amber-400,
+body:has(.mc-company-only-chrome) .mc-company-dark-card button.bg-amber-400 :is(span,strong) {
+  color: #102b47 !important;
+}
