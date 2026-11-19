@@ -101,7 +101,7 @@ export default function CompanySubscriptionsPage(){
   setReference('');setCouponCode('');setCouponPreview(null);await load()
  }
  return <><CompanyPageSidebar active="subscriptions"/><main dir="rtl" className="mc-company-page-with-sidebar min-h-screen bg-[linear-gradient(180deg,#f4f8ff_0%,#f8fbff_42%,#eef4fc_100%)] px-4 py-6 text-slate-900 sm:px-6"><div className="mx-auto max-w-6xl">
-  <CompanyPageTitleCard eyebrow="الاشتراك وإدارة الخدمات" title="اشتراك الشركة والباقات" description="اختر الباقة المناسبة وحدد نظام الفوترة الشهري أو السنوي. تبدأ مدة الاشتراك من تاريخ اعتماد الدفع، واشتراك المنصة منفصل عن أي مبالغ تخص تأجير السيارات." icon={CreditCard} />
+  <CompanyPageTitleCard eyebrow="الاشتراك وإدارة الخدمات" title="اشتراك الشركة والباقات" description="اختر الباقة المناسبة وحدد نظام الفوترة الشهري أو السنوي. تبدأ مدة الاشتراك من تاريخ اعتماد الدفع، واشتراك المنصة منفصل عن أي مبالغ تخص تأجير السيارات." icon={CreditCard} compact />
   <nav aria-label="التنقل داخل صفحة الاشتراكات" className="sticky top-3 z-20 mt-4 rounded-2xl border border-blue-100 bg-white/95 p-2 shadow-lg backdrop-blur">
    <div className="flex flex-wrap gap-2">
     <button type="button" onClick={()=>{if(window.history.length>1)window.history.back();else window.location.assign('/workspace/company')}} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-extrabold text-slate-700"><ArrowRight size={17}/> رجوع</button>
