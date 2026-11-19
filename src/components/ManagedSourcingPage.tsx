@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { ArrowLeft, BriefcaseBusiness, CarFront, CheckCircle2, CircleDollarSign, Clock3, FileText, ListChecks, MapPin, MessageCircle, Plus, RefreshCw, Search, ShieldCheck, Sparkles, TrendingUp, Truck, Wallet } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import PlatformBrand from './PlatformBrand'
-import AccountNotifications from './AccountNotifications'
 import AdminPageNavigation from './AdminPageNavigation'
 import CompanyPageSidebar from './CompanyPageSidebar'
 
@@ -192,7 +190,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
  const pendingRequests=requests.filter(r=>!['completed','cancelled','unable_to_fulfill'].includes(r.status)).length
  const completedRequests=requests.filter(r=>r.status==='completed').length
  return <>{!admin && <CompanyPageSidebar active="managed-sourcing"/>}<main dir="rtl" className={(admin ? "" : "mc-company-page-with-sidebar ") + "mc-managed-sourcing-page min-h-screen bg-[#f3f7fc] text-[14px] leading-7 text-slate-900 antialiased"}><div className="mx-auto max-w-[1380px] px-3 py-4 sm:px-6 sm:py-6">
-  <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm sm:px-5"><PlatformBrand/><div className="flex items-center gap-2"><a href={admin?'/workspace/admin':'/workspace/company'} className="rounded-xl border px-3 py-2 text-sm font-bold">رجوع لمساحة العمل</a><AccountNotifications/></div></header>
+  
   {admin?<AdminPageNavigation/>:null}
   <section className="mc-company-dark-card mt-5 rounded-3xl bg-gradient-to-l from-[#0b2340] via-[#123a61] to-[#1768a6] p-6 text-white shadow-lg sm:p-8"><div className="flex flex-wrap items-center justify-between gap-4"><div><span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold"><BriefcaseBusiness size={15}/> خدمة البحث والتوفير نيابة عن شركتك</span><h1 className="mt-4 text-2xl font-black sm:text-3xl">{admin?'إدارة خدمة البحث والتوفير':'دع My Car تبحث عن السيارات المناسبة لشركتك'}</h1><p className="mt-2 max-w-3xl text-sm leading-7 text-blue-100">{admin?'إدارة الطلبات والتسعير والمدفوعات والاشتراكات وتجهيز عروض الموردين.':'فريق متخصص يتولى البحث والتواصل مع الملاك وموردي الأساطيل والتحقق من توافر السيارات وتجهيز عروض مقارنة.'}</p></div><div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-sm"><ShieldCheck className="mb-2 text-cyan-200"/><b>تفويض ومتابعة موثقة</b><p className="mt-1 text-xs text-blue-100">لا نضمن إتمام الإيجار أو تشغيل المركبة.</p></div></div></section>
   {error&&<div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</div>}{notice&&<div role="status" className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{notice}</div>}
