@@ -11,7 +11,7 @@ type Props = {
 }
 
 export default function CompanyPageTitleCard({ eyebrow, title, description, icon: Icon, actions, compact = false }: Props) {
-  return <section className="mc-company-dark-card relative isolate overflow-hidden rounded-[26px] border border-blue-900/10 bg-gradient-to-l from-[#08294f] via-[#10518a] to-[#1479ad] p-5 text-white shadow-[0_20px_50px_-28px_rgba(8,42,82,.65)] sm:rounded-[30px] sm:p-7">
+  return <section className={"mc-company-page-title-card " + (compact ? "mc-company-page-title-card--compact " : "") + "mc-company-dark-card relative isolate overflow-hidden rounded-[26px] border border-blue-900/10 bg-gradient-to-l from-[#08294f] via-[#10518a] to-[#1479ad] p-5 text-white shadow-[0_20px_50px_-28px_rgba(8,42,82,.65)] sm:rounded-[30px] sm:p-7"}>
     <div aria-hidden="true" className="pointer-events-none absolute -left-12 -top-16 -z-10 h-56 w-56 rounded-full border-[26px] border-white/[0.07]" />
     <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 right-1/3 -z-10 h-52 w-52 rounded-full bg-cyan-300/10 blur-3xl" />
     <div className={"relative flex w-full min-w-0 flex-col justify-between " + (compact ? "gap-4 lg:flex-row lg:items-center" : "gap-5 lg:flex-row lg:items-center")}>
