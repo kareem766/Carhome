@@ -124,7 +124,6 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const [ownerOfferStats, setOwnerOfferStats] = useState({ pending: 0, accepted: 0, declined: 0 })
   const [supplierOfferStats, setSupplierOfferStats] = useState({ pending: 0, accepted: 0, declined: 0, company: 0, employee: 0 })
   const [vehicleEngagement, setVehicleEngagement] = useState<Record<string, { conversations: number; directOffers: number }>>({})
-  const [vehicleCatalogMetrics, setVehicleCatalogMetrics] = useState<Record<string, { impressions: number; uniqueViewers: number; impressions30d: number }>>({})
   const [vehicleReviewEvents, setVehicleReviewEvents] = useState<Record<string, VehicleReviewEvent[]>>({})
   const [expandedVehicleTimeline, setExpandedVehicleTimeline] = useState<string | null>(null)
   const [vehiclePromotionStats, setVehiclePromotionStats] = useState<Record<string, { status: string; endsAt: string | null; active: boolean; placementType: string | null; planName: string | null }>>({})
@@ -331,8 +330,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
         if (vehicleRows.length) {
           if (role === 'owner') {
             const vehicleIds = vehicleRows.map(vehicle => vehicle.id)
-            const [conversationRows, directOfferRows, catalogMetrics] = await Promise.all([
-              client.rpc('get_owner_vehicle_catalog_metrics', { p_vehicle_ids: vehicleIds }),
+            const [conversationRows, directOfferRows] = await Promise.all([
               client.from('conversations').select('id,vehicle_id,company_organization_id').eq('provider_organization_id', member.organization_id).not('company_organization_id', 'is', null).in('vehicle_id', vehicleIds),
               client.from('vehicle_offers').select('id,vehicle_id').eq('provider_organization_id', member.organization_id).in('vehicle_id', vehicleIds)
             ])
@@ -348,14 +346,6 @@ export default function WorkspacePage({ role }: { role: Role }) {
             }
             for (const row of directOfferRows.data || []) if (row.vehicle_id && engagement[row.vehicle_id]) engagement[row.vehicle_id].directOffers += 1
             setVehicleEngagement(engagement)
-            if (catalogMetrics.error) {
-              setError(previous => previous ? previous + ' · تعذر تحميل مشاهدات الكتالوج: ' + catalogMetrics.error.message : 'تعذر تحميل مشاهدات الكتالوج: ' + catalogMetrics.error.message)
-            } else {
-              const metrics: Record<string, { impressions: number; uniqueViewers: number; impressions30d: number }> = {}
-              const catalogMetricRows = (catalogMetrics.data || []) as unknown as Array<{ vehicle_id: string; impressions: number; unique_viewers: number; impressions_30d: number }>
-              for (const row of catalogMetricRows) metrics[row.vehicle_id] = { impressions: Number(row.impressions || 0), uniqueViewers: Number(row.unique_viewers || 0), impressions30d: Number(row.impressions_30d || 0) }
-              setVehicleCatalogMetrics(metrics)
-            }
           } else setVehicleEngagement({})
           const paymentResult = await client.from('vehicle_payment_submissions').select('vehicle_id,review_status,created_at').in('vehicle_id', vehicleRows.map(vehicle => vehicle.id)).order('created_at', { ascending: false })
           if (!paymentResult.error) {
