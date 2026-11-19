@@ -2301,3 +2301,69 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
     line-height: 1.9 !important;
   }
 }
+
+
+/* Mobile composition for compact company title cards:
+   reserve the icon in the upper corner and let the copy span the full card. */
+@media (max-width: 640px) {
+  .mc-company-page-title-card--compact {
+    padding: 1.25rem !important;
+  }
+  .mc-company-page-title-card--compact .mc-company-page-title-card__layout {
+    display: block !important;
+    width: 100% !important;
+  }
+  .mc-company-page-title-card--compact .mc-company-page-title-card__content {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .mc-company-page-title-card--compact .mc-company-page-title-card__icon {
+    position: absolute !important;
+    top: 0 !important;
+    inset-inline-end: 0 !important;
+    margin: 0 !important;
+  }
+  .mc-company-page-title-card--compact .mc-company-page-title-card__copy {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding-top: 3.5rem !important;
+    text-align: center !important;
+  }
+  .mc-company-page-title-card--compact .mc-company-page-title-card__copy > span {
+    display: flex !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    margin-inline: auto !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+  .mc-company-page-title-card--compact h1 {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: .8rem auto 0 !important;
+    color: #fff !important;
+    font-size: clamp(1.45rem, 6vw, 1.85rem) !important;
+    line-height: 1.45 !important;
+    text-align: center !important;
+    text-wrap: balance !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+  .mc-company-page-title-card--compact p {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: .75rem auto 0 !important;
+    color: #dbeafe !important;
+    font-size: .95rem !important;
+    line-height: 1.85 !important;
+    text-align: center !important;
+    text-wrap: pretty !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+}
