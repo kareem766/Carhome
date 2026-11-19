@@ -2216,3 +2216,15 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
   color: #bfdbfe !important;
   -webkit-text-fill-color: #bfdbfe !important;
 }
+
+
+/* Catalog hero: fixed high-contrast heading for every account viewing this dark blue hero. */
+.mc-company-catalog-hero h1,
+.mc-company-catalog-hero h1 * {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.mc-company-catalog-hero h1 span {
+  color: #bfdbfe !important;
+  -webkit-text-fill-color: #bfdbfe !important;
+}
