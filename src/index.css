@@ -2228,3 +2228,22 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
   color: #bfdbfe !important;
   -webkit-text-fill-color: #bfdbfe !important;
 }
+
+
+/* Dedicated high-contrast typography for the exclusive advertising card in company catalog. */
+.mc-company-catalog-ad-card h3 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.mc-company-catalog-ad-card p {
+  color: #dbeafe !important;
+  -webkit-text-fill-color: #dbeafe !important;
+}
+.mc-company-catalog-ad-card > .relative span {
+  color: #fde68a !important;
+  -webkit-text-fill-color: #fde68a !important;
+}
+.mc-company-catalog-ad-card a {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
