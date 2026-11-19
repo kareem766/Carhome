@@ -1,0 +1,17 @@
+/* Company account only: preserve each card's original surface and improve text contrast only on dark cards. */
+body:has(.mc-company-only-chrome) :is(
+  .bg-slate-800, .bg-slate-900, .bg-gray-800, .bg-gray-900,
+  .bg-blue-800, .bg-blue-900, .bg-indigo-800, .bg-indigo-900,
+  .bg-sky-800, .bg-sky-900, .bg-cyan-800, .bg-cyan-900,
+  .bg-\[\#071d38\], .bg-\[\#103d6b\], .bg-\[\#0b203a\]
+) {
+  color: #fff !important;
+}
+body:has(.mc-company-only-chrome) :is(
+  .bg-slate-800, .bg-slate-900, .bg-gray-800, .bg-gray-900,
+  .bg-blue-800, .bg-blue-900, .bg-indigo-800, .bg-indigo-900,
+  .bg-sky-800, .bg-sky-900, .bg-cyan-800, .bg-cyan-900,
+  .bg-\[\#071d38\], .bg-\[\#103d6b\], .bg-\[\#0b203a\]
+) :is(h1,h2,h3,h4,h5,p,span,label,small,strong,b,li,dt,dd,th,td) {
+  color: #fff !important;
+}

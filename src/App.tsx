@@ -1,10 +1,9 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
-import { ArrowLeft, Bell, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, ClipboardList, RefreshCw, MessageCircle, Wrench, Megaphone, Bot } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, Headset, BusFront, RefreshCw, MessageCircle, Megaphone, ClipboardList, Wrench, Bot, Bell } from 'lucide-react'
 import AuthPanel from './components/AuthPanel'
 import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
 import SupplierPageShell from './components/SupplierPageShell'
-import EmployeeWorkspaceHeader from './components/EmployeeWorkspaceHeader'
 import CompanyPageSidebar from './components/CompanyPageSidebar'
 import PlatformEntryBanner from './components/PlatformEntryBanner'
 import MyCarAssistantPage from './components/MyCarAssistantPage'
@@ -126,6 +125,43 @@ function OwnerPersistentBar() {
   </header>
 }
 
+
+function CompanyPersistentBar() {
+  const currentPath = window.location.pathname
+  const links = [
+    ['/workspace/company','الرئيسية'],
+    ['/workspace/company/requests','طلبات التأجير'],
+    ['/workspace/company/requests/new','طلب جديد'],
+    ['/workspace/catalog','السيارات المتاحة'],
+    ['/workspace/company/managed-sourcing','فوّض My Car للبحث'],
+    ['/workspace/company/subscriptions','الاشتراكات والباقات'],
+    ['/workspace/company/insights','التقارير والمؤشرات'],
+    ['/workspace/company/team','فريق العمل'],
+    ['/workspace/company/alerts','التنبيهات الذكية'],
+    ['/assistant','مساعد My Car']
+  ] as const
+  const active = (href: string) => {
+    if (href === '/workspace/company') return currentPath === href
+    if (href === '/workspace/company/requests') return currentPath.startsWith(href) && currentPath !== '/workspace/company/requests/new'
+    return currentPath === href || currentPath.startsWith(href + '/')
+  }
+  return <div className="mc-company-only-chrome" dir="rtl">
+    <header className="mc-platform-topbar">
+      <a href="/workspace/company" className="mc-platform-brand">
+        <img src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png" alt="شعار My Car عربيتي" />
+        <span><strong><span dir="ltr">My Car</span> <b>عربيتي</b></strong><small>منصة إدارة وتأجير السيارات</small></span>
+      </a>
+      <div className="mc-platform-header-actions">
+        <button type="button" aria-label="تحديث الصفحة" title="تحديث الصفحة" onClick={() => window.location.reload()}><RefreshCw size={18}/><span>تحديث الصفحة</span></button>
+        <a href="/messages" aria-label="المراسلات" title="المراسلات"><MessageCircle size={18}/><span>المراسلات</span></a>
+        <AccountNotifications/>
+      </div>
+    </header>
+    <nav className="mc-platform-page-nav" aria-label="التنقل بين صفحات حساب الشركة">
+      {links.map(([href,label]) => <a key={href} href={href} aria-current={active(href) ? 'page' : undefined} className={active(href) ? 'is-active' : ''}>{label}</a>)}
+    </nav>
+  </div>
+}
 
 function ServiceNotice({ title, message, settings }: { title: string; message: string; settings: PlatformSettings }) {
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5">
@@ -377,7 +413,7 @@ export default function App() {
   if (pathIsHome(window.location.pathname) && !homeImagesReady) return <PlatformLoading />
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (authUser && adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات لوحة التحكم</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
-  if (path === '/assistant') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><MyCarAssistantPage /></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><MyCarAssistantPage /></> : authUser?.user_metadata?.organization_type === 'employee' ? <><EmployeeWorkspaceHeader active="assistant"/><MyCarAssistantPage /></> : authUser?.user_metadata?.organization_type === 'company' ? <div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><CompanyPageSidebar active="assistant"/><div className="mc-company-page-with-sidebar min-w-0"><MyCarAssistantPage /></div></div> : authUser ? <MyCarAssistantPage /> : <ServiceNotice settings={settings} title="سجّل الدخول لاستخدام المساعد" message="مساعد My Car متاح للمستخدمين المسجلين فقط، ويعمل وفق صلاحيات الحساب." />
+  if (path === '/assistant') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><MyCarAssistantPage /></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><MyCarAssistantPage /></> : authUser?.user_metadata?.organization_type === 'employee' ? <><MyCarAssistantPage /></> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPersistentBar/><div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><CompanyPageSidebar active="assistant"/><div className="mc-company-page-with-sidebar min-w-0"><MyCarAssistantPage /></div></div></> : authUser ? <MyCarAssistantPage /> : <ServiceNotice settings={settings} title="سجّل الدخول لاستخدام المساعد" message="مساعد My Car متاح للمستخدمين المسجلين فقط، ويعمل وفق صلاحيات الحساب." />
   if (path === '/privacy') return <LegalPages kind="privacy" />
   if (path === '/terms') return <LegalPages kind="terms" />
   if (path === '/workspace' && !authLoaded) return <PlatformLoading />
@@ -388,67 +424,67 @@ export default function App() {
   if (path === '/complete-profile') return <Suspense fallback={<PlatformLoading />}><GoogleProfileCompletionPage /></Suspense>
   if (path === '/workspace/notifications') {
     if (!authUser) return <ServiceNotice settings={settings} title="سجّل الدخول لإعداد الإشعارات" message="يمكنك التحكم في قنوات الإشعارات بعد تسجيل الدخول." />
-    if (isPlatformAdmin) return <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage backHref="/workspace/admin" /></Suspense>
-    if (authUser.user_metadata?.organization_type === 'fleet_supplier') return <SupplierPageShell><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></SupplierPageShell>
+    if (isPlatformAdmin) return <><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage backHref="/workspace/admin" /></Suspense></>
+    if (authUser.user_metadata?.organization_type === 'fleet_supplier') return <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></SupplierPageShell></>
     if (authUser.user_metadata?.organization_type === 'individual_owner') return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></>
-    if (authUser.user_metadata?.organization_type === 'employee') return <><EmployeeWorkspaceHeader active="notifications"/><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></>
-    if (authUser.user_metadata?.organization_type === 'company') return <div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><CompanyPageSidebar active="notifications"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></div></div>
+    if (authUser.user_metadata?.organization_type === 'employee') return <><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></>
+    if (authUser.user_metadata?.organization_type === 'company') return <><CompanyPersistentBar/><div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><CompanyPageSidebar active="notifications"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></div></div></>
     return <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense>
   }
-  if (path === '/workspace/supplier/insights') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><FleetSupplierInsightsPage /></Suspense></SupplierPageShell> : <ServiceNotice settings={settings} title="تقارير الأسطول" message="هذه الصفحة متاحة لموردي الأساطيل المعتمدين بعد تسجيل الدخول." />
-  if (path === '/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لمركز الدعم" message="مركز الدعم الفني متاح للمستخدمين المسجلين لمتابعة تذاكرهم والردود." />
-  if (path === '/workspace/admin/support') return authUser ? <Suspense fallback={<PlatformLoading />}><SupportCenterPage admin /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الدعم" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
-  if (path === '/workspace/employee/messages') return <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
-  if (path === '/workspace/provider/employee-messages') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
-  if (path === '/workspace/employee/account') return <Suspense fallback={<PlatformLoading />}><EmployeeAccountPage /></Suspense>
-  if (path === '/workspace/employee/requests') return <Suspense fallback={<PlatformLoading />}><EmployeeRequestsOffersPage /></Suspense>
-  if (path === '/workspace/employee') return <Suspense fallback={<PlatformLoading />}><EmployeeWorkspacePage /></Suspense>
-  if (path === '/workspace/provider-employee-requests' || path === '/workspace/owner/employee-requests' || path === '/workspace/supplier/employee-requests') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense></> : <Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense>
-  if (path === '/workspace/admin/employee-requests') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-employee-requests" /></Suspense>
-  if (path === '/workspace/company/team') return <Suspense fallback={<PlatformLoading />}><CompanyTeamPage /></Suspense>
-  if (path === '/workspace/company/subscriptions') return <Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense>
-  if (path === '/workspace/company/insights') return <Suspense fallback={<PlatformLoading />}><CompanyInsightsPage /></Suspense>
-  if (path === '/workspace/admin/managed-sourcing-center') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingAdminCenter /></Suspense>
-  if (path === '/workspace/provider/managed-sourcing') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense></> : <Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense>
-  if (path === '/workspace/admin/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage admin /></Suspense>
-  if (path === '/workspace/company/managed-sourcing') return <Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense>
-  if (path === '/workspace/admin/platform-settings') return <Suspense fallback={<PlatformLoading />}><PlatformSettingsPage /></Suspense>
-  if (path === '/workspace/admin/managed-accounts') return <Suspense fallback={<PlatformLoading />}><AdminManagedAccountsPage /></Suspense>
-  if (path === '/workspace/admin/payment-information') return <Suspense fallback={<PlatformLoading />}><PaymentInformationPage /></Suspense>
-  if (path === '/workspace/admin/subscription-plans') return <Suspense fallback={<PlatformLoading />}><SubscriptionPlansPage /></Suspense>
-  if (path === '/workspace/admin/company-subscriptions') return <Suspense fallback={<PlatformLoading />}><AdminCompanySubscriptionsPage /></Suspense>
-  if (path === '/workspace/admin/discount-codes') return <Suspense fallback={<PlatformLoading />}><AdminDiscountCodesPage /></Suspense>
-  if (path === '/workspace/company/alerts') return <Suspense fallback={<PlatformLoading />}><CompanySmartAlertsPage /></Suspense>
-  if (path === '/workspace/admin/advertising-plans') return <Suspense fallback={<PlatformLoading />}><AdvertisingPlansAdminPage /></Suspense>
-  if (path === '/workspace/admin/communications') return <Suspense fallback={<PlatformLoading />}><AdminCommunicationsPage /></Suspense>
+  if (path === '/workspace/supplier/insights') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><FleetSupplierInsightsPage /></Suspense></SupplierPageShell></> : <ServiceNotice settings={settings} title="تقارير الأسطول" message="هذه الصفحة متاحة لموردي الأساطيل المعتمدين بعد تسجيل الدخول." />
+  if (path === '/support') return authUser ? <>{authUser.user_metadata?.organization_type === 'company' ? <CompanyPersistentBar/> : authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<Suspense fallback={<PlatformLoading />}><SupportCenterPage /></Suspense></> : <ServiceNotice settings={settings} title="سجّل الدخول لمركز الدعم" message="مركز الدعم الفني متاح للمستخدمين المسجلين لمتابعة تذاكرهم والردود." />
+  if (path === '/workspace/admin/support') return authUser ? <><Suspense fallback={<PlatformLoading />}><SupportCenterPage admin /></Suspense></> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الدعم" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
+  if (path === '/workspace/employee/messages') return <><Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense></>
+  if (path === '/workspace/provider/employee-messages') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense></SupplierPageShell></> : <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
+  if (path === '/workspace/employee/account') return <><Suspense fallback={<PlatformLoading />}><EmployeeAccountPage /></Suspense></>
+  if (path === '/workspace/employee/requests') return <><Suspense fallback={<PlatformLoading />}><EmployeeRequestsOffersPage /></Suspense></>
+  if (path === '/workspace/employee') return <><Suspense fallback={<PlatformLoading />}><EmployeeWorkspacePage /></Suspense></>
+  if (path === '/workspace/provider-employee-requests' || path === '/workspace/owner/employee-requests' || path === '/workspace/supplier/employee-requests') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense></> : <Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense>
+  if (path === '/workspace/admin/employee-requests') return <><Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-employee-requests" /></Suspense></>
+  if (path === '/workspace/company/team') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanyTeamPage /></Suspense></>
+  if (path === '/workspace/company/subscriptions') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense></>
+  if (path === '/workspace/company/insights') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanyInsightsPage /></Suspense></>
+  if (path === '/workspace/admin/managed-sourcing-center') return <><Suspense fallback={<PlatformLoading />}><ManagedSourcingAdminCenter /></Suspense></>
+  if (path === '/workspace/provider/managed-sourcing') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense></> : <Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense>
+  if (path === '/workspace/admin/managed-sourcing') return <><Suspense fallback={<PlatformLoading />}><ManagedSourcingPage admin /></Suspense></>
+  if (path === '/workspace/company/managed-sourcing') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense></>
+  if (path === '/workspace/admin/platform-settings') return <><Suspense fallback={<PlatformLoading />}><PlatformSettingsPage /></Suspense></>
+  if (path === '/workspace/admin/managed-accounts') return <><Suspense fallback={<PlatformLoading />}><AdminManagedAccountsPage /></Suspense></>
+  if (path === '/workspace/admin/payment-information') return <><Suspense fallback={<PlatformLoading />}><PaymentInformationPage /></Suspense></>
+  if (path === '/workspace/admin/subscription-plans') return <><Suspense fallback={<PlatformLoading />}><SubscriptionPlansPage /></Suspense></>
+  if (path === '/workspace/admin/company-subscriptions') return <><Suspense fallback={<PlatformLoading />}><AdminCompanySubscriptionsPage /></Suspense></>
+  if (path === '/workspace/admin/discount-codes') return <><Suspense fallback={<PlatformLoading />}><AdminDiscountCodesPage /></Suspense></>
+  if (path === '/workspace/company/alerts') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanySmartAlertsPage /></Suspense></>
+  if (path === '/workspace/admin/advertising-plans') return <><Suspense fallback={<PlatformLoading />}><AdvertisingPlansAdminPage /></Suspense></>
+  if (path === '/workspace/admin/communications') return <><Suspense fallback={<PlatformLoading />}><AdminCommunicationsPage /></Suspense></>
   if (path === '/workspace/catalog') {
     if (!authLoaded) return <PlatformLoading />
     if (!authUser || !['company','fleet_supplier','individual_owner'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للحسابات المعتمدة" message="سجّل الدخول بحساب مالك سيارة أو شركة أو مورد أسطول معتمد لاستعراض السيارات والإعلانات." />
     if (authUser.user_metadata?.organization_type === 'individual_owner') return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage hideHeader /></Suspense></>
-    return authUser.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense></SupplierPageShell> : <><CompanyPageSidebar active="catalog"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage hideHeader /></Suspense></div></>
+    return authUser.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense></SupplierPageShell></> : <><CompanyPersistentBar/><CompanyPageSidebar active="catalog"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage hideHeader /></Suspense></div></>
   }
   if (path === '/services/provider/register') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<Suspense fallback={<PlatformLoading />}><ServiceProviderRegistrationPage /></Suspense></>
-  if (path === '/services' || path === '/automotive-services') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPageSidebar active="services"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage hideHeader /></Suspense></div></> : <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage hideHeader={authUser?.user_metadata?.organization_type === 'individual_owner'} /></Suspense>}</>
+  if (path === '/services' || path === '/automotive-services') return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage /></Suspense></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPersistentBar/><CompanyPageSidebar active="services"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage hideHeader /></Suspense></div></> : <Suspense fallback={<PlatformLoading />}><AutomotiveServicesPage hideHeader={authUser?.user_metadata?.organization_type === 'individual_owner'} /></Suspense>}</>
   if (path === '/workspace/advertising-plans') {
     if (!authLoaded) return <PlatformLoading />
-    if (authUser?.user_metadata?.organization_type === 'company') return <Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense>
-    return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense></SupplierPageShell> : <Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense>}</>
+    if (authUser?.user_metadata?.organization_type === 'company') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense></>
+    return <>{authUser?.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense></SupplierPageShell></> : <Suspense fallback={<PlatformLoading />}><AdvertisingPlansPage /></Suspense>}</>
   }
   if (path === '/workspace/admin/automation-review') {
     if (!authLoaded) return <PlatformLoading />
     if (!authUser) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#061b36] px-5 text-white"><section className="w-full max-w-lg rounded-3xl border border-white/15 bg-[#102b47] p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-[#ffad0a]" size={44}/><h1 className="text-2xl font-black">تسجيل الدخول مطلوب</h1><p className="mt-3 leading-8 text-white/75">مركز المراجعة الذكية مخصص لإدارة My Car فقط. سجّل الدخول بحساب الإدارة للمتابعة.</p><button type="button" onClick={() => { setAuthMode('signin'); setAuthOpen(true) }} className="mt-6 rounded-xl bg-[#ffad0a] px-7 py-3 font-black text-[#142b43]">تسجيل الدخول</button><a href="/" className="mr-3 inline-flex rounded-xl border border-white/20 px-6 py-3 font-bold text-white">الرئيسية</a></section>{authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode="signin" redirectTo="/workspace/admin/automation-review"/>}</main>
     if (adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات الإدارة</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={() => window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
     if (!isPlatformAdmin) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#061b36] px-5 text-white"><section className="w-full max-w-lg rounded-3xl border border-rose-400/30 bg-[#102b47] p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-rose-300" size={44}/><h1 className="text-2xl font-black">غير مصرح بالدخول</h1><p className="mt-3 leading-8 text-white/75">هذا المركز متاح لحسابات إدارة المنصة المعتمدة فقط.</p><a href="/" className="mt-6 inline-flex rounded-xl bg-[#ffad0a] px-7 py-3 font-black text-[#142b43]">العودة للرئيسية</a></section></main>
-    return <Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-smart-review" /></Suspense>
+    return <><Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-smart-review" /></Suspense></>
   }
-  if (path === '/workspace/admin') return <Suspense fallback={<PlatformLoading />}><AdminDashboardPage /></Suspense>
-  if (path === '/workspace/admin/analytics') return <Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense>
-  if (path === '/workspace/admin/vehicle-reviews') return <Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense>
-  if (path.includes('/messages')) return <>{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <SupplierPageShell><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></SupplierPageShell> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPageSidebar active="messages"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></div></> : <Suspense fallback={<PlatformLoading />}>{authUser && authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<MessagingPage /></Suspense>}</>
-  if (path === '/workspace/company') return <Suspense fallback={<PlatformLoading />}><CompanyDashboardPage /></Suspense>
-  if (path.startsWith('/workspace/company/')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense>
+  if (path === '/workspace/admin') return <><Suspense fallback={<PlatformLoading />}><AdminDashboardPage /></Suspense></>
+  if (path === '/workspace/admin/analytics') return <><Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense></>
+  if (path === '/workspace/admin/vehicle-reviews') return <><Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense></>
+  if (path.includes('/messages')) return <>{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPersistentBar/><CompanyPageSidebar active="messages"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></div></> : <Suspense fallback={<PlatformLoading />}>{authUser && authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<MessagingPage /></Suspense>}</>
+  if (path === '/workspace/company') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanyDashboardPage /></Suspense></>
+  if (path.startsWith('/workspace/company/')) return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense></>
   if (path.startsWith('/workspace/owner')) return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="owner" /></Suspense></>
-  if (path.startsWith('/workspace/supplier')) return <Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense>
+  if (path.startsWith('/workspace/supplier')) return <><Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense></>
 
   if (!settingsLoaded && (path === '/register' || path.startsWith('/register/'))) return <main dir="rtl" className="grid min-h-screen place-items-center">جارٍ تحميل إعدادات المنصة...</main>
   if ((path === '/register' || path.startsWith('/register/')) && !settings.registration_enabled) {

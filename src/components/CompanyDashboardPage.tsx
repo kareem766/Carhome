@@ -176,7 +176,7 @@ export default function CompanyDashboardPage() {
       </header>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
-        <section className="relative isolate overflow-hidden rounded-[28px] bg-gradient-to-l from-[#071d38] via-[#103d6b] to-[#087eae] p-5 text-white shadow-[0_22px_55px_-28px_rgba(5,36,75,.55)] sm:p-8">
+        <section className="mc-company-dark-hero relative isolate overflow-hidden rounded-[28px] bg-gradient-to-l from-[#071d38] via-[#103d6b] to-[#087eae] p-5 text-white shadow-[0_22px_55px_-28px_rgba(5,36,75,.55)] sm:p-8">
           <div aria-hidden="true" className="pointer-events-none absolute -left-12 -top-16 -z-10 h-64 w-64 rounded-full border-[30px] border-white/5" />
           <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 right-1/3 -z-10 h-64 w-64 rounded-full bg-cyan-300/10 blur-3xl" />
           <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
@@ -253,7 +253,7 @@ export default function CompanyDashboardPage() {
                 <a href="/workspace/company/subscriptions" className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 text-xs font-extrabold text-white"><CreditCard size={15} /> عرض الباقات وإدارة الاشتراك</a>
               </section>
 
-              <section className="overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-[#0e3260] via-[#0b2b50] to-[#071a32] p-5 text-white shadow-sm">
+              <section className="mc-company-dark-card overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-[#0e3260] via-[#0b2b50] to-[#071a32] p-5 text-white shadow-sm">
                 <div className="flex items-center justify-between gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl border border-white/15 bg-white/10 text-cyan-200"><Search size={22} /></span><span className="rounded-full border border-cyan-200/20 bg-cyan-200/10 px-3 py-1 text-[10px] font-extrabold text-cyan-100">خدمة اختيارية</span></div>
                 <h3 className="mt-4 text-lg font-black">فوّض My Car للبحث نيابةً عن شركتك</h3>
                 <p className="mt-2 text-xs leading-6 text-blue-100">حدد احتياجك، ودع فريق المنصة يبحث لدى الملاك وموردي الأساطيل ويجهز لك ترشيحات وعروضًا للمقارنة قبل اتخاذ القرار.</p>

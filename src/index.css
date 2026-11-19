@@ -1558,3 +1558,693 @@ main.min-h-screen :is(input, select, textarea):disabled {
     scroll-margin-top: 168px;
   }
 }
+
+
+/* My Car company workspace — unified visual system (isolated to company routes). */
+.mc-company-page-with-sidebar {
+  --mc-company-ink: #10243d;
+  --mc-company-muted: #64758b;
+  --mc-company-line: #e2eaf3;
+  --mc-company-blue: #1459a6;
+  --mc-company-orange: #f5a623;
+  background: #f4f7fb !important;
+  color: var(--mc-company-ink) !important;
+  font-family: 'Cairo', sans-serif;
+}
+.mc-company-page-with-sidebar > .mx-auto,
+.mc-company-page-with-sidebar > div:has(> section:first-child) {
+  max-width: 1240px;
+}
+.mc-company-shared-sidebar {
+  background: linear-gradient(180deg,#0a1d34 0%,#102c4c 58%,#12395d 100%) !important;
+  border-left: 1px solid rgba(255,255,255,.08) !important;
+}
+.mc-company-shared-sidebar .mc-sidebar-brand { padding: .25rem .3rem 1rem; border-bottom: 1px solid rgba(255,255,255,.11); }
+.mc-company-shared-sidebar .mc-sidebar-tag { color: #a9c4e2; font-size: .7rem; font-weight: 800; }
+.mc-company-shared-sidebar .mc-sidebar-nav { gap: .32rem; }
+.mc-company-shared-sidebar .mc-sidebar-link {
+  min-height: 46px !important; border: 1px solid transparent !important;
+  border-radius: 13px !important; color: #d5e2f1 !important;
+  font-size: .82rem !important; font-weight: 800 !important;
+}
+.mc-company-shared-sidebar .mc-sidebar-link:hover { background: rgba(255,255,255,.085) !important; border-color: rgba(255,255,255,.08) !important; }
+.mc-company-shared-sidebar .mc-sidebar-link.is-active {
+  background: linear-gradient(105deg,#216bd0,#174e9b) !important;
+  border-color: rgba(147,197,253,.22) !important;
+  box-shadow: 0 8px 20px rgba(3,13,29,.24), inset 3px 0 0 #f5ad32 !important;
+}
+.mc-company-shared-sidebar .mc-sidebar-promo {
+  border: 1px solid rgba(255,255,255,.12); border-radius: 18px;
+  background: linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.035));
+  padding: 1rem; color: #fff;
+}
+.mc-company-page-with-sidebar > header {
+  border-color: var(--mc-company-line) !important;
+  background: rgba(255,255,255,.94) !important;
+  box-shadow: 0 5px 24px rgba(18,45,78,.055) !important;
+  backdrop-filter: blur(16px);
+}
+.mc-company-page-with-sidebar > header h1,
+.mc-company-page-with-sidebar > header h2 { color: var(--mc-company-ink); }
+.mc-company-page-with-sidebar > .mx-auto > section:first-child,
+.mc-company-page-with-sidebar > div > section:first-child {
+  border-radius: 22px !important;
+  box-shadow: 0 14px 34px rgba(11,43,78,.13) !important;
+}
+.mc-company-page-with-sidebar :is(article, .rounded-2xl.border, .rounded-3xl.border) {
+  border-color: var(--mc-company-line);
+  box-shadow: 0 5px 18px rgba(20,48,82,.045);
+}
+.mc-company-page-with-sidebar article,
+.mc-company-page-with-sidebar form,
+.mc-company-page-with-sidebar table {
+  border-radius: 18px;
+}
+.mc-company-page-with-sidebar :is(input,select,textarea) {
+  border-color: #d7e1ed;
+  border-radius: 12px;
+  color: #1b3048;
+  background-color: #fff;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.mc-company-page-with-sidebar :is(input,select,textarea):focus {
+  border-color: #5b9be0;
+  outline: 0;
+  box-shadow: 0 0 0 4px rgba(38,119,207,.11);
+}
+.mc-company-page-with-sidebar :is(button,a).bg-blue-700,
+.mc-company-page-with-sidebar button.bg-blue-600 {
+  box-shadow: 0 5px 12px rgba(20,89,166,.14);
+}
+.mc-company-page-with-sidebar :is(button,a):focus-visible {
+  outline: 3px solid rgba(59,130,246,.55);
+  outline-offset: 2px;
+}
+.mc-company-page-with-sidebar table { width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; }
+.mc-company-page-with-sidebar :is(th,td) { padding: .85rem .9rem; border-bottom: 1px solid #e8eef5; text-align: right; }
+.mc-company-page-with-sidebar th { background: #f5f8fc; color: #435a74; font-size: .78rem; font-weight: 900; }
+.mc-company-page-with-sidebar td { color: #344b65; font-size: .84rem; }
+.mc-company-mobile-nav {
+  background: rgba(255,255,255,.97) !important;
+  border-bottom: 1px solid #dce6f1 !important;
+  box-shadow: 0 5px 16px rgba(17,43,72,.055);
+}
+.mc-company-mobile-link { font-weight: 850 !important; }
+.mc-company-mobile-link.is-active { background: #eaf3ff !important; border-color: #b8d4f4 !important; color: #124f99 !important; }
+@media (min-width: 761px) {
+  .mc-company-page-with-sidebar { padding-bottom: 2.5rem; }
+  .mc-company-page-with-sidebar > .mx-auto { padding-top: 1.8rem; }
+}
+@media (max-width: 760px) {
+  .mc-company-mobile-nav { box-shadow: 0 4px 14px rgba(17,43,72,.06) !important; }
+  .mc-company-page-with-sidebar { min-height: calc(100svh - 54px); }
+  .mc-company-page-with-sidebar > .mx-auto { gap: 1rem !important; }
+  .mc-company-page-with-sidebar :is(article,form) { border-radius: 16px !important; }
+  .mc-company-page-with-sidebar :is(button,a) { touch-action: manipulation; }
+}
+
+
+/* Company workspace visual consistency pass: scoped to the company shell only. */
+.mc-company-page-with-sidebar {
+  color: #142b46;
+  background:
+    radial-gradient(ellipse at 92% 0%, rgba(45, 112, 190, .075), transparent 34rem),
+    linear-gradient(145deg, #f3f7fc 0%, #edf3fa 52%, #f7f9fc 100%);
+}
+.mc-company-page-with-sidebar :is(h1, h2, h3) {
+  color: #102642;
+  text-wrap: balance;
+}
+.mc-company-page-with-sidebar :is(p, label, small) {
+  line-height: 1.75;
+}
+.mc-company-page-with-sidebar article {
+  min-width: 0;
+  border: 1px solid rgba(190, 207, 229, .72);
+  border-radius: 1.15rem;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 8px 24px rgba(17, 43, 76, .055);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.mc-company-page-with-sidebar article:hover {
+  border-color: rgba(55, 125, 205, .38);
+  box-shadow: 0 14px 32px rgba(17, 43, 76, .09);
+}
+.mc-company-page-with-sidebar :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+  min-width: 0;
+  border: 1px solid #d7e2ef;
+  border-radius: .8rem;
+  background: #fff;
+  color: #193653;
+}
+.mc-company-page-with-sidebar :is(input, select, textarea):focus {
+  border-color: #4388d4;
+  box-shadow: 0 0 0 3px rgba(53, 125, 205, .12);
+  outline: none;
+}
+.mc-company-page-with-sidebar :is(button, a):focus-visible {
+  outline: 3px solid rgba(59, 130, 246, .72);
+  outline-offset: 3px;
+}
+.mc-company-page-with-sidebar table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.mc-company-page-with-sidebar :is(th, td) {
+  border-color: #e5edf6;
+  padding: .8rem .9rem;
+  vertical-align: middle;
+}
+.mc-company-page-with-sidebar th {
+  background: #f4f8fd;
+  color: #35516f;
+  font-size: .78rem;
+  font-weight: 850;
+}
+@media (max-width: 760px) {
+  .mc-company-page-with-sidebar {
+    padding-inline: 0;
+    overflow-x: clip;
+  }
+  .mc-company-page-with-sidebar :is(article, section) {
+    min-width: 0;
+  }
+  .mc-company-page-with-sidebar article {
+    border-radius: 1rem;
+  }
+  .mc-company-page-with-sidebar :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+    min-height: 46px;
+    max-width: 100%;
+    font-size: 16px;
+  }
+  .mc-company-page-with-sidebar :is(button, a) {
+    max-width: 100%;
+  }
+  .mc-company-page-with-sidebar table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc-company-page-with-sidebar article {
+    transition: none;
+  }
+}
+
+
+/* Company workspace layout correction — navigation, title bar and review notice share one stack. */
+:root { --mc-company-mobile-nav-height: 58px; }
+
+/* The mobile company page switcher is a persistent top rail, not part of the page header. */
+.mc-company-mobile-nav {
+  position: fixed !important;
+  inset: 0 0 auto 0 !important;
+  z-index: 100 !important;
+  display: flex !important;
+  min-height: var(--mc-company-mobile-nav-height) !important;
+  height: var(--mc-company-mobile-nav-height) !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: .35rem !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  padding: .4rem .65rem !important;
+  border-bottom: 1px solid #d8e3ef !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 5px 18px rgba(13,39,71,.09) !important;
+  backdrop-filter: none;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.mc-company-mobile-nav::-webkit-scrollbar { display: none; }
+.mc-company-mobile-nav .mc-company-mobile-link {
+  flex: 0 0 auto !important;
+  min-height: 42px !important;
+  white-space: nowrap !important;
+}
+.mc-company-mobile-more { position: relative; flex: 0 0 auto; }
+.mc-company-mobile-more > summary {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dce6f1;
+  border-radius: 11px;
+  background: #f7faff;
+  padding: .5rem .8rem;
+  color: #294765;
+  font-size: .76rem;
+  font-weight: 850;
+  list-style: none;
+  cursor: pointer;
+}
+.mc-company-mobile-more > summary::-webkit-details-marker { display: none; }
+.mc-company-mobile-more[open] .mc-company-mobile-more-menu {
+  position: fixed;
+  top: calc(var(--mc-company-mobile-nav-height) + 6px);
+  right: .65rem;
+  z-index: 120;
+  display: grid;
+  width: min(18rem, calc(100vw - 1.3rem));
+  max-height: min(70vh, 34rem);
+  gap: .35rem;
+  overflow-y: auto;
+  border: 1px solid #dbe5f1;
+  border-radius: 16px;
+  background: #fff;
+  padding: .55rem;
+  box-shadow: 0 18px 48px rgba(10,31,58,.2);
+}
+.mc-company-mobile-more-menu .mc-company-mobile-link {
+  width: 100%;
+  justify-content: flex-start;
+  white-space: normal !important;
+}
+
+/* Reserve room for the fixed rail, then keep each page title bar directly beneath it. */
+@media (max-width: 760px) {
+  .mc-company-page-with-sidebar {
+    width: 100% !important;
+    margin: 0 !important;
+    padding-top: var(--mc-company-mobile-nav-height) !important;
+  }
+  .mc-company-page-with-sidebar > header,
+  .mc-company-page-with-sidebar > .mc-company-dashboard-topbar,
+  .mc-company-page-with-sidebar .mc-workspace-topbar.mc-company-topbar,
+  .mc-company-workspace-main .mc-workspace-topbar.mc-company-topbar {
+    position: sticky !important;
+    top: var(--mc-company-mobile-nav-height) !important;
+    z-index: 80 !important;
+  }
+  .mc-company-workspace-main {
+    display: block !important;
+    width: 100% !important;
+    min-height: 100svh;
+    margin: 0 !important;
+    padding-top: var(--mc-company-mobile-nav-height) !important;
+  }
+  .mc-company-workspace-main > .mc-workspace-content {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  .mc-company-workspace-main .mc-workspace-mobile-nav,
+  .mc-company-workspace-main > .mc-workspace-sidebar {
+    display: none !important;
+  }
+  .mc-company-workspace-main .mc-workspace-topbar.mc-company-topbar {
+    top: var(--mc-company-mobile-nav-height) !important;
+  }
+  .mc-company-page-with-sidebar nav[aria-label="التنقل داخل صفحة الاشتراكات"] {
+    top: calc(var(--mc-company-mobile-nav-height) + 8px) !important;
+  }
+}
+
+/* On desktop, the fixed sidebar remains the sole navigation and the title bar starts at the top. */
+@media (min-width: 761px) {
+  .mc-company-mobile-nav { display: none !important; }
+  .mc-company-page-with-sidebar > header,
+  .mc-company-page-with-sidebar .mc-workspace-topbar.mc-company-topbar,
+  .mc-company-workspace-main .mc-workspace-topbar.mc-company-topbar {
+    top: 0 !important;
+  }
+  .mc-company-workspace-main {
+    display: block !important;
+    width: calc(100% - 260px) !important;
+    min-height: 100vh;
+    margin-right: 260px !important;
+  }
+  .mc-company-workspace-main > .mc-workspace-content {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  .mc-company-workspace-main > .mc-workspace-sidebar,
+  .mc-company-workspace-main .mc-workspace-mobile-nav {
+    display: none !important;
+  }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .mc-company-workspace-main {
+    width: calc(100% - 220px) !important;
+    margin-right: 220px !important;
+  }
+}
+
+/* Keep the pending-review notice below the company header and its navigation. */
+.mc-company-workspace-main .mc-workspace-content > [role="status"] {
+  position: relative;
+  z-index: 1;
+  margin: 1rem clamp(.75rem, 2vw, 1.5rem) 0;
+}
+
+
+/* FINAL company mobile chrome order: platform title bar first, company page rail second. */
+:root {
+  --mc-company-platform-bar-height: 66px;
+  --mc-company-mobile-nav-height: 58px;
+}
+@media (max-width: 760px) {
+  /* The platform title/account bar owns the first row. */
+  .mc-company-workspace-main .mc-workspace-topbar.mc-company-topbar,
+  .mc-company-page-with-sidebar .mc-workspace-topbar.mc-company-topbar,
+  .mc-company-page-with-sidebar > header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 150 !important;
+  }
+
+  /* Company page navigation is always directly UNDER the platform bar. */
+  .mc-company-mobile-nav {
+    position: fixed !important;
+    inset: var(--mc-company-platform-bar-height) 0 auto 0 !important;
+    top: var(--mc-company-platform-bar-height) !important;
+    z-index: 140 !important;
+    height: var(--mc-company-mobile-nav-height) !important;
+    min-height: var(--mc-company-mobile-nav-height) !important;
+  }
+
+  /* Keep page content clear of both persistent rows. */
+  .mc-company-workspace-main {
+    padding-top: calc(var(--mc-company-platform-bar-height) + var(--mc-company-mobile-nav-height)) !important;
+  }
+  .mc-company-page-with-sidebar {
+    padding-top: calc(var(--mc-company-platform-bar-height) + var(--mc-company-mobile-nav-height)) !important;
+  }
+  .mc-company-workspace-main .mc-workspace-topbar.mc-company-topbar {
+    top: 0 !important;
+  }
+  .mc-company-mobile-more[open] .mc-company-mobile-more-menu {
+    top: calc(var(--mc-company-platform-bar-height) + var(--mc-company-mobile-nav-height) + 6px) !important;
+  }
+}
+
+
+/* Corrected mobile order: workspace/platform title first, company page links beneath it. */
+@media (max-width: 760px) {
+  :root {
+    --mc-company-platform-bar-height: 76px;
+    --mc-company-mobile-nav-height: 56px;
+  }
+
+  /* Do not push the title bar below the navigation. */
+  .mc-company-workspace-main {
+    padding-top: 0 !important;
+  }
+  .mc-company-page-with-sidebar {
+    padding-top: 0 !important;
+  }
+
+  /* Keep the page title/platform bar at the top edge. */
+  .mc-company-workspace-main .mc-workspace-topbar.mc-company-topbar,
+  .mc-company-page-with-sidebar > .mc-company-dashboard-topbar,
+  .mc-company-page-with-sidebar > header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 160 !important;
+  }
+
+  /* The fixed company links start only after the title/platform bar. */
+  .mc-company-mobile-nav {
+    position: fixed !important;
+    top: var(--mc-company-platform-bar-height) !important;
+    inset-inline: 0 !important;
+    height: var(--mc-company-mobile-nav-height) !important;
+    min-height: var(--mc-company-mobile-nav-height) !important;
+    z-index: 150 !important;
+  }
+
+  /* Workspace content must start after BOTH visible bars. */
+  .mc-company-workspace-main .mc-workspace-page {
+    padding-top: calc(var(--mc-company-mobile-nav-height) + .8rem) !important;
+    scroll-margin-top: calc(var(--mc-company-platform-bar-height) + var(--mc-company-mobile-nav-height) + 12px) !important;
+  }
+  .mc-company-workspace-main .mc-workspace-content > [role="status"] {
+    margin-top: calc(var(--mc-company-mobile-nav-height) + 1rem) !important;
+  }
+
+  /* Dashboard has a separate title bar and content wrapper. */
+  .mc-company-page-with-sidebar > .mx-auto {
+    padding-top: calc(1.5rem + var(--mc-company-mobile-nav-height)) !important;
+  }
+}
+
+
+
+
+/* Company-only account chrome. Other account types and the public homepage are intentionally untouched. */
+.mc-company-only-chrome {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 500;
+  direction: rtl;
+  font-family: 'Cairo', sans-serif;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 8px 26px rgba(8,30,56,.10);
+  backdrop-filter: blur(16px);
+}
+.mc-platform-topbar {
+  display: flex;
+  min-height: 66px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #e5edf5;
+  padding: .55rem clamp(.75rem,2.5vw,2rem);
+  background: linear-gradient(105deg,#fff 0%,#f8fbff 100%);
+}
+.mc-platform-brand { display:inline-flex; min-width:0; align-items:center; gap:.7rem; color:#102b49; }
+.mc-platform-brand img {
+  display:block; width:44px; height:44px; flex:0 0 44px; border-radius:12px;
+  border:1px solid #e7edf4; background:#fff; padding:3px; object-fit:contain;
+}
+.mc-platform-brand strong { display:block; color:#102b49; font-size:1.05rem; font-weight:950; line-height:1.35; white-space:nowrap; }
+.mc-platform-brand strong b { color:#e99a13; }
+.mc-platform-brand small { display:block; margin-top:1px; color:#718198; font-size:.66rem; font-weight:750; }
+.mc-platform-header-actions { display:flex; flex:0 0 auto; align-items:center; justify-content:flex-start; gap:.5rem; }
+.mc-platform-header-actions > button,
+.mc-platform-header-actions > a {
+  display:inline-flex; min-height:42px; align-items:center; justify-content:center; gap:.45rem;
+  border:1px solid #dce6f0; border-radius:12px; background:#fff; padding:.45rem .8rem;
+  color:#24415f; font-size:.76rem; font-weight:850; white-space:nowrap;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease;
+}
+.mc-platform-header-actions > button:hover,
+.mc-platform-header-actions > a:hover { border-color:#a9c9ec; background:#f0f6ff; color:#15549a; }
+.mc-platform-header-actions > div { display:flex; align-items:center; gap:.45rem; }
+.mc-platform-header-actions > div > button { border-radius:12px !important; }
+.mc-platform-page-nav {
+  display:flex; min-height:50px; align-items:center; gap:.35rem; overflow-x:auto;
+  padding:.35rem clamp(.65rem,2.2vw,1.8rem); border-bottom:1px solid #dce6f1;
+  background:#fff; scrollbar-width:none; -webkit-overflow-scrolling:touch;
+}
+.mc-platform-page-nav::-webkit-scrollbar { display:none; }
+.mc-platform-page-nav a {
+  display:inline-flex; min-height:38px; flex:0 0 auto; align-items:center; justify-content:center;
+  border:1px solid transparent; border-radius:10px; padding:.42rem .82rem;
+  color:#53677f; font-size:.76rem; font-weight:850; white-space:nowrap;
+  transition:background .16s ease,color .16s ease,border-color .16s ease;
+}
+.mc-platform-page-nav a:hover { background:#f1f6fc; color:#164f8d; }
+.mc-platform-page-nav a.is-active {
+  border-color:#c7dcf4; background:linear-gradient(180deg,#edf5ff,#e4f0ff);
+  color:#124f91; box-shadow:inset 0 -2px 0 #f1a51e;
+}
+body:has(.mc-company-shared-sidebar) { padding-top:116px !important; }
+body:has(.mc-company-shared-sidebar) .mc-workspace-topbar,
+body:has(.mc-company-shared-sidebar) .mc-company-shared-sidebar,
+body:has(.mc-company-shared-sidebar) .mc-workspace-sidebar,
+body:has(.mc-company-shared-sidebar) .mc-company-mobile-nav,
+body:has(.mc-company-shared-sidebar) .mc-workspace-mobile-nav,
+body:has(.mc-company-shared-sidebar) .mc-company-dashboard-topbar,
+body:has(.mc-company-shared-sidebar) .mc-supplier-topbar,
+body:has(.mc-company-shared-sidebar) .mc-supplier-navigation,
+body:has(.mc-company-shared-sidebar) header.sticky.top-0.z-40 {
+  display:none !important;
+}
+body:has(.mc-company-shared-sidebar) .mc-workspace-main { margin-top:0 !important; }
+body:has(.mc-company-shared-sidebar) .mc-supplier-page-content,
+body:has(.mc-company-shared-sidebar) .mc-workspace-content { min-width:0; }
+@media (max-width:760px) {
+  .mc-platform-topbar { min-height:62px; gap:.45rem; padding:.45rem .65rem; }
+  .mc-platform-brand { gap:.45rem; }
+  .mc-platform-brand img { width:38px; height:38px; flex-basis:38px; }
+  .mc-platform-brand strong { font-size:.88rem; }
+  .mc-platform-brand small { display:none; }
+  .mc-platform-header-actions { gap:.3rem; }
+  .mc-platform-header-actions > button,
+  .mc-platform-header-actions > a { width:40px; min-width:40px; min-height:40px; padding:.4rem; border-radius:11px; }
+  .mc-platform-header-actions > button span,
+  .mc-platform-header-actions > a span { display:none; }
+  .mc-platform-header-actions > div { gap:.25rem; }
+  .mc-platform-page-nav { min-height:48px; gap:.25rem; padding:.3rem .5rem; }
+  .mc-platform-page-nav a { min-height:36px; padding:.35rem .68rem; font-size:.71rem; }
+  body:has(.mc-company-shared-sidebar) { padding-top:110px !important; }
+}
+
+/* Readability improvements are scoped to the redesigned company workspace only. */
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border).bg-white,
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border).bg-slate-50,
+body:has(.mc-company-shared-sidebar) :is(.rounded-xl,.rounded-2xl,.rounded-3xl).bg-blue-50 {
+  color:#243b56;
+}
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border,.rounded-xl,.rounded-2xl,.rounded-3xl).bg-white :is(h1,h2,h3,h4),
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border,.rounded-xl,.rounded-2xl,.rounded-3xl).bg-slate-50 :is(h1,h2,h3,h4),
+body:has(.mc-company-shared-sidebar) :is(.rounded-xl,.rounded-2xl,.rounded-3xl).bg-blue-50 :is(h1,h2,h3,h4) {
+  color:#142d49;
+}
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border,.rounded-xl,.rounded-2xl,.rounded-3xl).bg-white :is(p,label,small),
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border,.rounded-xl,.rounded-2xl,.rounded-3xl).bg-slate-50 :is(p,label,small),
+body:has(.mc-company-shared-sidebar) :is(.rounded-xl,.rounded-2xl,.rounded-3xl).bg-blue-50 :is(p,label,small) {
+  color:#52657c;
+}
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border,.rounded-xl,.rounded-2xl,.rounded-3xl).bg-white :is(input,select,textarea),
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border,.rounded-xl,.rounded-2xl,.rounded-3xl).bg-slate-50 :is(input,select,textarea) {
+  color:#172f4a; background-color:#fff;
+}
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border).bg-white :is(.text-slate-400,.text-gray-400) {
+  color:#64748b !important;
+}
+body:has(.mc-company-shared-sidebar) :is(article,.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border).bg-white :is(.text-slate-500,.text-gray-500) {
+  color:#52657c !important;
+}
+
+
+/* Company redesign: enforce readable text contrast on dark cards only. */
+body:has(.mc-company-shared-sidebar) :is(
+  article, [role="article"],
+  .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border,
+  .rounded-xl, .rounded-2xl, .rounded-3xl
+):is(
+  [class*="bg-slate-900"], [class*="bg-slate-950"],
+  [class*="bg-gray-900"], [class*="bg-gray-950"],
+  [class*="bg-zinc-900"], [class*="bg-zinc-950"],
+  [class*="bg-neutral-900"], [class*="bg-neutral-950"],
+  [class*="bg-blue-900"], [class*="bg-blue-950"],
+  [class*="bg-indigo-900"], [class*="bg-indigo-950"],
+  [class*="bg-violet-900"], [class*="bg-violet-950"],
+  [class*="bg-purple-900"], [class*="bg-purple-950"],
+  [class*="bg-[#0"], [class*="bg-[#1"]
+) {
+  color: #f8fafc !important;
+}
+body:has(.mc-company-shared-sidebar) :is(
+  article, [role="article"],
+  .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border,
+  .rounded-xl, .rounded-2xl, .rounded-3xl
+):is(
+  [class*="bg-slate-900"], [class*="bg-slate-950"],
+  [class*="bg-gray-900"], [class*="bg-gray-950"],
+  [class*="bg-zinc-900"], [class*="bg-zinc-950"],
+  [class*="bg-neutral-900"], [class*="bg-neutral-950"],
+  [class*="bg-blue-900"], [class*="bg-blue-950"],
+  [class*="bg-indigo-900"], [class*="bg-indigo-950"],
+  [class*="bg-violet-900"], [class*="bg-violet-950"],
+  [class*="bg-purple-900"], [class*="bg-purple-950"],
+  [class*="bg-[#0"], [class*="bg-[#1"]
+) :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,b,em,li,dt,dd,div) {
+  color: #f8fafc !important;
+}
+body:has(.mc-company-shared-sidebar) :is(
+  article, [role="article"],
+  .rounded-xl.border, .rounded-2xl.border, .rounded-3xl.border,
+  .rounded-xl, .rounded-2xl, .rounded-3xl
+):is(
+  [class*="bg-slate-900"], [class*="bg-slate-950"],
+  [class*="bg-gray-900"], [class*="bg-gray-950"],
+  [class*="bg-zinc-900"], [class*="bg-zinc-950"],
+  [class*="bg-neutral-900"], [class*="bg-neutral-950"],
+  [class*="bg-blue-900"], [class*="bg-blue-950"],
+  [class*="bg-indigo-900"], [class*="bg-indigo-950"],
+  [class*="bg-violet-900"], [class*="bg-violet-950"],
+  [class*="bg-purple-900"], [class*="bg-purple-950"],
+  [class*="bg-[#0"], [class*="bg-[#1"]
+) :is(.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400,.text-gray-500,.text-blue-100,.text-indigo-100) {
+  color: #e2e8f0 !important;
+}
+
+
+/* Company dark gradient cards: restore high-contrast typography without changing card surfaces. */
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero h1,
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero h2,
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero h3,
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero h4,
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero p,
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero strong,
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero small,
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero label,
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero li {
+  color: #f8fafc !important;
+}
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero :is(.text-blue-100,.text-cyan-100,.text-slate-300,.text-slate-400,.text-slate-500) {
+  color: #dbeafe !important;
+}
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero a.bg-white,
+body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-dark-hero button.bg-white {
+  color: #123b68 !important;
+}
+
+
+/* Unified contrast for explicitly marked dark cards in company-account components.
+   These cards are conditionally marked only for company accounts, so do not require
+   the shared sidebar to be mounted (the vehicle catalog is a standalone route). */
+.mc-company-dark-card,
+.mc-company-dark-card :is(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,b,em,li,dt,dd) {
+  color: #f8fafc !important;
+}
+.mc-company-dark-card :is(.text-blue-100,.text-cyan-100,.text-cyan-200,.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400) {
+  color: #dbeafe !important;
+}
+.mc-company-dark-card :is(a.bg-white,button.bg-white),
+.mc-company-dark-card :is(a.bg-white,button.bg-white) :is(span,strong),
+.mc-company-dark-card button.bg-amber-400,
+.mc-company-dark-card button.bg-amber-400 :is(span,strong) {
+  color: #102b47 !important;
+}
+
+
+/* Direct, page-specific contrast fix for the company vehicle catalog hero heading. */
+.mc-company-page-with-sidebar .mc-company-catalog-title {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.mc-company-page-with-sidebar .mc-company-catalog-title-accent {
+  color: #bfdbfe !important;
+  -webkit-text-fill-color: #bfdbfe !important;
+}
+
+
+/* Catalog hero: fixed high-contrast heading for every account viewing this dark blue hero. */
+.mc-company-catalog-hero h1,
+.mc-company-catalog-hero h1 * {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.mc-company-catalog-hero h1 span {
+  color: #bfdbfe !important;
+  -webkit-text-fill-color: #bfdbfe !important;
+}
+
+
+/* Dedicated high-contrast typography for the exclusive advertising card in company catalog. */
+.mc-company-catalog-ad-card h3 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.mc-company-catalog-ad-card p {
+  color: #dbeafe !important;
+  -webkit-text-fill-color: #dbeafe !important;
+}
+.mc-company-catalog-ad-card > .relative span {
+  color: #fde68a !important;
+  -webkit-text-fill-color: #fde68a !important;
+}
+.mc-company-catalog-ad-card a {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
