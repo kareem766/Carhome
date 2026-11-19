@@ -155,9 +155,10 @@ export default function VehicleCatalogPage({ hideHeader = false }: { hideHeader?
   }, [orgType, vehicles, filtered, promotedIds, premiumPromotedIds, page, pageSize])
   useEffect(() => {
     if (!supabase || !orgId || !['company', 'fleet_supplier'].includes(orgType) || impressionVehicleIds.length === 0) return
+    const client = supabase
     let cancelled = false
     const recordImpressions = async () => {
-      const { error: impressionError } = await supabase.rpc('record_vehicle_catalog_impressions', {
+      const { error: impressionError } = await client.rpc('record_vehicle_catalog_impressions', {
         p_vehicle_ids: impressionVehicleIds,
         p_viewer_organization_id: orgId
       })
