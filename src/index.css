@@ -2247,3 +2247,57 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
 }
+
+
+/* Compact company page title cards: override broad mobile h1 rules so the text
+   uses the full card width instead of breaking into narrow, oversized lines. */
+.mc-company-page-title-card--compact > div {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+.mc-company-page-title-card--compact > div > div {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+}
+.mc-company-page-title-card--compact h1 {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-top: .65rem;
+  color: #fff !important;
+  font-size: clamp(1.35rem, 5.4vw, 1.75rem) !important;
+  line-height: 1.45 !important;
+  text-align: right;
+  text-wrap: pretty !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+}
+.mc-company-page-title-card--compact p {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  color: #dbeafe !important;
+  font-size: .95rem !important;
+  line-height: 1.85 !important;
+  text-align: right;
+  text-wrap: pretty !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+@media (max-width: 640px) {
+  .mc-company-page-title-card--compact {
+    padding: 1.25rem !important;
+  }
+  .mc-company-page-title-card--compact h1 {
+    font-size: 1.45rem !important;
+    line-height: 1.5 !important;
+  }
+  .mc-company-page-title-card--compact p {
+    font-size: .9rem !important;
+    line-height: 1.9 !important;
+  }
+}
