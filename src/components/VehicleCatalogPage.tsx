@@ -154,10 +154,22 @@ export default function VehicleCatalogPage({ hideHeader = false }: { hideHeader?
     return Array.from(new Set([...premiumVisible, ...featuredVisible, ...regularVisible].map(vehicle => vehicle.id)))
   }, [orgType, vehicles, filtered, promotedIds, premiumPromotedIds, page, pageSize])
   useEffect(() => {
-    if (!supabase || impressionVehicleIds.length === 0) return
-    // The database deduplicates impressions per vehicle, organization, and UTC day.
-    void supabase.rpc('record_vehicle_catalog_impressions', { p_vehicle_ids: impressionVehicleIds })
-  }, [impressionVehicleIds, orgId])
+    if (!supabase || !orgId || !['company', 'fleet_supplier'].includes(orgType) || impressionVehicleIds.length === 0) return
+    const client = supabase
+    let cancelled = false
+    const recordImpressions = async () => {
+      const { error: impressionError } = await client.rpc('record_vehicle_catalog_impressions', {
+        p_vehicle_ids: impressionVehicleIds,
+        p_viewer_organization_id: orgId
+      })
+      if (impressionError && !cancelled) {
+        // Keep the catalog usable, but make failed tracking visible in diagnostics instead of silently showing zero.
+        console.error('تعذر تسجيل مرات ظهور السيارات من حساب الشركة:', impressionError)
+      }
+    }
+    void recordImpressions()
+    return () => { cancelled = true }
+  }, [impressionVehicleIds, orgId, orgType])
   const types = useMemo(() => ['الكل',...Array.from(new Set([...vehicles.map(v=>v.vehicle_type),'فان / ميكروباص','نقل']))], [vehicles])
   const cities = useMemo(() => ['الكل',...Array.from(new Set(vehicles.map(v=>v.governorate)))], [vehicles])
 
