@@ -79,7 +79,7 @@ export default function CompanyTeamPage(){
    <section className="mc-company-dark-card relative overflow-hidden rounded-[1.75rem] bg-gradient-to-l from-[#0b2545] via-[#123b68] to-[#176b9a] px-5 py-7 text-white shadow-[0_22px_55px_-30px_rgba(10,45,85,.55)] sm:px-8 sm:py-9">
     <div className="pointer-events-none absolute -left-12 -top-16 h-52 w-52 rounded-full border-[26px] border-cyan-300/10"></div>
     <p className="relative text-sm font-extrabold text-cyan-200">إدارة الفريق</p>
-    <h1 className="relative mt-2 text-3xl font-black leading-tight sm:text-4xl">موظفو الشركة وصلاحياتهم</h1>
+    <h1 className="relative mt-2 text-3xl font-black leading-tight sm:text-4xl">موظفين الشركة وصلاحياتهم</h1>
     <p className="relative mt-3 max-w-2xl text-sm leading-7 text-blue-100 sm:text-base">أنشئ حساب الموظف بنفسك، وحدد دوره، وسلّمه كلمة مرور مؤقتة ليغيّرها عند أول دخول.</p>
    </section>
    {error&&<div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
