@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Activity, ArrowLeft, BellRing, Building2, CarFront, CheckCircle2, ClipboardCheck, CreditCard, Gauge, Megaphone, RefreshCw, Settings2, ShieldCheck, Users, Wallet, BriefcaseBusiness, Sparkles } from 'lucide-react'
+import { Activity, ArrowLeft, BellRing, Building2, CarFront, CheckCircle2, ClipboardCheck, CreditCard, Gauge, Megaphone, RefreshCw, Settings2, ShieldCheck, Users, Wallet, BriefcaseBusiness, Sparkles, Images } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
 import AdminPageNavigation from './AdminPageNavigation'
@@ -18,6 +18,7 @@ const shortcuts = [
  { href: '/workspace/admin/payment-information', title: 'معلومات الدفع', desc: 'بيانات التحويلات المعتمدة للمنصة', icon: Wallet, tone: 'from-cyan-500 to-sky-700' },
  { href: '/workspace/admin/platform-settings', title: 'إعدادات وهوية المنصة', desc: 'الاسم والشعار والألوان وإعدادات التسجيل', icon: Settings2, tone: 'from-slate-600 to-slate-800' },
  { href: '/workspace/admin/communications', title: 'الإشعارات والبانرات', desc: 'إدارة الرسائل والإعلانات داخل المنصة', icon: BellRing, tone: 'from-pink-500 to-rose-700' },
+ { href: '/workspace/admin/promotional-slides', title: 'شريط العروض الترويجية', desc: 'إضافة صور العروض وروابطها وتحديد الحسابات المستهدفة', icon: Images, tone: 'from-blue-600 to-cyan-600' },
  { href: '/workspace/admin/analytics', title: 'التقارير والتحليلات', desc: 'تصفية البيانات وتصدير تقارير CSV وPDF', icon: Activity, tone: 'from-violet-500 to-purple-700' },
 ]
 export default function AdminDashboardPage() {
