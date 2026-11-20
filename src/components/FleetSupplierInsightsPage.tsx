@@ -113,10 +113,27 @@ export default function FleetSupplierInsightsPage() {
 
   return <main dir="rtl" className="min-h-screen bg-slate-50">
     <div className="mx-auto max-w-7xl space-y-6 p-4 py-7 sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><span className="text-xs font-black tracking-wide text-blue-700">MY CAR · FLEET PERFORMANCE</span><h1 className="mt-2 text-2xl font-black text-slate-950 sm:text-3xl">تقارير وتحليلات الأسطول</h1><p className="mt-2 text-sm leading-6 text-slate-600">{organizationName} · ملخص تشغيلي لسياراتك وعروضك وإعلاناتك</p></div>
-        <div className="flex flex-wrap gap-2"><button type="button" onClick={() => void load(true)} disabled={refreshing || loading} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700"><RefreshCw size={15} className={refreshing ? 'animate-spin' : ''}/> تحديث</button><a href="/workspace/supplier/vehicles" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-700 px-4 text-sm font-bold text-white"><ArrowLeft size={15}/> العودة للأسطول</a></div>
-      </div>
+      <section className="relative isolate overflow-hidden rounded-[28px] bg-gradient-to-br from-[#123f91] via-[#1457b8] to-[#0879c9] p-5 text-white shadow-xl shadow-blue-900/15 sm:p-7">
+        <div aria-hidden="true" className="pointer-events-none absolute -left-12 -top-20 h-64 w-64 rounded-full border-[28px] border-white/5"/>
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 right-1/3 h-64 w-64 rounded-full bg-cyan-300/10 blur-2xl"/>
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-extrabold tracking-wide text-blue-50"><BarChart3 size={14}/> MY CAR <span className="text-white/50">·</span> FLEET INTELLIGENCE</div>
+            <h1 className="mt-4 text-2xl font-black leading-tight text-white sm:text-3xl">تقارير وتحليلات الأسطول</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-blue-50/90">{organizationName} · نظرة شاملة على أداء سياراتك والعروض والإعلانات ومؤشرات الظهور</p>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <button type="button" onClick={() => void load(true)} disabled={refreshing || loading} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20 disabled:opacity-60"><RefreshCw size={15} className={refreshing ? 'animate-spin' : ''}/> تحديث التقارير</button>
+            <a href="/workspace/supplier/vehicles" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-extrabold text-blue-800 shadow-sm transition hover:bg-blue-50"><ArrowLeft size={15}/> العودة للأسطول</a>
+          </div>
+        </div>
+        <div className="relative mt-6 grid grid-cols-2 gap-2 border-t border-white/15 pt-4 sm:grid-cols-4">
+          <div className="rounded-xl bg-white/10 px-3 py-2.5"><span className="block text-[11px] font-semibold text-blue-100">السيارات المسجلة</span><strong className="mt-1 block text-xl font-black">{vehicles.length.toLocaleString('ar-EG')}</strong></div>
+          <div className="rounded-xl bg-white/10 px-3 py-2.5"><span className="block text-[11px] font-semibold text-blue-100">السيارات النشطة</span><strong className="mt-1 block text-xl font-black">{activeVehicles.length.toLocaleString('ar-EG')}</strong></div>
+          <div className="rounded-xl bg-white/10 px-3 py-2.5"><span className="block text-[11px] font-semibold text-blue-100">العروض المقدمة</span><strong className="mt-1 block text-xl font-black">{offers.length.toLocaleString('ar-EG')}</strong></div>
+          <div className="rounded-xl bg-white/10 px-3 py-2.5"><span className="block text-[11px] font-semibold text-blue-100">مشاهدات الكتالوج</span><strong className="mt-1 block text-xl font-black">{catalogTotals.impressions.toLocaleString('ar-EG')}</strong></div>
+        </div>
+      </section>
       {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm leading-6 text-rose-800">{error}</p>}
       {loading ? <div className="rounded-2xl border bg-white p-12 text-center text-slate-500">جارٍ تحميل تقارير الأسطول...</div> : <>
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
