@@ -255,7 +255,7 @@ export default function AuthCallbackPage() {
           </div>
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
             <a href="/support?new_ticket=1&category=account&subject=طلب%20مراجعة%20إيقاف%20الحساب" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl bg-[#123b63] px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-900/15 transition hover:bg-[#1a5689]"><Ticket size={18}/> إرسال تذكرة للدعم</a>
-            <a href="/support" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-extrabold text-[#173b61] transition hover:bg-slate-50"><Headset size={18}/> التواصل مع الدعم</a>
+            <a href="/support?new_ticket=1&category=account&subject=طلب%20مراجعة%20إيقاف%20الحساب" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-extrabold text-[#173b61] transition hover:bg-slate-50"><Headset size={18}/> التواصل مع الدعم</a>
           </div>
           <p className="mt-5 text-xs leading-6 text-slate-400">لن يُطلب منك تسجيل الدخول أو إنشاء حساب جديد لإرسال طلب المراجعة.</p>
         </div>
