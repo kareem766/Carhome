@@ -1069,7 +1069,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
     {showOwnerWelcome && role === 'owner' && <div className="fixed inset-0 z-[145] flex items-center justify-center overflow-y-auto bg-slate-950/75 px-3 py-4 backdrop-blur-md sm:p-4" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowOwnerWelcome(false) }}>
       <section role="dialog" aria-modal="true" aria-labelledby="owner-welcome-title" className="relative my-auto max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto overscroll-contain rounded-2xl border border-sky-200/70 bg-white shadow-[0_20px_60px_rgba(2,12,38,0.38)] sm:rounded-3xl">
         <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-orange-400 via-sky-500 to-blue-700"/>
-        <button type="button" aria-label="إغلاق" onClick={() => setShowOwnerWelcome(false)} className="absolute left-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-full border border-white/30 bg-white/95 text-slate-600 shadow-sm transition hover:bg-slate-100"><X size={18}/></button>
+        <button type="button" aria-label="إغلاق" onClick={() => setShowOwnerWelcome(false)} className="absolute left-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full border border-white/30 bg-white/95 text-slate-600 shadow-sm transition hover:bg-slate-100 sm:left-4 sm:top-4 sm:h-9 sm:w-9"><X size={18}/></button>
         <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 px-4 pb-4 pt-7 text-center text-white sm:px-7 sm:pb-5 sm:pt-8">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl border border-white/20 bg-white/10 text-sky-200 shadow-lg shadow-blue-950/30"><CarFront size={24}/></div>
           <p className="mt-2 text-[10px] font-black tracking-[.18em] text-sky-200">MY CAR · عربيتي</p>
@@ -1078,7 +1078,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
         </div>
         <div className="px-4 py-4 sm:px-7 sm:py-5">
           <h3 className="text-sm font-black text-slate-900 sm:text-base">إزاي تستفيد من حسابك؟</h3>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-2 sm:gap-3">
             {[
               'سجّل سياراتك ببيانات وصور وأسعار واضحة لزيادة فرص ظهورها',
               'اعرض سياراتك المعتمدة أمام الشركات وموردي الأساطيل',
@@ -1094,18 +1094,18 @@ export default function WorkspacePage({ role }: { role: Role }) {
         </div>
       </section>
     </div>}
-    {showSupplierWelcome && role === 'supplier' && <div className="fixed inset-0 z-[146] grid place-items-center bg-slate-950/75 p-4 backdrop-blur-md" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowSupplierWelcome(false) }}>
-      <section role="dialog" aria-modal="true" aria-labelledby="supplier-welcome-title" className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-sky-200/70 bg-white shadow-[0_28px_90px_rgba(2,12,38,0.42)]">
+    {showSupplierWelcome && role === 'supplier' && <div className="fixed inset-0 z-[146] grid place-items-center overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-md sm:p-4" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowSupplierWelcome(false) }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="supplier-welcome-title" className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border border-sky-200/70 bg-white shadow-[0_28px_90px_rgba(2,12,38,0.42)] sm:rounded-[2rem]">
         <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-orange-400 via-sky-500 to-blue-700"/>
         <button type="button" aria-label="إغلاق" onClick={() => setShowSupplierWelcome(false)} className="absolute left-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-full border border-white/30 bg-white/95 text-slate-600 shadow-sm transition hover:bg-slate-100"><X size={18}/></button>
-        <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 px-6 pb-7 pt-9 text-center text-white sm:px-9">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-white/20 bg-white/10 text-sky-200 shadow-lg shadow-blue-950/30"><Building2 size={31}/></div>
-          <p className="mt-4 text-xs font-black tracking-[.18em] text-sky-200">MY CAR · عربيتي</p>
-          <h2 id="supplier-welcome-title" className="mt-2 text-2xl font-black leading-tight sm:text-3xl">أهلًا بك في مساحة مورد الأسطول</h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-blue-100">أدر أسطولك باحتراف، ووسّع فرص وصول سياراتك إلى الشركات الباحثة عن حلول تأجير طويلة الأجل.</p>
+        <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 px-4 pb-4 pt-7 text-center text-white sm:px-9 sm:pb-7 sm:pt-9">
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl border border-white/20 bg-white/10 text-sky-200 shadow-lg shadow-blue-950/30 sm:h-16 sm:w-16 sm:rounded-2xl"><Building2 size={24} className="sm:hidden"/><Building2 size={31} className="hidden sm:block"/></div>
+          <p className="mt-3 text-[10px] font-black tracking-[.18em] text-sky-200 sm:mt-4 sm:text-xs">MY CAR · عربيتي</p>
+          <h2 id="supplier-welcome-title" className="mt-2 text-xl font-black leading-tight sm:text-3xl">أهلًا بك في مساحة مورد الأسطول</h2>
+          <p className="mx-auto mt-2 max-w-lg text-xs leading-6 text-blue-100 sm:mt-3 sm:text-sm sm:leading-7">أدر أسطولك باحتراف، ووسّع فرص وصول سياراتك إلى الشركات الباحثة عن حلول تأجير طويلة الأجل.</p>
         </div>
-        <div className="px-6 py-6 sm:px-9">
-          <h3 className="text-base font-black text-slate-900">مميزات حسابك على المنصة</h3>
+        <div className="px-4 py-4 sm:px-9 sm:py-6">
+          <h3 className="text-sm font-black text-slate-900 sm:text-base">مميزات حسابك على المنصة</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {[
               'إضافة سيارات الأسطول وإدارة بياناتها وصورها وأسعارها من مكان واحد',
@@ -1114,11 +1114,11 @@ export default function WorkspacePage({ role }: { role: Role }) {
               'تقديم عروضك ومتابعة حالتها والردود عليها بسهولة',
               'متابعة أداء الأسطول ومؤشرات المشاهدة والاهتمام بالسيارات',
               'عرض تقارير الأسطول وتصدير بيانات السيارات والعروض لمتابعة نشاطك'
-            ].map(item => <div key={item} className="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-bold leading-6 text-slate-700"><CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-600"/><span>{item}</span></div>)}
+            ].map(item => <div key={item} className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-bold leading-5 text-slate-700 sm:gap-2.5 sm:p-3 sm:text-sm sm:leading-6"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600 sm:hidden"/><CheckCircle2 size={18} className="mt-0.5 hidden shrink-0 text-emerald-600 sm:block"/><span>{item}</span></div>)}
           </div>
-          <div className="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-xs leading-6 text-orange-950"><strong>معلومة مهمة:</strong> المنصة تنظّم عرض السيارات والتواصل وتبادل العروض، ولا تضمن إتمام التأجير أو تتولى مدفوعات الإيجار بين المورد والشركة.</div>
-          <a href="/workspace/supplier/vehicles" className="mt-5 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-700 to-sky-600 px-5 font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl">ابدأ بإدارة أسطولك <ArrowLeft size={18}/></a>
-          <p className="mt-3 text-center text-xs text-slate-400">ستغلق رسالة الترحيب تلقائيًا خلال 10 ثوانٍ.</p>
+          <div className="mt-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2.5 text-[11px] leading-5 text-orange-950 sm:mt-4 sm:px-4 sm:py-3 sm:text-xs sm:leading-6"><strong>معلومة مهمة:</strong> المنصة تنظّم عرض السيارات والتواصل وتبادل العروض، ولا تضمن إتمام التأجير أو تتولى مدفوعات الإيجار بين المورد والشركة.</div>
+          <a href="/workspace/supplier/vehicles" className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-700 to-sky-600 px-4 py-2 text-sm font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl sm:mt-5 sm:min-h-13 sm:px-5 sm:text-base">ابدأ بإدارة أسطولك <ArrowLeft size={18}/></a>
+          <p className="mt-2 text-center text-[10px] text-slate-400 sm:mt-3 sm:text-xs">ستغلق رسالة الترحيب تلقائيًا خلال 10 ثوانٍ.</p>
         </div>
       </section>
     </div>}
