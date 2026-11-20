@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent, type ChangeEvent } from 'react'
-import { ImagePlus, Trash2, RefreshCw, ExternalLink, Eye, EyeOff } from 'lucide-react'
+import { Trash2, RefreshCw, Eye, EyeOff } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import AdminPageNavigation from './AdminPageNavigation'
 import { supabase } from '../lib/supabase'
