@@ -91,7 +91,23 @@ export default function NotificationPreferencesPage({ backHref }: { backHref?: s
                 'تعذر فحص اشتراك إشعارات هذا الجهاز.',
                 8000
               )
-              if (active) setPushSubscribed(Boolean(subscription))
+              if (active && subscription) {
+                const savedSubscription = await withTimeout(
+                  (async () => await supabase.from('platform_push_subscriptions')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('endpoint', subscription.endpoint)
+                    .maybeSingle())(),
+                  'تعذر التحقق من حفظ اشتراك هذا الجهاز.',
+                  8000
+                )
+                if (savedSubscription.error) throw savedSubscription.error
+                if (active) setPushSubscribed(Boolean(savedSubscription.data))
+              } else if (active) {
+                setPushSubscribed(false)
+              }
+            } else if (active) {
+              setPushSubscribed(false)
             }
           }
         } catch {

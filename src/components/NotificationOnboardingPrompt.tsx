@@ -24,6 +24,7 @@ export default function NotificationOnboardingPrompt() {
   const [visible, setVisible] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [permissionGranted, setPermissionGranted] = useState(false)
   const publicVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY
 
   useEffect(() => {
@@ -42,12 +43,59 @@ export default function NotificationOnboardingPrompt() {
   }, [])
 
   useEffect(() => {
-    if (!userId || typeof Notification === 'undefined' || Notification.permission !== 'default') {
+    let active = true
+    if (!userId || typeof Notification === 'undefined' || Notification.permission === 'denied') {
       setVisible(false)
-      return
+      setPermissionGranted(false)
+      return () => { active = false }
     }
+
     const dismissed = window.localStorage.getItem('mycar-push-onboarding-dismissed:' + userId)
-    setVisible(!dismissed)
+    if (dismissed) {
+      setVisible(false)
+      return () => { active = false }
+    }
+
+    async function checkDeviceRegistration() {
+      if (!supabase) return
+      try {
+        const registration = 'serviceWorker' in navigator
+          ? await navigator.serviceWorker.getRegistration('/push/')
+          : undefined
+        const browserSubscription = registration?.pushManager
+          ? await registration.pushManager.getSubscription()
+          : null
+        if (!active) return
+
+        // Subscriptions are per device. A different phone being registered must
+        // never hide onboarding on the current browser/device.
+        if (browserSubscription) {
+          const { data, error: lookupError } = await supabase
+            .from('platform_push_subscriptions')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('endpoint', browserSubscription.endpoint)
+            .maybeSingle()
+          if (!active) return
+          if (!lookupError && data) {
+            setVisible(false)
+            return
+          }
+        }
+
+        // If permission was already granted but the device was never persisted
+        // in Supabase, show onboarding to repair the missing registration.
+        setPermissionGranted(Notification.permission === 'granted')
+        setVisible(true)
+      } catch {
+        if (!active) return
+        setPermissionGranted(Notification.permission === 'granted')
+        setVisible(true)
+      }
+    }
+
+    void checkDeviceRegistration()
+    return () => { active = false }
   }, [userId])
 
   function dismiss() {
@@ -140,7 +188,7 @@ export default function NotificationOnboardingPrompt() {
       <h2 id="push-onboarding-title" className="mt-2 text-center text-xl font-black text-slate-900">فعّل إشعارات المنصة</h2>
       <p className="mt-3 text-center text-sm leading-7 text-slate-600">خليك على اطلاع بطلباتك والعروض والرسائل المهمة. اضغط تفعيل، وبعدها اختار «سماح» في رسالة المتصفح.</p>
       {error && <p role="alert" className="mt-4 rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-800">{error}</p>}
-      <button type="button" disabled={busy} onClick={() => void enableNotifications()} className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 font-black text-white hover:bg-blue-800 disabled:opacity-60"><Bell size={18}/>{busy ? 'جارٍ تفعيل الإشعارات...' : 'تفعيل إشعارات هذا الجهاز'}</button>
+      <button type="button" disabled={busy} onClick={() => void enableNotifications()} className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 font-black text-white hover:bg-blue-800 disabled:opacity-60"><Bell size={18}/>{busy ? 'جارٍ تفعيل الإشعارات...' : permissionGranted ? 'إكمال تفعيل إشعارات هذا الجهاز' : 'تفعيل إشعارات هذا الجهاز'}</button>
       <button type="button" onClick={dismiss} className="mt-3 min-h-11 w-full rounded-xl px-4 text-sm font-bold text-slate-500 hover:bg-slate-50">لاحقًا</button>
       <p className="mt-3 text-center text-xs leading-5 text-slate-400">تقدر تغيّر اختيارك في أي وقت من إعدادات الإشعارات أو إعدادات الجهاز.</p>
     </section>
