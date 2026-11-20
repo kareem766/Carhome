@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ShieldAlert } from 'lucide-react'
+import { ShieldAlert, Headset, Ticket, Clock3 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import PlatformLoading from './PlatformLoading'
@@ -111,6 +111,7 @@ export default function AuthCallbackPage() {
   const started = useRef(false)
   const [, setMessage] = useState('جارٍ تأكيد البريد الإلكتروني وتجهيز حسابك...')
   const [error, setError] = useState('')
+  const [accountSuspended, setAccountSuspended] = useState(false)
 
   useEffect(() => {
     if (started.current) return
@@ -137,6 +138,22 @@ export default function AuthCallbackPage() {
         if (sessionError) throw sessionError
         if (!data.session?.user) {
           throw new Error('لم نتمكن من استلام جلسة التحقق. افتح أحدث رسالة تأكيد، أو اطلب رسالة جديدة ثم جرّب مرة أخرى.')
+        }
+        // A suspended organization must see a clear account-status screen, not an email-confirmation error.
+        const { data: suspensionMembership, error: suspensionLookupError } = await supabase
+          .from('organization_memberships')
+          .select('organization_id,organizations!inner(approval_status)')
+          .eq('user_id', data.session.user.id)
+          .limit(1)
+          .maybeSingle()
+        if (suspensionLookupError) throw suspensionLookupError
+        const linkedOrganization = suspensionMembership?.organizations as { approval_status?: string } | { approval_status?: string }[] | null
+        const organizationStatus = Array.isArray(linkedOrganization) ? linkedOrganization[0]?.approval_status : linkedOrganization?.approval_status
+        if (organizationStatus === 'suspended') {
+          if (!active) return
+          setAccountSuspended(true)
+          setMessage('')
+          return
         }
         // Password-recovery links must take precedence over the temporary-password gate.
         // The recovery form completes both the Auth password update and the admin-managed flag.
@@ -212,7 +229,31 @@ export default function AuthCallbackPage() {
     return () => { active = false }
   }, [])
 
-  return error ? (
+  return accountSuspended ? (
+    <main dir="rtl" className="relative grid min-h-screen place-items-center overflow-hidden bg-[#f2f6fb] px-4 py-10 sm:px-6">
+      <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl"/>
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl"/>
+      <section className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,39,67,.12)]">
+        <div className="h-2 bg-gradient-to-l from-amber-400 via-orange-400 to-[#173f68]"/>
+        <div className="px-6 py-8 text-center sm:px-10 sm:py-10">
+          <div className="mb-7 flex justify-center"><PlatformBrand /></div>
+          <span className="mx-auto grid h-20 w-20 place-items-center rounded-[1.7rem] border border-amber-200 bg-amber-50 text-amber-600 shadow-inner"><ShieldAlert size={38}/></span>
+          <span className="mt-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-extrabold text-amber-800"><Clock3 size={15}/> حالة الحساب · إيقاف مؤقت</span>
+          <h1 className="mt-4 text-2xl font-black tracking-tight text-[#102b47] sm:text-3xl">حسابك موقوف مؤقتًا</h1>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-8 text-slate-600">تم إيقاف الوصول إلى مساحة العمل الخاصة بحسابك مؤقتًا. لا توجد مشكلة في تأكيد بريدك الإلكتروني، ويمكنك التواصل مع فريق الدعم لمعرفة التفاصيل وطلب مراجعة الحالة.</p>
+          <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-right">
+            <p className="text-sm font-extrabold text-[#173b61]">ماذا يمكنك أن تفعل الآن؟</p>
+            <p className="mt-1 text-sm leading-7 text-slate-600">أرسل تذكرة إلى دعم My Car عربيتي، واشرح طلبك. سيظهر رد فريق الدعم داخل مركز الدعم ويمكنك متابعته من حسابك.</p>
+          </div>
+          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+            <a href="/support?new_ticket=1&category=account&subject=طلب%20مراجعة%20إيقاف%20الحساب" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl bg-[#123b63] px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-900/15 transition hover:bg-[#1a5689]"><Ticket size={18}/> إرسال تذكرة للدعم</a>
+            <a href="/support" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-extrabold text-[#173b61] transition hover:bg-slate-50"><Headset size={18}/> التواصل مع الدعم</a>
+          </div>
+          <p className="mt-5 text-xs leading-6 text-slate-400">لن تحتاج إلى إنشاء حساب جديد. استخدم حسابك الحالي لمتابعة طلب الدعم.</p>
+        </div>
+      </section>
+    </main>
+  ) : error ? (
     <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5">
       <section className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-7 text-center shadow-sm sm:p-10">
         <div className="mb-6 flex justify-center"><PlatformBrand /></div>
