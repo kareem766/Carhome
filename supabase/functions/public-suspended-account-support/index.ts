@@ -60,7 +60,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const requestCode = "MC-" + crypto.randomUUID().replaceAll("-", "").slice(0, 10).toUpperCase();
-    const { error: insertError } = await admin.from("public_support_requests").insert({
+    const { data: savedRequest, error: insertError } = await admin.from("public_support_requests").insert({
       request_code: requestCode,
       contact_name: contactName,
       contact_email: contactEmail,
@@ -68,8 +68,27 @@ Deno.serve(async (req: Request) => {
       phone: phone || null,
       subject: "طلب مراجعة إيقاف الحساب",
       message,
-    });
-    if (insertError) throw insertError;
+    }).select("id").single();
+    if (insertError || !savedRequest) throw insertError || new Error("Unable to save support request");
+
+    const { data: admins, error: adminsError } = await admin.from("platform_admins").select("user_id");
+    if (adminsError || !admins?.length) {
+      await admin.from("public_support_requests").delete().eq("id", savedRequest.id);
+      throw adminsError || new Error("No platform administrators are configured");
+    }
+    const notifications = admins.map(({ user_id }) => ({
+      user_id,
+      title: "طلب جديد لمراجعة حساب موقوف",
+      body: `وصل طلب مراجعة جديد برقم ${requestCode} للحساب ${accountEmail}.`,
+      notification_type: "account",
+      action_url: "/workspace/admin/support",
+      created_by: null,
+    }));
+    const { error: notificationError } = await admin.from("platform_notifications").insert(notifications);
+    if (notificationError) {
+      await admin.from("public_support_requests").delete().eq("id", savedRequest.id);
+      throw notificationError;
+    }
 
     return reply({ success: true, reference: requestCode });
   } catch (error) {
