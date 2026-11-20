@@ -193,6 +193,34 @@ export default function App() {
     if (!supabase) { setAuthLoaded(true); return }
     let active = true
     let syncSequence = 0
+    let validationInFlight = false
+    let redirectingForInvalidSession = false
+    const isProtectedRoute = () => ['/workspace', '/messages', '/assistant', '/support'].some(prefix => window.location.pathname === prefix || window.location.pathname.startsWith(prefix + '/'))
+    async function validateCurrentUser() {
+      if (!active || validationInFlight || document.visibilityState === 'hidden') return
+      validationInFlight = true
+      try {
+        const { data: sessionData } = await supabase!.auth.getSession()
+        const session = sessionData.session
+        if (!session) return
+        const { data, error } = await supabase!.auth.getUser()
+        if (!active) return
+        if (!error && data.user?.id === session.user.id) return
+        const message = String(error?.message || '').toLowerCase()
+        const code = String((error as { code?: string } | null)?.code || '').toLowerCase()
+        const invalidAccount = !data.user || ['user_not_found', 'session_not_found', 'refresh_token_not_found', 'invalid_token'].includes(code) || /user from sub claim.*does not exist|user.*not found|session.*not found|refresh token.*not found|invalid jwt|invalid token/.test(message) || [401, 403, 404].includes(Number((error as { status?: number } | null)?.status))
+        if (!invalidAccount) return
+        redirectingForInvalidSession = true
+        console.info('My Car: active account is no longer available; clearing its local session.')
+        await supabase!.auth.signOut({ scope: 'local' })
+        if (active) window.location.replace('/?login=1&account-unavailable=1')
+      } catch (error) {
+        // Temporary connectivity failures must not sign users out or create redirect loops.
+        console.warn('My Car session validation was temporarily unavailable:', error)
+      } finally {
+        validationInFlight = false
+      }
+    }
     async function syncSession(user: User | null) {
       const sequence = ++syncSequence
       if (!active) return
@@ -217,11 +245,27 @@ export default function App() {
       setAuthLoaded(true)
     }
     void supabase.auth.getSession().then(({ data }) => syncSession(data.session?.user ?? null))
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       // Supabase recommends deferring follow-up client calls outside the auth callback.
-      window.setTimeout(() => { void syncSession(session?.user ?? null) }, 0)
+      window.setTimeout(() => {
+        void syncSession(session?.user ?? null)
+        if (event === 'SIGNED_OUT' && !redirectingForInvalidSession && isProtectedRoute()) {
+          window.location.replace('/?login=1&session-ended=1')
+        }
+      }, 0)
     })
-    return () => { active = false; syncSequence++; listener.subscription.unsubscribe() }
+    const handleResume = () => { void validateCurrentUser() }
+    const validationInterval = window.setInterval(() => { void validateCurrentUser() }, 60_000)
+    window.addEventListener('focus', handleResume)
+    document.addEventListener('visibilitychange', handleResume)
+    return () => {
+      active = false
+      syncSequence++
+      window.clearInterval(validationInterval)
+      window.removeEventListener('focus', handleResume)
+      document.removeEventListener('visibilitychange', handleResume)
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
