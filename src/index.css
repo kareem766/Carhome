@@ -891,7 +891,8 @@ main.min-h-screen :is(input, select, textarea):disabled {
 
 
 /* Supplier secondary navigation: sits directly beneath the shared account header. */
-.mc-supplier-navigation{position:sticky;top:0;z-index:85;width:100%;border-bottom:1px solid #dbe6f2;background:rgba(248,251,255,.97);box-shadow:0 7px 20px rgba(15,35,65,.07);backdrop-filter:blur(16px)}
+.mc-supplier-sticky-chrome{position:sticky;top:0;z-index:160;isolation:isolate;width:100%;box-shadow:0 7px 20px rgba(15,35,65,.07)}
+.mc-supplier-navigation{position:relative;top:auto;z-index:1;width:100%;border-bottom:1px solid #dbe6f2;background:rgba(248,251,255,.97);backdrop-filter:blur(16px)}
 .mc-supplier-navigation-inner{display:flex;min-height:58px;max-width:1440px;margin:0 auto;align-items:center;justify-content:flex-start;gap:.35rem;overflow-x:auto;padding:.45rem clamp(.7rem,2.5vw,1.5rem);scrollbar-width:none;overscroll-behavior-x:contain}
 .mc-supplier-navigation-inner::-webkit-scrollbar{display:none}
 .mc-supplier-navigation-link{position:relative;display:inline-flex;min-height:42px;flex:0 0 auto;align-items:center;justify-content:center;gap:.5rem;border:1px solid transparent;border-radius:12px;padding:.55rem .9rem;color:#526982;font-size:.82rem;font-weight:850;white-space:nowrap;transition:background .18s,border-color .18s,color .18s,box-shadow .18s}
