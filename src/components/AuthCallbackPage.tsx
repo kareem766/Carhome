@@ -119,7 +119,7 @@ export default function AuthCallbackPage() {
 
   async function submitReviewRequest() {
     const normalizedEmail = reviewEmail.trim().toLowerCase()
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalizedEmail)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       setReviewError('اكتب البريد الإلكتروني المرتبط بالحساب الموقوف لإرسال طلب المراجعة.')
       return
     }
