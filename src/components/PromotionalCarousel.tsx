@@ -13,7 +13,7 @@ export default function PromotionalCarousel({ role }: { role: PromoRole }) {
   let mounted=true
   async function load(){
    if(!supabase)return
-   const {data,error}=await supabase.from('platform_promo_slides').select('id,title,image_url,click_url,display_order,audience_roles').eq('enabled',true).contains('audience_roles',[role]).order('display_order',{ascending:true}).order('created_at',{ascending:false})
+   const {data,error}=await supabase.from('platform_promo_slides').select('id,title,image_url,click_url,display_order,audience_roles,starts_at,ends_at').eq('enabled',true).contains('audience_roles',[role]).order('display_order',{ascending:true}).order('created_at',{ascending:false})
    if(!mounted||error||!data)return
    const now=Date.now()
    const eligible=(data as (Slide & {audience_roles:string[];starts_at?:string|null;ends_at?:string|null})[]).filter(item=>(!item.starts_at||new Date(item.starts_at).getTime()<=now)&&(!item.ends_at||new Date(item.ends_at).getTime()>now))
