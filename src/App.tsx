@@ -381,6 +381,8 @@ export default function App() {
     if (isPlatformAdmin && path.startsWith('/workspace/') && !path.startsWith('/workspace/admin')) window.location.replace('/workspace/admin')
     if (path === '/register' || path.startsWith('/register/')) window.location.replace(destination)
     if (path === '/workspace') window.location.replace(destination)
+    // Fleet suppliers always land on their primary fleet workspace after sign-in (email or Google).
+    if ((path === '/' || pathIsHome(path)) && !isPlatformAdmin && authUser.user_metadata?.organization_type === 'fleet_supplier') window.location.replace('/workspace/supplier/vehicles')
     // Owners land directly on their vehicle portfolio after every successful sign-in.
     if ((path === '/' || pathIsHome(path)) && !isPlatformAdmin && authUser.user_metadata?.organization_type !== 'company' && authUser.user_metadata?.organization_type !== 'fleet_supplier' && authUser.user_metadata?.organization_type !== 'employee') window.location.replace('/workspace/owner/vehicles')
   }, [authLoaded, authUser, isPlatformAdmin, path])
