@@ -208,7 +208,7 @@ export default function App() {
         if (!error && data.user?.id === session.user.id) return
         const message = String(error?.message || '').toLowerCase()
         const code = String((error as { code?: string } | null)?.code || '').toLowerCase()
-        const invalidAccount = !data.user || ['user_not_found', 'session_not_found', 'refresh_token_not_found', 'invalid_token'].includes(code) || /user from sub claim.*does not exist|user.*not found|session.*not found|refresh token.*not found|invalid jwt|invalid token/.test(message) || [401, 403, 404].includes(Number((error as { status?: number } | null)?.status))
+        const invalidAccount = (!error && (!data.user || data.user.id !== session.user.id)) || Boolean(error && (['user_not_found', 'session_not_found', 'refresh_token_not_found', 'invalid_token'].includes(code) || /user from sub claim.*does not exist|user.*not found|session.*not found|refresh token.*not found|invalid jwt|invalid token/.test(message) || [401, 403, 404].includes(Number((error as { status?: number } | null)?.status))))
         if (!invalidAccount) return
         redirectingForInvalidSession = true
         console.info('My Car: active account is no longer available; clearing its local session.')
@@ -244,7 +244,10 @@ export default function App() {
       }
       setAuthLoaded(true)
     }
-    void supabase.auth.getSession().then(({ data }) => syncSession(data.session?.user ?? null))
+    void supabase.auth.getSession().then(({ data }) => {
+      void syncSession(data.session?.user ?? null)
+      if (data.session) void validateCurrentUser()
+    })
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       // Supabase recommends deferring follow-up client calls outside the auth callback.
       window.setTimeout(() => {
@@ -457,7 +460,7 @@ export default function App() {
         <p className="mt-3 leading-8 text-white/75">المنصة متاحة حاليًا لصاحب المنصة فقط أثناء فترة الإيقاف. ستعود الخدمة لباقي المستخدمين عند إعادة التفعيل.</p>
         {!authUser ? <button type="button" onClick={() => openAuth('signin')} className="mt-7 rounded-xl bg-[#ffad0a] px-6 py-3 font-black text-[#142b43]">دخول صاحب المنصة</button> : <button type="button" onClick={() => { void supabase?.auth.signOut().then(() => { window.location.assign('/') }) }} className="mt-7 rounded-xl border border-white/20 px-6 py-3 font-bold text-white">تسجيل الخروج</button>}
       </section>
-      {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode}/>}
+      {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}
     </main>
   }
   // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
@@ -526,7 +529,7 @@ export default function App() {
   }
   if (path === '/workspace/admin/automation-review') {
     if (!authLoaded) return <PlatformLoading />
-    if (!authUser) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#061b36] px-5 text-white"><section className="w-full max-w-lg rounded-3xl border border-white/15 bg-[#102b47] p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-[#ffad0a]" size={44}/><h1 className="text-2xl font-black">تسجيل الدخول مطلوب</h1><p className="mt-3 leading-8 text-white/75">مركز المراجعة الذكية مخصص لإدارة My Car فقط. سجّل الدخول بحساب الإدارة للمتابعة.</p><button type="button" onClick={() => { setAuthMode('signin'); setAuthOpen(true) }} className="mt-6 rounded-xl bg-[#ffad0a] px-7 py-3 font-black text-[#142b43]">تسجيل الدخول</button><a href="/" className="mr-3 inline-flex rounded-xl border border-white/20 px-6 py-3 font-bold text-white">الرئيسية</a></section>{authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode="signin" redirectTo="/workspace/admin/automation-review"/>}</main>
+    if (!authUser) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#061b36] px-5 text-white"><section className="w-full max-w-lg rounded-3xl border border-white/15 bg-[#102b47] p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-[#ffad0a]" size={44}/><h1 className="text-2xl font-black">تسجيل الدخول مطلوب</h1><p className="mt-3 leading-8 text-white/75">مركز المراجعة الذكية مخصص لإدارة My Car فقط. سجّل الدخول بحساب الإدارة للمتابعة.</p><button type="button" onClick={() => { setAuthMode('signin'); setAuthOpen(true) }} className="mt-6 rounded-xl bg-[#ffad0a] px-7 py-3 font-black text-[#142b43]">تسجيل الدخول</button><a href="/" className="mr-3 inline-flex rounded-xl border border-white/20 px-6 py-3 font-bold text-white">الرئيسية</a></section>{authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode="signin" redirectTo="/workspace/admin/automation-review" initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}</main>
     if (adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات الإدارة</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={() => window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
     if (!isPlatformAdmin) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#061b36] px-5 text-white"><section className="w-full max-w-lg rounded-3xl border border-rose-400/30 bg-[#102b47] p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-rose-300" size={44}/><h1 className="text-2xl font-black">غير مصرح بالدخول</h1><p className="mt-3 leading-8 text-white/75">هذا المركز متاح لحسابات إدارة المنصة المعتمدة فقط.</p><a href="/" className="mt-6 inline-flex rounded-xl bg-[#ffad0a] px-7 py-3 font-black text-[#142b43]">العودة للرئيسية</a></section></main>
     return <><Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-smart-review" /></Suspense></>
@@ -631,7 +634,7 @@ export default function App() {
         {!authUser && settings.registration_enabled && <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-3xl bg-gradient-to-l from-[#102b47] to-[#174a82] p-6 text-white shadow-xl sm:flex-row sm:items-center sm:p-9"><div><p className="font-extrabold text-[#ffad0a]">خطوتك الأولى تبدأ هنا</p><h3 className="mt-2 text-2xl font-black">جاهز تلاقي السيارة المناسبة أو تعرض سياراتك؟</h3><p className="mt-2 text-sm leading-7 text-white/75">أنشئ حسابك مجانًا وابدأ استكشاف تجربة My Car عربيتي.</p></div><a href="/register" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-6 font-black text-[#102b47] shadow-lg hover:bg-amber-300">إنشاء حساب جديد<UserRoundPlus size={18}/></a></div>}
       </div></section>
       <footer className="bg-[#071b31] px-5 py-7 text-sm text-white/70 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div>© {new Date().getFullYear()} {settings.platform_name}. {settings.footer_text}</div><div className="flex flex-wrap items-center gap-4"><a href="/services" className="hover:text-[#ffad0a]">خدمات السيارات</a><a href="/privacy" className="hover:text-[#ffad0a]">سياسة الخصوصية</a><a href="/terms" className="hover:text-[#ffad0a]">شروط الاستخدام</a>{settings.support_email&&<a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone&&<a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}</div></div></footer>
-      {authOpen&&<AuthPanel onClose={()=>setAuthOpen(false)} initialMode={authMode}/>}
+      {authOpen&&<AuthPanel onClose={()=>setAuthOpen(false)} initialMode={authMode} initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}
     </main>
   )
 }
