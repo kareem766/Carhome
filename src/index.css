@@ -2339,3 +2339,34 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
     line-height: 1.45 !important;
   }
 }
+
+
+/* Fleet supplier header: keep notification popovers above the page navigation. */
+.mc-supplier-topbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 180 !important;
+  isolation: isolate;
+}
+.mc-supplier-navigation {
+  position: sticky !important;
+  top: 78px !important;
+  z-index: 120 !important;
+}
+.mc-supplier-topbar .mc-workspace-header-actions {
+  position: relative;
+  z-index: 181;
+}
+.mc-supplier-topbar .mc-workspace-header-actions > div {
+  position: relative;
+  z-index: 182;
+}
+@media (max-width: 760px) {
+  .mc-supplier-topbar {
+    top: 0 !important;
+    min-height: calc(68px + env(safe-area-inset-top)) !important;
+  }
+  .mc-supplier-navigation {
+    top: calc(68px + env(safe-area-inset-top)) !important;
+  }
+}
