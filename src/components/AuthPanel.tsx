@@ -221,6 +221,8 @@ export default function AuthPanel({ onClose, initialMode = 'signin', redirectTo 
         if (!isValidEmailAddress(identifier)) {
           throw new Error('اكتب بريدًا إلكترونيًا صحيحًا لتسجيل الدخول.')
         }
+        // Preserve only the account email so the banned-account review action can identify the account after Supabase rejects the session.
+        localStorage.setItem('mycar_pending_suspended_account_email', identifier)
         const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: identifier, password })
         if (signInError) throw signInError
         if (!data.user || !data.session) throw new Error('تم تسجيل الدخول لكن لم يتم إنشاء جلسة صالحة. حاول مرة أخرى.')
