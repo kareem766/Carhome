@@ -18,7 +18,7 @@ type TicketRow = {
   updated_at: string
 }
 type TicketMessage = { id: string; ticket_id: string; sender_user_id: string; body: string; created_at: string }
-type PublicSupportRequest = { id: string; contact_name: string; contact_email: string; account_email: string; phone: string | null; subject: string; message: string; status: string; created_at: string }
+type PublicSupportRequest = { id: string; request_code: string; contact_name: string; contact_email: string; account_email: string; phone: string | null; subject: string; message: string; status: string; created_at: string }
 type Props = { admin?: boolean }
 
 const categories = [
@@ -119,7 +119,7 @@ export default function SupportCenterPage({ admin = false }: Props) {
     try {
       await loadTickets(user.id)
       if (admin) {
-        const { data: publicRows, error: publicError } = await supabase.from('public_support_requests').select('id,contact_name,contact_email,account_email,phone,subject,message,status,created_at').order('created_at', { ascending: false }).limit(100)
+        const { data: publicRows, error: publicError } = await supabase.from('public_support_requests').select('id,request_code,contact_name,contact_email,account_email,phone,subject,message,status,created_at').order('created_at', { ascending: false }).limit(100)
         if (publicError) throw publicError
         setPublicRequests((publicRows || []) as PublicSupportRequest[])
       }
@@ -175,6 +175,13 @@ export default function SupportCenterPage({ admin = false }: Props) {
     if (insertError) setError(insertError.message)
     else { setMessageDraft(''); await loadMessages(selectedTicket.id); await loadTickets(userId) }
     setSaving(false)
+  }
+
+  async function updatePublicRequestStatus(id: string, status: string) {
+    if (!supabase || !admin) return
+    const { error: updateError } = await supabase.from('public_support_requests').update({ status, updated_at: new Date().toISOString() }).eq('id', id)
+    if (updateError) setError(updateError.message)
+    else setPublicRequests(rows => rows.map(row => row.id === id ? { ...row, status } : row))
   }
 
   async function updateStatus(status: string) {
