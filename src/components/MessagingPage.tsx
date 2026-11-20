@@ -1,7 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowLeft, ArrowRight, MessageCircle, RefreshCw, Send, Search, ShieldCheck, MessagesSquare } from 'lucide-react'
-import PlatformBrand from './PlatformBrand'
-import AccountNotifications from './AccountNotifications'
+import { ArrowRight, MessageCircle, RefreshCw, Send, Search, ShieldCheck, MessagesSquare } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type Conversation = { id: string; request_id: string | null; vehicle_id: string | null; company_organization_id: string; provider_organization_id: string; status: string; created_at: string; company: { name: string } | null; provider: { name: string } | null; rental_requests: { title: string } | null; vehicles: { make: string; model: string; model_year: number } | null }
@@ -21,19 +19,12 @@ export default function MessagingPage() {
   const [error,setError] = useState('')
   const [notice,setNotice] = useState('')
   const [searchTerm,setSearchTerm] = useState('')
-  const [workspaceHref,setWorkspaceHref] = useState('/workspace/owner/vehicles')
-  const [isOwner,setIsOwner] = useState(false)
-  const [accountRoleReady,setAccountRoleReady] = useState(false)
 
   async function loadConversations() {
     if (!supabase) { window.location.replace('/?login=1'); return }
     const { data: auth } = await supabase.auth.getUser()
     if (!auth.user) { window.location.replace('/?login=1'); return }
     setUserId(auth.user.id)
-    const accountType = String(auth.user.user_metadata?.organization_type || '')
-    setWorkspaceHref(accountType === 'company' ? '/workspace/company' : accountType === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles')
-    setIsOwner(accountType === 'individual_owner')
-    setAccountRoleReady(true)
     const { data: memberships, error: membershipError } = await supabase.from('organization_memberships').select('organization_id').eq('user_id',auth.user.id).limit(1)
     if (membershipError) { setError(membershipError.message); setLoading(false); return }
     const orgId = memberships?.[0]?.organization_id
