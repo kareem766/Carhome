@@ -1,36 +1,101 @@
-export default function PlatformLoading() {
+type PlatformLoadingProps = {
+  pageName?: string
+}
+
+const loadingRoutes: Array<[string, string]> = [
+  ['/workspace/admin/promotional-slides', 'إدارة العروض الترويجية'],
+  ['/workspace/admin/automation-review', 'مركز المراجعة الذكية'],
+  ['/workspace/admin/employee-requests', 'مراجعة طلبات الموظفين'],
+  ['/workspace/admin', 'لوحة تحكم الإدارة'],
+  ['/workspace/company/requests/new', 'طلب سيارة جديد'],
+  ['/workspace/company/requests', 'طلبات التأجير'],
+  ['/workspace/company/subscriptions', 'الاشتراكات والباقات'],
+  ['/workspace/company/managed-sourcing', 'تفويض البحث عن السيارات'],
+  ['/workspace/company/insights', 'تقارير الشركة'],
+  ['/workspace/company/team', 'فريق العمل'],
+  ['/workspace/company/alerts', 'التنبيهات الذكية'],
+  ['/workspace/company', 'مساحة الشركة'],
+  ['/workspace/owner/vehicles', 'سياراتي'],
+  ['/workspace/owner/offers', 'عروضي'],
+  ['/workspace/owner/requests', 'طلبات الشركات'],
+  ['/workspace/employee/requests', 'طلبات السيارات والعروض'],
+  ['/workspace/employee/messages', 'رسائل الموظف'],
+  ['/workspace/employee/account', 'حسابي وبياناتي'],
+  ['/workspace/employee', 'مساحة الموظف'],
+  ['/workspace/supplier/vehicles', 'سيارات الأسطول'],
+  ['/workspace/provider-employee-requests', 'طلبات الموظفين'],
+  ['/workspace/catalog', 'كتالوج السيارات'],
+  ['/workspace/advertising-plans', 'باقات الإعلانات'],
+  ['/workspace/notifications', 'الإشعارات'],
+  ['/workspace', 'مساحة العمل'],
+  ['/assistant', 'مساعد My Car'],
+  ['/services', 'خدمات السيارات'],
+  ['/automotive-services', 'خدمات السيارات'],
+  ['/messages', 'المراسلات'],
+  ['/support', 'مركز الدعم'],
+  ['/complete-profile', 'استكمال بيانات الحساب'],
+  ['/first-login-password', 'تحديث كلمة المرور'],
+  ['/reset-password', 'إعادة تعيين كلمة المرور'],
+  ['/auth/callback', 'تأكيد تسجيل الدخول'],
+  ['/register', 'إنشاء حساب جديد'],
+  ['/privacy', 'سياسة الخصوصية'],
+  ['/terms', 'الشروط والأحكام'],
+]
+
+function resolvePageName(pathname: string) {
+  const match = loadingRoutes.find(([route]) => pathname === route || pathname.startsWith(route + '/'))
+  if (match) return match[1]
+  if (pathname === '/' || pathname === '') return 'الصفحة الرئيسية'
+  return 'مساحة العمل'
+}
+
+export default function PlatformLoading({ pageName }: PlatformLoadingProps) {
+  const currentPage = pageName || (typeof window !== 'undefined' ? resolvePageName(window.location.pathname) : 'مساحة العمل')
+
   return (
     <main
       dir="rtl"
-      className="relative grid min-h-screen place-items-center overflow-hidden px-5 text-white"
-      style={{ background: 'radial-gradient(ellipse at 50% 44%, #173b69 0%, #0b2343 43%, #06152b 100%)' }}
+      className="relative grid min-h-[100svh] place-items-center overflow-hidden px-5 text-slate-900"
+      style={{ background: 'linear-gradient(145deg, #f8fbff 0%, #eaf2fb 48%, #f5f8fc 100%)' }}
     >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(249,115,22,.10), transparent 34%)' }} />
-      <div className="relative flex flex-col items-center gap-9" role="status" aria-label="جارٍ فتح مساحة عمل My Car عربيتي">
-        <div className="relative grid h-56 w-56 place-items-center sm:h-64 sm:w-64">
-          <span aria-hidden="true" className="absolute inset-0 rounded-full border border-orange-300/25" style={{ boxShadow: '0 0 55px rgba(249,115,22,.16), inset 0 0 28px rgba(249,115,22,.06)' }} />
-          <span aria-hidden="true" className="absolute inset-2 animate-[spin_4s_linear_infinite] rounded-full border-[4px] border-transparent border-t-orange-400 border-r-orange-500" style={{ filter: 'drop-shadow(0 0 7px rgba(249,115,22,.8))' }} />
-          <span aria-hidden="true" className="absolute inset-5 animate-[spin_6s_linear_infinite_reverse] rounded-full border-2 border-transparent border-b-orange-300/90 border-l-orange-400/80" />
-          <span aria-hidden="true" className="absolute inset-8 rounded-full border border-white/10" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(rgba(51,95,145,.12) 1px, transparent 1px)', backgroundSize: '30px 30px', maskImage: 'linear-gradient(to bottom, transparent, black 24%, black 76%, transparent)' }} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 42%, rgba(34,211,238,.17), transparent 29%), radial-gradient(circle at 50% 58%, rgba(249,115,22,.10), transparent 40%)' }} />
+
+      <div className="relative flex w-full max-w-sm flex-col items-center gap-10" role="status" aria-live="polite" aria-label={`جارٍ فتح ${currentPage}`}>
+        <div className="relative grid h-64 w-64 place-items-center sm:h-72 sm:w-72">
+          <span aria-hidden="true" className="absolute inset-1 rounded-full border border-slate-300/55" style={{ boxShadow: '0 0 70px rgba(34,211,238,.12), inset 0 0 45px rgba(255,255,255,.65)' }} />
+          <span aria-hidden="true" className="absolute inset-3 animate-[spin_8s_linear_infinite] rounded-full border-[3px] border-transparent border-t-orange-400 border-r-orange-300/70 motion-reduce:animate-none" style={{ filter: 'drop-shadow(0 0 8px rgba(249,115,22,.75))' }} />
+          <span aria-hidden="true" className="absolute inset-7 animate-[spin_11s_linear_infinite_reverse] rounded-full border-2 border-transparent border-b-cyan-500/75 border-l-slate-300/60 motion-reduce:animate-none" />
+          <span aria-hidden="true" className="absolute inset-12 rounded-full border border-slate-300/60" />
+          <span aria-hidden="true" className="absolute right-[13px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-orange-300 shadow-[0_0_10px_4px_rgba(251,146,60,.65)]" />
+          <span aria-hidden="true" className="absolute bottom-8 left-10 h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_12px_3px_rgba(103,232,249,.55)]" />
+
           <div
-            className="relative flex items-center gap-2 rounded-full px-7 py-6"
-            dir="ltr"
-            style={{ background: 'linear-gradient(145deg, #12345b, #071a32)', boxShadow: 'inset 0 2px 18px rgba(255,255,255,.08), 0 10px 35px rgba(0,0,0,.28)' }}
+            className="relative flex min-h-40 min-w-52 flex-col items-center justify-center rounded-[2.25rem] border border-white/90 px-8 py-7"
+            style={{ background: 'linear-gradient(145deg, rgba(255,255,255,.98), rgba(238,246,253,.96))', boxShadow: '0 22px 60px rgba(35,68,105,.13), inset 0 1px 0 rgba(255,255,255,1), 0 0 38px rgba(34,211,238,.13)' }}
           >
-            <span className="flex flex-col items-center gap-2">
-              <span className="text-[38px] font-black leading-none tracking-[-0.055em] text-white sm:text-5xl">My <span className="text-cyan-300">Car</span></span>
-              <span dir="rtl" className="text-2xl font-black leading-none tracking-normal text-cyan-300 sm:text-3xl">عربيتي</span>
+            <span className="mb-3 text-[2.65rem] font-black leading-none tracking-[-0.065em]" dir="ltr">
+              <span className="text-[#123252]">My</span><span className="text-[#08aeca]">Car</span>
             </span>
+            <span className="text-[2rem] font-black leading-none tracking-tight text-[#08aeca]">عربيتي</span>
+            <span aria-hidden="true" className="mt-4 h-1 w-14 rounded-full bg-gradient-to-l from-orange-300 to-orange-500 shadow-[0_0_12px_rgba(249,115,22,.65)]" />
           </div>
-          <span aria-hidden="true" className="absolute right-0 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-orange-300" style={{ boxShadow: '0 0 8px 3px rgba(251,146,60,.75), 0 0 24px 8px rgba(249,115,22,.35)' }} />
         </div>
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-lg font-bold tracking-normal text-white drop-shadow-sm">جارٍ فتح مساحة عملك...</p>
-          <span aria-hidden="true" className="h-1.5 w-36 overflow-hidden rounded-full bg-white/15">
-            <span className="block h-full w-1/2 animate-pulse rounded-full bg-gradient-to-l from-orange-300 to-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.7)]" />
-          </span>
+
+        <div className="flex w-full flex-col items-center gap-5 text-center">
+          <div className="space-y-2">
+            <p className="text-xs font-bold tracking-[.22em] text-slate-500">MY CAR · عربيتي</p>
+            <p className="text-xl font-extrabold leading-relaxed text-slate-800 sm:text-2xl">
+              جارٍ فتح <span className="text-[#079fbd]">{currentPage}</span>
+            </p>
+            <p className="text-sm text-slate-500">لحظات ونكون معك</p>
+          </div>
+          <div aria-hidden="true" className="h-1.5 w-44 overflow-hidden rounded-full bg-slate-300/60">
+            <span className="block h-full w-2/5 animate-[loading-slide_1.35s_ease-in-out_infinite] rounded-full bg-gradient-to-l from-orange-300 via-orange-400 to-orange-500 shadow-[0_0_14px_rgba(249,115,22,.8)] motion-reduce:animate-none" />
+          </div>
         </div>
       </div>
+      <style>{`@keyframes loading-slide { 0% { transform: translateX(260%); } 100% { transform: translateX(-260%); } }`}</style>
     </main>
   )
 }
