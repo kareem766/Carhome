@@ -45,13 +45,15 @@ export default function SupportCenterPage({ admin = false }: Props) {
   const [selectedId, setSelectedId] = useState('')
   const [messages, setMessages] = useState<TicketMessage[]>([])
   const [messageDraft, setMessageDraft] = useState('')
-  const [newTicketOpen, setNewTicketOpen] = useState(false)
-  const [subject, setSubject] = useState('')
-  const [category, setCategory] = useState('general')
+  const supportParams = new URLSearchParams(window.location.search)
+  const suspensionTicketRequested = supportParams.get('new_ticket') === '1'
+  const [newTicketOpen, setNewTicketOpen] = useState(suspensionTicketRequested)
+  const [subject, setSubject] = useState(suspensionTicketRequested ? (supportParams.get('subject') || 'طلب مراجعة إيقاف الحساب') : '')
+  const [category, setCategory] = useState(suspensionTicketRequested ? 'account' : 'general')
   const [priority, setPriority] = useState('normal')
   const [companyAccount, setCompanyAccount] = useState(false)
   const [prioritySupport, setPrioritySupport] = useState(false)
-  const [firstMessage, setFirstMessage] = useState('')
+  const [firstMessage, setFirstMessage] = useState(suspensionTicketRequested ? 'أرغب في مراجعة حالة إيقاف حسابي ومعرفة سبب الإيقاف والخطوات المطلوبة لإعادة تفعيله.' : '')
   const [search, setSearch] = useState('')
 
   const selectedTicket = tickets.find(ticket => ticket.id === selectedId) || null
