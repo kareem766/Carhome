@@ -115,6 +115,7 @@ export default function AuthCallbackPage() {
   const [reviewEmail, setReviewEmail] = useState(() => { try { return localStorage.getItem('mycar_pending_suspended_account_email') || '' } catch { return '' } })
   const [reviewSending, setReviewSending] = useState(false)
   const [reviewReference, setReviewReference] = useState('')
+  const [reviewPending, setReviewPending] = useState(false)
   const [reviewError, setReviewError] = useState('')
 
   async function submitReviewRequest() {
@@ -139,13 +140,35 @@ export default function AuthCallbackPage() {
       } })
       if (submitError || !data?.success) throw new Error(data?.error || submitError?.message || 'تعذر إرسال طلبك الآن. حاول مرة أخرى بعد قليل.')
       setReviewReference(String(data.reference || ''))
-      try { localStorage.removeItem('mycar_pending_suspended_account_email') } catch { /* ignore storage restrictions */ }
+      setReviewPending(true)
+      try { localStorage.setItem('mycar_pending_suspended_account_email', normalizedEmail) } catch { /* ignore storage restrictions */ }
     } catch (caught) {
       setReviewError(caught instanceof Error ? caught.message : 'تعذر إرسال طلبك الآن. حاول مرة أخرى بعد قليل.')
     } finally {
       setReviewSending(false)
     }
   }
+
+  useEffect(() => {
+    if (!accountSuspended || !reviewEmail.trim() || !supabase) return
+    let active = true
+    const checkExistingReview = async () => {
+      try {
+        const { data, error: lookupError } = await supabase.functions.invoke('public-suspended-account-support', {
+          body: { action: 'status', accountEmail: reviewEmail.trim().toLowerCase() }
+        })
+        if (lookupError) throw lookupError
+        if (active && data?.pending && data?.reference) {
+          setReviewReference(String(data.reference))
+          setReviewPending(true)
+        }
+      } catch (lookupError) {
+        console.error('Could not check suspended-account review status', lookupError)
+      }
+    }
+    void checkExistingReview()
+    return () => { active = false }
+  }, [accountSuspended, reviewEmail])
 
   useEffect(() => {
     if (started.current) return
@@ -288,7 +311,7 @@ export default function AuthCallbackPage() {
             <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني للحساب الموقوف<input type="email" required autoComplete="email" dir="ltr" value={reviewEmail} onChange={event=>setReviewEmail(event.target.value)} placeholder="name@example.com" className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-left font-normal outline-none focus:border-blue-400"/></label>
             {reviewError && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900">{reviewError}</p>}
             <button type="button" onClick={()=>void submitReviewRequest()} disabled={reviewSending || !supabase} className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#123b63] px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-900/15 transition hover:bg-[#1a5689] disabled:cursor-not-allowed disabled:opacity-60">{reviewSending ? <><LoaderCircle size={18} className="animate-spin"/> جارٍ إرسال طلبك...</> : <><Send size={18}/> إرسال طلب للمراجعة</>}</button>
-          </div> : <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white text-emerald-600 shadow-sm"><CheckCircle2 size={28}/></span><h2 className="mt-3 text-lg font-black text-emerald-900">تم إرسال طلبك للمراجعة بنجاح</h2><p className="mt-2 text-sm leading-7 text-emerald-800">هيتم مراجعة حالتك والعمل على حلها خلال 48 ساعة عمل.</p>{reviewReference && <p className="mt-3 text-xs font-bold text-emerald-900">رقم الطلب: <b dir="ltr">{reviewReference}</b></p>}</div>}
+          </div> : <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white text-emerald-600 shadow-sm"><CheckCircle2 size={28}/></span><h2 className="mt-3 text-lg font-black text-emerald-900">{reviewPending ? 'طلبك قيد المراجعة' : 'تم إرسال طلبك للمراجعة بنجاح'}</h2><p className="mt-2 text-sm leading-7 text-emerald-800">{reviewPending ? 'طلبك بالفعل قيد المراجعة. مش هتحتاج تبعت طلب تاني؛ هنحدّث حالة الطلب بعد انتهاء المراجعة.' : 'هيتم مراجعة حالتك والعمل على حلها خلال 48 ساعة عمل.'}</p>{reviewReference && <p className="mt-3 text-xs font-bold text-emerald-900">رقم الطلب: <b dir="ltr">{reviewReference}</b></p>}</div>}
           <p className="mt-5 text-xs leading-6 text-slate-400">لن تحتاج إلى تسجيل الدخول لإرسال الطلب. سيتم إخطار فريق الإدارة به لمراجعته.</p>
         </div>
       </section>
