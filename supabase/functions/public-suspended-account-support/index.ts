@@ -19,6 +19,28 @@ Deno.serve(async (req: Request) => {
 
   try {
     const payload = await req.json();
+    const action = String(payload.action || "submit");
+    if (action === "status") {
+      const accountEmail = String(payload.accountEmail || "").trim().toLowerCase();
+      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(accountEmail) || accountEmail.length > 254) {
+        return reply({ success: false, error: "Invalid account email" }, 400);
+      }
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (!supabaseUrl || !serviceRoleKey) return reply({ success: false, error: "Support service is unavailable" }, 503);
+      const admin = createClient(supabaseUrl, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } });
+      const { data: existing, error: lookupError } = await admin
+        .from("public_support_requests")
+        .select("request_code,status")
+        .eq("account_email", accountEmail)
+        .in("status", ["open", "in_progress"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (lookupError) throw lookupError;
+      return reply({ success: true, pending: Boolean(existing), reference: existing?.request_code || null, status: existing?.status || null });
+    }
+    if (action !== "submit") return reply({ success: false, error: "Unsupported action" }, 400);
     // Quietly accept honeypot submissions without storing them.
     if (typeof payload.website === "string" && payload.website.trim()) {
       return reply({ success: true, reference: "MC-RECEIVED" });
@@ -47,6 +69,19 @@ Deno.serve(async (req: Request) => {
     const admin = createClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
+
+    const { data: existingRequest, error: existingError } = await admin
+      .from("public_support_requests")
+      .select("request_code,status")
+      .eq("account_email", accountEmail)
+      .in("status", ["open", "in_progress"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existingError) throw existingError;
+    if (existingRequest) {
+      return reply({ success: true, pending: true, reference: existingRequest.request_code, status: existingRequest.status });
+    }
 
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { count, error: rateError } = await admin
@@ -90,7 +125,7 @@ Deno.serve(async (req: Request) => {
       throw notificationError;
     }
 
-    return reply({ success: true, reference: requestCode });
+    return reply({ success: true, pending: true, reference: requestCode, status: "open" });
   } catch (error) {
     console.error("public suspended-account support intake failed", error);
     return reply({ success: false, error: "تعذر حفظ طلبك الآن. حاول مرة أخرى بعد قليل." }, 500);
