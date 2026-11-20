@@ -168,6 +168,57 @@ Deno.serve(async (req: Request) => {
       return send({ error: "تعذر حفظ مرجع السجلات التاريخية. لم يتم حذف الحساب." }, 500);
     }
 
+    // Remove account-scoped data and anonymize actor references while preserving business/audit history.
+    const redactions = await Promise.all([
+      db.from("company_subscriptions").update({ created_by: null, reviewed_by: null }).or(`created_by.eq.${userId},reviewed_by.eq.${userId}`),
+      db.from("conversations").update({ created_by: null }).eq("created_by", userId),
+      db.from("discount_code_redemptions").update({ user_id: null }).eq("user_id", userId),
+      db.from("employee_rental_offers").update({ created_by: null }).eq("created_by", userId),
+      db.from("employee_rental_requests").update({ employee_user_id: null, reviewed_by: null }).or(`employee_user_id.eq.${userId},reviewed_by.eq.${userId}`),
+      db.from("managed_sourcing_actions").update({ created_by: null }).eq("created_by", userId),
+      db.from("managed_sourcing_internal_notes").update({ created_by: null }).eq("created_by", userId),
+      db.from("managed_sourcing_offers").update({ created_by: null }).eq("created_by", userId),
+      db.from("managed_sourcing_requests").update({ created_by: null }).eq("created_by", userId),
+      db.from("managed_sourcing_subscriptions").update({ created_by: null, reviewed_by: null }).or(`created_by.eq.${userId},reviewed_by.eq.${userId}`),
+      db.from("managed_sourcing_updates").update({ created_by: null }).eq("created_by", userId),
+      db.from("organizations").update({ created_by: null }).eq("created_by", userId),
+      db.from("platform_banners").update({ created_by: null }).eq("created_by", userId),
+      db.from("platform_notifications").update({ created_by: null }).eq("created_by", userId),
+      db.from("platform_promo_slides").update({ created_by: null }).eq("created_by", userId),
+      db.from("rental_offers").update({ created_by: null }).eq("created_by", userId),
+      db.from("rental_requests").update({ created_by: null }).eq("created_by", userId),
+      db.from("service_provider_submissions").update({ reviewed_by: null }).eq("reviewed_by", userId),
+      db.from("vehicle_images").update({ created_by: null }).eq("created_by", userId),
+      db.from("vehicle_offers").update({ created_by: null }).eq("created_by", userId),
+      db.from("vehicle_payment_submissions").update({ reviewed_by: null }).eq("reviewed_by", userId),
+      db.from("vehicle_promotions").update({ created_by: null, reviewed_by: null }).or(`created_by.eq.${userId},reviewed_by.eq.${userId}`),
+      db.from("vehicle_review_feedback").update({ reviewed_by: null }).eq("reviewed_by", userId),
+      db.from("vehicles").update({ created_by: null }).eq("created_by", userId),
+      db.from("messages").update({ sender_id: null }).eq("sender_id", userId),
+    ]);
+    const redactionError = redactions.find((result) => result.error)?.error;
+    if (redactionError) {
+      await rollback();
+      return send({ error: "تعذر إخفاء هوية المستخدم من السجلات التاريخية: " + redactionError.message }, 500);
+    }
+
+    const cleanup = await Promise.all([
+      db.from("organization_memberships").delete().eq("user_id", userId),
+      db.from("employee_accounts").delete().eq("user_id", userId),
+      db.from("managed_sourcing_invites").delete().eq("user_id", userId),
+      db.from("admin_managed_account_passwords").delete().eq("user_id", userId),
+      db.from("notification_delivery_outbox").delete().eq("user_id", userId),
+      db.from("platform_notification_preferences").delete().eq("user_id", userId),
+      db.from("platform_notifications").delete().eq("user_id", userId),
+      db.from("platform_push_subscriptions").delete().eq("user_id", userId),
+      db.from("profiles").delete().eq("id", userId),
+    ]);
+    const cleanupError = cleanup.find((result) => result.error)?.error;
+    if (cleanupError) {
+      await rollback();
+      return send({ error: "تعذر استكمال إزالة بيانات الحساب المرتبطة: " + cleanupError.message }, 500);
+    }
+
     const { error: deleteError } = await db.auth.admin.deleteUser(userId);
     if (deleteError) {
       await rollback();
@@ -176,7 +227,7 @@ Deno.serve(async (req: Request) => {
 
     return send({
       success: true,
-      message: "تم حذف حساب الدخول والبيانات الشخصية وعضوياته. تم الاحتفاظ بالسجلات المالية والتعاقدية والطلبات والعروض والمراسلات، مع إيقاف المؤسسات وإعلاناتها عند عدم وجود أعضاء آخرين.",
+      message: "تم حذف حساب الدخول والملف الشخصي والعضويات وبيانات الإشعارات والدعوات المرتبطة به، وإخفاء هوية المستخدم من السجلات التاريخية. تم الاحتفاظ بالسجلات المالية والتعاقدية والطلبات والعروض والمراسلات، مع إيقاف سيارات المؤسسة وإزالة بيانات التواصل عند عدم وجود أعضاء آخرين.",
       preserved_history: true,
     });
   } catch (error) {
