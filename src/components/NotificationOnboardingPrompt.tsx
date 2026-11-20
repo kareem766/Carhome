@@ -58,20 +58,39 @@ export default function NotificationOnboardingPrompt() {
 
     async function checkDeviceRegistration() {
       if (!supabase) return
-      const { data, error: lookupError } = await supabase
-        .from('platform_push_subscriptions')
-        .select('id')
-        .eq('user_id', userId)
-        .limit(1)
-        .maybeSingle()
-      if (!active) return
-      // If the browser permission was already granted but the device was never
-      // persisted in Supabase, keep onboarding visible so it can repair itself.
-      if (lookupError || !data) {
+      try {
+        const registration = 'serviceWorker' in navigator
+          ? await navigator.serviceWorker.getRegistration('/push/')
+          : undefined
+        const browserSubscription = registration?.pushManager
+          ? await registration.pushManager.getSubscription()
+          : null
+        if (!active) return
+
+        // Subscriptions are per device. A different phone being registered must
+        // never hide onboarding on the current browser/device.
+        if (browserSubscription) {
+          const { data, error: lookupError } = await supabase
+            .from('platform_push_subscriptions')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('endpoint', browserSubscription.endpoint)
+            .maybeSingle()
+          if (!active) return
+          if (!lookupError && data) {
+            setVisible(false)
+            return
+          }
+        }
+
+        // If permission was already granted but the device was never persisted
+        // in Supabase, show onboarding to repair the missing registration.
         setPermissionGranted(Notification.permission === 'granted')
         setVisible(true)
-      } else {
-        setVisible(false)
+      } catch {
+        if (!active) return
+        setPermissionGranted(Notification.permission === 'granted')
+        setVisible(true)
       }
     }
 
