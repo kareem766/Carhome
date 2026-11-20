@@ -891,7 +891,8 @@ main.min-h-screen :is(input, select, textarea):disabled {
 
 
 /* Supplier secondary navigation: sits directly beneath the shared account header. */
-.mc-supplier-navigation{position:sticky;top:0;z-index:85;width:100%;border-bottom:1px solid #dbe6f2;background:rgba(248,251,255,.97);box-shadow:0 7px 20px rgba(15,35,65,.07);backdrop-filter:blur(16px)}
+.mc-supplier-sticky-chrome{position:sticky;top:0;z-index:160;isolation:isolate;width:100%;box-shadow:0 7px 20px rgba(15,35,65,.07)}
+.mc-supplier-navigation{position:relative;top:auto;z-index:1;width:100%;border-bottom:1px solid #dbe6f2;background:rgba(248,251,255,.97);backdrop-filter:blur(16px)}
 .mc-supplier-navigation-inner{display:flex;min-height:58px;max-width:1440px;margin:0 auto;align-items:center;justify-content:flex-start;gap:.35rem;overflow-x:auto;padding:.45rem clamp(.7rem,2.5vw,1.5rem);scrollbar-width:none;overscroll-behavior-x:contain}
 .mc-supplier-navigation-inner::-webkit-scrollbar{display:none}
 .mc-supplier-navigation-link{position:relative;display:inline-flex;min-height:42px;flex:0 0 auto;align-items:center;justify-content:center;gap:.5rem;border:1px solid transparent;border-radius:12px;padding:.55rem .9rem;color:#526982;font-size:.82rem;font-weight:850;white-space:nowrap;transition:background .18s,border-color .18s,color .18s,box-shadow .18s}
@@ -2338,4 +2339,26 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
     font-size: .72rem !important;
     line-height: 1.45 !important;
   }
+}
+
+
+/* Fleet supplier workspace: compact, consistent page chrome and content rhythm. */
+.mc-supplier-sticky-chrome{position:sticky!important;top:0!important;z-index:160!important;isolation:isolate;background:#fff}
+.mc-supplier-topbar{min-height:68px!important;padding:.55rem clamp(.75rem,2vw,1.35rem)!important;margin:0!important}
+.mc-supplier-navigation{margin:0!important}
+.mc-supplier-navigation-inner{min-height:48px!important;padding:.3rem clamp(.65rem,2vw,1.25rem)!important;gap:.25rem!important}
+.mc-supplier-navigation-link{min-height:36px!important;padding:.42rem .72rem!important;border-radius:10px!important;font-size:.78rem!important;gap:.4rem!important}
+.mc-supplier-navigation-link svg{width:16px;height:16px}
+.mc-supplier-page-content{padding:0 clamp(.65rem,1.8vw,1.25rem) 1.25rem!important}
+.mc-supplier-page-content>main{margin-top:0!important;padding-top:.65rem!important}
+.mc-supplier-page-content>main>section{margin-top:.75rem!important}
+.mc-supplier-page-content :is(.space-y-8,.space-y-7)>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:1rem!important}
+.mc-supplier-page-content :is(.gap-8,.gap-7){gap:1rem!important}
+.mc-supplier-page-content :is(.gap-6){gap:.85rem!important}
+@media(max-width:760px){
+  .mc-supplier-topbar{min-height:58px!important;padding:.4rem .65rem!important}
+  .mc-supplier-navigation-inner{min-height:44px!important;padding:.25rem .5rem!important;gap:.2rem!important}
+  .mc-supplier-navigation-link{min-height:34px!important;padding:.36rem .58rem!important;font-size:.72rem!important}
+  .mc-supplier-page-content{padding:0 .55rem .9rem!important}
+  .mc-supplier-page-content>main{padding-top:.45rem!important}
 }
