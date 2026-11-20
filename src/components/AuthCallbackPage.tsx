@@ -251,13 +251,13 @@ export default function AuthCallbackPage() {
           <p className="mx-auto mt-3 max-w-md text-sm leading-8 text-slate-600">تم إيقاف الوصول إلى مساحة العمل الخاصة بحسابك مؤقتًا. لا توجد مشكلة في تأكيد بريدك الإلكتروني، ويمكنك التواصل مع فريق الدعم لمعرفة التفاصيل وطلب مراجعة الحالة.</p>
           <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-right">
             <p className="text-sm font-extrabold text-[#173b61]">ماذا يمكنك أن تفعل الآن؟</p>
-            <p className="mt-1 text-sm leading-7 text-slate-600">أرسل تذكرة إلى دعم My Car عربيتي، واشرح طلبك. سيظهر رد فريق الدعم داخل مركز الدعم ويمكنك متابعته من حسابك.</p>
+            <p className="mt-1 text-sm leading-7 text-slate-600">أرسل طلب مراجعة دون تسجيل الدخول، واترك بريدًا إلكترونيًا أو رقم هاتف صحيحًا حتى يتمكن فريق الدعم من التواصل معك.</p>
           </div>
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
             <a href="/support?new_ticket=1&category=account&subject=طلب%20مراجعة%20إيقاف%20الحساب" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl bg-[#123b63] px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-900/15 transition hover:bg-[#1a5689]"><Ticket size={18}/> إرسال تذكرة للدعم</a>
             <a href="/support" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-extrabold text-[#173b61] transition hover:bg-slate-50"><Headset size={18}/> التواصل مع الدعم</a>
           </div>
-          <p className="mt-5 text-xs leading-6 text-slate-400">لن تحتاج إلى إنشاء حساب جديد. استخدم حسابك الحالي لمتابعة طلب الدعم.</p>
+          <p className="mt-5 text-xs leading-6 text-slate-400">لن يُطلب منك تسجيل الدخول أو إنشاء حساب جديد لإرسال طلب المراجعة.</p>
         </div>
       </section>
     </main>
