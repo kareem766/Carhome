@@ -197,6 +197,12 @@ export default function WorkspacePage({ role }: { role: Role }) {
     const ownerWelcomePending = role === 'owner'
       && !ownerWelcomeAlreadySeen
       && (ownerWelcomeQueued || (accountCreatedWithin24Hours && org.approval_status === 'pending_review'))
+    // Supplier welcome should survive email-confirmation and OAuth redirects even
+    // when browser storage markers are lost; mirror the owner's first-login fallback.
+    const supplierWelcomeAlreadySeen = localStorage.getItem(supplierWelcomeSeenKey) === '1'
+    const supplierWelcomePendingAfterSignup = role === 'supplier'
+      && !supplierWelcomeAlreadySeen
+      && (supplierWelcomePending || (accountCreatedWithin24Hours && org.approval_status === 'pending_review'))
 
     setOrganization({ ...org, id: member.organization_id })
     if (ownerWelcomePending) {
@@ -209,7 +215,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
       localStorage.removeItem(companyFreeWelcomeKey)
       setShowCompanyFreeWelcome(true)
     }
-    if (supplierWelcomePending) {
+    if (supplierWelcomePendingAfterSignup) {
       localStorage.setItem(supplierWelcomeSeenKey, '1')
       localStorage.removeItem(supplierWelcomeKey)
       setShowSupplierWelcome(true)
