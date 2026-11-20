@@ -6,7 +6,7 @@ import { isValidEmailAddress, normalizeEmailAddress } from '../lib/email'
 import PlatformBrand from './PlatformBrand'
 
 type AccountType = 'individual_owner' | 'fleet_supplier' | 'company'
-type Props = { onClose: () => void; initialMode?: 'signin' | 'signup'; redirectTo?: string }
+type Props = { onClose: () => void; initialMode?: 'signin' | 'signup'; redirectTo?: string; initialNotice?: string }
 
 function isStrongPassword(value: string) { return value.length >= 8 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value) }
 
@@ -86,7 +86,7 @@ async function prepareAccount(user: NonNullable<Session['user']>, fallbackName: 
   if (membershipInsert.error && membershipInsert.error.code !== '23505') throw membershipInsert.error
 }
 
-export default function AuthPanel({ onClose, initialMode = 'signin', redirectTo }: Props) {
+export default function AuthPanel({ onClose, initialMode = 'signin', redirectTo, initialNotice = '' }: Props) {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
   const [forgotPassword, setForgotPassword] = useState(() => window.location.search.includes('reset-password=1'))
   const [settingNewPassword, setSettingNewPassword] = useState(false)
@@ -99,7 +99,7 @@ export default function AuthPanel({ onClose, initialMode = 'signin', redirectTo 
   const [accountType, setAccountType] = useState<AccountType>(invitationId ? 'company' : 'individual_owner')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState(initialNotice)
   const [error, setError] = useState('')
   const [session, setSession] = useState<Session | null>(null)
   const [sessionLoading, setSessionLoading] = useState(true)
