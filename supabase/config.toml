@@ -5,6 +5,9 @@
     },
     "notification-dispatch": {
       "verify_jwt": false
+    },
+    "public-suspended-account-support": {
+      "verify_jwt": false
     }
   }
 }
