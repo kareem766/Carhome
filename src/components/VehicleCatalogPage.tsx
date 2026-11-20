@@ -229,6 +229,26 @@ export default function VehicleCatalogPage({ hideHeader = false }: { hideHeader?
         return
       }
 
+      if (orgType === 'fleet_supplier') {
+        // Fleet suppliers must use the guarded database RPC; direct conversation inserts
+        // are intentionally not permitted by the conversations RLS policy.
+        const initialMessage = sendOffer
+          ? messageBody
+          : `مرحبًا، أود الاستفسار عن السيارة ${selected.make} ${selected.model} ${selected.model_year}.`
+        const { data, error: submitError } = await supabase.rpc('start_fleet_supplier_vehicle_conversation', {
+          p_vehicle_id: selected.id,
+          p_message: initialMessage,
+          p_send_offer: sendOffer
+        })
+        if (submitError) throw new Error('تعذر إرسال طلب السيارة وبدء المحادثة: ' + submitError.message)
+        const result = data as { offer_id?: string | null; conversation_id?: string } | null
+        if (!result?.conversation_id || (sendOffer && !result.offer_id)) {
+          throw new Error('لم يؤكد النظام حفظ العرض والمحادثة. لم يتم تحويلك إلى المحادثة.')
+        }
+        window.location.href = '/messages?conversation=' + result.conversation_id
+        return
+      }
+
       const { data: existing, error: lookupError } = await supabase
         .from('conversations')
         .select('id')
