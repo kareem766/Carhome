@@ -2250,3 +2250,92 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
   -webkit-text-fill-color: #0f172a !important;
 }
 
+
+
+/* Messaging hero: rebuild the mobile layout so Arabic text never collapses into narrow columns. */
+@media (max-width: 640px) {
+  .mc-messaging-main > .mx-auto > section.relative {
+    padding: 1.15rem !important;
+    border-radius: 1.5rem !important;
+    min-height: 0 !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative > .relative {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative > .relative > div:first-child {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: .75rem !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative > .relative > div:first-child > div:first-child {
+    width: 2.8rem !important;
+    height: 2.8rem !important;
+    flex: 0 0 2.8rem !important;
+    border-radius: .9rem !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative > .relative > div:first-child > div:last-child {
+    flex: 1 1 0% !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    text-align: right !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative h1 {
+    display: block !important;
+    width: 100% !important;
+    margin-top: .55rem !important;
+    font-size: clamp(1.35rem, 5.5vw, 1.75rem) !important;
+    line-height: 1.45 !important;
+    letter-spacing: 0 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative p {
+    font-size: .82rem !important;
+    line-height: 1.8 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative .tracking-wide {
+    display: none !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative > .relative > div:nth-child(2) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) !important;
+    align-items: stretch !important;
+    gap: .55rem !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative > .relative > div:nth-child(2) > div,
+  .mc-messaging-main > .mx-auto > section.relative > .relative > div:nth-child(2) > button {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: .45rem !important;
+    min-width: 0 !important;
+    min-height: 3.15rem !important;
+    padding: .55rem .65rem !important;
+    border-radius: .9rem !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative > .relative > div:nth-child(2) > div > div:last-child p:first-child {
+    font-size: 1.25rem !important;
+    line-height: 1.2 !important;
+  }
+  .mc-messaging-main > .mx-auto > section.relative > .relative > div:nth-child(2) > div > div:last-child p:last-child,
+  .mc-messaging-main > .mx-auto > section.relative > .relative > div:nth-child(2) > button {
+    font-size: .72rem !important;
+    line-height: 1.45 !important;
+  }
+}
