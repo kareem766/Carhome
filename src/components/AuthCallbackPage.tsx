@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ShieldAlert, Headset, Ticket, Clock3 } from 'lucide-react'
+import { ShieldAlert, Clock3, CheckCircle2, LoaderCircle, Send } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import PlatformLoading from './PlatformLoading'
@@ -112,6 +112,40 @@ export default function AuthCallbackPage() {
   const [, setMessage] = useState('جارٍ تأكيد البريد الإلكتروني وتجهيز حسابك...')
   const [error, setError] = useState('')
   const [accountSuspended, setAccountSuspended] = useState(false)
+  const [reviewEmail, setReviewEmail] = useState(() => { try { return localStorage.getItem('mycar_pending_suspended_account_email') || '' } catch { return '' } })
+  const [reviewSending, setReviewSending] = useState(false)
+  const [reviewReference, setReviewReference] = useState('')
+  const [reviewError, setReviewError] = useState('')
+
+  async function submitReviewRequest() {
+    const normalizedEmail = reviewEmail.trim().toLowerCase()
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalizedEmail)) {
+      setReviewError('اكتب البريد الإلكتروني المرتبط بالحساب الموقوف لإرسال طلب المراجعة.')
+      return
+    }
+    if (!supabase || reviewSending) return
+    setReviewSending(true)
+    setReviewError('')
+    try {
+      const displayName = normalizedEmail.split('@')[0].replace(/[._-]+/g, ' ').slice(0, 90) || 'مستخدم My Car'
+      const { data, error: submitError } = await supabase.functions.invoke('public-suspended-account-support', { body: {
+        contactName: displayName,
+        contactEmail: normalizedEmail,
+        accountEmail: normalizedEmail,
+        phone: '',
+        subject: 'طلب مراجعة إيقاف الحساب',
+        message: 'أطلب مراجعة إيقاف حسابي على منصة My Car عربيتي وإعادة فحص حالة الحساب.',
+        website: ''
+      } })
+      if (submitError || !data?.success) throw new Error(data?.error || submitError?.message || 'تعذر إرسال طلبك الآن. حاول مرة أخرى بعد قليل.')
+      setReviewReference(String(data.reference || ''))
+      try { localStorage.removeItem('mycar_pending_suspended_account_email') } catch { /* ignore storage restrictions */ }
+    } catch (caught) {
+      setReviewError(caught instanceof Error ? caught.message : 'تعذر إرسال طلبك الآن. حاول مرة أخرى بعد قليل.')
+    } finally {
+      setReviewSending(false)
+    }
+  }
 
   useEffect(() => {
     if (started.current) return
@@ -248,16 +282,14 @@ export default function AuthCallbackPage() {
           <span className="mx-auto grid h-20 w-20 place-items-center rounded-[1.7rem] border border-amber-200 bg-amber-50 text-amber-600 shadow-inner"><ShieldAlert size={38}/></span>
           <span className="mt-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-extrabold text-amber-800"><Clock3 size={15}/> حالة الحساب · إيقاف مؤقت</span>
           <h1 className="mt-4 text-2xl font-black tracking-tight text-[#102b47] sm:text-3xl">حسابك موقوف مؤقتًا</h1>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-8 text-slate-600">تم إيقاف الوصول إلى مساحة العمل الخاصة بحسابك مؤقتًا. لا توجد مشكلة في تأكيد بريدك الإلكتروني، ويمكنك التواصل مع فريق الدعم لمعرفة التفاصيل وطلب مراجعة الحالة.</p>
-          <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-right">
-            <p className="text-sm font-extrabold text-[#173b61]">ماذا يمكنك أن تفعل الآن؟</p>
-            <p className="mt-1 text-sm leading-7 text-slate-600">أرسل طلب مراجعة دون تسجيل الدخول، واترك بريدًا إلكترونيًا أو رقم هاتف صحيحًا حتى يتمكن فريق الدعم من التواصل معك.</p>
-          </div>
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            <a href="/support?new_ticket=1&category=account&subject=طلب%20مراجعة%20إيقاف%20الحساب" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl bg-[#123b63] px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-900/15 transition hover:bg-[#1a5689]"><Ticket size={18}/> إرسال تذكرة للدعم</a>
-            <a href="/support?new_ticket=1&category=account&subject=طلب%20مراجعة%20إيقاف%20الحساب" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-extrabold text-[#173b61] transition hover:bg-slate-50"><Headset size={18}/> التواصل مع الدعم</a>
-          </div>
-          <p className="mt-5 text-xs leading-6 text-slate-400">لن يُطلب منك تسجيل الدخول أو إنشاء حساب جديد لإرسال طلب المراجعة.</p>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-8 text-slate-600">تم إيقاف الوصول إلى مساحة العمل الخاصة بحسابك مؤقتًا. يمكنك إرسال طلب مراجعة مباشر دون الحاجة إلى تسجيل الدخول.</p>
+          {!reviewReference ? <div className="mt-6 space-y-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-right">
+            <div><p className="text-sm font-extrabold text-[#173b61]">مراجعة حالة الحساب</p><p className="mt-1 text-sm leading-7 text-slate-600">{reviewEmail ? 'سيتم ربط الطلب تلقائيًا بالبريد الذي استخدمته في تسجيل الدخول.' : 'أدخل البريد الإلكتروني المرتبط بالحساب الموقوف لإرسال الطلب مباشرة.'}</p></div>
+            {!reviewEmail && <label className="block text-sm font-bold text-slate-700">البريد الإلكتروني للحساب الموقوف<input type="email" required autoComplete="email" dir="ltr" value={reviewEmail} onChange={event=>setReviewEmail(event.target.value)} placeholder="name@example.com" className="mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-left font-normal outline-none focus:border-blue-400"/></label>}
+            {reviewError && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900">{reviewError}</p>}
+            <button type="button" onClick={()=>void submitReviewRequest()} disabled={reviewSending || !supabase} className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#123b63] px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-900/15 transition hover:bg-[#1a5689] disabled:cursor-not-allowed disabled:opacity-60">{reviewSending ? <><LoaderCircle size={18} className="animate-spin"/> جارٍ إرسال طلبك...</> : <><Send size={18}/> إرسال طلب للمراجعة</>}</button>
+          </div> : <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white text-emerald-600 shadow-sm"><CheckCircle2 size={28}/></span><h2 className="mt-3 text-lg font-black text-emerald-900">تم إرسال طلبك للمراجعة بنجاح</h2><p className="mt-2 text-sm leading-7 text-emerald-800">هيتم مراجعة حالتك والعمل على حلها خلال 48 ساعة عمل.</p>{reviewReference && <p className="mt-3 text-xs font-bold text-emerald-900">رقم الطلب: <b dir="ltr">{reviewReference}</b></p>}</div>}
+          <p className="mt-5 text-xs leading-6 text-slate-400">لن تحتاج إلى تسجيل الدخول لإرسال الطلب. سيتم إخطار فريق الإدارة به لمراجعته.</p>
         </div>
       </section>
     </main>
