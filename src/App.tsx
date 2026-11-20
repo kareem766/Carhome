@@ -375,6 +375,12 @@ export default function App() {
     // Incomplete Google signups must be allowed to choose their account type before workspace routing.
     const needsGoogleOnboarding = authUser.app_metadata?.provider === 'google' && Number(authUser.user_metadata?.onboarding_version || 0) < 2
     if (needsGoogleOnboarding && path.startsWith('/register')) return
+    // Normalize the legacy supplier workspace root to the full My Fleet dashboard.
+    // The shortened generic workspace is not the supplier's primary landing page.
+    if (authUser.user_metadata?.organization_type === 'fleet_supplier' && (path === '/workspace/supplier' || path === '/workspace/supplier/')) {
+      window.location.replace('/workspace/supplier/vehicles')
+      return
+    }
     // Authenticated users should never see sign-in/sign-up prompts or the registration chooser.
     setAuthOpen(false)
     const destination = isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'employee' ? '/workspace/employee' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
