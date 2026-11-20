@@ -150,11 +150,12 @@ export default function AuthCallbackPage() {
   }
 
   useEffect(() => {
-    if (!accountSuspended || !reviewEmail.trim() || !supabase) return
+    const client = supabase
+    if (!accountSuspended || !reviewEmail.trim() || !client) return
     let active = true
     const checkExistingReview = async () => {
       try {
-        const { data, error: lookupError } = await supabase.functions.invoke('public-suspended-account-support', {
+        const { data, error: lookupError } = await client.functions.invoke('public-suspended-account-support', {
           body: { action: 'status', accountEmail: reviewEmail.trim().toLowerCase() }
         })
         if (lookupError) throw lookupError
