@@ -1,4 +1,4 @@
-import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing, Wallet, UserPlus, ClipboardCheck, BarChart3, Activity, BriefcaseBusiness, Headset, TicketPercent, Sparkles, Send } from 'lucide-react'
+import { LayoutDashboard, Palette, CreditCard, Megaphone, BellRing, Wallet, UserPlus, ClipboardCheck, BarChart3, Activity, BriefcaseBusiness, Headset, TicketPercent, Sparkles, Send, Images } from 'lucide-react'
 import { useState } from 'react'
 import PlatformEntryBanner from './PlatformEntryBanner'
 
@@ -12,6 +12,7 @@ const groups = [
   {href:'/workspace/admin/managed-sourcing-center',label:'مركز تشغيل التفويضات والنتائج',icon:Send},
   {href:'/workspace/admin/managed-accounts',label:'حسابات المستخدمين',icon:UserPlus},
   {href:'/workspace/admin/communications',label:'الإشعارات والبانرات',icon:BellRing},
+  {href:'/workspace/admin/promotional-slides',label:'شريط العروض الترويجية',icon:Images},
   {href:'/workspace/admin/analytics',label:'التقارير والتحليلات',icon:Activity},
   
  ]},
