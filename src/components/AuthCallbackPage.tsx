@@ -221,6 +221,14 @@ export default function AuthCallbackPage() {
         const detail = caught && typeof caught === 'object' && 'message' in caught
           ? String((caught as { message?: unknown }).message || '')
           : String(caught || '')
+        // Supabase rejects banned users before issuing a session, so no organization lookup is possible.
+        // Treat the explicit auth ban as a temporary account suspension and show the support route.
+        if (/user is banned|user banned|banned/i.test(detail)) {
+          setAccountSuspended(true)
+          setError('')
+          setMessage('')
+          return
+        }
         setError(detail || 'تعذر تأكيد البريد الإلكتروني. افتح أحدث رسالة تأكيد أو اطلب رابطًا جديدًا.')
         setMessage('')
       }
