@@ -1147,7 +1147,9 @@ main.min-h-screen :is(input, select, textarea):disabled {
   .mc-messaging-main .mc-messaging-header p{margin-top:.2rem!important;font-size:.74rem!important;line-height:1.6!important}
   .mc-messaging-main .mc-messaging-actions{display:flex!important;flex-wrap:wrap!important;gap:.4rem!important}
   .mc-messaging-main .mc-messaging-actions>*{min-height:42px!important;font-size:.72rem!important}
-  .mc-messaging-main>.mx-auto>section.relative{display:none!important}
+  /* Keep the blue messaging hero visible on the inbox for every account role. */
+  .mc-messaging-main>.mx-auto>section.relative{display:block!important}
+  .mc-messaging-main.mc-mobile-chat-open>.mx-auto>section.relative{display:none!important}
   .mc-messaging-main>.mx-auto>div.mt-6{display:block!important;min-height:0!important;margin-top:.7rem!important}
   .mc-messaging-main .mc-messaging-conversation-list{display:flex!important;flex-direction:column!important;gap:.6rem!important;width:100%;min-width:0}
   .mc-messaging-main .mc-messaging-conversation-list>div:first-child{min-height:58px;padding:.75rem .9rem!important;border-radius:1rem!important}
