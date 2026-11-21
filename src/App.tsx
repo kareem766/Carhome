@@ -426,12 +426,14 @@ export default function App() {
   useEffect(() => {
     if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
-    const loadImage = (sources: string[]) => new Promise<string>((resolve, reject) => {
+    // Render the page shell immediately; photography must never block access to homepage content.
+    setHomeImagesReady(true)
+    const loadImage = (sources: string[]) => new Promise<string>((resolve) => {
       let index = 0
       const tryNext = () => {
         const source = sources[index++]
         if (!source) {
-          reject(new Error('Homepage vehicle photography could not be loaded.'))
+          resolve('')
           return
         }
         const image = new Image()
@@ -443,12 +445,7 @@ export default function App() {
     })
     void loadImage([HOME_BANNER_IMAGE]).catch((error) => console.error('Homepage banner image could not be preloaded:', error))
     void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
-      if (!active) return
-      setHomeImageUrls(urls)
-      setHomeImagesReady(true)
-    }).catch((error) => {
-      // Fail closed: the homepage stays on its branded loader instead of showing empty or broken vehicle cards.
-      console.error(error)
+      if (active) setHomeImageUrls(urls)
     })
     return () => { active = false }
   }, [])
@@ -642,12 +639,15 @@ export default function App() {
             </div>
           </div>
           <div className="mc-home-vehicle-gallery mx-auto mt-8 grid w-full max-w-6xl grid-cols-3 gap-3 sm:mt-10 sm:gap-5" aria-label="فئات السيارات">
-            {homeImageUrls.map((src, index) => <a key={src + index} href={authUser ? '/workspace/catalog' : '/register/company'} className={`mc-home-vehicle-card group relative isolate block h-32 overflow-hidden rounded-2xl border bg-[#102b47] shadow-[0_18px_45px_rgba(0,0,0,.24)] sm:h-52 lg:h-64 ${index === 1 ? 'mc-home-vehicle-card-featured' : ''}`}>
-              <img src={src} alt={['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]} loading="eager" decoding="async" fetchPriority="high" width="1200" height="800" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"/>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06172a]/95 via-[#06172a]/15 to-transparent"/>
-              {index === 1 && <span className="mc-home-popular-badge"><Star size={15} fill="currentColor"/> الأكثر طلبًا</span>}
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 px-2 pb-3 text-right text-[11px] font-black text-white sm:px-4 sm:pb-4 sm:text-base"><span>{['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]}</span><span className="mc-home-card-arrow"><ArrowLeft size={17}/></span></div>
-            </a>)}
+            {HOME_CAR_IMAGES.map((_, index) => {
+              const src = homeImageUrls[index]
+              return <a key={index} href={authUser ? '/workspace/catalog' : '/register/company'} aria-label={`استكشف ${['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]}`} className={`mc-home-vehicle-card group relative isolate block h-32 overflow-hidden rounded-2xl border bg-[#102b47] shadow-[0_18px_45px_rgba(0,0,0,.24)] sm:h-52 lg:h-64 ${index === 1 ? 'mc-home-vehicle-card-featured' : ''}`}>
+                {src && <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" fetchPriority="low" width="1200" height="800" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(event) => { event.currentTarget.style.display = 'none' }}/>}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06172a]/95 via-[#06172a]/15 to-transparent"/>
+                {index === 1 && <span className="mc-home-popular-badge"><Star size={15} fill="currentColor"/> الأكثر طلبًا</span>}
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 px-2 pb-3 text-right text-[11px] font-black text-white sm:px-4 sm:pb-4 sm:text-base"><span>{['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]}</span><span className="mc-home-card-arrow"><ArrowLeft size={17}/></span></div>
+              </a>
+            })}
           </div>
           {authUser?.user_metadata?.organization_type === 'company' && <form onSubmit={(event)=>{event.preventDefault();const data=new FormData(event.currentTarget);const params=new URLSearchParams();['governorate','vehicle_type','duration'].forEach(key=>{const value=String(data.get(key)||'');if(value)params.set(key,value)});window.location.href='/workspace/catalog'+(params.toString()?'?'+params.toString():'')}} className="relative z-20 mx-auto mt-7 max-w-5xl rounded-3xl border border-white/70 bg-white p-3 text-slate-700 shadow-2xl sm:mt-8 sm:p-4">
             <div className="grid gap-2 sm:grid-cols-3">
