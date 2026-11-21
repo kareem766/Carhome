@@ -681,6 +681,37 @@ export default function App() {
         <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-right"><p className="text-sm leading-7 text-slate-700"><strong className="text-[#102b47]">وضوح وثقة في التعامل:</strong> My Car منصة وسيطة للتواصل وتنظيم الطلبات والعروض بين الشركات وملاك السيارات وموردي الأساطيل. لا تتولى المنصة تحصيل قيمة الإيجار أو إدارة المدفوعات بين أطراف التعاقد، ولا تضمن تشغيل السيارة أو تنفيذ الاتفاق؛ وتظل شروط التعاقد والتنفيذ مسؤولية الأطراف المعنية.</p></div>
 
         {!authUser && settings.registration_enabled && <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-3xl bg-gradient-to-l from-[#102b47] to-[#174a82] p-6 text-white shadow-xl sm:flex-row sm:items-center sm:p-9"><div><p className="font-extrabold text-[#ffad0a]">خطوتك الأولى تبدأ هنا</p><h3 className="mt-2 text-2xl font-black">جاهز تلاقي السيارة المناسبة أو تعرض سياراتك؟</h3><p className="mt-2 text-sm leading-7 text-white/75">أنشئ حسابك مجانًا وابدأ استكشاف تجربة My Car عربيتي.</p></div><a href="/register" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-6 font-black text-[#102b47] shadow-lg hover:bg-amber-300">إنشاء حساب جديد<UserRoundPlus size={18}/></a></div>}
+        <section className="mc-home-faq mt-14" aria-labelledby="mc-home-faq-title">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-6 text-center">
+              <p className="font-extrabold text-[#f5a400]">إجابات تساعدك تبدأ بثقة</p>
+              <h2 id="mc-home-faq-title" className="mt-2 text-2xl font-black text-[#102b47] sm:text-3xl">أسئلة شائعة عن My Car عربيتي</h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">تعرف على طريقة عمل المنصة ودور كل طرف قبل إنشاء حسابك.</p>
+            </div>
+            <div className="grid gap-3">
+              <details className="mc-home-faq-item" open>
+                <summary>ما هي خدمة My Car عربيتي؟</summary>
+                <p>منصة إلكترونية وسيطة تربط الشركات التي تبحث عن سيارات للاستخدام طويل الأجل بملاك السيارات وموردي الأساطيل، وتساعد على تنظيم الطلبات والعروض والتواصل.</p>
+              </details>
+              <details className="mc-home-faq-item">
+                <summary>هل يمكن لمالك السيارة أو مورد الأسطول عرض سياراته؟</summary>
+                <p>نعم، يمكن إنشاء الحساب وإضافة بيانات السيارات وفق متطلبات المنصة، ثم تخضع البيانات وطلبات النشر للمراجعة قبل اعتمادها.</p>
+              </details>
+              <details className="mc-home-faq-item">
+                <summary>هل يمكن للشركات طلب سيارات شهريًا أو سنويًا؟</summary>
+                <p>يمكن للشركات استكشاف الكتالوج وإرسال طلبات التأجير وتحديد احتياجاتها، كما يمكنها تفويض My Car للبحث عن سيارات مناسبة.</p>
+              </details>
+              <details className="mc-home-faq-item">
+                <summary>هل المنصة تستقبل قيمة إيجار السيارات أو تضمن تنفيذ الاتفاق؟</summary>
+                <p>لا. My Car وسيط إلكتروني لتنظيم التواصل والطلبات والعروض، ولا تتولى تحصيل قيمة الإيجار أو إدارة المدفوعات بين الأطراف، ولا تضمن توافر السيارة أو تنفيذ التعاقد. يتفق الأطراف مباشرةً على الشروط والتنفيذ.</p>
+              </details>
+              <details className="mc-home-faq-item">
+                <summary>هل طلب التسجيل أو إضافة السيارة يتم اعتماده فورًا؟</summary>
+                <p>قد تتطلب الحسابات وبيانات السيارات والإعلانات مراجعة إدارة المنصة قبل الاعتماد أو النشر. تظهر حالة الطلب للمستخدم وفق الإجراءات المعمول بها داخل حسابه.</p>
+              </details>
+            </div>
+          </div>
+        </section>
       </div></section>
       <footer className="bg-[#071b31] px-5 py-7 text-sm text-white/70 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div>© {new Date().getFullYear()} {settings.platform_name}. {settings.footer_text}</div><div className="flex flex-wrap items-center gap-4"><a href="/services" className="hover:text-[#ffad0a]">خدمات السيارات</a><a href="/privacy" className="hover:text-[#ffad0a]">سياسة الخصوصية</a><a href="/terms" className="hover:text-[#ffad0a]">شروط الاستخدام</a>{settings.support_email&&<a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone&&<a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}</div></div></footer>
       {authOpen&&<AuthPanel onClose={()=>setAuthOpen(false)} initialMode={authMode} initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}
