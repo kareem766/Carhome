@@ -10,20 +10,42 @@ const roles:{value:Role;label:string}[]=[{value:'individual_owner',label:'مال
 
 type Destination={value:string;label:string;roles:Role[]}
 const destinations:Destination[]=[
- {value:'/workspace',label:'الرئيسية الخاصة بالحساب',roles:['individual_owner','fleet_supplier','employee']},
+ // صفحات عامة ومشتركة
+ {value:'/',label:'الصفحة الرئيسية للمنصة',roles:['individual_owner','fleet_supplier','employee']},
  {value:'/services',label:'خدمات السيارات',roles:['individual_owner','fleet_supplier','employee']},
  {value:'/assistant',label:'مساعد My Car',roles:['individual_owner','fleet_supplier','employee']},
  {value:'/support',label:'مركز الدعم',roles:['individual_owner','fleet_supplier','employee']},
- {value:'/workspace/owner/vehicles',label:'سياراتي',roles:['individual_owner']},
- {value:'/workspace/owner/offers',label:'عروضي',roles:['individual_owner']},
- {value:'/workspace/owner/requests',label:'طلبات الشركات',roles:['individual_owner']},
- {value:'/workspace/catalog',label:'كتالوج السيارات',roles:['individual_owner','fleet_supplier']},
- {value:'/workspace/advertising-plans',label:'باقات الإعلانات',roles:['individual_owner','fleet_supplier']},
- {value:'/workspace/provider-employee-requests',label:'طلبات الموظفين',roles:['individual_owner','fleet_supplier']},
- {value:'/workspace/supplier/insights',label:'إحصائيات الأسطول',roles:['fleet_supplier']},
- {value:'/workspace/employee/requests',label:'طلبات السيارات والعروض',roles:['employee']},
- {value:'/workspace/employee/account',label:'حسابي وبياناتي',roles:['employee']},
- {value:'/workspace/employee/messages',label:'الرسائل',roles:['employee']},
+ {value:'/privacy',label:'سياسة الخصوصية',roles:['individual_owner','fleet_supplier','employee']},
+ {value:'/terms',label:'الشروط والأحكام',roles:['individual_owner','fleet_supplier','employee']},
+ {value:'/workspace/notifications',label:'إعدادات الإشعارات',roles:['individual_owner','fleet_supplier','employee']},
+
+ // صفحات مالك السيارة
+ {value:'/workspace/owner/vehicles',label:'مالك السيارة · سياراتي',roles:['individual_owner']},
+ {value:'/workspace/owner/offers',label:'مالك السيارة · عروضي',roles:['individual_owner']},
+ {value:'/workspace/owner/requests',label:'مالك السيارة · طلبات الشركات',roles:['individual_owner']},
+ {value:'/workspace/owner/employee-requests',label:'مالك السيارة · طلبات الموظفين',roles:['individual_owner']},
+ {value:'/workspace/provider/managed-sourcing',label:'مالك السيارة · تفويضات البحث',roles:['individual_owner']},
+ {value:'/workspace/catalog',label:'مالك السيارة · كتالوج السيارات',roles:['individual_owner']},
+ {value:'/workspace/advertising-plans',label:'مالك السيارة · باقات الإعلانات',roles:['individual_owner']},
+
+ // صفحات مورد الأسطول
+ {value:'/workspace/supplier/vehicles',label:'مورد الأسطول · أسطولي',roles:['fleet_supplier']},
+ {value:'/workspace/supplier/vehicles/new',label:'مورد الأسطول · إضافة سيارة',roles:['fleet_supplier']},
+ {value:'/workspace/supplier/requests',label:'مورد الأسطول · طلبات الشركات',roles:['fleet_supplier']},
+ {value:'/workspace/supplier/offers',label:'مورد الأسطول · عروضي',roles:['fleet_supplier']},
+ {value:'/workspace/provider-employee-requests',label:'مورد الأسطول · طلبات الموظفين',roles:['fleet_supplier']},
+ {value:'/workspace/provider/managed-sourcing',label:'مورد الأسطول · تفويضات البحث',roles:['fleet_supplier']},
+ {value:'/workspace/supplier/insights',label:'مورد الأسطول · تقارير الأسطول',roles:['fleet_supplier']},
+ {value:'/workspace/supplier/account',label:'مورد الأسطول · الحساب',roles:['fleet_supplier']},
+ {value:'/workspace/catalog',label:'مورد الأسطول · كتالوج السيارات',roles:['fleet_supplier']},
+ {value:'/workspace/advertising-plans',label:'مورد الأسطول · الإعلانات',roles:['fleet_supplier']},
+ {value:'/messages',label:'مورد الأسطول · المحادثات',roles:['fleet_supplier']},
+
+ // صفحات الموظف المستقل
+ {value:'/workspace/employee',label:'الموظف · الرئيسية',roles:['employee']},
+ {value:'/workspace/employee/requests',label:'الموظف · طلباتي والعروض',roles:['employee']},
+ {value:'/workspace/employee/messages',label:'الموظف · المراسلات',roles:['employee']},
+ {value:'/workspace/employee/account',label:'الموظف · بيانات الحساب',roles:['employee']},
 ]
 export default function AdminPromotionalSlidesPage(){
  const [authorized,setAuthorized]=useState(false),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false)
