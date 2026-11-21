@@ -43,6 +43,7 @@ const destinations:Destination[]=[
 
  // صفحات الموظف المستقل
  {value:'/workspace/employee',label:'الموظف · الرئيسية',roles:['employee']},
+ {value:'/workspace/employee#new-request',label:'الموظف المستقل · إنشاء طلب سيارة جديدة',roles:['employee']},
  {value:'/workspace/employee/requests',label:'الموظف · طلباتي والعروض',roles:['employee']},
  {value:'/workspace/employee/messages',label:'الموظف · المراسلات',roles:['employee']},
  {value:'/workspace/employee/account',label:'الموظف · بيانات الحساب',roles:['employee']},
