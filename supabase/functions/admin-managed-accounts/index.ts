@@ -189,15 +189,18 @@ Deno.serve(async(req:Request)=>{
   },{onConflict:"user_id"});
   if(passwordRecordError){await rollback();return send({error:"تعذر إعداد تغيير كلمة المرور الإلزامي للحساب الجديد: "+passwordRecordError.message},500);}
   if(role==="employee"){
-   const {error:employeeError}=await db.from("employee_accounts").insert({
-    user_id:newUserId,employment_type:employmentType,organization_id:employeeOrganization?.id||null,account_status:banned?"suspended":"active"
-   });
-   if(employeeError){await rollback();return send({error:"تعذر إنشاء ملف الموظف: "+employeeError.message},500);}
+   // Auth triggers create an employee_accounts row for independent employees,
+   // and the organization_memberships trigger creates/updates it for company members.
+   // Upsert after those triggers so we never hit a duplicate key and still preserve pending status.
    if(employeeOrganization){
     const {error:membershipError}=await db.from("organization_memberships").insert({organization_id:employeeOrganization.id,user_id:newUserId,role:"member"});
     if(membershipError){await rollback();return send({error:"تعذر ربط الموظف بالشركة: "+membershipError.message},500);}
     membershipCreated=true;
    }
+   const {error:employeeError}=await db.from("employee_accounts").upsert({
+    user_id:newUserId,employment_type:employmentType,organization_id:employeeOrganization?.id||null,account_status:banned?"suspended":"active"
+   },{onConflict:"user_id"});
+   if(employeeError){await rollback();return send({error:"تعذر حفظ ملف الموظف: "+employeeError.message},500);}
   }else{
    const {data:organization,error:organizationError}=await db.from("organizations").insert({
     name:organizationName,organization_type:role,created_by:newUserId,city:city||null,
