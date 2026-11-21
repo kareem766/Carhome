@@ -1,15 +1,16 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
 import { ArrowLeft, Building2, CarFront, ShieldCheck, Menu, X, UserRound, UserRoundPlus, MapPin, CalendarDays, Search, Star, HandCoins, BusFront, RefreshCw, MessageCircle, Megaphone, ClipboardList, Wrench, Bot, Bell } from 'lucide-react'
-import AuthPanel from './components/AuthPanel'
+const AuthPanel = lazy(() => import('./components/AuthPanel'))
 import PlatformLoading from './components/PlatformLoading'
 import AccountNotifications from './components/AccountNotifications'
 import SupplierPageShell from './components/SupplierPageShell'
 import CompanyPageSidebar from './components/CompanyPageSidebar'
-import PlatformEntryBanner from './components/PlatformEntryBanner'
-import MyCarAssistantPage from './components/MyCarAssistantPage'
+const PlatformEntryBanner = lazy(() => import('./components/PlatformEntryBanner'))
+const MyCarAssistantPage = lazy(() => import('./components/MyCarAssistantPage'))
 const SupportCenterPage = lazy(() => import('./components/SupportCenterPage'))
-import RoleRegistrationPage, { RoleChooserPage } from './components/RoleRegistrationPage'
-import LegalPages from './components/LegalPages'
+const RoleRegistrationPage = lazy(() => import('./components/RoleRegistrationPage'))
+const RoleChooserPage = lazy(() => import('./components/RoleRegistrationPage').then(module => ({ default: module.RoleChooserPage })))
+const LegalPages = lazy(() => import('./components/LegalPages'))
 const WorkspacePage = lazy(() => import('./components/WorkspacePage'))
 const CompanyDashboardPage = lazy(() => import('./components/CompanyDashboardPage'))
 const EmployeeRegistrationPage = lazy(() => import('./components/EmployeeRegistrationPage'))
@@ -505,7 +506,7 @@ export default function App() {
         <p className="mt-3 leading-8 text-white/75">المنصة متاحة حاليًا لصاحب المنصة فقط أثناء فترة الإيقاف. ستعود الخدمة لباقي المستخدمين عند إعادة التفعيل.</p>
         {!authUser ? <button type="button" onClick={() => openAuth('signin')} className="mt-7 rounded-xl bg-[#ffad0a] px-6 py-3 font-black text-[#142b43]">دخول صاحب المنصة</button> : <button type="button" onClick={() => { void supabase?.auth.signOut().then(() => { window.location.assign('/') }) }} className="mt-7 rounded-xl border border-white/20 px-6 py-3 font-bold text-white">تسجيل الخروج</button>}
       </section>
-      {authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}
+      {authOpen && <Suspense fallback={<PlatformLoading />}><AuthPanel onClose={() => setAuthOpen(false)} initialMode={authMode} initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}
     </main>
   }
   // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
@@ -515,9 +516,9 @@ export default function App() {
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (authUser && employeeAccountError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5"><section className="w-full max-w-xl rounded-3xl border border-amber-200 bg-white p-8 text-center shadow-xl"><ShieldCheck className="mx-auto mb-4 text-amber-500" size={42}/><h1 className="text-xl font-black text-slate-900">تعذر التحقق من حساب الموظف</h1><p className="mt-3 leading-8 text-slate-600">{employeeAccountError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-blue-700 px-6 py-3 font-black text-white">إعادة المحاولة</button><button type="button" onClick={()=>{void supabase?.auth.signOut().then(()=>window.location.replace('/?login=1'))}} className="mr-2 mt-6 rounded-xl border border-slate-200 px-6 py-3 font-bold text-slate-700">تسجيل الخروج</button></section></main>
   if (authUser && adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات لوحة التحكم</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
-  if (path === '/assistant') return authUser?.user_metadata?.organization_type === 'company_employee' ? <><CompanyPersistentBar employeeView/><CompanyPageSidebar active="assistant" employeeView/><div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><div className="mc-company-page-with-sidebar min-w-0"><MyCarAssistantPage /></div></div></> : authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><MyCarAssistantPage /></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><MyCarAssistantPage /></> : authUser?.user_metadata?.organization_type === 'employee' ? <><MyCarAssistantPage /></> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPersistentBar/><div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><CompanyPageSidebar active="assistant"/><div className="mc-company-page-with-sidebar min-w-0"><MyCarAssistantPage /></div></div></> : authUser ? <MyCarAssistantPage /> : <ServiceNotice settings={settings} title="سجّل الدخول لاستخدام المساعد" message="مساعد My Car متاح للمستخدمين المسجلين فقط، ويعمل وفق صلاحيات الحساب." />
-  if (path === '/privacy') return <LegalPages kind="privacy" />
-  if (path === '/terms') return <LegalPages kind="terms" />
+  if (path === '/assistant') return authUser?.user_metadata?.organization_type === 'company_employee' ? <><CompanyPersistentBar employeeView/><CompanyPageSidebar active="assistant" employeeView/><div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><MyCarAssistantPage /></Suspense></div></div></> : authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><MyCarAssistantPage /></Suspense></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><MyCarAssistantPage /></Suspense></> : authUser?.user_metadata?.organization_type === 'employee' ? <><Suspense fallback={<PlatformLoading />}><MyCarAssistantPage /></Suspense></> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPersistentBar/><div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><CompanyPageSidebar active="assistant"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><MyCarAssistantPage /></Suspense></div></div></> : authUser ? <Suspense fallback={<PlatformLoading />}><MyCarAssistantPage /></Suspense> : <ServiceNotice settings={settings} title="سجّل الدخول لاستخدام المساعد" message="مساعد My Car متاح للمستخدمين المسجلين فقط، ويعمل وفق صلاحيات الحساب." />
+  if (path === '/privacy') return <Suspense fallback={<PlatformLoading />}><LegalPages kind="privacy" /></Suspense>
+  if (path === '/terms') return <Suspense fallback={<PlatformLoading />}><LegalPages kind="terms" /></Suspense>
   if (path === '/workspace' && !authLoaded) return <PlatformLoading />
   if (path === '/workspace') return <PlatformLoading />
   if (path === '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
@@ -577,7 +578,7 @@ export default function App() {
   }
   if (path === '/workspace/admin/automation-review') {
     if (!authLoaded) return <PlatformLoading />
-    if (!authUser) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#061b36] px-5 text-white"><section className="w-full max-w-lg rounded-3xl border border-white/15 bg-[#102b47] p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-[#ffad0a]" size={44}/><h1 className="text-2xl font-black">تسجيل الدخول مطلوب</h1><p className="mt-3 leading-8 text-white/75">مركز المراجعة الذكية مخصص لإدارة My Car فقط. سجّل الدخول بحساب الإدارة للمتابعة.</p><button type="button" onClick={() => { setAuthMode('signin'); setAuthOpen(true) }} className="mt-6 rounded-xl bg-[#ffad0a] px-7 py-3 font-black text-[#142b43]">تسجيل الدخول</button><a href="/" className="mr-3 inline-flex rounded-xl border border-white/20 px-6 py-3 font-bold text-white">الرئيسية</a></section>{authOpen && <AuthPanel onClose={() => setAuthOpen(false)} initialMode="signin" redirectTo="/workspace/admin/automation-review" initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}</main>
+    if (!authUser) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#061b36] px-5 text-white"><section className="w-full max-w-lg rounded-3xl border border-white/15 bg-[#102b47] p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-[#ffad0a]" size={44}/><h1 className="text-2xl font-black">تسجيل الدخول مطلوب</h1><p className="mt-3 leading-8 text-white/75">مركز المراجعة الذكية مخصص لإدارة My Car فقط. سجّل الدخول بحساب الإدارة للمتابعة.</p><button type="button" onClick={() => { setAuthMode('signin'); setAuthOpen(true) }} className="mt-6 rounded-xl bg-[#ffad0a] px-7 py-3 font-black text-[#142b43]">تسجيل الدخول</button><a href="/" className="mr-3 inline-flex rounded-xl border border-white/20 px-6 py-3 font-bold text-white">الرئيسية</a></section>{authOpen && <Suspense fallback={<PlatformLoading />}><AuthPanel onClose={() => setAuthOpen(false)} initialMode="signin" redirectTo="/workspace/admin/automation-review" initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}</main>
     if (adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات الإدارة</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={() => window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
     if (!isPlatformAdmin) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#061b36] px-5 text-white"><section className="w-full max-w-lg rounded-3xl border border-rose-400/30 bg-[#102b47] p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-rose-300" size={44}/><h1 className="text-2xl font-black">غير مصرح بالدخول</h1><p className="mt-3 leading-8 text-white/75">هذا المركز متاح لحسابات إدارة المنصة المعتمدة فقط.</p><a href="/" className="mt-6 inline-flex rounded-xl bg-[#ffad0a] px-7 py-3 font-black text-[#142b43]">العودة للرئيسية</a></section></main>
     return <><Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-smart-review" /></Suspense></>
@@ -599,7 +600,7 @@ export default function App() {
   if (path === '/register/company' && !settings.company_registration_enabled) return <ServiceNotice settings={settings} title="تسجيل الشركات متوقف" message="التسجيل لهذا النوع من الحسابات غير متاح حاليًا." />
   if (path === '/register/supplier' && !settings.supplier_registration_enabled) return <ServiceNotice settings={settings} title="تسجيل موردي الأساطيل متوقف" message="التسجيل لهذا النوع من الحسابات غير متاح حاليًا." />
   if (path === '/register/employee') return <Suspense fallback={<PlatformLoading />}><EmployeeRegistrationPage /></Suspense>
-  if (path === '/register') return <RoleChooserPage onChoose={(role) => {
+  if (path === '/register') return <Suspense fallback={<PlatformLoading />}><RoleChooserPage onChoose={(role) => {
     const enabled = role === 'employee' ? true : role === 'individual_owner' ? settings.owner_registration_enabled : role === 'fleet_supplier' ? settings.supplier_registration_enabled : settings.company_registration_enabled
     if (!enabled) { window.alert('التسجيل لهذا النوع من الحسابات غير متاح حاليًا.'); return }
     const needsGoogleOnboarding = authUser?.app_metadata?.provider === 'google' && Number(authUser.user_metadata?.onboarding_version || 0) < 2
@@ -609,13 +610,13 @@ export default function App() {
       return
     }
     window.location.href = role === 'employee' ? '/register/employee' : '/register/' + (role === 'individual_owner' ? 'owner' : role === 'fleet_supplier' ? 'supplier' : 'company')
-  }} onLogin={() => { window.location.href = '/?login=1' }} />
-  if (path === '/register/owner') return <RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} />
-  if (path === '/register/company') return <RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} />
-  if (path === '/register/supplier') return <RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} />
+  }} onLogin={() => { window.location.href = '/?login=1' }} /></Suspense>
+  if (path === '/register/owner') return <Suspense fallback={<PlatformLoading />}><RoleRegistrationPage role="individual_owner" onBack={() => { window.location.href = '/register' }} /></Suspense>
+  if (path === '/register/company') return <Suspense fallback={<PlatformLoading />}><RoleRegistrationPage role="company" onBack={() => { window.location.href = '/register' }} /></Suspense>
+  if (path === '/register/supplier') return <Suspense fallback={<PlatformLoading />}><RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} /></Suspense>
 
   return (
-    <main dir="rtl" className="min-h-screen overflow-hidden bg-[#061b36] text-slate-900">{authLoaded && !authUser && <PlatformEntryBanner/>}
+    <main dir="rtl" className="min-h-screen overflow-hidden bg-[#061b36] text-slate-900">{authLoaded && !authUser && <Suspense fallback={null}><PlatformEntryBanner/></Suspense>}
       {settings.announcement_text && <div className="px-4 py-2 text-center text-sm font-bold text-white" style={{backgroundColor:settings.primary_color}}>{settings.announcement_text}</div>}
       <section className="mc-home-hero-section relative isolate overflow-hidden bg-[#061b36] text-white">
         <div className="absolute inset-0 -z-20 bg-cover bg-center" style={{backgroundImage:"url(https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=2200&q=90)"}}/>
