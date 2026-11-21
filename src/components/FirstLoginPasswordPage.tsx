@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabase";
 export default function FirstLoginPasswordPage() {
  const [password,setPassword]=useState("");
  const [confirm,setConfirm]=useState("");
- const [displayName,setDisplayName]=useState("مرحبًا بك في فريق My Car");
+ const [displayName,setDisplayName]=useState("مرحبًا بك في My Car");
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  useEffect(()=>{let active=true;void supabase?.auth.getUser().then(({data})=>{if(active&&data.user?.user_metadata?.display_name)setDisplayName(String(data.user.user_metadata.display_name))});return()=>{active=false}},[]);
@@ -28,8 +28,46 @@ export default function FirstLoginPasswordPage() {
    if(refreshError)throw refreshError;
    const user=refreshed.session?.user;
    if(!user||user.app_metadata?.must_change_password===true)throw new Error("تم تحديث كلمة المرور، لكن تعذر إنهاء تفعيل الحساب. سجّل الدخول مرة أخرى.");
+
+   // Resolve the workspace from the authoritative employee record, not Auth metadata.
+   // Admin-created employee accounts may not have organization_type copied into user_metadata.
+   const {data:employee,error:employeeError}=await supabase
+    .from("employee_accounts")
+    .select("employment_type,organization_id,account_status")
+    .eq("user_id",user.id)
+    .maybeSingle();
+   if(employeeError)throw new Error("تم حفظ كلمة المرور، لكن تعذر التحقق من نوع حساب الموظف. سجّل الدخول مرة أخرى أو تواصل مع الدعم.");
+   if(employee){
+    if(employee.account_status!=="active")throw new Error("تم حفظ كلمة المرور، لكن حساب الموظف غير مفعّل حاليًا. تواصل مع إدارة My Car.");
+    if(employee.employment_type==="independent"){
+     window.location.replace("/workspace/employee");
+     return;
+    }
+    if(employee.employment_type==="company_member"&&employee.organization_id){
+     const {data:membership,error:membershipError}=await supabase
+      .from("organization_memberships")
+      .select("organization_id,organizations!inner(id,organization_type,approval_status)")
+      .eq("user_id",user.id)
+      .eq("organization_id",employee.organization_id)
+      .eq("organizations.organization_type","company")
+      .eq("organizations.approval_status","approved")
+      .maybeSingle();
+     if(membershipError||!membership)throw new Error("تم حفظ كلمة المرور، لكن تعذر التحقق من عضويتك في الشركة. تواصل مع إدارة My Car.");
+     window.location.replace("/workspace/company");
+     return;
+    }
+    throw new Error("تم حفظ كلمة المرور، لكن بيانات نوع حساب الموظف غير مكتملة. تواصل مع إدارة My Car.");
+   }
+
+   const {data:admin,error:adminError}=await supabase.from("platform_admins").select("user_id").eq("user_id",user.id).maybeSingle();
+   if(adminError)throw new Error("تم حفظ كلمة المرور، لكن تعذر التحقق من صلاحيات الحساب. سجّل الدخول مرة أخرى.");
+   if(admin){window.location.replace("/workspace/admin");return;}
    const role=user.user_metadata?.organization_type;
-   window.location.replace(role==="company"?"/workspace/company":role==="fleet_supplier"?"/workspace/supplier/vehicles":"/workspace/owner/vehicles");
+   if(role==="company"){window.location.replace("/workspace/company");return;}
+   if(role==="fleet_supplier"){window.location.replace("/workspace/supplier/vehicles");return;}
+   if(role==="individual_owner"||role==="owner"){window.location.replace("/workspace/owner/vehicles");return;}
+   if(role==="employee"){window.location.replace("/workspace/employee");return;}
+   throw new Error("تم حفظ كلمة المرور، لكن تعذر تحديد مساحة العمل المرتبطة بحسابك. تواصل مع إدارة My Car بدلًا من فتح مساحة غير صحيحة.");
   }catch(e){setError(e instanceof Error?e.message:"تعذر تغيير كلمة المرور.");}
   finally{setBusy(false);}
  }
@@ -41,7 +79,7 @@ export default function FirstLoginPasswordPage() {
    <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-100 text-blue-700 shadow-inner"><Sparkles size={30}/></div>
    <p className="mt-6 text-center text-xs font-black tracking-wide text-blue-700">أهلًا بك في My Car</p>
    <h1 className="mt-2 text-center text-2xl font-black leading-tight text-slate-950 sm:text-3xl">سعداء بانضمامك، {displayName}</h1>
-   <p className="mx-auto mt-3 max-w-md text-center text-sm leading-7 text-slate-600">هذه أول مرة تدخل فيها إلى مساحة عمل شركتك. قبل أن تبدأ، أنشئ كلمة مرور خاصة بك للحفاظ على أمان حسابك.</p>
+   <p className="mx-auto mt-3 max-w-md text-center text-sm leading-7 text-slate-600">قبل أن تبدأ، أنشئ كلمة مرور خاصة بك للحفاظ على أمان حسابك.</p>
    <div className="mt-7 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
     <div className="flex items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-blue-700 shadow-sm"><LockKeyhole size={19}/></span><div><p className="text-sm font-extrabold text-slate-900">خطوة أمان لمرة واحدة</p><p className="mt-1 text-xs leading-5 text-slate-600">لن تُطلب منك هذه الشاشة مرة أخرى بعد حفظ كلمة المرور الجديدة.</p></div></div>
    </div>
@@ -51,7 +89,7 @@ export default function FirstLoginPasswordPage() {
     {error&&<p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-700">{error}</p>}
     <button disabled={busy} className="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-blue-800 to-blue-600 px-4 py-3 font-extrabold text-white shadow-lg shadow-blue-900/15 transition hover:brightness-105 disabled:opacity-60">{busy?<LoaderCircle className="animate-spin" size={19}/>:<ShieldCheck size={19}/>}حفظ كلمة المرور والدخول إلى حسابي</button>
    </form>
-   <p className="mt-5 text-center text-xs leading-6 text-slate-400">حسابك مرتبط بشركة العمل، وستظهر لك الأدوات وفق الصلاحيات التي حددها مالك الشركة.</p>
+   <p className="mt-5 text-center text-xs leading-6 text-slate-400">سيتم فتح مساحة العمل المناسبة لنوع حسابك والصلاحيات المحددة له.</p>
   </section>
  </main>;
 }
