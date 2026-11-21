@@ -82,7 +82,7 @@ function inferVehicleProfile(make: string, model: string): { type: string; seats
 const fieldClass = 'mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
 const primaryClass = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 font-extrabold text-white hover:bg-blue-800 disabled:opacity-50'
 
-export default function WorkspacePage({ role }: { role: Role }) {
+export default function WorkspacePage({ role, employeeView = false }: { role: Role; employeeView?: boolean }) {
   const [user, setUser] = useState<{ id: string; name: string; email: string } | null>(null)
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [showReviewModal, setShowReviewModal] = useState(false)
@@ -985,7 +985,7 @@ export default function WorkspacePage({ role }: { role: Role }) {
   const sideNavigation = <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">{workspaceLinks.map(({href,label,icon:Icon})=><a key={href} href={href} aria-current={path===href?'page':undefined} className={'mc-sidebar-link '+(path===href?'is-active':'')}><Icon size={19}/><span>{label}</span></a>)}<div className="mc-sidebar-divider"/><button type="button" onClick={()=>void signOut()} className="mc-sidebar-link mc-sidebar-logout"><LogOut size={19}/><span>تسجيل الخروج</span></button></nav>
   const companyActiveSection = path.endsWith('/account') ? 'account' : path.endsWith('/requests/new') ? 'new-request' : path.includes('/requests') ? 'requests' : path.includes('/vehicles') ? 'catalog' : 'overview'
   return <>
-    {role === 'company' && <CompanyPageSidebar active={companyActiveSection} />}
+    {role === 'company' && <CompanyPageSidebar active={companyActiveSection} employeeView={employeeView} />}
     <main dir="rtl" className={`mc-workspace-main min-h-screen bg-[#f3f6fb] ${role === 'owner' ? 'mc-owner-workspace-main' : ''} ${role === 'company' ? 'mc-company-workspace-main' : ''}`}>
     {role === 'supplier' && <aside className="mc-workspace-sidebar"><div className="mc-sidebar-brand"><PlatformBrand compact/><span className="mc-sidebar-tag">مساحة العمل</span></div>{sideNavigation}<div className="mc-sidebar-promo"><CarFront size={27}/><strong>كل خدمات السيارات في مكان واحد</strong><p>إدارة أسهل وفرص تشغيل أكثر مع CarHome.</p><a href="/workspace/catalog">استكشف الكتالوج ←</a></div></aside>}
     <div className="mc-workspace-content min-w-0">
