@@ -185,6 +185,7 @@ export default function App() {
   const [authLoaded, setAuthLoaded] = useState(false)
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
   const [adminLookupError, setAdminLookupError] = useState<string | null>(null)
+  const [employeeAccountError, setEmployeeAccountError] = useState<string | null>(null)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [homeImageUrls, setHomeImageUrls] = useState<string[]>([])
   const [homeImagesReady, setHomeImagesReady] = useState(false)
@@ -241,6 +242,50 @@ export default function App() {
         setAdminLookupError('تعذر التحقق من صلاحيات مدير المنصة. لم يتم تحويلك إلى مساحة مالك السيارة حفاظًا على صلاحيات الحساب.')
       } else {
         setIsPlatformAdmin(Boolean(data))
+      }
+      // Employee records are the source of truth for employee accounts. Do not
+      // let stale/missing Auth user_metadata send a valid employee to the owner workspace.
+      setEmployeeAccountError(null)
+      const { data: employeeRecord, error: employeeLookupError } = await supabase!
+        .from('employee_accounts')
+        .select('employment_type, organization_id, account_status')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      if (!active || sequence !== syncSequence) return
+      if (employeeLookupError) {
+        console.error('Employee account lookup failed:', employeeLookupError)
+      } else if (employeeRecord) {
+        let employeeMembershipValid = employeeRecord.employment_type === 'independent'
+        if (employeeRecord.employment_type === 'company_member' && employeeRecord.organization_id) {
+          const { data: membership, error: membershipError } = await supabase!
+            .from('organization_memberships')
+            .select('organization_id, organizations!inner(id, organization_type, approval_status)')
+            .eq('user_id', user.id)
+            .eq('organization_id', employeeRecord.organization_id)
+            .eq('organizations.organization_type', 'company')
+            .eq('organizations.approval_status', 'approved')
+            .maybeSingle()
+          if (membershipError) {
+            console.error('Employee company membership lookup failed:', membershipError)
+          } else {
+            employeeMembershipValid = Boolean(membership)
+          }
+        }
+        if (employeeRecord.account_status !== 'active') {
+          setEmployeeAccountError('حساب الموظف غير مفعّل حاليًا. تواصل مع إدارة My Car لتفعيل الحساب.')
+        } else if (!employeeMembershipValid) {
+          setEmployeeAccountError('لم يتم التحقق من عضوية الموظف داخل الشركة المعتمدة. لن يتم فتح مساحة مالك السيارة لهذا الحساب.')
+        } else {
+          setAuthUser({
+            ...user,
+            user_metadata: {
+              ...user.user_metadata,
+              organization_type: 'employee',
+              employment_type: employeeRecord.employment_type,
+              organization_id: employeeRecord.organization_id
+            }
+          })
+        }
       }
       setAuthLoaded(true)
     }
@@ -468,6 +513,7 @@ export default function App() {
   // Keep the public homepage behind the branded loader until every hero vehicle visual has decoded.
   if (pathIsHome(window.location.pathname) && !homeImagesReady) return <PlatformLoading />
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
+  if (authUser && employeeAccountError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5"><section className="w-full max-w-xl rounded-3xl border border-amber-200 bg-white p-8 text-center shadow-xl"><ShieldCheck className="mx-auto mb-4 text-amber-500" size={42}/><h1 className="text-xl font-black text-slate-900">تعذر التحقق من حساب الموظف</h1><p className="mt-3 leading-8 text-slate-600">{employeeAccountError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-blue-700 px-6 py-3 font-black text-white">إعادة المحاولة</button><button type="button" onClick={()=>{void supabase?.auth.signOut().then(()=>window.location.replace('/?login=1'))}} className="mr-2 mt-6 rounded-xl border border-slate-200 px-6 py-3 font-bold text-slate-700">تسجيل الخروج</button></section></main>
   if (authUser && adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات لوحة التحكم</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
   if (path === '/assistant') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><MyCarAssistantPage /></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><MyCarAssistantPage /></> : authUser?.user_metadata?.organization_type === 'employee' ? <><MyCarAssistantPage /></> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPersistentBar/><div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><CompanyPageSidebar active="assistant"/><div className="mc-company-page-with-sidebar min-w-0"><MyCarAssistantPage /></div></div></> : authUser ? <MyCarAssistantPage /> : <ServiceNotice settings={settings} title="سجّل الدخول لاستخدام المساعد" message="مساعد My Car متاح للمستخدمين المسجلين فقط، ويعمل وفق صلاحيات الحساب." />
   if (path === '/privacy') return <LegalPages kind="privacy" />
