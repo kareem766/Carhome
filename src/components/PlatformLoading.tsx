@@ -1,3 +1,5 @@
+import { CarFront } from 'lucide-react'
+
 type PlatformLoadingProps = {
   pageName?: string
 }
@@ -58,27 +60,30 @@ export default function PlatformLoading({ pageName }: PlatformLoadingProps) {
       className="relative grid min-h-[100svh] place-items-center overflow-hidden px-5 text-slate-900"
       style={{ background: 'linear-gradient(145deg, #f8fbff 0%, #eaf2fb 48%, #f5f8fc 100%)' }}
     >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(rgba(51,95,145,.12) 1px, transparent 1px)', backgroundSize: '30px 30px', maskImage: 'linear-gradient(to bottom, transparent, black 24%, black 76%, transparent)' }} />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 42%, rgba(34,211,238,.17), transparent 29%), radial-gradient(circle at 50% 58%, rgba(249,115,22,.10), transparent 40%)' }} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-45" style={{ backgroundImage: 'radial-gradient(rgba(51,95,145,.10) 1px, transparent 1px)', backgroundSize: '32px 32px', maskImage: 'linear-gradient(to bottom, transparent, black 24%, black 76%, transparent)' }} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 39%, rgba(34,211,238,.16), transparent 30%), radial-gradient(ellipse at 50% 54%, rgba(249,115,22,.08), transparent 42%)' }} />
 
-      <div className="relative flex w-full max-w-sm flex-col items-center gap-10" role="status" aria-live="polite" aria-label={`جارٍ فتح ${currentPage}`}>
-        <div className="relative grid h-64 w-64 place-items-center sm:h-72 sm:w-72">
-          <span aria-hidden="true" className="absolute inset-1 rounded-full border border-slate-300/55" style={{ boxShadow: '0 0 70px rgba(34,211,238,.12), inset 0 0 45px rgba(255,255,255,.65)' }} />
-          <span aria-hidden="true" className="absolute inset-3 animate-[spin_8s_linear_infinite] rounded-full border-[3px] border-transparent border-t-orange-400 border-r-orange-300/70 motion-reduce:animate-none" style={{ filter: 'drop-shadow(0 0 8px rgba(249,115,22,.75))' }} />
-          <span aria-hidden="true" className="absolute inset-7 animate-[spin_11s_linear_infinite_reverse] rounded-full border-2 border-transparent border-b-cyan-500/75 border-l-slate-300/60 motion-reduce:animate-none" />
-          <span aria-hidden="true" className="absolute inset-12 rounded-full border border-slate-300/60" />
-          <span aria-hidden="true" className="absolute right-[13px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-orange-300 shadow-[0_0_10px_4px_rgba(251,146,60,.65)]" />
-          <span aria-hidden="true" className="absolute bottom-8 left-10 h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_12px_3px_rgba(103,232,249,.55)]" />
+      <div className="relative flex w-full max-w-sm flex-col items-center gap-12" role="status" aria-live="polite" aria-label={`جارٍ فتح ${currentPage}`}>
+        <div className="flex w-full flex-col items-center">
+          <div className="relative mb-5 grid h-24 w-24 place-items-center">
+            <span aria-hidden="true" className="absolute inset-0 rounded-full bg-cyan-300/20 blur-2xl" />
+            <span aria-hidden="true" className="absolute inset-3 rounded-full bg-orange-300/15 blur-xl" />
+            <CarFront aria-hidden="true" size={62} strokeWidth={1.65} className="relative animate-[logo-float_2.8s_ease-in-out_infinite] text-[#123252] drop-shadow-[0_8px_12px_rgba(8,174,202,.18)] motion-reduce:animate-none" />
+            <span aria-hidden="true" className="absolute bottom-1 left-1/2 h-1 w-12 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#08aeca] via-[#f9a23b] to-[#08aeca] opacity-80 blur-[1px]" />
+          </div>
 
-          <div
-            className="relative flex min-h-40 min-w-52 flex-col items-center justify-center rounded-[2.25rem] border border-white/90 px-8 py-7"
-            style={{ background: 'linear-gradient(145deg, rgba(255,255,255,.98), rgba(238,246,253,.96))', boxShadow: '0 22px 60px rgba(35,68,105,.13), inset 0 1px 0 rgba(255,255,255,1), 0 0 38px rgba(34,211,238,.13)' }}
-          >
-            <span className="mb-3 text-[2.65rem] font-black leading-none tracking-[-0.065em]" dir="ltr">
+          <div className="flex items-baseline justify-center gap-3" dir="ltr">
+            <span className="text-[3.2rem] font-black leading-none tracking-[-0.075em]">
               <span className="text-[#123252]">My</span><span className="text-[#08aeca]">Car</span>
             </span>
-            <span className="text-[2rem] font-black leading-none tracking-tight text-[#08aeca]">عربيتي</span>
-            <span aria-hidden="true" className="mt-4 h-1 w-14 rounded-full bg-gradient-to-l from-orange-300 to-orange-500 shadow-[0_0_12px_rgba(249,115,22,.65)]" />
+            <span className="text-[2.15rem] font-black leading-none tracking-tight text-[#08aeca]" dir="rtl">عربيتي</span>
+          </div>
+          <p className="mt-3 text-[11px] font-extrabold tracking-[.28em] text-slate-500">منصة السيارات للشركات والأساطيل</p>
+
+          <div aria-hidden="true" className="mt-7 flex h-1.5 w-32 items-center justify-center gap-1.5">
+            <span className="h-1 w-7 rounded-full bg-[#08aeca]/70" />
+            <span className="h-1.5 w-12 rounded-full bg-gradient-to-l from-orange-400 to-orange-300 shadow-[0_0_12px_rgba(249,115,22,.35)]" />
+            <span className="h-1 w-7 rounded-full bg-[#08aeca]/70" />
           </div>
         </div>
 
@@ -90,12 +95,12 @@ export default function PlatformLoading({ pageName }: PlatformLoadingProps) {
             </p>
             <p className="text-sm text-slate-500">لحظات ونكون معك</p>
           </div>
-          <div aria-hidden="true" className="h-1.5 w-44 overflow-hidden rounded-full bg-slate-300/60">
-            <span className="block h-full w-2/5 animate-[loading-slide_1.35s_ease-in-out_infinite] rounded-full bg-gradient-to-l from-orange-300 via-orange-400 to-orange-500 shadow-[0_0_14px_rgba(249,115,22,.8)] motion-reduce:animate-none" />
+          <div aria-hidden="true" className="h-1.5 w-48 overflow-hidden rounded-full bg-slate-300/60">
+            <span className="block h-full w-2/5 animate-[loading-slide_1.45s_ease-in-out_infinite] rounded-full bg-gradient-to-l from-orange-300 via-orange-400 to-orange-500 shadow-[0_0_14px_rgba(249,115,22,.55)] motion-reduce:animate-none" />
           </div>
         </div>
       </div>
-      <style>{`@keyframes loading-slide { 0% { transform: translateX(260%); } 100% { transform: translateX(-260%); } }`}</style>
+      <style>{`@keyframes loading-slide { 0% { transform: translateX(260%); } 100% { transform: translateX(-260%); } } @keyframes logo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }`}</style>
     </main>
   )
 }
