@@ -21,7 +21,8 @@ const links = [
   { id: 'notifications', href: '/workspace/notifications', label: 'إعدادات الإشعارات', icon: Bell },
 ]
 
-export default function CompanyPageSidebar({ active }: { active: Section }) {
+export default function CompanyPageSidebar({ active, employeeView = false }: { active: Section; employeeView?: boolean }) {
+  const visibleLinks = employeeView ? links.filter(link => ['assistant', 'overview', 'requests', 'new-request', 'catalog', 'services', 'messages', 'notifications'].includes(link.id)) : links
   async function signOut() {
     if (!supabase) return
     await supabase.auth.signOut()
@@ -29,7 +30,7 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
   }
 
   const currentPath = window.location.pathname
-  const exactMatch = links.find(link => link.href === currentPath)
+  const exactMatch = visibleLinks.find(link => link.href === currentPath)
   const renderMobileLink = ({ id, href, label, icon: Icon }: typeof links[number]) => {
     const selected = exactMatch ? id === exactMatch.id : id === active
     return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-company-mobile-link ' + (selected ? 'is-active' : '')}>
@@ -37,8 +38,8 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
       <span>{label}</span>
     </a>
   }
-  const primaryMobileLinks = links.filter(link => ['overview', 'requests', 'new-request', 'catalog', 'messages'].includes(link.id))
-  const secondaryMobileLinks = links.filter(link => !['overview', 'requests', 'new-request', 'catalog', 'messages'].includes(link.id))
+  const primaryMobileLinks = visibleLinks.filter(link => ['overview', 'requests', 'new-request', 'catalog', 'messages'].includes(link.id))
+  const secondaryMobileLinks = visibleLinks.filter(link => !['overview', 'requests', 'new-request', 'catalog', 'messages'].includes(link.id))
   return <>
     <aside dir="rtl" className="mc-workspace-sidebar mc-company-shared-sidebar" aria-label="قائمة مساحة العمل">
       <div className="mc-sidebar-brand">
@@ -46,7 +47,7 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
         <span className="mc-sidebar-tag">مساحة العمل</span>
       </div>
       <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">
-        {links.map(({ id, href, label, icon: Icon }) => {
+        {visibleLinks.map(({ id, href, label, icon: Icon }) => {
           const selected = exactMatch ? id === exactMatch.id : id === active
           return <a key={id} href={href} aria-current={selected ? 'page' : undefined} className={'mc-sidebar-link ' + (selected ? 'is-active' : '')}>
             <Icon size={19} />
@@ -59,12 +60,12 @@ export default function CompanyPageSidebar({ active }: { active: Section }) {
           <span>تسجيل الخروج</span>
         </button>
       </nav>
-      <div className="mc-sidebar-promo">
+      {!employeeView && <div className="mc-sidebar-promo">
         <CarFront size={27} />
         <strong>كل خدمات السيارات في مكان واحد</strong>
         <p>إدارة أسهل وفرص تشغيل أكثر مع My Car.</p>
         <a href="/workspace/catalog">استكشف الكتالوج ←</a>
-      </div>
+      </div>}
     </aside>
     <nav dir="rtl" aria-label="التنقل داخل مساحة الشركة" className="mc-company-mobile-nav">
       {primaryMobileLinks.map(renderMobileLink)}
