@@ -56,42 +56,40 @@ export default function PlatformLoading({ pageName }: PlatformLoadingProps) {
     <main
       dir="rtl"
       className="relative grid min-h-[100svh] place-items-center overflow-hidden px-5 text-slate-900"
-      style={{ background: 'linear-gradient(145deg, #f8fbff 0%, #eaf2fb 48%, #f5f8fc 100%)' }}
+      style={{ background: 'linear-gradient(145deg, #f8fbff 0%, #edf4fb 52%, #f8fafc 100%)' }}
     >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(rgba(51,95,145,.12) 1px, transparent 1px)', backgroundSize: '30px 30px', maskImage: 'linear-gradient(to bottom, transparent, black 24%, black 76%, transparent)' }} />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 42%, rgba(34,211,238,.17), transparent 29%), radial-gradient(circle at 50% 58%, rgba(249,115,22,.10), transparent 40%)' }} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-35" style={{ backgroundImage: 'radial-gradient(rgba(51,95,145,.09) 1px, transparent 1px)', backgroundSize: '34px 34px', maskImage: 'linear-gradient(to bottom, transparent, black 25%, black 75%, transparent)' }} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 40%, rgba(34,211,238,.13), transparent 36%), radial-gradient(ellipse at 50% 58%, rgba(249,115,22,.07), transparent 44%)' }} />
 
-      <div className="relative flex w-full max-w-sm flex-col items-center gap-10" role="status" aria-live="polite" aria-label={`جارٍ فتح ${currentPage}`}>
-        <div className="relative grid h-64 w-64 place-items-center sm:h-72 sm:w-72">
-          <span aria-hidden="true" className="absolute inset-1 rounded-full border border-slate-300/55" style={{ boxShadow: '0 0 70px rgba(34,211,238,.12), inset 0 0 45px rgba(255,255,255,.65)' }} />
-          <span aria-hidden="true" className="absolute inset-3 animate-[spin_8s_linear_infinite] rounded-full border-[3px] border-transparent border-t-orange-400 border-r-orange-300/70 motion-reduce:animate-none" style={{ filter: 'drop-shadow(0 0 8px rgba(249,115,22,.75))' }} />
-          <span aria-hidden="true" className="absolute inset-7 animate-[spin_11s_linear_infinite_reverse] rounded-full border-2 border-transparent border-b-cyan-500/75 border-l-slate-300/60 motion-reduce:animate-none" />
-          <span aria-hidden="true" className="absolute inset-12 rounded-full border border-slate-300/60" />
-          <span aria-hidden="true" className="absolute right-[13px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-orange-300 shadow-[0_0_10px_4px_rgba(251,146,60,.65)]" />
-          <span aria-hidden="true" className="absolute bottom-8 left-10 h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_12px_3px_rgba(103,232,249,.55)]" />
-
-          <div
-            className="relative flex min-h-40 min-w-52 flex-col items-center justify-center rounded-[2.25rem] border border-white/90 px-8 py-7"
-            style={{ background: 'linear-gradient(145deg, rgba(255,255,255,.98), rgba(238,246,253,.96))', boxShadow: '0 22px 60px rgba(35,68,105,.13), inset 0 1px 0 rgba(255,255,255,1), 0 0 38px rgba(34,211,238,.13)' }}
-          >
-            <span className="mb-3 text-[2.65rem] font-black leading-none tracking-[-0.065em]" dir="ltr">
-              <span className="text-[#123252]">My</span><span className="text-[#08aeca]">Car</span>
-            </span>
-            <span className="text-[2rem] font-black leading-none tracking-tight text-[#08aeca]">عربيتي</span>
-            <span aria-hidden="true" className="mt-4 h-1 w-14 rounded-full bg-gradient-to-l from-orange-300 to-orange-500 shadow-[0_0_12px_rgba(249,115,22,.65)]" />
+      <div className="relative flex w-full max-w-sm flex-col items-center gap-12" role="status" aria-live="polite" aria-label={`جارٍ فتح ${currentPage}`}>
+        <div className="flex w-full flex-col items-center">
+          <div className="relative flex h-32 w-64 items-center justify-center">
+            <span aria-hidden="true" className="absolute inset-x-10 inset-y-5 rounded-full bg-cyan-300/20 blur-2xl" />
+            <img
+              src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png"
+              alt="My Car عربيتي"
+              className="relative z-10 max-h-28 w-56 object-contain"
+              onError={(event) => { event.currentTarget.style.display = 'none' }}
+            />
+          </div>
+          <p className="mt-2 text-center text-sm font-semibold leading-7 text-slate-500">منصة السيارات للشركات والأساطيل في مصر</p>
+          <div aria-hidden="true" className="mt-6 flex h-1.5 w-28 items-center justify-center gap-1.5">
+            <span className="h-1 w-5 rounded-full bg-[#08aeca]/65" />
+            <span className="h-1.5 w-10 rounded-full bg-gradient-to-l from-orange-400 to-orange-300 shadow-[0_0_10px_rgba(249,115,22,.3)]" />
+            <span className="h-1 w-5 rounded-full bg-[#08aeca]/65" />
           </div>
         </div>
 
         <div className="flex w-full flex-col items-center gap-5 text-center">
-          <div className="space-y-2">
-            <p className="text-xs font-bold tracking-[.22em] text-slate-500">MY CAR · عربيتي</p>
+          <div className="space-y-3">
+            <p className="text-xs font-bold tracking-[.12em] text-slate-500">MY CAR · عربيتي</p>
             <p className="text-xl font-extrabold leading-relaxed text-slate-800 sm:text-2xl">
-              جارٍ فتح <span className="text-[#079fbd]">{currentPage}</span>
+              جارٍ فتح <span className="whitespace-nowrap text-[#079fbd]">{currentPage}</span>
             </p>
-            <p className="text-sm text-slate-500">لحظات ونكون معك</p>
+            <p className="text-sm font-medium leading-7 text-slate-500">لحظات ونكون معك</p>
           </div>
-          <div aria-hidden="true" className="h-1.5 w-44 overflow-hidden rounded-full bg-slate-300/60">
-            <span className="block h-full w-2/5 animate-[loading-slide_1.35s_ease-in-out_infinite] rounded-full bg-gradient-to-l from-orange-300 via-orange-400 to-orange-500 shadow-[0_0_14px_rgba(249,115,22,.8)] motion-reduce:animate-none" />
+          <div aria-hidden="true" className="h-1.5 w-48 overflow-hidden rounded-full bg-slate-300/60">
+            <span className="block h-full w-2/5 animate-[loading-slide_1.45s_ease-in-out_infinite] rounded-full bg-gradient-to-l from-orange-300 via-orange-400 to-orange-500 shadow-[0_0_12px_rgba(249,115,22,.45)] motion-reduce:animate-none" />
           </div>
         </div>
       </div>
