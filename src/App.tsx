@@ -387,6 +387,7 @@ export default function App() {
     setMeta('meta[property="og:title"]', 'property', 'og:title', seo.title)
     setMeta('meta[property="og:description"]', 'property', 'og:description', seo.description)
     setMeta('meta[property="og:image"]', 'property', 'og:image', 'https://i.ibb.co/LDtVLtkT/3-E4722-EB-3946-4526-80-D0-87-A0-E48133-C7.png')
+    setMeta('meta[property="og:image:alt"]', 'property', 'og:image:alt', 'My Car عربيتي — منصة السيارات للشركات والأساطيل في مصر')
     const canonicalPath = pathname === '/' ? '/' : pathname
     let canonicalLink = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
     if (isIndexable) {
@@ -404,6 +405,7 @@ export default function App() {
     setMeta('meta[name="twitter:card"]', 'name', 'twitter:card', 'summary_large_image')
     setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', seo.title)
     setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', seo.description)
+    setMeta('meta[name="twitter:image:alt"]', 'name', 'twitter:image:alt', 'My Car عربيتي — منصة السيارات للشركات والأساطيل في مصر')
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
     if (themeMeta) themeMeta.content = settings.primary_color || defaults.primary_color
     document.documentElement.style.setProperty('--platform-primary', settings.primary_color || defaults.primary_color)
