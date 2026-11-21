@@ -49,7 +49,7 @@ export default function AdminManagedAccountsPage() {
     catch(e){setListError(e instanceof Error?e.message:"تعذر تحميل الحسابات.");}
     finally{setLoading(false);}
   },[invoke]);
-  const loadCompanies=useCallback(async()=>{setCompaniesLoading(true);try{const data=await invoke({action:"list_companies"});setCompanies((data.companies||[]) as Array<{id:string;name:string}>);}catch(e){setListError(e instanceof Error?e.message:"تعذر تحميل قائمة الشركات.");}finally{setCompaniesLoading(false);}},[invoke]);
+  const loadCompanies=useCallback(async()=>{setCompaniesLoading(true);try{if(!supabase)throw new Error("خدمة قاعدة البيانات غير متاحة حاليًا.");const {data,error}=await supabase.from("organizations").select("id,name").eq("organization_type","company").eq("approval_status","approved").order("name",{ascending:true});if(error)throw error;setCompanies((data||[]) as Array<{id:string;name:string}>);}catch(e){setListError(e instanceof Error?e.message:"تعذر تحميل قائمة الشركات المعتمدة.");}finally{setCompaniesLoading(false);}},[]);
   useEffect(()=>{void loadAccounts();void loadCompanies();},[loadAccounts,loadCompanies]);
 
   const visible=useMemo(()=>accounts.filter(a=>{
