@@ -717,7 +717,7 @@ export default function App() {
         </section>
       </div></section>
       <footer className="bg-[#071b31] px-5 py-7 text-sm text-white/70 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div>© {new Date().getFullYear()} {settings.platform_name}. {settings.footer_text}</div><div className="flex flex-wrap items-center gap-4"><a href="/services" className="hover:text-[#ffad0a]">خدمات السيارات</a><a href="/privacy" className="hover:text-[#ffad0a]">سياسة الخصوصية</a><a href="/terms" className="hover:text-[#ffad0a]">شروط الاستخدام</a>{settings.support_email&&<a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}{settings.support_phone&&<a href={'tel:'+settings.support_phone}>{settings.support_phone}</a>}</div></div></footer>
-      {authOpen&&<AuthPanel onClose={()=>setAuthOpen(false)} initialMode={authMode} initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}
+      {authOpen&&<Suspense fallback={<PlatformLoading />}><AuthPanel onClose={()=>setAuthOpen(false)} initialMode={authMode} initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/>}
     </main>
   )
 }
