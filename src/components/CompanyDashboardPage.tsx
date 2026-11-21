@@ -26,7 +26,7 @@ const requestStatus: Record<string, string> = {
 const money = (value: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(Number(value) || 0)
 const dateLabel = (value: string | null | undefined) => value ? new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : 'غير محدد'
 
-export default function CompanyDashboardPage() {
+export default function CompanyDashboardPage({ employeeView = false }: { employeeView?: boolean }) {
   const [organization, setOrganization] = useState<OrganizationRow | null>(null)
   const [requests, setRequests] = useState<RequestRow[]>([])
   const [vehicles, setVehicles] = useState<VehicleRow[]>([])
@@ -156,12 +156,12 @@ export default function CompanyDashboardPage() {
       : { title: 'لا يوجد اشتراك نشط', status: 'راجع الباقات المتاحة', detail: 'اختر الباقة المناسبة لاحتياجات شركتك وتعرّف على المزايا والحدود.', tone: 'text-slate-700 bg-slate-50 border-slate-200' }
 
   return <>
-    <CompanyPageSidebar active="overview" />
+    <CompanyPageSidebar active="overview" employeeView={employeeView} />
     <main dir="rtl" className="mc-company-page-with-sidebar min-h-screen bg-[linear-gradient(180deg,#f3f7fd_0%,#f8fbff_44%,#eef3fa_100%)] text-slate-900">
       <header className="mc-company-dashboard-topbar sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 shadow-[0_8px_30px_rgba(20,55,95,.05)] backdrop-blur-xl">
         <div className="mc-company-dashboard-topbar-inner mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="mc-company-dashboard-heading min-w-0 flex-1">
-            <span className="text-[11px] font-bold text-slate-400">MY CAR · مساحة الشركات</span>
+            <span className="text-[11px] font-bold text-slate-400">MY CAR · {employeeView ? "مساحة موظف الشركة" : "مساحة الشركات"}</span>
             <h1 className="mt-0.5 truncate text-base font-black text-slate-900 sm:text-lg">لوحة متابعة الشركة</h1>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -183,7 +183,7 @@ export default function CompanyDashboardPage() {
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-extrabold text-cyan-100"><Building2 size={14} /> مركز إدارة احتياجات النقل والتشغيل</span>
               <h2 className="mt-4 text-2xl font-black leading-tight sm:text-3xl">أهلًا بك في مساحة {organization?.name || 'شركتك'}</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100">كل ما تحتاجه شركتك للبحث عن السيارات، نشر طلبات التأجير، مقارنة العروض، متابعة الاشتراك وإدارة فريق العمل — من لوحة واحدة واضحة.</p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100">{employeeView ? "تابع طلبات التأجير الخاصة بشركتك، راجع العروض الواردة، واستكشف السيارات المتاحة من مساحة عملك." : "كل ما تحتاجه شركتك للبحث عن السيارات، نشر طلبات التأجير، مقارنة العروض، متابعة الاشتراك وإدارة فريق العمل — من لوحة واحدة واضحة."}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className={'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-extrabold ' + companyApproval.tone}><ApprovalIcon size={14} />{companyApproval.label}</span>
                 {subscription && <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200/40 bg-emerald-300/10 px-3 py-1.5 text-xs font-extrabold text-emerald-100"><CreditCard size={14} />{subscription.plan_name}</span>}
@@ -244,16 +244,16 @@ export default function CompanyDashboardPage() {
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><ShieldCheck size={21} /></span><div><h3 className="font-black">حالة حساب الشركة</h3><p className="mt-0.5 text-xs text-slate-500">حالة اعتماد بيانات شركتك.</p></div></div>
                 <div className={'mt-4 rounded-xl border p-3 ' + companyApproval.tone}><div className="flex items-center gap-2 text-sm font-extrabold"><ApprovalIcon size={17} />{companyApproval.label}</div><p className="mt-1 text-xs leading-5">{companyApproval.detail}</p></div>
-                <a href="/workspace/company/account" className="mt-3 inline-flex min-h-10 items-center gap-2 text-xs font-extrabold text-blue-700">مراجعة بيانات الحساب <ArrowLeft size={14} /></a>
+                {!employeeView && <a href="/workspace/company/account" className="mt-3 inline-flex min-h-10 items-center gap-2 text-xs font-extrabold text-blue-700">مراجعة بيانات الحساب <ArrowLeft size={14} /></a>}
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <section className={employeeView ? "hidden" : "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"}>
                 <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-violet-50 text-violet-700"><CreditCard size={21} /></span><div><h3 className="font-black">اشتراك الشركة</h3><p className="mt-0.5 text-xs text-slate-500">الباقة وحالة التفعيل.</p></div></div><a href="/workspace/company/subscriptions" className="text-xs font-extrabold text-blue-700">إدارة</a></div>
                 <div className={'mt-4 rounded-xl border p-3 ' + subscriptionLabel.tone}><span className="text-[11px] font-extrabold">{subscriptionLabel.status}</span><strong className="mt-1 block text-base font-black">{subscriptionLabel.title}</strong><p className="mt-1 text-xs leading-5">{subscriptionLabel.detail}</p></div>
                 <a href="/workspace/company/subscriptions" className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 text-xs font-extrabold text-white"><CreditCard size={15} /> عرض الباقات وإدارة الاشتراك</a>
               </section>
 
-              <section className="mc-company-dark-card overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-[#0e3260] via-[#0b2b50] to-[#071a32] p-5 text-white shadow-sm">
+              <section className={employeeView ? "hidden" : "mc-company-dark-card overflow-hidden rounded-2xl border border-cyan-200 bg-gradient-to-br from-[#0e3260] via-[#0b2b50] to-[#071a32] p-5 text-white shadow-sm"}>
                 <div className="flex items-center justify-between gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl border border-white/15 bg-white/10 text-cyan-200"><Search size={22} /></span><span className="rounded-full border border-cyan-200/20 bg-cyan-200/10 px-3 py-1 text-[10px] font-extrabold text-cyan-100">خدمة اختيارية</span></div>
                 <h3 className="mt-4 text-lg font-black">فوّض My Car للبحث نيابةً عن شركتك</h3>
                 <p className="mt-2 text-xs leading-6 text-blue-100">حدد احتياجك، ودع فريق المنصة يبحث لدى الملاك وموردي الأساطيل ويجهز لك ترشيحات وعروضًا للمقارنة قبل اتخاذ القرار.</p>
@@ -261,7 +261,7 @@ export default function CompanyDashboardPage() {
                 <a href="/workspace/company/managed-sourcing" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg bg-white px-4 text-xs font-extrabold text-blue-950 hover:bg-cyan-50">إدارة خدمة البحث <ArrowLeft size={14} /></a>
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <section className={employeeView ? "hidden" : "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"}>
                 <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><Users size={19} /></span><div><h3 className="font-black">فريق الشركة</h3><p className="mt-0.5 text-xs text-slate-500">إدارة المستخدمين والصلاحيات.</p></div></div><strong className="text-xl font-black tabular-nums">{teamCount === null ? '—' : teamCount.toLocaleString('ar-EG')}</strong></div>
                 <a href="/workspace/company/team" className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-xs font-extrabold text-slate-700 hover:border-blue-300 hover:text-blue-700"><Users size={15} /> إدارة موظفي الشركة</a>
               </section>
@@ -280,7 +280,7 @@ export default function CompanyDashboardPage() {
                 { href: '/workspace/company/subscriptions', title: 'الاشتراكات والباقات', description: 'راجع مزايا الباقة وحالة السداد', icon: CreditCard, tone: 'bg-indigo-50 text-indigo-700' },
                 { href: '/messages', title: 'المحادثات', description: 'تابع تواصلك مع مقدمي السيارات', icon: MessageCircle, tone: 'bg-sky-50 text-sky-700' },
                 { href: '/services', title: 'خدمات السيارات', description: 'استكشف خدمات الصيانة والتشغيل', icon: Wrench, tone: 'bg-orange-50 text-orange-700' }
-              ].map(item => <a key={item.href} href={item.href} className="group flex min-h-[104px] items-center gap-3 rounded-xl border border-slate-200 p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/40 hover:shadow-sm"><span className={'grid h-11 w-11 shrink-0 place-items-center rounded-xl ' + item.tone}><item.icon size={20} /></span><span className="min-w-0 flex-1"><strong className="block text-sm font-extrabold text-slate-900">{item.title}</strong><span className="mt-1 block text-xs leading-5 text-slate-500">{item.description}</span></span><ArrowLeft size={15} className="shrink-0 text-slate-400 transition group-hover:-translate-x-1 group-hover:text-blue-700" /></a>)}
+              ].filter(item => !employeeView || ['/workspace/company/requests','/messages','/services'].includes(item.href)).map(item => <a key={item.href} href={item.href} className="group flex min-h-[104px] items-center gap-3 rounded-xl border border-slate-200 p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/40 hover:shadow-sm"><span className={'grid h-11 w-11 shrink-0 place-items-center rounded-xl ' + item.tone}><item.icon size={20} /></span><span className="min-w-0 flex-1"><strong className="block text-sm font-extrabold text-slate-900">{item.title}</strong><span className="mt-1 block text-xs leading-5 text-slate-500">{item.description}</span></span><ArrowLeft size={15} className="shrink-0 text-slate-400 transition group-hover:-translate-x-1 group-hover:text-blue-700" /></a>)}
             </div>
           </section>
 
