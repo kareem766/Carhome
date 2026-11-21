@@ -280,8 +280,8 @@ export default function App() {
             ...user,
             user_metadata: {
               ...user.user_metadata,
-              organization_type: 'employee',
-              employment_type: employeeRecord.employment_type,
+              organization_type: employeeRecord.employment_type === 'company_member' ? 'company_employee' : 'employee',
+              employment_type: employeeRecord.employment_type, 
               organization_id: employeeRecord.organization_id
             }
           })
@@ -475,14 +475,14 @@ export default function App() {
     }
     // Authenticated users should never see sign-in/sign-up prompts or the registration chooser.
     setAuthOpen(false)
-    const destination = isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'employee' ? '/workspace/employee' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
+    const destination = isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'company_employee' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'company_employee' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'employee' ? '/workspace/employee' : authUser.user_metadata?.organization_type === 'company' ? '/workspace/company' : authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
     if (isPlatformAdmin && path.startsWith('/workspace/') && !path.startsWith('/workspace/admin')) window.location.replace('/workspace/admin')
     if (path === '/register' || path.startsWith('/register/')) window.location.replace(destination)
     if (path === '/workspace') window.location.replace(destination)
     // Fleet suppliers always land on their primary fleet workspace after sign-in (email or Google).
     if ((path === '/' || pathIsHome(path)) && !isPlatformAdmin && authUser.user_metadata?.organization_type === 'fleet_supplier') window.location.replace('/workspace/supplier/vehicles')
     // Owners land directly on their vehicle portfolio after every successful sign-in.
-    if ((path === '/' || pathIsHome(path)) && !isPlatformAdmin && authUser.user_metadata?.organization_type !== 'company' && authUser.user_metadata?.organization_type !== 'fleet_supplier' && authUser.user_metadata?.organization_type !== 'employee') window.location.replace('/workspace/owner/vehicles')
+    if ((path === '/' || pathIsHome(path)) && !isPlatformAdmin && authUser.user_metadata?.organization_type !== 'company' && authUser.user_metadata?.organization_type !== 'company_employee' && authUser.user_metadata?.organization_type !== 'fleet_supplier' && authUser.user_metadata?.organization_type !== 'employee') window.location.replace('/workspace/owner/vehicles')
   }, [authLoaded, authUser, isPlatformAdmin, path])
 
   useEffect(() => {
@@ -529,6 +529,7 @@ export default function App() {
     if (isPlatformAdmin) return <><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage backHref="/workspace/admin" /></Suspense></>
     if (authUser.user_metadata?.organization_type === 'fleet_supplier') return <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></SupplierPageShell></>
     if (authUser.user_metadata?.organization_type === 'individual_owner') return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></>
+    if (authUser.user_metadata?.organization_type === 'company_employee') return <><CompanyPersistentBar employeeView/><CompanyPageSidebar active="notifications" employeeView/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></div></>
     if (authUser.user_metadata?.organization_type === 'employee') return <><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></>
     if (authUser.user_metadata?.organization_type === 'company') return <><CompanyPersistentBar/><div dir="rtl" className="min-h-screen bg-[#f3f6fb]"><CompanyPageSidebar active="notifications"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense></div></div></>
     return <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense>
@@ -540,29 +541,29 @@ export default function App() {
   if (path === '/workspace/provider/employee-messages') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense></SupplierPageShell></> : <Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense>
   if (path === '/workspace/employee/account') return <><Suspense fallback={<PlatformLoading />}><EmployeeAccountPage /></Suspense></>
   if (path === '/workspace/employee/requests') return <><Suspense fallback={<PlatformLoading />}><EmployeeRequestsOffersPage /></Suspense></>
-  if (path === '/workspace/employee') return <><Suspense fallback={<PlatformLoading />}><EmployeeWorkspacePage /></Suspense></>
+  if (path === '/workspace/employee') return authUser?.user_metadata?.organization_type === 'company_employee' ? <>{window.location.replace('/workspace/company')}<PlatformLoading /></> : <><Suspense fallback={<PlatformLoading />}><EmployeeWorkspacePage /></Suspense></>
   if (path === '/workspace/provider-employee-requests' || path === '/workspace/owner/employee-requests' || path === '/workspace/supplier/employee-requests') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense></> : <Suspense fallback={<PlatformLoading />}><EmployeeProviderRequestsPage /></Suspense>
   if (path === '/workspace/admin/employee-requests') return <><Suspense fallback={<PlatformLoading />}><AdminReviewPage initialSection="admin-employee-requests" /></Suspense></>
-  if (path === '/workspace/company/team') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanyTeamPage /></Suspense></>
-  if (path === '/workspace/company/subscriptions') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense></>
-  if (path === '/workspace/company/insights') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanyInsightsPage /></Suspense></>
+  if (path === '/workspace/company/team') return authUser?.user_metadata?.organization_type === 'company_employee' ? <>{window.location.replace('/workspace/company')}<PlatformLoading /></> : <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanyTeamPage /></Suspense></>
+  if (path === '/workspace/company/subscriptions') return authUser?.user_metadata?.organization_type === 'company_employee' ? <>{window.location.replace('/workspace/company')}<PlatformLoading /></> : <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanySubscriptionsPage /></Suspense></>
+  if (path === '/workspace/company/insights') return authUser?.user_metadata?.organization_type === 'company_employee' ? <>{window.location.replace('/workspace/company')}<PlatformLoading /></> : <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanyInsightsPage /></Suspense></>
   if (path === '/workspace/admin/managed-sourcing-center') return <><Suspense fallback={<PlatformLoading />}><ManagedSourcingAdminCenter /></Suspense></>
   if (path === '/workspace/provider/managed-sourcing') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'individual_owner' ? <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense></> : <Suspense fallback={<PlatformLoading />}><ManagedSourcingInvitationsPage /></Suspense>
   if (path === '/workspace/admin/managed-sourcing') return <><Suspense fallback={<PlatformLoading />}><ManagedSourcingPage admin /></Suspense></>
-  if (path === '/workspace/company/managed-sourcing') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense></>
+  if (path === '/workspace/company/managed-sourcing') return authUser?.user_metadata?.organization_type === 'company_employee' ? <>{window.location.replace('/workspace/company')}<PlatformLoading /></> : <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><ManagedSourcingPage /></Suspense></>
   if (path === '/workspace/admin/platform-settings') return <><Suspense fallback={<PlatformLoading />}><PlatformSettingsPage /></Suspense></>
   if (path === '/workspace/admin/managed-accounts') return <><Suspense fallback={<PlatformLoading />}><AdminManagedAccountsPage /></Suspense></>
   if (path === '/workspace/admin/payment-information') return <><Suspense fallback={<PlatformLoading />}><PaymentInformationPage /></Suspense></>
   if (path === '/workspace/admin/subscription-plans') return <><Suspense fallback={<PlatformLoading />}><SubscriptionPlansPage /></Suspense></>
   if (path === '/workspace/admin/company-subscriptions') return <><Suspense fallback={<PlatformLoading />}><AdminCompanySubscriptionsPage /></Suspense></>
   if (path === '/workspace/admin/discount-codes') return <><Suspense fallback={<PlatformLoading />}><AdminDiscountCodesPage /></Suspense></>
-  if (path === '/workspace/company/alerts') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanySmartAlertsPage /></Suspense></>
+  if (path === '/workspace/company/alerts') return authUser?.user_metadata?.organization_type === 'company_employee' ? <>{window.location.replace('/workspace/company')}<PlatformLoading /></> : <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanySmartAlertsPage /></Suspense></>
   if (path === '/workspace/admin/advertising-plans') return <><Suspense fallback={<PlatformLoading />}><AdvertisingPlansAdminPage /></Suspense></>
   if (path === '/workspace/admin/communications') return <><Suspense fallback={<PlatformLoading />}><AdminCommunicationsPage /></Suspense></>
   if (path === '/workspace/admin/promotional-slides') return <><Suspense fallback={<PlatformLoading />}><AdminPromotionalSlidesPage /></Suspense></>
   if (path === '/workspace/catalog') {
     if (!authLoaded) return <PlatformLoading />
-    if (!authUser || !['company','fleet_supplier','individual_owner'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للحسابات المعتمدة" message="سجّل الدخول بحساب مالك سيارة أو شركة أو مورد أسطول معتمد لاستعراض السيارات والإعلانات." />
+    if (!authUser || !['company','company_employee','fleet_supplier','individual_owner'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للحسابات المعتمدة" message="سجّل الدخول بحساب مالك سيارة أو شركة أو مورد أسطول معتمد لاستعراض السيارات والإعلانات." />
     if (authUser.user_metadata?.organization_type === 'individual_owner') return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage hideHeader /></Suspense></>
     return authUser.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage /></Suspense></SupplierPageShell></> : <><CompanyPersistentBar/><CompanyPageSidebar active="catalog"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><VehicleCatalogPage hideHeader /></Suspense></div></>
   }
@@ -584,8 +585,8 @@ export default function App() {
   if (path === '/workspace/admin/analytics') return <><Suspense fallback={<PlatformLoading />}><AdminAnalyticsPage /></Suspense></>
   if (path === '/workspace/admin/vehicle-reviews') return <><Suspense fallback={<PlatformLoading />}><AdminReviewPage /></Suspense></>
   if (path.includes('/messages')) return <>{authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></SupplierPageShell></> : authUser?.user_metadata?.organization_type === 'company' ? <><CompanyPersistentBar/><CompanyPageSidebar active="messages"/><div className="mc-company-page-with-sidebar min-w-0"><Suspense fallback={<PlatformLoading />}><MessagingPage /></Suspense></div></> : <Suspense fallback={<PlatformLoading />}>{authUser && authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>}<MessagingPage /></Suspense>}</>
-  if (path === '/workspace/company') return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><CompanyDashboardPage /></Suspense></>
-  if (path.startsWith('/workspace/company/')) return <><CompanyPersistentBar/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense></>
+  if (path === '/workspace/company') return <><CompanyPersistentBar employeeView={authUser?.user_metadata?.organization_type === 'company_employee'}/><Suspense fallback={<PlatformLoading />}><CompanyDashboardPage employeeView={authUser?.user_metadata?.organization_type === 'company_employee'}/></Suspense></>
+  if (path.startsWith('/workspace/company/')) return authUser?.user_metadata?.organization_type === 'company_employee' && path !== '/workspace/company/requests' && path !== '/workspace/company/requests/new' ? <>{window.location.replace('/workspace/company')}<PlatformLoading /></> : <><CompanyPersistentBar employeeView={authUser?.user_metadata?.organization_type === 'company_employee'}/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="company" /></Suspense></>
   if (path.startsWith('/workspace/owner')) return <><OwnerPersistentBar/><Suspense fallback={<PlatformLoading />}><WorkspacePage role="owner" /></Suspense></>
   if (path.startsWith('/workspace/supplier')) return <><Suspense fallback={<PlatformLoading />}><WorkspacePage role="supplier" /></Suspense></>
 
