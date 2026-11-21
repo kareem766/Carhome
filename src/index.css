@@ -2364,6 +2364,62 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
 }
 
 
+/* Homepage FAQ: readable, keyboard-accessible disclosure cards. */
+.mc-home-faq-item {
+  overflow: hidden;
+  border: 1px solid #dce6f1;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(16,43,71,.045);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.mc-home-faq-item[open] {
+  border-color: #b9d4f7;
+  box-shadow: 0 12px 30px rgba(16,43,71,.075);
+}
+.mc-home-faq-item summary {
+  position: relative;
+  display: flex;
+  min-height: 3.75rem;
+  align-items: center;
+  padding: .9rem 1.2rem;
+  padding-left: 3rem;
+  color: #102b47;
+  cursor: pointer;
+  font-size: .95rem;
+  font-weight: 850;
+  line-height: 1.7;
+  list-style: none;
+}
+.mc-home-faq-item summary::-webkit-details-marker { display:none; }
+.mc-home-faq-item summary::after {
+  position: absolute;
+  left: 1.2rem;
+  content: '+';
+  color: #d18b00;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+.mc-home-faq-item[open] summary::after { content: '−'; }
+.mc-home-faq-item summary:focus-visible {
+  outline: 3px solid #f5a400;
+  outline-offset: -3px;
+  border-radius: .8rem;
+}
+.mc-home-faq-item p {
+  margin: 0;
+  padding: 0 1.2rem 1.1rem;
+  color: #52657c;
+  font-size: .88rem;
+  line-height: 1.95;
+}
+@media (max-width: 640px) {
+  .mc-home-faq-item summary { min-height: 3.5rem; padding: .8rem 1rem; padding-left: 2.7rem; font-size: .86rem; }
+  .mc-home-faq-item summary::after { left: 1rem; }
+  .mc-home-faq-item p { padding: 0 1rem 1rem; font-size: .82rem; }
+}
+@media (prefers-reduced-motion: reduce) { .mc-home-faq-item { transition: none; } }
+
 /* My Car homepage premium refresh — isolated preview styling */
 .mc-home-hero-section {
   background:
