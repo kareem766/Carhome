@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Megaphone } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type PromoRole = 'individual_owner' | 'fleet_supplier' | 'employee'
@@ -38,7 +38,6 @@ export default function PromotionalCarousel({ role }: { role: PromoRole }) {
   <div className="relative w-full overflow-hidden bg-slate-100 sm:aspect-[16/5] sm:min-h-[150px] sm:max-h-[310px]">
    {link?<a href={link} aria-label={current.title?'افتح العرض: '+current.title:'افتح العرض'} className="relative block w-full focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-cyan-300 sm:absolute sm:inset-0">{image}</a>:image}
    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-slate-950/10"/>
-   <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-slate-950/55 px-3 py-1.5 text-[11px] font-extrabold text-white backdrop-blur sm:right-5 sm:top-5 sm:text-xs"><Megaphone size={14}/> عروض My Car</span>
    {slides.length>1&&<>
     <button type="button" onClick={()=>move(-1)} aria-label="العرض السابق" className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/30 bg-slate-950/55 text-white shadow-lg backdrop-blur transition hover:bg-slate-950/80 sm:right-4 sm:h-11 sm:w-11"><ChevronRight size={22}/></button>
     <button type="button" onClick={()=>move(1)} aria-label="العرض التالي" className="absolute left-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/30 bg-slate-950/55 text-white shadow-lg backdrop-blur transition hover:bg-slate-950/80 sm:left-4 sm:h-11 sm:w-11"><ChevronLeft size={22}/></button>
