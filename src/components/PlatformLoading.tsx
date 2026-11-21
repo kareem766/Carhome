@@ -53,47 +53,44 @@ export default function PlatformLoading({ pageName }: PlatformLoadingProps) {
   const currentPage = pageName || (typeof window !== 'undefined' ? resolvePageName(window.location.pathname) : 'مساحة العمل')
 
   return (
-    <main
+    <div
       dir="rtl"
-      className="relative grid min-h-[100svh] place-items-center overflow-hidden px-5 text-slate-900"
-      style={{ background: 'linear-gradient(145deg, #f8fbff 0%, #edf4fb 52%, #f8fafc 100%)' }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/72 px-5 backdrop-blur-[5px]"
+      role="status"
+      aria-live="polite"
+      aria-label={`جارٍ فتح ${currentPage}`}
     >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-35" style={{ backgroundImage: 'radial-gradient(rgba(51,95,145,.09) 1px, transparent 1px)', backgroundSize: '34px 34px', maskImage: 'linear-gradient(to bottom, transparent, black 25%, black 75%, transparent)' }} />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 40%, rgba(34,211,238,.13), transparent 36%), radial-gradient(ellipse at 50% 58%, rgba(249,115,22,.07), transparent 44%)' }} />
-
-      <div className="relative flex w-full max-w-sm flex-col items-center gap-12" role="status" aria-live="polite" aria-label={`جارٍ فتح ${currentPage}`}>
-        <div className="flex w-full flex-col items-center">
-          <div className="relative flex h-32 w-64 items-center justify-center">
-            <span aria-hidden="true" className="absolute inset-x-10 inset-y-5 rounded-full bg-cyan-300/20 blur-2xl" />
-            <img
-              src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png"
-              alt="My Car عربيتي"
-              className="relative z-10 max-h-28 w-56 object-contain"
-              onError={(event) => { event.currentTarget.style.display = 'none' }}
-            />
-          </div>
-          <p className="mt-2 text-center text-sm font-semibold leading-7 text-slate-500">منصة السيارات للشركات والأساطيل في مصر</p>
-          <div aria-hidden="true" className="mt-6 flex h-1.5 w-28 items-center justify-center gap-1.5">
-            <span className="h-1 w-5 rounded-full bg-[#08aeca]/65" />
-            <span className="h-1.5 w-10 rounded-full bg-gradient-to-l from-orange-400 to-orange-300 shadow-[0_0_10px_rgba(249,115,22,.3)]" />
-            <span className="h-1 w-5 rounded-full bg-[#08aeca]/65" />
-          </div>
+      <div className="flex w-full max-w-xs flex-col items-center text-center">
+        <div className="relative flex h-24 w-52 items-center justify-center">
+          <span aria-hidden="true" className="absolute inset-5 rounded-full bg-cyan-300/20 blur-2xl" />
+          <img
+            src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png"
+            alt="My Car عربيتي"
+            className="relative z-10 max-h-20 w-44 object-contain animate-[brand-fade_1.9s_ease-in-out_infinite]"
+          />
         </div>
-
-        <div className="flex w-full flex-col items-center gap-5 text-center">
-          <div className="space-y-3">
-            <p className="text-xs font-bold tracking-[.12em] text-slate-500">MY CAR · عربيتي</p>
-            <p className="text-xl font-extrabold leading-relaxed text-slate-800 sm:text-2xl">
-              جارٍ فتح <span className="whitespace-nowrap text-[#079fbd]">{currentPage}</span>
-            </p>
-            <p className="text-sm font-medium leading-7 text-slate-500">لحظات ونكون معك</p>
-          </div>
-          <div aria-hidden="true" className="h-1.5 w-48 overflow-hidden rounded-full bg-slate-300/60">
-            <span className="block h-full w-2/5 animate-[loading-slide_1.45s_ease-in-out_infinite] rounded-full bg-gradient-to-l from-orange-300 via-orange-400 to-orange-500 shadow-[0_0_12px_rgba(249,115,22,.45)] motion-reduce:animate-none" />
-          </div>
+        <p className="mt-3 text-base font-extrabold leading-7 text-slate-800">
+          جارٍ فتح <span className="text-[#079fbd]">{currentPage}</span>
+        </p>
+        <p className="mt-1 text-sm font-medium text-slate-500">لحظات ونكون معك</p>
+        <div aria-hidden="true" className="mt-5 h-1 w-24 overflow-hidden rounded-full bg-slate-200">
+          <span className="block h-full w-1/2 rounded-full bg-gradient-to-l from-[#08aeca] to-orange-400 animate-[loading-glide_1.35s_ease-in-out_infinite]" />
         </div>
       </div>
-      <style>{`@keyframes loading-slide { 0% { transform: translateX(260%); } 100% { transform: translateX(-260%); } }`}</style>
-    </main>
+      <style>{`
+        @keyframes brand-fade {
+          0%, 100% { opacity: .42; transform: translateY(3px) scale(.985); }
+          50% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes loading-glide {
+          0% { transform: translateX(150%); }
+          100% { transform: translateX(-150%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-\[brand-fade_1\.9s_ease-in-out_infinite\],
+          .animate-\[loading-glide_1\.35s_ease-in-out_infinite\] { animation: none !important; }
+        }
+      `}</style>
+    </div>
   )
 }
