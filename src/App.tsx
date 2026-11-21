@@ -639,10 +639,6 @@ export default function App() {
               <h1 className="mt-3 text-4xl font-black leading-[1.35] tracking-tight sm:text-6xl lg:text-7xl">نربطك بأفضل<br/><span className="text-[#ffad0a]">السيارات في مصر</span></h1>
               <span className="mc-home-title-underline" aria-hidden="true"/>
               <p className="mt-5 max-w-2xl text-sm font-semibold leading-8 text-white/90 sm:text-lg">سواء كنت شركة تبحث عن سيارات تناسب تشغيلك، أو مالكًا يريد الوصول إلى فرص تأجير طويلة الأجل، أو موردًا يدير أسطولًا كاملًا؛ My Car عربيتي تجمع احتياجات سوق تأجير السيارات للشركات في مكان واحد.</p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                {authUser ? <a href={isPlatformAdmin ? '/workspace/admin' : authUser.user_metadata?.organization_type === 'company' || authUser.user_metadata?.organization_type === 'company_employee' || authUser.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/catalog' : '/workspace'} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-6 text-sm font-black text-[#142b43] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-amber-300"><ArrowLeft size={18}/> انتقل إلى مساحة العمل</a> : <a href="/register" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#ffad0a] px-6 text-sm font-black text-[#142b43] shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-amber-300"><UserRoundPlus size={18}/> ابدأ رحلتك مع My Car</a>}
-                <a href="/services" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/45 bg-white/[0.06] px-5 text-sm font-extrabold text-white backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-white/15">اكتشف خدماتنا <ArrowLeft size={17}/></a>
-              </div>
             </div>
           </div>
           <div className="mc-home-vehicle-gallery mx-auto mt-8 grid w-full max-w-6xl grid-cols-3 gap-3 sm:mt-10 sm:gap-5" aria-label="فئات السيارات">
