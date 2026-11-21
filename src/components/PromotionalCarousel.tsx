@@ -33,10 +33,10 @@ export default function PromotionalCarousel({ role }: { role: PromoRole }) {
  const move=(direction:number)=>setActive(index=>(index+direction+slides.length)%slides.length)
  const validLink=(value:string|null)=>{if(!value)return null;try{const url=new URL(value,window.location.origin);return ['http:','https:'].includes(url.protocol)?value:null}catch{return value.startsWith('/')?value:null}}
  const link=validLink(current.click_url)
- const image=<img src={current.image_url} alt={current.title||'عرض جديد على My Car'} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.015]" draggable={false}/>
+ const image=<img src={current.image_url} alt={current.title||'عرض جديد على My Car'} className="block h-auto w-full object-contain sm:absolute sm:inset-0 sm:h-full sm:object-cover sm:transition-transform sm:duration-700 sm:group-hover:scale-[1.015]" draggable={false}/>
  return <section dir="rtl" aria-label="العروض الجديدة على My Car" className="group relative mx-auto w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-[0_12px_35px_rgba(15,35,65,.12)] sm:rounded-3xl" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)} onFocus={()=>setPaused(true)} onBlur={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))setPaused(false)}} onTouchStart={event=>setTouchStart(event.touches[0]?.clientX??null)} onTouchEnd={event=>{if(touchStart===null)return;const delta=event.changedTouches[0].clientX-touchStart;if(Math.abs(delta)>45)move(delta>0?-1:1);setTouchStart(null)}}>
-  <div className="relative aspect-[16/6] min-h-[150px] max-h-[310px] w-full sm:aspect-[16/5]">
-   {link?<a href={link} aria-label={current.title?'افتح العرض: '+current.title:'افتح العرض'} className="absolute inset-0 block focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-cyan-300">{image}</a>:image}
+  <div className="relative w-full overflow-hidden bg-slate-100 sm:aspect-[16/5] sm:min-h-[150px] sm:max-h-[310px]">
+   {link?<a href={link} aria-label={current.title?'افتح العرض: '+current.title:'افتح العرض'} className="relative block w-full focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-cyan-300 sm:absolute sm:inset-0">{image}</a>:image}
    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-slate-950/10"/>
    <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-slate-950/55 px-3 py-1.5 text-[11px] font-extrabold text-white backdrop-blur sm:right-5 sm:top-5 sm:text-xs"><Megaphone size={14}/> عروض My Car</span>
    {slides.length>1&&<>
