@@ -1026,7 +1026,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
         className="group relative mb-6 block w-full overflow-hidden rounded-[1.65rem] border border-sky-200/30 bg-[#06264a] shadow-[0_18px_48px_rgba(8,47,86,.24)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200/60 hover:shadow-[0_24px_58px_rgba(8,47,86,.34)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-300/50"
       >
         <img src="/employee-requests-banner.jpg" alt="استكشف طلبات الموظفين — اكتشف احتياجات الموظفين وقدّم عروضك المناسبة مباشرة" className="block h-auto w-full aspect-[8/3] object-cover transition duration-500 group-hover:scale-[1.012]" loading="eager" decoding="async" />
-        <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-[#031a35]/10" />
+        <span aria-hidden="true" className="mc-employee-requests-banner-tint pointer-events-none absolute inset-0" />
       </a>}
       <div className="mc-workspace-page">
     {isAccountPage ? <AccountProfilePage role={role} /> : <>{dashboard}{feedback}</>}
