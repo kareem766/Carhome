@@ -43,6 +43,7 @@ const AdminManagedAccountsPage = lazy(() => import('./components/AdminManagedAcc
 const FirstLoginPasswordPage = lazy(() => import('./components/FirstLoginPasswordPage'))
 const AdminCommunicationsPage = lazy(() => import('./components/AdminCommunicationsPage'))
 const AdminPromotionalSlidesPage = lazy(() => import('./components/AdminPromotionalSlidesPage'))
+const AdminHomepageBannersPage = lazy(() => import('./components/AdminHomepageBannersPage'))
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
@@ -569,6 +570,7 @@ export default function App() {
   if (path === '/workspace/admin/advertising-plans') return <><Suspense fallback={<PlatformLoading />}><AdvertisingPlansAdminPage /></Suspense></>
   if (path === '/workspace/admin/communications') return <><Suspense fallback={<PlatformLoading />}><AdminCommunicationsPage /></Suspense></>
   if (path === '/workspace/admin/promotional-slides') return <><Suspense fallback={<PlatformLoading />}><AdminPromotionalSlidesPage /></Suspense></>
+  if (path === '/workspace/admin/homepage-banners') return <><Suspense fallback={<PlatformLoading />}><AdminHomepageBannersPage /></Suspense></>
   if (path === '/workspace/catalog') {
     if (!authLoaded) return <PlatformLoading />
     if (!authUser || !['company','company_employee','fleet_supplier','individual_owner'].includes(String(authUser.user_metadata?.organization_type || ''))) return <ServiceNotice settings={settings} title="الكتالوج متاح للحسابات المعتمدة" message="سجّل الدخول بحساب مالك سيارة أو شركة أو مورد أسطول معتمد لاستعراض السيارات والإعلانات." />
