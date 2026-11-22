@@ -23,7 +23,7 @@ drop policy if exists "homepage banners visible to matching signed-in accounts" 
 create policy "homepage banners visible to matching signed-in accounts"
   on public.platform_homepage_banners for select to authenticated
   using (enabled = true and audience_roles && array[
-    coalesce((select raw_user_meta_data->>'organization_type' from auth.users where id = auth.uid()),'')
+    coalesce(auth.jwt()->'user_metadata'->>'organization_type','')
   ]::text[]);
 drop policy if exists "platform admins manage homepage banners" on public.platform_homepage_banners;
 create policy "platform admins manage homepage banners"
