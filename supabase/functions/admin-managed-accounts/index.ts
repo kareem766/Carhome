@@ -7,14 +7,16 @@ async function hashPassword(password:string,salt:Uint8Array){const key=await cry
 const randomPassword=()=>{const bytes=crypto.getRandomValues(new Uint8Array(18));return btoa(String.fromCharCode(...bytes)).replace(/[+/=]/g,"").slice(0,20)+"aA7!"};
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
- const send=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,"Content-Type":"application/json"}});
+ let action="unknown"; let stage="request_validation";
+ const send=(body:unknown,status=200)=>{if(status>=500)console.error("[admin-managed-accounts]",JSON.stringify({action,stage,status}));return new Response(JSON.stringify(body),{status,headers:{...cors,"Content-Type":"application/json"}});};
  if(req.method!=="POST")return send({error:"Method not allowed"},405);
  const url=Deno.env.get("SUPABASE_URL")!,key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,anonKey=Deno.env.get("SUPABASE_ANON_KEY")!;
  const auth=req.headers.get("Authorization")||"";if(!auth.startsWith("Bearer "))return send({error:"يجب تسجيل الدخول أولاً."},401);
  const db=createClient(url,key,{auth:{persistSession:false}});const {data:caller,error:authError}=await db.auth.getUser(auth.slice(7));
  if(authError||!caller.user)return send({error:"جلسة الدخول غير صالحة."},401);
- let body:Record<string,unknown>;try{body=await req.json();}catch{return send({error:"بيانات الطلب غير صالحة."},400);}
+ let body:Record<string,unknown>;try{body=await req.json();}catch{return send({error:"بيانات الطلب غير صالحة."},400);} action=String(body.action||"unknown");
  if(body.action==="complete"){
+  stage="complete_password_change";
   const u=caller.user;if(u.app_metadata?.must_change_password!==true||!(u.app_metadata?.created_by_platform_admin===true||u.app_metadata?.created_by_company===true))return send({error:"لا يوجد تغيير إلزامي لهذا الحساب."},403);
   const newPassword=String(body.password||"");if(newPassword.length<8)return send({error:"أدخل كلمة المرور الجديدة."},400);
   const {data:stored,error:storedError}=await db.from("admin_managed_account_passwords").select("temporary_password_hash,password_salt").eq("user_id",u.id).maybeSingle();
@@ -30,8 +32,9 @@ Deno.serve(async(req:Request)=>{
  }
 
  if(body.action==="create_company_member"){
+  stage="create_company_member.validate";
   // Remove invisible characters commonly introduced by mobile keyboards/autofill.
-  const email=String(body.email||"").normalize("NFKC").replace(/[\u200B-\u200D\uFEFF\u00A0]/g,"").replace(/\s+/g,"").trim().toLowerCase();
+  const email=String(body.email||"").normalize("NFKC").replace(/[\u200B-\u200D\uFEFF\u00A0]/g,"").trim().toLowerCase();
   const displayName=String(body.display_name||"").trim();
   const role=String(body.role||"member");
   const validEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -120,12 +123,14 @@ Deno.serve(async(req:Request)=>{
 
 
  if(body.action==="list_companies"){
+  stage="list_companies";
   const {data:companies,error:companiesError}=await db.from("organizations").select("id,name").eq("organization_type","company").eq("approval_status","approved").order("name");
   if(companiesError)return send({error:"تعذر تحميل الشركات المعتمدة."},500);
   return send({companies:companies||[]});
  }
 
  if(body.action==="create"){
+  stage="create.validate";
   const email=String(body.email||"").normalize("NFKC").replace(/[\u200B-\u200D\uFEFF\u00A0]/g,"").replace(/\s+/g,"").trim().toLowerCase();
   const displayName=String(body.display_name||"").trim();
   const requestedOrgName=String(body.organization_name||"").trim();
@@ -162,6 +167,7 @@ Deno.serve(async(req:Request)=>{
   }
   const organizationName=role==="employee"?(employeeOrganization?.name||""):requestedOrgName||displayName+" - "+(role==="individual_owner"?"مالك سيارة":"مؤسسة");
   const banned=activationStatus==="pending";
+  stage="create.auth_user";
   const {data:createdUser,error:createError}=await db.auth.admin.createUser({
    email,password,email_confirm:true,ban_duration:banned?"876000h":"none",
    app_metadata:{must_change_password:true,created_by_platform_admin:true},
@@ -179,10 +185,12 @@ Deno.serve(async(req:Request)=>{
    await db.from("profiles").delete().eq("id",newUserId);
    await db.auth.admin.deleteUser(newUserId);
   };
+  stage="create.profile";
   const {error:profileError}=await db.from("profiles").upsert({
    id:newUserId,display_name:displayName,phone:phone||null,contact_email:email,address:address||null,locale:"ar"
   },{onConflict:"id"});
   if(profileError){await rollback();return send({error:"تعذر إنشاء الملف الشخصي للحساب: "+profileError.message},500);}
+  stage="create.temporary_password_record";
   const temporarySalt=crypto.getRandomValues(new Uint8Array(16));
   const {error:passwordRecordError}=await db.from("admin_managed_account_passwords").upsert({
    user_id:newUserId,temporary_password_hash:await hashPassword(password,temporarySalt),password_salt:enc(temporarySalt)
@@ -193,15 +201,18 @@ Deno.serve(async(req:Request)=>{
    // and the organization_memberships trigger creates/updates it for company members.
    // Upsert after those triggers so we never hit a duplicate key and still preserve pending status.
    if(employeeOrganization){
+    stage="create.employee_membership";
     const {error:membershipError}=await db.from("organization_memberships").insert({organization_id:employeeOrganization.id,user_id:newUserId,role:"member"});
     if(membershipError){await rollback();return send({error:"تعذر ربط الموظف بالشركة: "+membershipError.message},500);}
     membershipCreated=true;
    }
+   stage="create.employee_account";
    const {error:employeeError}=await db.from("employee_accounts").upsert({
     user_id:newUserId,employment_type:employmentType,organization_id:employeeOrganization?.id||null,account_status:banned?"suspended":"active"
    },{onConflict:"user_id"});
    if(employeeError){await rollback();return send({error:"تعذر حفظ ملف الموظف: "+employeeError.message},500);}
   }else{
+   stage="create.organization";
    const {data:organization,error:organizationError}=await db.from("organizations").insert({
     name:organizationName,organization_type:role,created_by:newUserId,city:city||null,
     contact_name:displayName,phone:phone||null,contact_email:email,address:address||null,
@@ -211,6 +222,7 @@ Deno.serve(async(req:Request)=>{
    }).select("id").single();
    if(organizationError){await rollback();return send({error:"تعذر إنشاء المؤسسة المرتبطة بالحساب: "+organizationError.message},500);}
    createdOrganizationId=organization.id;
+   stage="create.owner_membership";
    const {error:membershipError}=await db.from("organization_memberships").insert({organization_id:organization.id,user_id:newUserId,role:"owner"});
    if(membershipError){await rollback();return send({error:"تعذر ربط المستخدم بالمؤسسة: "+membershipError.message},500);}
    membershipCreated=true;
@@ -221,10 +233,12 @@ Deno.serve(async(req:Request)=>{
  }
 
  if(body.action==="list"){
+  stage="list_users";
   const {data:users,error:userError}=await db.auth.admin.listUsers({page:1,perPage:1000});
   if(userError)return send({error:"تعذر تحميل حسابات المستخدمين."},500);
   const ids=(users?.users||[]).map(u=>u.id);
   if(!ids.length)return send({accounts:[]});
+  stage="list_related_records";
   const [{data:profiles,error:profilesError},{data:memberships,error:membershipsError},{data:adminRows,error:adminsError},{data:employeeRows,error:employeesError}]=await Promise.all([
    db.from("profiles").select("id,display_name,phone,contact_email,address").in("id",ids),
    db.from("organization_memberships").select("user_id,organization_id,role,organizations(id,name,organization_type,city,phone,contact_email,address,approval_status)").in("user_id",ids),
@@ -258,6 +272,7 @@ Deno.serve(async(req:Request)=>{
  const target=targetResult.user;
 
  if(body.action==="update"){
+  stage="update_auth_user";
   const email=String(body.email||target.email||"").trim().toLowerCase();
   const displayName=String(body.display_name||"").trim();
   const role=String(body.organization_type||target.user_metadata?.organization_type||"individual_owner");
@@ -284,6 +299,7 @@ Deno.serve(async(req:Request)=>{
  }
 
  if(body.action==="reset_password"){
+  stage="reset_password";
   const password=randomPassword(),salt=crypto.getRandomValues(new Uint8Array(16));
   const {error:pwError}=await db.auth.admin.updateUserById(userId,{password,app_metadata:{...target.app_metadata,must_change_password:true,created_by_platform_admin:true}});
   if(pwError)return send({error:"تعذر إعادة تعيين كلمة المرور."},500);
