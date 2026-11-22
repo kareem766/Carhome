@@ -3,6 +3,7 @@ import { ArrowLeft, Building2, CarFront, Wrench, ClipboardList, FileText, ImageP
 import { supabase } from '../lib/supabase'
 import { vehicleCatalog } from '../data/vehicleCatalog'
 import PlatformBrand from './PlatformBrand'
+import PlatformLoading from './PlatformLoading'
 import AccountNotifications from './AccountNotifications'
 import SupplierNavigation from './SupplierNavigation'
 import AccountProfilePage from './AccountProfilePage'
@@ -853,17 +854,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
     }, 2600)
   }
 
-  if (loading || !user) return <main dir="rtl" aria-busy="true" aria-label="تحميل الصفحة" className="grid min-h-screen place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_top,_#e8f4ff_0%,_#f7faff_48%,_#ffffff_100%)] px-6">
-    <div className="flex flex-col items-center gap-6">
-      <div className="animate-pulse rounded-2xl bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,55,95,0.10)] ring-1 ring-blue-100/80">
-        <PlatformBrand />
-      </div>
-      <div aria-hidden="true" className="h-1 w-28 overflow-hidden rounded-full bg-blue-100">
-        <div className="h-full w-1/2 animate-[mc-loading-progress_1.25s_ease-in-out_infinite] rounded-full bg-gradient-to-l from-cyan-500 to-blue-700" />
-      </div>
-    </div>
-    <style>{`@keyframes mc-loading-progress{0%{transform:translateX(130%)}100%{transform:translateX(-220%)}}`}</style>
-  </main>;
+  if (loading || !user) return <PlatformLoading />;
 
   const reviewNoticeAlreadySeen = localStorage.getItem('mycar_review_notice_seen_' + user.id) === '1'
   const reviewStatusNotice = organization?.approval_status === 'pending_review' && !reviewNoticeAlreadySeen ? (
@@ -1006,6 +997,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
   const sideNavigation = <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">{workspaceLinks.map(({href,label,icon:Icon})=><a key={href} href={href} aria-current={path===href?'page':undefined} className={'mc-sidebar-link '+(path===href?'is-active':'')}><Icon size={19}/><span>{label}</span></a>)}<div className="mc-sidebar-divider"/><button type="button" onClick={()=>void signOut()} className="mc-sidebar-link mc-sidebar-logout"><LogOut size={19}/><span>تسجيل الخروج</span></button></nav>
   const companyActiveSection = path.endsWith('/account') ? 'account' : path.endsWith('/requests/new') ? 'new-request' : path.includes('/requests') ? 'requests' : path.includes('/vehicles') ? 'catalog' : 'overview'
   return <>
+    <PlatformLoading fadeOut />
     {role === 'company' && <CompanyPageSidebar active={companyActiveSection} employeeView={employeeView} />}
     <main dir="rtl" className={`mc-workspace-main min-h-screen bg-[#f3f6fb] ${role === 'owner' ? 'mc-owner-workspace-main' : ''} ${role === 'company' ? 'mc-company-workspace-main' : ''}`}>
     {role === 'supplier' && <aside className="mc-workspace-sidebar"><div className="mc-sidebar-brand"><PlatformBrand compact/><span className="mc-sidebar-tag">مساحة العمل</span></div>{sideNavigation}<div className="mc-sidebar-promo"><CarFront size={27}/><strong>كل خدمات السيارات في مكان واحد</strong><p>إدارة أسهل وفرص تشغيل أكثر مع CarHome.</p><a href="/workspace/catalog">استكشف الكتالوج ←</a></div></aside>}
