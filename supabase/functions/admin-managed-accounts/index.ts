@@ -34,7 +34,7 @@ Deno.serve(async(req:Request)=>{
   const email=String(body.email||"").normalize("NFKC").replace(/[\u200B-\u200D\uFEFF\u00A0]/g,"").replace(/\s+/g,"").trim().toLowerCase();
   const displayName=String(body.display_name||"").trim();
   const role=String(body.role||"member");
-  const validEmail=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i.test(email)
+  const validEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     && !email.split("@")[0].startsWith(".")
     && !email.split("@")[0].endsWith(".")
     && !email.split("@")[0].includes("..");
