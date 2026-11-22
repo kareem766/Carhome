@@ -44,8 +44,8 @@ export default function CompanyTeamPage(){
   e.preventDefault();if(!supabase||saving)return
   setSaving(true);setError('');setNotice('');setPlanLimitNotice('');setTemporaryPassword('')
   try{
-   const normalizedEmail=email.normalize('NFKC').replace(/[\\u200B-\\u200D\\uFEFF\\u00A0]/g,'').trim().toLowerCase()
-   const validEmail=/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalizedEmail)&&!normalizedEmail.split('@')[0].startsWith('.')&&!normalizedEmail.split('@')[0].endsWith('.')&&!normalizedEmail.split('@')[0].includes('..')
+   const normalizedEmail=email.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF\u00A0]/g,'').trim().toLowerCase()
+   const validEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)&&!normalizedEmail.split('@')[0].startsWith('.')&&!normalizedEmail.split('@')[0].endsWith('.')&&!normalizedEmail.split('@')[0].includes('..')
    if(!validEmail)throw new Error('صيغة البريد الإلكتروني غير صحيحة. تأكد من كتابته بالشكل name@example.com ومن عدم وجود مسافات داخل البريد.')
    const {data,error:invokeError}=await supabase.functions.invoke('admin-managed-accounts',{body:{action:'create_company_member',display_name:displayName.trim(),email:normalizedEmail,role}})
    if(invokeError)throw invokeError
