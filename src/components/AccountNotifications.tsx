@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import { Bell, CircleUserRound, LogOut, MessageCircle, ChevronDown, X, ExternalLink, CarFront, ClipboardList, FileText, Megaphone, Headset, Bot } from 'lucide-react'
+import { Bell, CircleUserRound, LogOut, MessageCircle, ChevronDown, X, ExternalLink, CarFront, ClipboardList, FileText, Megaphone, Headset } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformEntryBanner from './PlatformEntryBanner'
 import NotificationOnboardingPrompt from './NotificationOnboardingPrompt'
+import AssistantFloatingLauncher from './AssistantFloatingLauncher'
 
 function AccountAvatar({ name, size = 'small' }: { name: string; size?: 'small' | 'large' }) {
   const initial = name.trim().charAt(0) || 'ح'
@@ -199,7 +200,7 @@ export default function AccountNotifications() {
 
   if (!authChecked || !authenticated) return null
 
-  return <>{window.location.pathname !== '/assistant' && createPortal(<a href="/assistant" aria-label="مساعد My Car الذكي" title="مساعد My Car الذكي" className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+16px)] left-4 z-[90] inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-cyan-200/80 bg-gradient-to-l from-[#08294f] via-[#10518a] to-[#1479ad] px-3.5 text-xs font-black text-white shadow-[0_6px_20px_rgba(7,29,53,.28),0_0_12px_rgba(34,211,238,.14)] transition duration-200 hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-[0_9px_25px_rgba(7,29,53,.34)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-300/60 sm:bottom-6 sm:left-6 sm:px-4"><span className="grid h-7 w-7 place-items-center rounded-full bg-white/10 text-amber-300"><Bot size={17}/></span><span className="whitespace-nowrap">مساعد My Car الذكي</span></a>, document.body)}<NotificationOnboardingPrompt/><div className="relative flex items-center gap-2" dir="rtl">{showEntryBanner && <PlatformEntryBanner/>}
+  return <><AssistantFloatingLauncher/><NotificationOnboardingPrompt/><div className="relative flex items-center gap-2" dir="rtl">{showEntryBanner && <PlatformEntryBanner/>}
     <button type="button" aria-label={unreadCount ? `الإشعارات، ${unreadCount} غير مقروءة` : 'فتح الإشعارات'} title="الإشعارات" aria-expanded={notificationsOpen} onClick={() => { setNotificationsOpen(v => !v); setOpen(false) }} className="relative grid h-11 w-11 place-items-center rounded-full border border-sky-200 bg-sky-50 text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-300">
       <Bell size={19} />
       {unreadCount > 0 && <span aria-label={`${unreadCount} إشعارات غير مقروءة`} className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>}
