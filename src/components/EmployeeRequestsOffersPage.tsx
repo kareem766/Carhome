@@ -19,20 +19,28 @@ export default function EmployeeRequestsOffersPage(){
  async function load(){
   if(!supabase){setError('تعذر الاتصال بالخدمة.');setLoading(false);return}
   setLoading(true);setError('')
-  const {data:{user},error:authError}=await supabase.auth.getUser()
-  if(authError||!user){window.location.replace('/?login=1');return}
-  if(user.user_metadata?.organization_type!=='employee'){window.location.replace('/workspace');return}
-  const account=await supabase.from('employee_accounts').select('account_status').eq('user_id',user.id).maybeSingle()
-  if(account.error||!account.data||account.data.account_status!=='active'){setError('حساب الموظف غير نشط أو غير معتمد. يرجى التواصل مع الدعم.');setLoading(false);return}
-  const [requestResult,offerResult]=await Promise.all([
-   supabase.from('employee_rental_requests').select('id,title,vehicle_type,governorate,duration_months,start_date,status,created_at,pickup_address,details,seats,work_days_per_week,daily_hours,budget_min_egp,budget_max_egp').eq('employee_user_id',user.id).order('created_at',{ascending:false}),
-   supabase.from('employee_rental_offers').select('id,request_id,monthly_price_egp,status,message,created_at,organizations(name),vehicles(make,model,model_year)').order('created_at',{ascending:false})
-  ])
-  if(requestResult.error)setError('تعذر تحميل طلباتك: '+requestResult.error.message)
-  else setRequests((requestResult.data||[]) as RequestRow[])
-  if(offerResult.error)setError('تعذر تحميل العروض: '+offerResult.error.message)
-  else setOffers((offerResult.data||[]) as unknown as OfferRow[])
-  setLoading(false)
+  try {
+   const {data:authData,error:authError}=await supabase.auth.getUser()
+   const user=authData?.user
+   if(authError)throw new Error('تعذر التحقق من جلسة الدخول: '+authError.message)
+   if(!user){window.location.replace('/?login=1');return}
+   if(user.user_metadata?.organization_type!=='employee'){window.location.replace('/workspace');return}
+   const account=await supabase.from('employee_accounts').select('account_status').eq('user_id',user.id).maybeSingle()
+   if(account.error)throw new Error('تعذر التحقق من حالة حساب الموظف: '+account.error.message)
+   if(!account.data||account.data.account_status!=='active')throw new Error('حساب الموظف غير نشط أو غير معتمد. يرجى التواصل مع الدعم.')
+   const requestResult=await supabase.from('employee_rental_requests').select('id,title,vehicle_type,governorate,duration_months,start_date,status,created_at,pickup_address,details,seats,work_days_per_week,daily_hours,budget_min_egp,budget_max_egp').eq('employee_user_id',user.id).order('created_at',{ascending:false})
+   if(requestResult.error)throw new Error('تعذر تحميل طلباتك: '+requestResult.error.message)
+   const requestRows=(requestResult.data||[]) as RequestRow[]
+   setRequests(requestRows)
+   if(requestRows.length===0){setOffers([]);return}
+   const offerResult=await supabase.from('employee_rental_offers').select('id,request_id,monthly_price_egp,status,message,created_at,organizations(name),vehicles(make,model,model_year)').in('request_id',requestRows.map(request=>request.id)).order('created_at',{ascending:false})
+   if(offerResult.error)throw new Error('تعذر تحميل العروض: '+offerResult.error.message)
+   setOffers((offerResult.data||[]) as unknown as OfferRow[])
+  } catch(caught) {
+   setError(caught instanceof Error?caught.message:'حدث خطأ غير متوقع أثناء تحميل طلباتك وعروضك. حاول مرة أخرى.')
+  } finally {
+   setLoading(false)
+  }
  }
  useEffect(()=>{void load()},[])
  const requestedRequestId = new URLSearchParams(window.location.search).get('request')
@@ -44,20 +52,35 @@ export default function EmployeeRequestsOffersPage(){
  async function respond(id:string,accept:boolean){
   if(!supabase)return
   setBusy(id);setError('');setNotice('')
-  const {error:e}=await supabase.rpc('employee_respond_to_offer',{p_offer_id:id,p_accept:accept})
-  if(e)setError('تعذر تحديث العرض: '+e.message)
-  else{setNotice(accept?'تم اختيار العرض وتحديث حالة الطلب.':'تم رفض العرض.');await load()}
-  setBusy('')
+  try {
+   const {error:rpcError}=await supabase.rpc('employee_respond_to_offer',{p_offer_id:id,p_accept:accept})
+   if(rpcError)throw new Error(rpcError.message)
+   setNotice(accept?'تم اختيار العرض وتحديث حالة الطلب.':'تم رفض العرض.')
+   await load()
+  } catch(caught) {
+   setError('تعذر تحديث العرض: '+(caught instanceof Error?caught.message:'حدث خطأ غير متوقع.'))
+  } finally {
+   setBusy('')
+  }
  }
  async function cancel(id:string){
   if(!supabase||!window.confirm('هل تريد إلغاء هذا الطلب؟ لن يتمكن مقدمو السيارات من إرسال عروض جديدة عليه.'))return
   setBusy(id);setError('');setNotice('')
-  const {data:{user}}=await supabase.auth.getUser()
-  const {data,error:e}=await supabase.from('employee_rental_requests').update({status:'cancelled'}).eq('id',id).eq('employee_user_id',user?.id).in('status',['pending_review','open']).select('id').maybeSingle()
-  if(e)setError('تعذر إلغاء الطلب: '+e.message)
-  else if(!data)setError('لم يعد الطلب قابلًا للإلغاء. حدّث الصفحة للتحقق من حالته.')
-  else{setNotice('تم إلغاء الطلب بنجاح.');await load()}
-  setBusy('')
+  try {
+   const {data:authData,error:authError}=await supabase.auth.getUser()
+   if(authError)throw new Error('تعذر التحقق من جلسة الدخول: '+authError.message)
+   const user=authData?.user
+   if(!user){window.location.replace('/?login=1');return}
+   const {data,error:updateError}=await supabase.from('employee_rental_requests').update({status:'cancelled'}).eq('id',id).eq('employee_user_id',user.id).in('status',['pending_review','open']).select('id').maybeSingle()
+   if(updateError)throw new Error(updateError.message)
+   if(!data)throw new Error('لم يعد الطلب قابلًا للإلغاء. حدّث الصفحة للتحقق من حالته.')
+   setNotice('تم إلغاء الطلب بنجاح.')
+   await load()
+  } catch(caught) {
+   setError('تعذر إلغاء الطلب: '+(caught instanceof Error?caught.message:'حدث خطأ غير متوقع.'))
+  } finally {
+   setBusy('')
+  }
  }
  const totalOffers=offers.length
  if(loading) return <EmployeePageLoading />
