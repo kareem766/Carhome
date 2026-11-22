@@ -67,6 +67,7 @@ export default function VehicleCatalogPage({ hideHeader = false }: { hideHeader?
   useEffect(() => {
     let active = true
     async function load() {
+      try {
       if (!supabase) { window.location.replace('/?login=1'); return }
       const { data: auth } = await supabase.auth.getUser()
       if (!auth.user) { window.location.replace('/?login=1'); return }
@@ -121,6 +122,12 @@ export default function VehicleCatalogPage({ hideHeader = false }: { hideHeader?
         setVehicles(current => [...current].sort((a,b) => Number(premium.includes(b.id))-Number(premium.includes(a.id)) || Number(promoted.includes(b.id))-Number(promoted.includes(a.id))))
       }
       if (active) setLoading(false)
+      } catch (caught) {
+        if (active) {
+          setError(caught instanceof Error ? caught.message : 'تعذر تحميل بيانات الكتالوج. تحقق من اتصالك ثم حاول مرة أخرى.')
+          setLoading(false)
+        }
+      }
     }
     void load()
     return () => { active = false }
