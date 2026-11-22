@@ -6,8 +6,8 @@ import AdminPageNavigation from './AdminPageNavigation'
 import { supabase } from '../lib/supabase'
 
 type Metric = { key: string; label: string; value: number | string; note: string; icon: typeof Users; tone: string }
-type Counts = { users: number; organizations: number; companyAccounts: number; approvedOrganizations: number; pendingOrganizations: number; vehicles: number; approvedVehicles: number; pendingVehicles: number; pendingPayments: number; subscriptions: number; activeAds: number; requests: number; suppliers: number; employees: number; employeeRequests: number; pendingEmployeeRequests: number }
-const initial: Counts = { users: 0, organizations: 0, companyAccounts: 0, approvedOrganizations: 0, pendingOrganizations: 0, vehicles: 0, approvedVehicles: 0, pendingVehicles: 0, pendingPayments: 0, subscriptions: 0, activeAds: 0, requests: 0, suppliers: 0, employees: 0, employeeRequests: 0, pendingEmployeeRequests: 0 }
+type Counts = { users: number; organizations: number; companyAccounts: number; approvedOrganizations: number; pendingOrganizations: number; vehicles: number; approvedVehicles: number; pendingVehicles: number; pausedVehicles: number; pendingPayments: number; subscriptions: number; activeAds: number; requests: number; suppliers: number; employees: number; employeeRequests: number; pendingEmployeeRequests: number }
+const initial: Counts = { users: 0, organizations: 0, companyAccounts: 0, approvedOrganizations: 0, pendingOrganizations: 0, vehicles: 0, approvedVehicles: 0, pendingVehicles: 0, pausedVehicles: 0, pendingPayments: 0, subscriptions: 0, activeAds: 0, requests: 0, suppliers: 0, employees: 0, employeeRequests: 0, pendingEmployeeRequests: 0 }
 const shortcuts = [
  { href: '/workspace/admin/managed-sourcing', title: 'خدمة البحث نيابة عن الشركات', desc: 'إدارة التفويضات والتسعير والمدفوعات والعروض', icon: BriefcaseBusiness, tone: 'from-cyan-600 to-blue-800' },
  { href: '/workspace/admin/vehicle-reviews', title: 'مركز المراجعات الموحد', desc: 'مراجعة الحسابات والسيارات والمدفوعات والإعلانات والطلبات', icon: ClipboardCheck, tone: 'from-sky-500 to-blue-700' },
@@ -75,6 +75,7 @@ export default function AdminDashboardPage() {
     countRegisteredVehicles(),
     countRegisteredVehicles([['review_status', 'approved']]),
     countRegisteredVehicles([['review_status', 'pending_review']]),
+    countRegisteredVehicles([['review_status', 'paused']]),
     count('vehicle_payment_submissions', [['review_status', 'pending']]),
     count('company_subscriptions'),
     countActiveAds(),
@@ -84,7 +85,7 @@ export default function AdminDashboardPage() {
     count('employee_rental_requests'),
     count('employee_rental_requests', [['status', 'pending_review']]),
    ])
-   setCounts({ users: values[0], organizations: values[1], companyAccounts: values[2], approvedOrganizations: values[3], pendingOrganizations: values[4], vehicles: values[5], approvedVehicles: values[6], pendingVehicles: values[7], pendingPayments: values[8], subscriptions: values[9], activeAds: values[10], requests: values[11], suppliers: values[12], employees: values[13], employeeRequests: values[14], pendingEmployeeRequests: values[15] })
+   setCounts({ users: values[0], organizations: values[1], companyAccounts: values[2], approvedOrganizations: values[3], pendingOrganizations: values[4], vehicles: values[5], approvedVehicles: values[6], pendingVehicles: values[7], pausedVehicles: values[8], pendingPayments: values[9], subscriptions: values[10], activeAds: values[11], requests: values[12], suppliers: values[13], employees: values[14], employeeRequests: values[15], pendingEmployeeRequests: values[16] })
    setUpdatedAt(new Date().toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }))
   } catch (e) { setError(e instanceof Error ? e.message : 'تعذر تحميل مؤشرات لوحة الإدارة.') }
   finally { setLoading(false) }
@@ -92,7 +93,7 @@ export default function AdminDashboardPage() {
  useEffect(() => { void load() }, [load])
  const metrics: Metric[] = [
   { key: 'orgs', label: 'حسابات المؤسسات', value: counts.organizations, note: `${counts.approvedOrganizations} معتمد · ${counts.pendingOrganizations} بانتظار المراجعة`, icon: Building2, tone: 'blue' },
-  { key: 'vehicles', label: 'السيارات المسجلة', value: counts.vehicles, note: `${counts.approvedVehicles} معتمد · ${counts.pendingVehicles} قيد المراجعة`, icon: CarFront, tone: 'cyan' },
+  { key: 'vehicles', label: 'السيارات المسجلة', value: counts.vehicles, note: `${counts.approvedVehicles} معتمد · ${counts.pendingVehicles} قيد المراجعة · ${counts.pausedVehicles} موقوف`, icon: CarFront, tone: 'cyan' },
   { key: 'users', label: 'ملفات المستخدمين', value: counts.users, note: 'إجمالي الملفات المسجلة على المنصة', icon: Users, tone: 'violet' },
   { key: 'payments', label: 'تحويلات تنتظر المراجعة', value: counts.pendingPayments, note: 'إثباتات دفع لم تُعتمد بعد؛ لا تُحتسب سياراتها ضمن التسجيل المكتمل', icon: Wallet, tone: 'amber' },
   { key: 'requests', label: 'طلبات التأجير', value: counts.requests, note: 'كل طلبات التأجير المسجلة', icon: ClipboardCheck, tone: 'emerald' },
