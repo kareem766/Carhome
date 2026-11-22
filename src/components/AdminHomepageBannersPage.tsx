@@ -13,6 +13,37 @@ const roles:{value:Role;label:string}[]=[
  {value:'company_employee',label:'موظف الشركة'},
  {value:'employee',label:'الموظف المستقل'}
 ]
+type DestinationGroup={group:string;options:{value:string;label:string}[]}
+const destinations:DestinationGroup[]=[
+ {group:'صفحات عامة',options:[
+  {value:'/workspace',label:'الصفحة الرئيسية'},
+  {value:'/services',label:'خدمات السيارات'},
+  {value:'/support',label:'الدعم الفني'}
+ ]},
+ {group:'مالك السيارة',options:[
+  {value:'/workspace/owner/vehicles',label:'سياراتي'},
+  {value:'/workspace/owner/offers',label:'عروضي'},
+  {value:'/workspace/provider-employee-requests',label:'طلبات الموظفين'},
+  {value:'/workspace/catalog',label:'كتالوج السيارات'},
+  {value:'/workspace/owner/ads',label:'إعلاناتي'}
+ ]},
+ {group:'مورد الأسطول',options:[
+  {value:'/workspace/provider-employee-requests',label:'طلبات الموظفين'},
+  {value:'/workspace/provider/vehicles',label:'سيارات الأسطول'},
+  {value:'/workspace/provider/offers',label:'عروضي'},
+  {value:'/workspace/catalog',label:'كتالوج السيارات'}
+ ]},
+ {group:'الشركة',options:[
+  {value:'/workspace/company/requests',label:'طلبات السيارات'},
+  {value:'/workspace/company/subscriptions',label:'اشتراكات الشركة'},
+  {value:'/workspace/catalog',label:'كتالوج السيارات'}
+ ]},
+ {group:'الموظف المستقل وموظف الشركة',options:[
+  {value:'/workspace/employee/requests',label:'طلباتي'},
+  {value:'/workspace/employee/offers',label:'العروض المقدمة'},
+  {value:'/workspace/catalog',label:'كتالوج السيارات'}
+ ]}
+]
 export default function AdminHomepageBannersPage(){
  const [authorized,setAuthorized]=useState(false),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false)
  const [items,setItems]=useState<Banner[]>([]),[editing,setEditing]=useState<Banner|null>(null)
