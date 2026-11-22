@@ -900,9 +900,11 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
   const pendingVehicles = vehicles.filter(vehicle => vehicle.review_status === 'pending_review' || vehicle.payment_status === 'pending').length
   const receivedOffers = requests.reduce((total, request) => total + (request.rental_offers?.length || 0), 0)
   const dashboard = isWorkspaceHome ? <section className="mc-dashboard mt-6 space-y-5">
-    <div className={"mc-dashboard-hero relative overflow-hidden rounded-[1.75rem] bg-gradient-to-l from-[#0b2545] via-[#123b68] to-[#155e91] p-6 text-white shadow-xl sm:p-8 " + (role === "company" ? "mc-company-dark-card" : "")}>
+    <div className={"mc-dashboard-hero relative overflow-hidden rounded-[1.75rem] border border-blue-300/15 bg-[linear-gradient(115deg,#071629_0%,#102f59_38%,#174f91_72%,#087fa8_100%)] p-6 text-white shadow-[0_18px_45px_rgba(3,18,43,0.28)] sm:p-8 " + (role === "company" ? "mc-company-dark-card" : "")}>
       <div className="pointer-events-none absolute -left-12 -top-16 h-56 w-56 rounded-full border-[28px] border-white/5" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/3 h-56 w-56 rounded-full bg-cyan-300/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/3 h-56 w-56 rounded-full bg-cyan-300/15 blur-3xl" />
+      <div className="pointer-events-none absolute -right-10 top-0 h-px w-2/3 bg-gradient-to-l from-transparent via-cyan-200/35 to-transparent" />
+      <div className="pointer-events-none absolute -bottom-28 left-1/4 h-64 w-64 rounded-full bg-blue-400/10 blur-3xl" />
       <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div className="max-w-2xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-cyan-100"><Building2 size={14}/> لوحة إدارة حسابك</span>
