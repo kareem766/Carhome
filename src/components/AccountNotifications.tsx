@@ -5,6 +5,7 @@ import { Bell, CircleUserRound, LogOut, MessageCircle, ChevronDown, X, ExternalL
 import { supabase } from '../lib/supabase'
 import PlatformEntryBanner from './PlatformEntryBanner'
 import NotificationOnboardingPrompt from './NotificationOnboardingPrompt'
+import AssistantFloatingLauncher from './AssistantFloatingLauncher'
 
 function AccountAvatar({ name, size = 'small' }: { name: string; size?: 'small' | 'large' }) {
   const initial = name.trim().charAt(0) || 'ح'
@@ -199,7 +200,7 @@ export default function AccountNotifications() {
 
   if (!authChecked || !authenticated) return null
 
-  return <><NotificationOnboardingPrompt/><div className="relative flex items-center gap-2" dir="rtl">{showEntryBanner && <PlatformEntryBanner/>}
+  return <><AssistantFloatingLauncher/><NotificationOnboardingPrompt/><div className="relative flex items-center gap-2" dir="rtl">{showEntryBanner && <PlatformEntryBanner/>}
     <button type="button" aria-label={unreadCount ? `الإشعارات، ${unreadCount} غير مقروءة` : 'فتح الإشعارات'} title="الإشعارات" aria-expanded={notificationsOpen} onClick={() => { setNotificationsOpen(v => !v); setOpen(false) }} className="relative grid h-11 w-11 place-items-center rounded-full border border-sky-200 bg-sky-50 text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-300">
       <Bell size={19} />
       {unreadCount > 0 && <span aria-label={`${unreadCount} إشعارات غير مقروءة`} className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>}

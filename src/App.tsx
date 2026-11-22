@@ -104,7 +104,7 @@ function OwnerPersistentBar() {
     { href: '/workspace/notifications', label: 'إعدادات الإشعارات', icon: <Bell size={17}/> },
   ]
   const currentPath = window.location.pathname
-  return <header dir="rtl" className="mc-owner-persistent-bar">
+  return <><header dir="rtl" className="mc-owner-persistent-bar">
     <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car <span className="text-cyan-300">عربيتي</span></strong><small>مساحة مالك السيارة</small></span></a>
     <nav aria-label="التنقل الرئيسي" className="mc-owner-main-links">{links.map(link => {
       const active = currentPath === link.href
@@ -125,6 +125,8 @@ function OwnerPersistentBar() {
       <AccountNotifications/>
     </div>
   </header>
+
+  </>
 }
 
 
