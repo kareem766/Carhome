@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
 import App from './App'
 import NotificationOnboardingPrompt from './components/NotificationOnboardingPrompt'
+import PlatformErrorBoundary from './components/PlatformErrorBoundary'
 import './index.css'
 import './company-cards.css'
 
@@ -10,9 +11,11 @@ registerSW({ immediate: true })
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <>
-      <App />
-      <NotificationOnboardingPrompt />
-    </>
+    <PlatformErrorBoundary>
+      <>
+        <App />
+        <NotificationOnboardingPrompt />
+      </>
+    </PlatformErrorBoundary>
   </React.StrictMode>
 )
