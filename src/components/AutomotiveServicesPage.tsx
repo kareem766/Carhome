@@ -49,6 +49,19 @@ export default function AutomotiveServicesPage({ hideHeader = false }: { hideHea
       {filtered.length===0&&<div className="mt-5 rounded-2xl border border-dashed bg-white p-10 text-center"><Search size={30} className="mx-auto text-slate-300"/><h3 className="mt-3 font-extrabold">لا توجد نتائج مطابقة</h3><p className="mt-2 text-sm text-slate-500">جرّب تغيير نوع الخدمة أو المحافظة أو كلمات البحث.</p><button onClick={()=>{setSearch('');setCity('الكل');setCategory('all')}} className="mt-4 rounded-xl border px-4 py-2 text-sm font-bold">إعادة ضبط البحث</button></div>}
     </section>
     <section id="suggest-service" className="mx-auto max-w-7xl px-4 pb-12 sm:px-6"><div className="grid gap-5 rounded-3xl border border-blue-100 bg-[linear-gradient(120deg,#eff6ff_0%,#ffffff_70%)] p-6 shadow-sm shadow-blue-100 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8"><div><h2 className="text-xl font-black text-blue-950">هل تعرف مقدم خدمة موثوقًا؟</h2><p className="mt-2 max-w-3xl text-sm leading-8 text-slate-600">نرحب باقتراح مراكز صيانة وتأمين وقطع غيار وخدمات أساطيل لإضافتها بعد مراجعة بياناتها ومصدرها الرسمي. لا يعني إدراج أي جهة ضمان جودة خدماتها أو اعتماد المنصة لها.</p></div><a href="/services/provider/register" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 font-extrabold text-white shadow-lg shadow-blue-700/20 transition hover:-translate-y-0.5 hover:bg-blue-800"><BadgeCheck size={17}/> قم بتسجيل مقدم الخدمة المعتمد</a></div><p className="mt-4 text-xs leading-6 text-slate-500">تنويه: المنصة دليل معلوماتي لتسهيل الوصول إلى مقدمي الخدمات، وليست طرفًا في عقود الصيانة أو التأمين أو بيع قطع الغيار. تحقّق من العنوان والتغطية والأسعار والتراخيص مباشرةً مع مقدم الخدمة. قد تتغير بيانات الفروع.</p></section>
-    <footer className="border-t border-slate-200 bg-white py-6 text-center text-sm text-slate-500">© {new Date().getFullYear()} <PlatformBrand compact /> · <a href="/privacy" className="font-bold text-blue-700">سياسة الخصوصية</a> · <a href="/terms" className="font-bold text-blue-700">شروط الاستخدام</a></footer>
+    <footer className="border-t border-slate-200 bg-white px-4 py-5 text-slate-500 sm:px-6 sm:py-6">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-4 text-center sm:flex-row sm:flex-wrap sm:gap-x-7 sm:gap-y-3">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-xs sm:text-sm">
+          <span>© {new Date().getFullYear()} جميع الحقوق محفوظة</span>
+          <span aria-hidden="true" className="hidden text-slate-300 sm:inline">·</span>
+          <PlatformBrand compact />
+        </div>
+        <nav aria-label="روابط المنصة القانونية" className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-slate-100 pt-3 text-xs sm:border-0 sm:pt-0 sm:text-sm">
+          <a href="/privacy" className="font-bold text-blue-700 transition hover:text-blue-900">سياسة الخصوصية</a>
+          <span aria-hidden="true" className="text-slate-300">·</span>
+          <a href="/terms" className="font-bold text-blue-700 transition hover:text-blue-900">شروط الاستخدام</a>
+        </nav>
+      </div>
+    </footer>
   </main>
 }
