@@ -104,7 +104,7 @@ function OwnerPersistentBar() {
     { href: '/workspace/notifications', label: 'إعدادات الإشعارات', icon: <Bell size={17}/> },
   ]
   const currentPath = window.location.pathname
-  return <header dir="rtl" className="mc-owner-persistent-bar">
+  return <><header dir="rtl" className="mc-owner-persistent-bar">
     <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car <span className="text-cyan-300">عربيتي</span></strong><small>مساحة مالك السيارة</small></span></a>
     <nav aria-label="التنقل الرئيسي" className="mc-owner-main-links">{links.map(link => {
       const active = currentPath === link.href
@@ -125,6 +125,8 @@ function OwnerPersistentBar() {
       <AccountNotifications/>
     </div>
   </header>
+    {currentPath !== '/assistant' && <a href="/assistant" aria-label="مساعد My Car الذكي" title="مساعد My Car الذكي" className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+18px)] right-4 z-[90] inline-flex min-h-14 items-center justify-center gap-2.5 rounded-full border border-cyan-200/80 bg-gradient-to-l from-[#08294f] via-[#10518a] to-[#1479ad] px-5 text-sm font-black text-white shadow-[0_8px_28px_rgba(7,29,53,.32),0_0_18px_rgba(34,211,238,.18)] transition duration-200 hover:-translate-y-1 hover:border-cyan-300 hover:shadow-[0_12px_34px_rgba(7,29,53,.4)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-300/60 sm:bottom-7 sm:right-7 sm:px-6"><span className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-amber-300"><Bot size={21}/></span><span className="whitespace-nowrap">مساعد My Car الذكي</span><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.8)]"/></a>}
+  </>
 }
 
 
