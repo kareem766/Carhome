@@ -21,6 +21,7 @@ export default function MessagingPage() {
   const [searchTerm,setSearchTerm] = useState('')
 
   async function loadConversations() {
+    try {
     if (!supabase) { window.location.replace('/?login=1'); return }
     const { data: auth } = await supabase.auth.getUser()
     if (!auth.user) { window.location.replace('/?login=1'); return }
@@ -38,11 +39,19 @@ export default function MessagingPage() {
       if (rows.length === 0) setMessages([])
     }
     setLoading(false)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'تعذر تحميل المحادثات. تحقق من اتصالك ثم حاول مرة أخرى.')
+      setLoading(false)
+    }
   }
   async function loadMessages(conversationId: string) {
+    try {
     if (!supabase || !conversationId) { setMessages([]); return }
     const { data, error: messageError } = await supabase.from('messages').select('id,sender_id,sender_organization_id,body,created_at').eq('conversation_id',conversationId).order('created_at',{ascending:true})
-    if (messageError) setError(messageError.message); else setMessages((data || []) as Message[])
+    if (messageError) setError('تعذر تحميل رسائل المحادثة. حاول تحديث الصفحة.'); else setMessages((data || []) as Message[])
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'تعذر تحميل رسائل المحادثة.')
+    }
   }
   useEffect(() => { void loadConversations() }, [])
   useEffect(() => { if (activeId) void loadMessages(activeId); else setMessages([]) }, [activeId])
@@ -69,28 +78,46 @@ export default function MessagingPage() {
   }, [activeId])
 
   async function refreshMessages() {
+    if (refreshing) return
     setRefreshing(true)
     setError('')
-    await loadConversations()
-    if (activeId) await loadMessages(activeId)
-    setRefreshing(false)
+    try {
+      await loadConversations()
+      if (activeId) await loadMessages(activeId)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'تعذر تحديث المحادثات الآن.')
+    } finally {
+      setRefreshing(false)
+    }
   }
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!supabase || !userId || !organizationId || !activeId || !body.trim()) return
+    if (!supabase || !userId || !organizationId || !activeId || !body.trim() || sending) return
+    const conversationId = activeId
+    const messageBody = body.trim()
     setSending(true); setError(''); setNotice('')
-    const { error: sendError } = await supabase.from('messages').insert({ conversation_id:activeId, sender_organization_id:organizationId, sender_id:userId, body:body.trim() })
-    setSending(false)
-    if (sendError) { setError(sendError.message); return }
-    setBody('')
-    await loadMessages(activeId)
-    setNotice('تم إرسال الرسالة.')
+    try {
+      const { error: sendError } = await supabase.from('messages').insert({
+        conversation_id:conversationId,
+        sender_organization_id:organizationId,
+        sender_id:userId,
+        body:messageBody
+      })
+      if (sendError) throw new Error('تعذر إرسال الرسالة. تحقق من اتصالك وحالة المحادثة ثم حاول مرة أخرى.')
+      setBody('')
+      await loadMessages(conversationId)
+      setNotice('تم إرسال الرسالة.')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'تعذر إرسال الرسالة الآن. حاول مرة أخرى.')
+    } finally {
+      setSending(false)
+    }
   }
   const active = conversations.find(c=>c.id===activeId)
   const filteredConversations = conversations.filter(c => `${c.vehicles ? `${c.vehicles.make} ${c.vehicles.model}` : c.rental_requests?.title || ''} ${c.company?.name || ''} ${c.provider?.name || ''}`.toLocaleLowerCase('ar').includes(searchTerm.trim().toLocaleLowerCase('ar')))
   const otherName = active ? (active.vehicle_id ? 'الطرف الآخر داخل المنصة' : (active.company_organization_id===organizationId ? active.provider?.name : active.company?.name)) : ''
-  return <main dir="rtl" className={`mc-messaging-main min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/70 px-4 py-6 sm:px-6 sm:py-8 ${mobileChatOpen ? "mc-mobile-chat-open" : ""}`}><div className="mx-auto max-w-6xl">
+  return <main dir="rtl" aria-busy={loading} className={`mc-messaging-main min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/70 px-4 py-6 sm:px-6 sm:py-8 ${mobileChatOpen ? "mc-mobile-chat-open" : ""}`}><div className="mx-auto max-w-6xl">
     <section className="relative mt-5 overflow-hidden rounded-[28px] bg-gradient-to-l from-[#082d59] via-[#0756a5] to-[#1685d4] p-5 text-white shadow-xl shadow-blue-900/15 sm:p-7">
       <div className="pointer-events-none absolute -left-12 -top-20 h-56 w-56 rounded-full border-[26px] border-white/10"/>
       <div className="pointer-events-none absolute -bottom-24 right-1/3 h-48 w-48 rounded-full bg-cyan-300/10 blur-2xl"/>
@@ -103,7 +130,7 @@ export default function MessagingPage() {
       </div>
     </section>
     {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800">{error}</p>}{notice && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p>}
-    {loading ? <p className="py-12 text-center text-slate-500">جارٍ تحميل المحادثات...</p> : <div className="mt-6 grid min-h-[65vh] gap-5 md:grid-cols-[0.82fr_1.18fr]">
+    {loading ? <div role="status" aria-label="جارٍ تحميل المحادثات" className="mc-messaging-loading mt-6 grid gap-5 md:grid-cols-[0.82fr_1.18fr]"><div className="space-y-3 rounded-3xl border border-slate-200/80 bg-white p-4"><div className="mc-skeleton h-12 rounded-2xl"/><div className="mc-skeleton h-11 rounded-2xl"/>{Array.from({length:4},(_,index)=><div key={index} className="flex items-center gap-3 rounded-2xl border border-slate-100 p-3"><div className="mc-skeleton h-11 w-11 shrink-0 rounded-2xl"/><div className="flex-1 space-y-2"><div className="mc-skeleton h-3 w-3/5 rounded-full"/><div className="mc-skeleton h-3 w-4/5 rounded-full"/></div></div>)}</div><div className="hidden min-h-[60vh] flex-col justify-end gap-4 rounded-3xl border border-slate-200/80 bg-white p-6 md:flex"><div className="mc-skeleton h-14 w-2/5 rounded-2xl"/><div className="mc-skeleton ms-auto h-16 w-3/5 rounded-2xl"/><div className="mc-skeleton h-14 w-1/2 rounded-2xl"/><div className="mc-skeleton mt-5 h-12 w-full rounded-xl"/></div></div> : <div className="mt-6 grid min-h-[65vh] gap-5 md:grid-cols-[0.82fr_1.18fr]">
       <aside className="mc-messaging-conversation-list space-y-3"><div className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm"><div><h2 className="font-extrabold text-slate-900">محادثاتك</h2><p className="mt-1 text-xs text-slate-500">تواصل خاص داخل المنصة</p></div><span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-extrabold text-blue-800">{conversations.length}</span></div><label className="flex min-h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-slate-400 shadow-sm focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-50"><Search size={17}/><input value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} placeholder="ابحث في المحادثات..." className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"/></label>{filteredConversations.map(c=><button key={c.id} onClick={()=>{setActiveId(c.id);setMobileChatOpen(true)}} className={'w-full rounded-2xl border p-4 text-right shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md '+(activeId===c.id?'border-blue-300 bg-blue-50 ring-1 ring-blue-100':'border-slate-200/80 bg-white hover:border-blue-200')}><span className="flex items-center gap-2 font-extrabold"><MessageCircle size={17}/>{c.vehicles ? `${c.vehicles.make} ${c.vehicles.model} · ${c.vehicles.model_year}` : c.rental_requests?.title || 'محادثة بخصوص طلب تأجير'}</span><span className="mt-2 block text-sm text-slate-600">{c.vehicle_id ? 'تواصل داخلي بخصوص السيارة' : (c.company_organization_id===organizationId ? c.provider?.name : c.company?.name)}</span><span className="mt-1 block text-xs text-slate-500">{c.status==='open'?'مفتوحة':'مغلقة'}</span></button>)}{filteredConversations.length===0 && <p className="rounded-2xl border border-dashed bg-white p-6 text-sm leading-7 text-slate-500">{searchTerm ? 'لا توجد محادثات تطابق بحثك.' : 'لا توجد محادثات بعد. ابدأ محادثة من أحد العروض أو السيارات المتاحة.'}</p>}</aside>
       <section className="mc-messaging-chat-panel flex min-h-[60vh] flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/40"><div className="mc-messaging-chat-heading flex items-center gap-3 border-b border-slate-100 bg-white p-5"><button type="button" onClick={()=>setMobileChatOpen(false)} aria-label="العودة إلى قائمة المحادثات" className="mc-messaging-back-to-list inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 hover:bg-blue-50"><ArrowRight size={19}/></button><div className="min-w-0"><h2 className="truncate font-extrabold">{active ? otherName : 'اختر محادثة'}</h2><p className="mt-1 truncate text-xs text-slate-500">{active?.vehicles ? `استفسار عن ${active.vehicles.make} ${active.vehicles.model}` : active?.rental_requests?.title || 'المراسلات محفوظة داخل حسابك'}</p></div></div><div className="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-slate-50 to-white p-4 sm:p-5">{messages.map(m=><div key={m.id} className={'max-w-[90%] rounded-2xl p-3 text-sm leading-7 '+(m.sender_id===userId?'ms-auto bg-blue-700 text-white':'me-auto border bg-white text-slate-800')}><p className="whitespace-pre-wrap break-words">{m.body}</p><p className={'mt-1 text-[10px] '+(m.sender_id===userId?'text-blue-100':'text-slate-400')}>{new Date(m.created_at).toLocaleString('ar-EG')}</p></div>)}{active && messages.length===0 && <p className="py-8 text-center text-sm text-slate-500">ابدأ المحادثة برسالتك الأولى.</p>}</div><form onSubmit={sendMessage} className="flex gap-2 border-t p-3"><input value={body} onChange={e=>setBody(e.target.value)} disabled={!active || active.status!=='open'} maxLength={4000} className="min-h-12 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100" placeholder={active?.status==='open'?'اكتب رسالتك داخل المنصة...':'اختر محادثة مفتوحة'} /><button disabled={sending || !active || active.status!=='open' || !body.trim()} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-700 px-4 font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"><Send size={17}/> إرسال</button></form></section>
     </div>}
