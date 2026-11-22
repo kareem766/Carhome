@@ -104,9 +104,12 @@ function OwnerPersistentBar() {
     { href: '/workspace/notifications', label: 'إعدادات الإشعارات', icon: <Bell size={17}/> },
   ]
   const currentPath = window.location.pathname
+  useLayoutEffect(() => {
+    document.querySelector('.mc-owner-main-link.is-active')?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' })
+  }, [currentPath])
   return <header dir="rtl" className="mc-owner-persistent-bar">
-    <a href="/workspace/owner/vehicles" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car <span className="text-cyan-300">عربيتي</span></strong><small>مساحة مالك السيارة</small></span></a>
-    <nav aria-label="التنقل الرئيسي" className="mc-owner-main-links">{links.map(link => {
+    <a href="/workspace/owner/vehicles" aria-label="العودة إلى سياراتي - My Car عربيتي" className="mc-owner-bar-brand"><span className="mc-owner-bar-mark"><CarFront size={21}/></span><span><strong>My Car <span className="text-cyan-300">عربيتي</span></strong><small>مساحة مالك السيارة</small></span></a>
+    <nav aria-label="التنقل الرئيسي لحساب مالك السيارة" className="mc-owner-main-links">{links.map(link => {
       const active = currentPath === link.href
         || (link.href === '/workspace/owner/vehicles' && (currentPath === '/workspace/owner' || currentPath.startsWith('/workspace/owner/vehicles')))
         || (link.href === '/workspace/owner/offers' && currentPath.startsWith('/workspace/owner/offers'))
@@ -126,7 +129,6 @@ function OwnerPersistentBar() {
     </div>
   </header>
 }
-
 
 function CompanyPersistentBar({ employeeView = false }: { employeeView?: boolean }) {
   const currentPath = window.location.pathname
