@@ -1020,6 +1020,27 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
       </>}
       {reviewStatusNotice}
       {!isAccountPage && !isVehicleForm && !isRequestForm && isWorkspaceHome && (role === 'owner' || role === 'supplier') && <div className="mb-5"><PromotionalCarousel role={role === 'owner' ? 'individual_owner' : 'fleet_supplier'} /></div>}
+      {isWorkspaceHome && (role === 'owner' || role === 'supplier') && <a
+        href="/workspace/provider-employee-requests"
+        aria-label="استكشف طلبات الموظفين"
+        className="group relative mb-6 flex min-h-[116px] w-full items-center justify-between gap-4 overflow-hidden rounded-[1.65rem] border border-sky-200/25 bg-[linear-gradient(112deg,#06172d_0%,#0a315b_48%,#075b91_100%)] px-5 py-5 text-white shadow-[0_18px_48px_rgba(8,47,86,.22),inset_0_1px_0_rgba(255,255,255,.14)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200/55 hover:shadow-[0_24px_58px_rgba(8,47,86,.3)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-300/50 sm:px-7"
+      >
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_12%_20%,rgba(56,189,248,.28),transparent_38%),radial-gradient(ellipse_at_88%_100%,rgba(14,165,233,.22),transparent_42%)]" />
+        <span aria-hidden="true" className="pointer-events-none absolute -left-12 -top-20 h-48 w-48 rounded-full border border-white/10 transition duration-700 group-hover:scale-125 group-hover:border-cyan-100/25" />
+        <span className="relative flex min-w-0 items-center gap-4">
+          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-cyan-100/25 bg-white/10 text-cyan-100 shadow-[0_0_28px_rgba(56,189,248,.16)] transition duration-300 group-hover:scale-105 group-hover:bg-white/15">
+            <ClipboardList size={27} strokeWidth={2.1}/>
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[10px] font-extrabold tracking-[.18em] text-cyan-200/90">MY CAR · فرص جديدة</span>
+            <span className="mt-1 block text-lg font-black leading-snug sm:text-2xl">استكشف طلبات الموظفين</span>
+            <span className="mt-1 block text-xs leading-5 text-sky-100/85 sm:text-sm">اكتشف احتياجات الموظفين وقدّم عروضك المناسبة مباشرةً</span>
+          </span>
+        </span>
+        <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/25 bg-white/10 text-white transition duration-300 group-hover:-translate-x-1 group-hover:bg-white group-hover:text-[#082b50]">
+          <ArrowLeft size={21} strokeWidth={2.5}/>
+        </span>
+      </a>}
       <div className="mc-workspace-page">
     {isAccountPage ? <AccountProfilePage role={role} /> : <>{dashboard}{feedback}</>}
     {isAccountPage ? null : isVehicleForm ? vehicleForm : isRequestForm ? requestForm : role === 'company' ? <>{!isWorkspaceHome && !isCompanyVehicles && !isRequestList ? <section className="mc-company-dark-card mt-6 rounded-3xl bg-slate-950 p-7 text-white"><h2 className="text-2xl font-extrabold">إدارة احتياجات تأجير السيارات</h2><p className="mt-3 text-sm leading-7 text-slate-300">أنشئ طلبات التأجير، وتابع الطلبات والعروض، واستعرض السيارات المعتمدة.</p><div className="mt-5 flex flex-wrap gap-3"><a className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-white px-5 font-extrabold text-slate-950" href="/workspace/company/requests/new"><Plus size={18}/> إنشاء طلب</a><a className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/30 px-5 font-bold text-white" href="/workspace/company/requests"><ClipboardList size={18}/> طلباتي</a><a className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/30 px-5 font-bold text-white" href="/workspace/catalog"><CarFront size={18}/> السيارات المتاحة</a></div></section> : <div className="mt-6 flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-extrabold">{isCompanyVehicles ? 'السيارات المعتمدة المتاحة' : 'طلبات التأجير'}</h2>{isRequestList && <a className={primaryClass} href="/workspace/company/requests/new"><Plus size={17}/> طلب جديد</a>}</div>}
