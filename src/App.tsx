@@ -632,7 +632,7 @@ export default function App() {
           <div className="mc-home-hero-layout">
             <div className="mc-home-hero-visual" aria-label="سيارة مناسبة لتشغيل الشركات">
               <img src={HOME_BANNER_IMAGE} alt="شراكة بين مالك السيارات وممثلي الشركات" loading="eager" decoding="async" fetchPriority="high" className="mc-home-user-banner"/>
-              <span className="mc-home-hero-glow" aria-hidden="true"/>
+              <span className="mc-home-hero-glow" aria-hidden="true"/><div className="mc-home-visual-caption"><span className="mc-home-caption-mark"><CarFront size={17}/></span><span><strong>حلول سيارات الأعمال</strong><small>منصة واحدة تربط أطراف السوق</small></span><span className="mc-home-caption-seal"><ShieldCheck size={18}/> تجربة منظمة</span></div>
             </div>
             <div className="mc-home-copy">
               <p className="text-sm font-bold text-white/90 sm:text-lg">منصة <span className="text-[#ffad0a]">My Car عربيتي</span></p>
