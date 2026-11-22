@@ -14,7 +14,7 @@ type OwnedVehicle = { id: string; make: string; model: string; model_year: numbe
 
 const money = (value: number) => new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(value)
 
-export default function VehicleCatalogPage({ hideHeader = false }: { hideHeader?: boolean }) {
+export default function VehicleCatalogPage({ hideHeader = false, viewerOrganizationType = '' }: { hideHeader?: boolean; viewerOrganizationType?: string }) {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [plans, setPlans] = useState<AdPlan[]>([])
   const [myVehicles, setMyVehicles] = useState<OwnedVehicle[]>([])
@@ -25,7 +25,7 @@ export default function VehicleCatalogPage({ hideHeader = false }: { hideHeader?
   const [submittingPromotion, setSubmittingPromotion] = useState(false)
   const [userId, setUserId] = useState('')
   const [orgId, setOrgId] = useState('')
-  const [orgType, setOrgType] = useState('')
+  const [orgType, setOrgType] = useState(viewerOrganizationType)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
