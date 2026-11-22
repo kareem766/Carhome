@@ -2772,3 +2772,24 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
   .mc-owner-main-links{scroll-behavior:auto}
   .mc-owner-main-link,.mc-owner-main-link svg{transition:none}
 }
+
+/* Unified premium blue card surface — background only; preserve all foreground colors. */
+:root {
+  --mc-premium-blue-card: linear-gradient(115deg, #071629 0%, #102f59 38%, #174f91 72%, #087fa8 100%);
+}
+.mc-dashboard-hero,
+.mc-company-dark-card,
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="from-[#0b2545]"],
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="from-blue-"][class*="to-"],
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="via-blue-"][class*="to-blue-"] {
+  background-color: #102f59 !important;
+  background-image: var(--mc-premium-blue-card) !important;
+  border-color: rgba(147, 197, 253, .22) !important;
+  box-shadow: 0 18px 45px rgba(3, 18, 43, .24);
+}
+/* Keep action controls and small blue icon/status tiles outside the card color system. */
+main :is(button, a, [role="button"])[class*="bg-blue-"],
+main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
+  background-image: revert-layer;
+}
+
