@@ -43,14 +43,21 @@ export default function CompanyTeamPage(){
  async function createEmployee(e:FormEvent){
   e.preventDefault();if(!supabase||saving)return
   setSaving(true);setError('');setNotice('');setPlanLimitNotice('');setTemporaryPassword('')
-  const normalizedEmail=email.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF\u00A0]/g,'').replace(/\s+/g,'').trim().toLowerCase()
-  const validEmail=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i.test(normalizedEmail)
-  if(!validEmail){setError('صيغة البريد الإلكتروني غير صحيحة. تأكد من كتابته بالشكل name@example.com ومن عدم وجود مسافات.');setSaving(false);return}
-  const {data,error:invokeError}=await supabase.functions.invoke('admin-managed-accounts',{body:{action:'create_company_member',display_name:displayName.trim(),email:normalizedEmail,role}})
-  if(invokeError||data?.error){const message=String(data?.error||invokeError?.message||'تعذر إنشاء حساب الموظف.');if(message.includes('الحد الأقصى')||message.includes('حد أعضاء الفريق')||message.includes('يلزم تفعيل اشتراك شركة')||message.includes('إضافة أعضاء الفريق'))setPlanLimitNotice(message);else setError(message);setSaving(false);return}
-  setTemporaryPassword(String(data.temporary_password||''))
-  setNotice('تم إنشاء حساب الموظف وربطه بالشركة. انسخ كلمة المرور المؤقتة وشاركها معه؛ لن تظهر مرة أخرى بعد مغادرة هذه الصفحة.')
-  setDisplayName('');setEmail('');setRole('member');setSaving(false);setRefresh(v=>v+1)
+  try{
+   const normalizedEmail=email.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF\u00A0]/g,'').trim().toLowerCase()
+   const validEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)&&!normalizedEmail.split('@')[0].startsWith('.')&&!normalizedEmail.split('@')[0].endsWith('.')&&!normalizedEmail.split('@')[0].includes('..')
+   if(!validEmail)throw new Error('صيغة البريد الإلكتروني غير صحيحة. تأكد من كتابته بالشكل name@example.com ومن عدم وجود مسافات داخل البريد.')
+   const {data,error:invokeError}=await supabase.functions.invoke('admin-managed-accounts',{body:{action:'create_company_member',display_name:displayName.trim(),email:normalizedEmail,role}})
+   if(invokeError)throw invokeError
+   if(data?.error)throw new Error(String(data.error))
+   setTemporaryPassword(String(data.temporary_password||''))
+   setNotice('تم إنشاء حساب الموظف وربطه بالشركة. انسخ كلمة المرور المؤقتة وشاركها معه؛ لن تظهر مرة أخرى بعد مغادرة هذه الصفحة.')
+   setDisplayName('');setEmail('');setRole('member');setRefresh(v=>v+1)
+  }catch(caught){
+   const message=caught instanceof Error?caught.message:'تعذر إنشاء حساب الموظف. حاول مرة أخرى.'
+   if(message.includes('الحد الأقصى')||message.includes('حد أعضاء الفريق')||message.includes('يلزم تفعيل اشتراك شركة')||message.includes('إضافة أعضاء الفريق'))setPlanLimitNotice(message)
+   else setError(message)
+  }finally{setSaving(false)}
  }
  async function copyPassword(){
   if(!temporaryPassword)return
@@ -89,7 +96,7 @@ export default function CompanyTeamPage(){
     <form onSubmit={createEmployee} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
      <div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700"><UserPlus/></span><div><h2 className="font-black">إنشاء حساب موظف</h2><p className="text-xs text-slate-500">لن يحتاج الموظف إلى رابط دعوة أو إنشاء حساب بنفسه.</p></div></div>
      <label className="mt-5 block text-sm font-bold">اسم الموظف<input required minLength={2} maxLength={120} value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="الاسم بالكامل" className={field}/></label>
-     <label className="mt-4 block text-sm font-bold">البريد الإلكتروني<input required type="email" inputMode="email" autoComplete="off" autoCapitalize="none" spellCheck={false} value={email} onChange={e=>setEmail(e.target.value)} onBlur={()=>setEmail(v=>v.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF\u00A0]/g,'').replace(/\s+/g,'').trim().toLowerCase())} placeholder="employee@company.com" className={field} dir="ltr"/></label>
+     <label className="mt-4 block text-sm font-bold">البريد الإلكتروني<input required type="email" inputMode="email" autoComplete="off" autoCapitalize="none" spellCheck={false} value={email} onChange={e=>setEmail(e.target.value)} onBlur={()=>setEmail(v=>v.normalize('NFKC').replace(/[\u200B-\u200D\uFEFF\u00A0]/g,'').trim().toLowerCase())} placeholder="employee@company.com" className={field} dir="ltr"/></label>
      <label className="mt-4 block text-sm font-bold">الدور والصلاحيات<select value={role} onChange={e=>setRole(e.target.value as 'member'|'manager')} className={field}><option value="member">موظف</option><option value="manager">مدير</option></select></label>
      <button disabled={saving} className={btn+' mt-5 w-full'}><UserPlus size={17}/>{saving?'جارٍ إنشاء الحساب...':'إنشاء حساب الموظف'}</button>
      {temporaryPassword&&<div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-4">

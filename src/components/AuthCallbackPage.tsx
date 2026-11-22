@@ -53,7 +53,17 @@ async function finishAccount(user: User) {
     if (legacy.error) throw legacy.error
   }
 
-  if (role === 'employee') return role
+  if (role === 'employee') {
+    // Employee accounts are created by the auth trigger (independent) or the
+    // admin provisioning flow (company member); never create an organization for them.
+    const employeeAccount = await supabase.from('employee_accounts')
+      .select('employment_type,organization_id,account_status')
+      .eq('user_id', user.id).maybeSingle()
+    if (employeeAccount.error || !employeeAccount.data) {
+      throw new Error('تم تأكيد الحساب، لكن ملف الموظف لم يكتمل بعد. لن ننشئ مؤسسة من نوع غير صالح. حاول تسجيل الدخول مرة أخرى أو تواصل مع دعم My Car.')
+    }
+    return role
+  }
 
   const membership = await supabase.from('organization_memberships').select('organization_id').eq('user_id', user.id).limit(1).maybeSingle()
   if (membership.error) throw membership.error
