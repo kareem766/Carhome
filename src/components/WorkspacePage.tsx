@@ -3,6 +3,7 @@ import { ArrowLeft, Building2, CarFront, Wrench, ClipboardList, FileText, ImageP
 import { supabase } from '../lib/supabase'
 import { vehicleCatalog } from '../data/vehicleCatalog'
 import PlatformBrand from './PlatformBrand'
+import PlatformLoading from './PlatformLoading'
 import AccountNotifications from './AccountNotifications'
 import SupplierNavigation from './SupplierNavigation'
 import AccountProfilePage from './AccountProfilePage'
@@ -152,6 +153,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
     const client = supabase
     setLoading(true)
     setError('')
+    try {
     const { data: authData, error: authError } = await client.auth.getUser()
     if (authError || !authData.user) { window.location.replace('/?login=1'); return }
     const authUser = authData.user
@@ -181,10 +183,10 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
     }
     const expectedType = role === 'owner' ? 'individual_owner' : role === 'supplier' ? 'fleet_supplier' : 'company'
     const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations!inner(id,name,organization_type,approval_status)').eq('user_id', authUser.id).eq('organizations.organization_type', expectedType).limit(1)
-    if (membershipError) { setError(membershipError.message); setLoading(false); return }
+    if (membershipError) { setError(membershipError.message); return }
     const member = memberships?.[0] as unknown as { organization_id: string; organizations: Organization | Organization[] | null } | undefined
     const org = Array.isArray(member?.organizations) ? member?.organizations[0] : member?.organizations
-    if (!member?.organization_id || !org) { setError('لم يتم ربط حسابك بمؤسسة من النوع الصحيح بعد. سجّل الخروج ثم ادخل مجددًا، أو أعد إكمال التسجيل.'); setLoading(false); return }
+    if (!member?.organization_id || !org) { setError('لم يتم ربط حسابك بمؤسسة من النوع الصحيح بعد. سجّل الخروج ثم ادخل مجددًا، أو أعد إكمال التسجيل.'); return }
     if (org.organization_type !== expectedType) {
       const correctPath = org.organization_type === 'company' ? '/workspace/company' : org.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
       window.location.replace(correctPath)
@@ -409,7 +411,11 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
         } else setOfferedRequestIds(new Set())
       }
     }
-    setLoading(false)
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : 'تعذر تحميل بيانات مساحة العمل. حاول تحديث الصفحة.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { void loadWorkspace() }, [])
@@ -848,7 +854,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
     }, 2600)
   }
 
-  if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
+  if (loading || !user) return <PlatformLoading />;
 
   const reviewNoticeAlreadySeen = localStorage.getItem('mycar_review_notice_seen_' + user.id) === '1'
   const reviewStatusNotice = organization?.approval_status === 'pending_review' && !reviewNoticeAlreadySeen ? (
@@ -991,6 +997,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
   const sideNavigation = <nav aria-label="التنقل داخل مساحة العمل" className="mc-sidebar-nav">{workspaceLinks.map(({href,label,icon:Icon})=><a key={href} href={href} aria-current={path===href?'page':undefined} className={'mc-sidebar-link '+(path===href?'is-active':'')}><Icon size={19}/><span>{label}</span></a>)}<div className="mc-sidebar-divider"/><button type="button" onClick={()=>void signOut()} className="mc-sidebar-link mc-sidebar-logout"><LogOut size={19}/><span>تسجيل الخروج</span></button></nav>
   const companyActiveSection = path.endsWith('/account') ? 'account' : path.endsWith('/requests/new') ? 'new-request' : path.includes('/requests') ? 'requests' : path.includes('/vehicles') ? 'catalog' : 'overview'
   return <>
+    <PlatformLoading fadeOut />
     {role === 'company' && <CompanyPageSidebar active={companyActiveSection} employeeView={employeeView} />}
     <main dir="rtl" className={`mc-workspace-main min-h-screen bg-[#f3f6fb] ${role === 'owner' ? 'mc-owner-workspace-main' : ''} ${role === 'company' ? 'mc-company-workspace-main' : ''}`}>
     {role === 'supplier' && <aside className="mc-workspace-sidebar"><div className="mc-sidebar-brand"><PlatformBrand compact/><span className="mc-sidebar-tag">مساحة العمل</span></div>{sideNavigation}<div className="mc-sidebar-promo"><CarFront size={27}/><strong>كل خدمات السيارات في مكان واحد</strong><p>إدارة أسهل وفرص تشغيل أكثر مع CarHome.</p><a href="/workspace/catalog">استكشف الكتالوج ←</a></div></aside>}

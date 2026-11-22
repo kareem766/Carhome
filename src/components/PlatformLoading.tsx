@@ -1,5 +1,6 @@
 type PlatformLoadingProps = {
   pageName?: string
+  fadeOut?: boolean
 }
 
 const loadingRoutes: Array<[string, string]> = [
@@ -49,13 +50,13 @@ function resolvePageName(pathname: string) {
   return 'مساحة العمل'
 }
 
-export default function PlatformLoading({ pageName }: PlatformLoadingProps) {
+export default function PlatformLoading({ pageName, fadeOut = false }: PlatformLoadingProps) {
   const currentPage = pageName || (typeof window !== 'undefined' ? resolvePageName(window.location.pathname) : 'مساحة العمل')
 
   return (
     <div
       dir="rtl"
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/72 px-5 backdrop-blur-[5px]"
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-white/72 px-5 backdrop-blur-[5px] ${fadeOut ? "animate-[mc-platform-loader-fade_520ms_ease-out_forwards]" : ""}`}
       role="status"
       aria-live="polite"
       aria-label={`جارٍ فتح ${currentPage}`}
@@ -82,6 +83,7 @@ export default function PlatformLoading({ pageName }: PlatformLoadingProps) {
           0%, 100% { opacity: .42; transform: translateY(3px) scale(.985); }
           50% { opacity: 1; transform: translateY(0) scale(1); }
         }
+        @keyframes mc-platform-loader-fade { from { opacity: 1; visibility: visible; } to { opacity: 0; visibility: hidden; } }
         @keyframes loading-glide {
           0% { transform: translateX(150%); }
           100% { transform: translateX(-150%); }
