@@ -2772,3 +2772,10 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
   .mc-owner-main-links{scroll-behavior:auto}
   .mc-owner-main-link,.mc-owner-main-link svg{transition:none}
 }
+
+
+/* Match the employee requests banner blue treatment to the premium dashboard card. */
+.mc-employee-requests-banner-tint {
+  background: linear-gradient(115deg, rgba(7, 22, 41, .24) 0%, rgba(16, 47, 89, .18) 38%, rgba(23, 79, 145, .14) 72%, rgba(8, 127, 168, .12) 100%);
+  mix-blend-mode: multiply;
+}
