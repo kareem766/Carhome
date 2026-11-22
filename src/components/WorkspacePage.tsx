@@ -152,6 +152,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
     const client = supabase
     setLoading(true)
     setError('')
+    try {
     const { data: authData, error: authError } = await client.auth.getUser()
     if (authError || !authData.user) { window.location.replace('/?login=1'); return }
     const authUser = authData.user
@@ -181,10 +182,10 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
     }
     const expectedType = role === 'owner' ? 'individual_owner' : role === 'supplier' ? 'fleet_supplier' : 'company'
     const { data: memberships, error: membershipError } = await client.from('organization_memberships').select('organization_id, organizations!inner(id,name,organization_type,approval_status)').eq('user_id', authUser.id).eq('organizations.organization_type', expectedType).limit(1)
-    if (membershipError) { setError(membershipError.message); setLoading(false); return }
+    if (membershipError) { setError(membershipError.message); return }
     const member = memberships?.[0] as unknown as { organization_id: string; organizations: Organization | Organization[] | null } | undefined
     const org = Array.isArray(member?.organizations) ? member?.organizations[0] : member?.organizations
-    if (!member?.organization_id || !org) { setError('لم يتم ربط حسابك بمؤسسة من النوع الصحيح بعد. سجّل الخروج ثم ادخل مجددًا، أو أعد إكمال التسجيل.'); setLoading(false); return }
+    if (!member?.organization_id || !org) { setError('لم يتم ربط حسابك بمؤسسة من النوع الصحيح بعد. سجّل الخروج ثم ادخل مجددًا، أو أعد إكمال التسجيل.'); return }
     if (org.organization_type !== expectedType) {
       const correctPath = org.organization_type === 'company' ? '/workspace/company' : org.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
       window.location.replace(correctPath)
@@ -409,7 +410,11 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
         } else setOfferedRequestIds(new Set())
       }
     }
-    setLoading(false)
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : 'تعذر تحميل بيانات مساحة العمل. حاول تحديث الصفحة.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { void loadWorkspace() }, [])
@@ -848,7 +853,17 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
     }, 2600)
   }
 
-  if (loading || !user) return null;
+  if (loading || !user) return <main dir="rtl" aria-busy="true" aria-label="تحميل الصفحة" className="grid min-h-screen place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_top,_#e8f4ff_0%,_#f7faff_48%,_#ffffff_100%)] px-6">
+    <div className="flex flex-col items-center gap-6">
+      <div className="animate-pulse rounded-2xl bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,55,95,0.10)] ring-1 ring-blue-100/80">
+        <PlatformBrand />
+      </div>
+      <div aria-hidden="true" className="h-1 w-28 overflow-hidden rounded-full bg-blue-100">
+        <div className="h-full w-1/2 animate-[mc-loading-progress_1.25s_ease-in-out_infinite] rounded-full bg-gradient-to-l from-cyan-500 to-blue-700" />
+      </div>
+    </div>
+    <style>{`@keyframes mc-loading-progress{0%{transform:translateX(130%)}100%{transform:translateX(-220%)}}`}</style>
+  </main>;
 
   const reviewNoticeAlreadySeen = localStorage.getItem('mycar_review_notice_seen_' + user.id) === '1'
   const reviewStatusNotice = organization?.approval_status === 'pending_review' && !reviewNoticeAlreadySeen ? (
