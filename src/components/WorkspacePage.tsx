@@ -1023,23 +1023,10 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
       {isWorkspaceHome && (role === 'owner' || role === 'supplier') && <a
         href="/workspace/provider-employee-requests"
         aria-label="استكشف طلبات الموظفين"
-        className="group relative mb-6 flex min-h-[116px] w-full items-center justify-between gap-4 overflow-hidden rounded-[1.65rem] border border-sky-200/25 bg-[linear-gradient(112deg,#06172d_0%,#0a315b_48%,#075b91_100%)] px-5 py-5 text-white shadow-[0_18px_48px_rgba(8,47,86,.22),inset_0_1px_0_rgba(255,255,255,.14)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200/55 hover:shadow-[0_24px_58px_rgba(8,47,86,.3)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-300/50 sm:px-7"
+        className="group relative mb-6 block w-full overflow-hidden rounded-[1.65rem] border border-sky-200/30 bg-[#06264a] shadow-[0_18px_48px_rgba(8,47,86,.24)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200/60 hover:shadow-[0_24px_58px_rgba(8,47,86,.34)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-300/50"
       >
-        <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_12%_20%,rgba(56,189,248,.28),transparent_38%),radial-gradient(ellipse_at_88%_100%,rgba(14,165,233,.22),transparent_42%)]" />
-        <span aria-hidden="true" className="pointer-events-none absolute -left-12 -top-20 h-48 w-48 rounded-full border border-white/10 transition duration-700 group-hover:scale-125 group-hover:border-cyan-100/25" />
-        <span className="relative flex min-w-0 items-center gap-4">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-cyan-100/25 bg-white/10 text-cyan-100 shadow-[0_0_28px_rgba(56,189,248,.16)] transition duration-300 group-hover:scale-105 group-hover:bg-white/15">
-            <ClipboardList size={27} strokeWidth={2.1}/>
-          </span>
-          <span className="min-w-0">
-            <span className="block text-[10px] font-extrabold tracking-[.18em] text-cyan-200/90">MY CAR · فرص جديدة</span>
-            <span className="mt-1 block text-lg font-black leading-snug sm:text-2xl">استكشف طلبات الموظفين</span>
-            <span className="mt-1 block text-xs leading-5 text-sky-100/85 sm:text-sm">اكتشف احتياجات الموظفين وقدّم عروضك المناسبة مباشرةً</span>
-          </span>
-        </span>
-        <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/25 bg-white/10 text-white transition duration-300 group-hover:-translate-x-1 group-hover:bg-white group-hover:text-[#082b50]">
-          <ArrowLeft size={21} strokeWidth={2.5}/>
-        </span>
+        <img src="/employee-requests-banner.jpg" alt="استكشف طلبات الموظفين — اكتشف احتياجات الموظفين وقدّم عروضك المناسبة مباشرة" className="block h-auto w-full aspect-[8/3] object-cover transition duration-500 group-hover:scale-[1.012]" loading="eager" decoding="async" />
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-[#031a35]/10" />
       </a>}
       <div className="mc-workspace-page">
     {isAccountPage ? <AccountProfilePage role={role} /> : <>{dashboard}{feedback}</>}
