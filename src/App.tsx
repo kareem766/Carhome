@@ -434,28 +434,76 @@ export default function App() {
   useEffect(() => {
     if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
-    // Render the page shell immediately; photography must never block access to homepage content.
-    setHomeImagesReady(true)
-    const loadImage = (sources: string[]) => new Promise<string>((resolve) => {
-      let index = 0
-      const tryNext = () => {
-        const source = sources[index++]
-        if (!source) {
-          resolve('')
-          return
-        }
-        const image = new Image()
-        image.onload = () => { void image.decode().catch(() => undefined).then(() => resolve(source)) }
-        image.onerror = tryNext
-        image.src = source
+    let completed = false
+    const fallbackSource = '/carhome-icon.svg'
+    const claimedSources = new Set<string>()
+    const resolvedUrls = HOME_CAR_IMAGES.map(() => fallbackSource)
+    let resolvedCount = 0
+
+    const attemptSource = (source: string) => new Promise<boolean>((resolve) => {
+      const image = new Image()
+      let settled = false
+      let decodeTimeout: number | undefined
+      const loadTimeout = window.setTimeout(() => settle(false), 3500)
+      const settle = (loaded: boolean) => {
+        if (settled) return
+        settled = true
+        window.clearTimeout(loadTimeout)
+        if (decodeTimeout !== undefined) window.clearTimeout(decodeTimeout)
+        resolve(loaded)
       }
-      tryNext()
+      image.onerror = () => settle(false)
+      image.onload = () => {
+        if (typeof image.decode !== 'function') { settle(true); return }
+        decodeTimeout = window.setTimeout(() => settle(false), 1500)
+        void image.decode().then(() => settle(true)).catch(() => settle(false))
+      }
+      image.src = source
     })
-    void loadImage([HOME_BANNER_IMAGE]).catch((error) => console.error('Homepage banner image could not be preloaded:', error))
-    void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
-      if (active) setHomeImageUrls(urls)
+
+    const loadImage = async (sources: string[]) => {
+      for (const source of sources) {
+        // A source can belong to only one card at a time, preventing duplicate photos.
+        if (claimedSources.has(source)) continue
+        claimedSources.add(source)
+        if (await attemptSource(source)) return source
+        claimedSources.delete(source)
+      }
+      // Keep the page recoverable if every external photo fails.
+      await attemptSource(fallbackSource)
+      return fallbackSource
+    }
+
+    const finish = () => {
+      if (!active || completed) return
+      completed = true
+      window.clearTimeout(globalTimeout)
+      setHomeImageUrls([...resolvedUrls])
+      setHomeImagesReady(true)
+    }
+
+    // Do not keep visitors behind the loader indefinitely on slow or blocked image hosts.
+    const globalTimeout = window.setTimeout(finish, 12000)
+
+    HOME_CAR_IMAGES.forEach((sources, index) => {
+      void loadImage(sources).then((url) => {
+        if (!active || completed) return
+        resolvedUrls[index] = url
+        resolvedCount += 1
+        if (resolvedCount === HOME_CAR_IMAGES.length) finish()
+      }).catch((error) => {
+        console.error('Homepage vehicle image could not be preloaded:', error)
+        if (!active || completed) return
+        resolvedUrls[index] = fallbackSource
+        resolvedCount += 1
+        if (resolvedCount === HOME_CAR_IMAGES.length) finish()
+      })
     })
-    return () => { active = false }
+
+    return () => {
+      active = false
+      window.clearTimeout(globalTimeout)
+    }
   }, [])
 
   const path = window.location.pathname
