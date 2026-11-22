@@ -107,6 +107,7 @@ export default function AdminAutomationReviewPage({ onClose, embedded = false }:
   const [settings, setSettings] = useState<Record<string, ReviewSetting>>({})
   const [auditRows, setAuditRows] = useState<AuditRow[]>([])
   const [savingSetting, setSavingSetting] = useState<string | null>(null)
+  const [thresholdDrafts, setThresholdDrafts] = useState<Record<string, number>>({})
   const [visionResults, setVisionResults] = useState<Record<string, VisionResult>>({})
   const [visionLoading, setVisionLoading] = useState<string | null>(null)
 
@@ -133,6 +134,7 @@ export default function AdminAutomationReviewPage({ onClose, embedded = false }:
     if (errors.length) { setError('تعذر تحميل بعض سجلات المراجعة: ' + errors.map(x => x!.message).join(' · ')); setLoading(false); return }
     const settingRows = (settingResult.data || []) as ReviewSetting[]
     setSettings(Object.fromEntries(settingRows.map(item => [item.category, item])))
+    setThresholdDrafts(Object.fromEntries(settingRows.map(item => [item.category, item.risk_threshold])))
     setAuditRows((auditResult.data || []) as AuditRow[])
     const imageRows = (imageResult.data || []) as VehicleImage[]
     const fileAudits = (fileAuditResult.data || []) as FileAudit[]
@@ -208,6 +210,19 @@ export default function AdminAutomationReviewPage({ onClose, embedded = false }:
     await load()
   }
 
+  async function saveRiskThreshold(category: string) {
+    if (!supabase || savingSetting) return
+    const threshold = Number(thresholdDrafts[category] ?? settings[category]?.risk_threshold ?? 85)
+    if (!Number.isInteger(threshold) || threshold < 0 || threshold > 100) { setError('حد المخاطر يجب أن يكون رقمًا صحيحًا من 0 إلى 100.'); return }
+    setSavingSetting(category + ':threshold'); setError('')
+    const { data: auth } = await supabase.auth.getUser()
+    if (!auth.user) { setError('انتهت جلسة الإدارة. سجل الدخول مرة أخرى.'); setSavingSetting(null); return }
+    const { error: updateError } = await supabase.from('admin_review_settings').update({ risk_threshold: threshold, updated_by: auth.user.id, updated_at: new Date().toISOString() }).eq('category', category)
+    if (updateError) { setError('تعذر حفظ حد المخاطر: ' + updateError.message); setSavingSetting(null); return }
+    setSavingSetting(null)
+    await load()
+  }
+
   async function runVisionReview(item: Finding) {
     if (!supabase || !['vehicle', 'payment'].includes(item.kind) || visionLoading) return
     const key = item.kind + ':' + item.id
@@ -265,9 +280,10 @@ export default function AdminAutomationReviewPage({ onClose, embedded = false }:
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {(['vehicle','account','payment','ad','service'] as const).map(category => {
             const enabled = settings[category]?.analysis_enabled !== false
-            return <div key={category} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
-              <div><strong className="block text-sm text-slate-800">{settingLabels[category]}</strong><span className="mt-1 block text-xs text-slate-500">{enabled ? 'الفحص التوصيفي يعمل' : 'الفحص متوقف لهذه الفئة'}</span></div>
-              <button type="button" onClick={() => void toggleAnalysis(category)} disabled={loading || savingSetting !== null} className={`min-w-24 rounded-lg px-3 py-2 text-xs font-extrabold transition disabled:opacity-50 ${enabled ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>{savingSetting === category ? 'جارٍ الحفظ...' : enabled ? 'إيقاف الفحص' : 'تفعيل الفحص'}</button>
+            return <div key={category} className="rounded-xl border border-slate-200 p-3">
+              <div className="flex items-center justify-between gap-3"><div><strong className="block text-sm text-slate-800">{settingLabels[category]}</strong><span className="mt-1 block text-xs text-slate-500">{enabled ? 'الفحص التوصيفي يعمل' : 'الفحص متوقف لهذه الفئة'}</span></div>
+              <button type="button" onClick={() => void toggleAnalysis(category)} disabled={loading || savingSetting !== null} className={`min-w-24 rounded-lg px-3 py-2 text-xs font-extrabold transition disabled:opacity-50 ${enabled ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>{savingSetting === category ? 'جارٍ الحفظ...' : enabled ? 'إيقاف الفحص' : 'تفعيل الفحص'}</button></div>
+              <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3"><label className="min-w-0 flex-1 text-xs font-bold text-slate-600">حد المخاطر الإرشادي (0–100)<input type="number" min={0} max={100} step={1} value={thresholdDrafts[category] ?? settings[category]?.risk_threshold ?? 85} onChange={e=>setThresholdDrafts(current=>({...current,[category]:Number(e.target.value)}))} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-900"/></label><button type="button" onClick={()=>void saveRiskThreshold(category)} disabled={loading || savingSetting !== null || (thresholdDrafts[category] ?? settings[category]?.risk_threshold) === settings[category]?.risk_threshold} className="min-h-10 rounded-lg border border-blue-200 bg-blue-50 px-4 text-xs font-extrabold text-blue-800 disabled:opacity-40">{savingSetting === category + ':threshold' ? 'جارٍ الحفظ...' : 'حفظ الحد'}</button></div>
             </div>
           })}
         </div>

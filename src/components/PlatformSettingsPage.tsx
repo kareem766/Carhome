@@ -26,6 +26,9 @@ type PlatformSettings = {
   maintenance_mode: boolean
   partner_logos: { name: string; logo_url: string; website_url?: string }[]
   partner_ticker_seconds: number
+  owner_vehicle_monthly_fee_egp: number
+  supplier_vehicle_registration_fee_egp: number
+  company_subscription_required: boolean
 }
 const defaults: PlatformSettings = {
   id: true, platform_name: 'My Car عربيتي', tagline: 'منصة السيارات للشركات والأساطيل في مصر',
@@ -34,7 +37,9 @@ const defaults: PlatformSettings = {
   footer_text: 'جميع الحقوق محفوظة.', announcement_text: '', primary_color: '#1d4ed8',
   secondary_color: '#0f172a', registration_enabled: true, owner_registration_enabled: true,
   company_registration_enabled: true, supplier_registration_enabled: true, maintenance_mode: false,
-  partner_logos: [], partner_ticker_seconds: 28
+  partner_logos: [], partner_ticker_seconds: 28,
+  owner_vehicle_monthly_fee_egp: 150, supplier_vehicle_registration_fee_egp: 150,
+  company_subscription_required: false
 }
 const fieldClass = 'mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
 const labelClass = 'block text-sm font-bold text-slate-700'
@@ -48,6 +53,8 @@ export default function PlatformSettingsPage() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [partnerLogosText, setPartnerLogosText] = useState('')
+  const [employeeFeeEnabled, setEmployeeFeeEnabled] = useState(false)
+  const [employeeFeeEgp, setEmployeeFeeEgp] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -59,10 +66,14 @@ export default function PlatformSettingsPage() {
       if (!active) return
       if (adminError || !admin) { setError(adminError?.message || 'هذه الصفحة متاحة لصاحب المنصة فقط.'); setLoading(false); return }
       setAuthorized(true)
-      const { data, error: settingsError } = await supabase.from('platform_settings').select('id,platform_name,tagline,description,logo_url,favicon_url,support_email,support_phone,website_url,address,footer_text,announcement_text,primary_color,secondary_color,registration_enabled,owner_registration_enabled,company_registration_enabled,supplier_registration_enabled,maintenance_mode,partner_logos,partner_ticker_seconds').eq('id', true).maybeSingle()
+      const { data, error: settingsError } = await supabase.from('platform_settings').select('id,platform_name,tagline,description,logo_url,favicon_url,support_email,support_phone,website_url,address,footer_text,announcement_text,primary_color,secondary_color,registration_enabled,owner_registration_enabled,company_registration_enabled,supplier_registration_enabled,maintenance_mode,partner_logos,partner_ticker_seconds,owner_vehicle_monthly_fee_egp,supplier_vehicle_registration_fee_egp,company_subscription_required').eq('id', true).maybeSingle()
       if (!active) return
       if (settingsError) setError('تعذر تحميل إعدادات المنصة. تأكد من تطبيق Migration إعدادات المنصة. ' + settingsError.message)
       else if (data) { const loaded = { ...defaults, ...data, platform_name: ['Carhome', 'My Car'].includes(data.platform_name) ? defaults.platform_name : (data.platform_name || defaults.platform_name), tagline: data.tagline === 'تأجير السيارات للشركات' ? defaults.tagline : (data.tagline || defaults.tagline) } as PlatformSettings; setSettings(loaded); setPartnerLogosText((loaded.partner_logos || []).map(p => [p.name, p.logo_url, p.website_url || ''].join(' | ')).join('\n')) }
+      const { data: employeeFees, error: employeeFeesError } = await supabase.from('employee_service_settings').select('request_fee_enabled,request_fee_egp').eq('id', true).maybeSingle()
+      if (!active) return
+      if (employeeFeesError) setError(current => current ? current + ' · تعذر تحميل رسوم خدمات الموظفين: ' + employeeFeesError.message : 'تعذر تحميل رسوم خدمات الموظفين: ' + employeeFeesError.message)
+      else if (employeeFees) { setEmployeeFeeEnabled(Boolean(employeeFees.request_fee_enabled)); setEmployeeFeeEgp(Number(employeeFees.request_fee_egp || 0)) }
       setLoading(false)
     }
     void load()
@@ -91,6 +102,7 @@ export default function PlatformSettingsPage() {
     event.preventDefault()
     if (!supabase || !authorized) return
     if (!settings.platform_name.trim() || !settings.tagline.trim()) { setError('اسم المنصة والوصف المختصر مطلوبان.'); return }
+    if (![settings.owner_vehicle_monthly_fee_egp, settings.supplier_vehicle_registration_fee_egp, employeeFeeEgp].every(value => Number.isFinite(value) && value >= 0 && value <= 1000000)) { setError('تأكد أن جميع الرسوم أرقام صحيحة بين صفر ومليون جنيه.'); return }
     setSaving(true); setError(''); setNotice('')
     const { data: auth } = await supabase.auth.getUser()
     let partnerLogos: PlatformSettings['partner_logos']
@@ -110,12 +122,18 @@ export default function PlatformSettingsPage() {
       owner_registration_enabled: settings.owner_registration_enabled,
       company_registration_enabled: settings.company_registration_enabled,
       supplier_registration_enabled: settings.supplier_registration_enabled,
-      maintenance_mode: settings.maintenance_mode, updated_at: new Date().toISOString(),
+      maintenance_mode: settings.maintenance_mode,
+      owner_vehicle_monthly_fee_egp: Math.round(settings.owner_vehicle_monthly_fee_egp),
+      supplier_vehicle_registration_fee_egp: Math.round(settings.supplier_vehicle_registration_fee_egp),
+      company_subscription_required: settings.company_subscription_required,
+      updated_at: new Date().toISOString(),
       updated_by: auth.user?.id || null
     }
     const { error: saveError } = await supabase.from('platform_settings').update(payload).eq('id', true)
+    if (saveError) { setSaving(false); setError('تعذر حفظ إعدادات المنصة: ' + saveError.message); return }
+    const { error: employeeFeeSaveError } = await supabase.from('employee_service_settings').update({ request_fee_enabled: employeeFeeEnabled, request_fee_egp: Number(employeeFeeEgp.toFixed(2)), updated_at: new Date().toISOString(), updated_by: auth.user?.id || null }).eq('id', true)
     setSaving(false)
-    if (saveError) { setError('تعذر حفظ الإعدادات: ' + saveError.message); return }
+    if (employeeFeeSaveError) { setError('تم حفظ إعدادات المنصة، لكن تعذر حفظ رسوم خدمات الموظفين: ' + employeeFeeSaveError.message); return }
     window.dispatchEvent(new Event('platform-settings-updated'))
     setNotice('تم حفظ إعدادات الهوية بنجاح. سيتم تحديث اسم المنصة وشعارها وألوانها في الصفحات المشتركة، مع إعادة تحميل الصفحة لتحديث بيانات العنوان والأيقونة.')
   }
@@ -173,6 +191,15 @@ export default function PlatformSettingsPage() {
             <label className={labelClass}>العنوان<input maxLength={300} value={settings.address || ''} onChange={e=>update('address',e.target.value)} className={fieldClass}/></label>
             <label className={labelClass+' sm:col-span-2'}>نص التذييل وحقوق النشر<input maxLength={300} value={settings.footer_text} onChange={e=>update('footer_text',e.target.value)} className={fieldClass}/></label>
             <label className={labelClass+' sm:col-span-2'}>إعلان عام أعلى الموقع (اختياري)<textarea maxLength={500} rows={2} value={settings.announcement_text || ''} onChange={e=>update('announcement_text',e.target.value)} className={fieldClass}/></label>
+          </div>
+        </section>
+        <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
+          <div className="flex items-start gap-3"><div className="min-w-0"><h2 className="text-lg font-extrabold">الرسوم والاشتراكات والخدمات</h2><p className="mt-1 text-sm leading-6 text-slate-500">إدارة الرسوم التي تُستخدم في طلبات تسجيل السيارات وخدمات الموظفين، والتحكم في إلزام الشركات بالاشتراك.</p></div></div>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <label className={labelClass}>رسوم تسجيل سيارة المالك لكل شهر (جنيه)<input type="number" min={0} max={1000000} step={1} value={settings.owner_vehicle_monthly_fee_egp} onChange={e=>update('owner_vehicle_monthly_fee_egp',Number(e.target.value))} className={fieldClass}/></label>
+            <label className={labelClass}>رسوم تسجيل سيارة مورد الأسطول (جنيه)<input type="number" min={0} max={1000000} step={1} value={settings.supplier_vehicle_registration_fee_egp} onChange={e=>update('supplier_vehicle_registration_fee_egp',Number(e.target.value))} className={fieldClass}/></label>
+            <label className="flex items-center gap-3 rounded-xl border p-4 text-sm font-bold sm:col-span-2"><input type="checkbox" checked={settings.company_subscription_required} onChange={e=>update('company_subscription_required',e.target.checked)} className="h-4 w-4"/><span>إلزام الشركات باشتراك نشط قبل نشر طلبات تأجير جديدة</span></label>
+            <div className="rounded-xl border border-slate-200 p-4 sm:col-span-2"><label className="flex items-center gap-3 text-sm font-bold"><input type="checkbox" checked={employeeFeeEnabled} disabled className="h-4 w-4"/>تفعيل رسوم إنشاء طلبات الموظفين</label><label className={labelClass+' mt-4'}>رسوم طلب الموظف (جنيه)<input type="number" min={0} max={1000000} step={0.5} disabled={!employeeFeeEnabled} value={employeeFeeEgp} onChange={e=>setEmployeeFeeEgp(Number(e.target.value))} className={fieldClass+' disabled:bg-slate-100 disabled:text-slate-400'}/></label><p className="mt-2 text-xs leading-6 text-slate-500">إعداد الرسوم محفوظ في قاعدة البيانات، لكن تفعيلها متوقف مؤقتًا لحين استكمال دورة الدفع وإرفاق إثبات التحويل ومراجعة الإدارة؛ إبقاء هذا الخيار مغلقًا يمنع تعطيل إرسال طلبات الموظفين.</p></div>
           </div>
         </section>
         <section className="rounded-3xl border border-white bg-white/95 p-5 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.30)] sm:p-7">
