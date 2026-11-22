@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { AlertCircle, ArrowRight, CheckCircle2, Headset, MessageSquare, Plus, RefreshCw, Send, ShieldCheck, Ticket } from 'lucide-react'
+import { AlertCircle, ArrowRight, CheckCircle2, Headset, MessageSquare, Phone, Plus, RefreshCw, Send, ShieldCheck, Ticket } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
@@ -19,7 +19,7 @@ type TicketRow = {
 }
 type TicketMessage = { id: string; ticket_id: string; sender_user_id: string; body: string; created_at: string }
 type PublicSupportRequest = { id: string; request_code: string; contact_name: string; contact_email: string; account_email: string; phone: string | null; subject: string; message: string; status: string; created_at: string }
-type Props = { admin?: boolean }
+type Props = { admin?: boolean; supportPhone?: string | null }
 
 const categories = [
   { value: 'general', label: 'استفسار عام' }, { value: 'account', label: 'الحساب والتسجيل' },
@@ -36,7 +36,7 @@ const statusLabel = (value: string) => statuses.find(x => x.value === value)?.la
 const categoryLabel = (value: string) => categories.find(x => x.value === value)?.label || value
 const dateLabel = (value: string) => new Date(value).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' })
 
-export default function SupportCenterPage({ admin = false }: Props) {
+export default function SupportCenterPage({ admin = false, supportPhone = null }: Props) {
   const [userId, setUserId] = useState('')
   const [authorized, setAuthorized] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -206,6 +206,7 @@ export default function SupportCenterPage({ admin = false }: Props) {
       <section className="mt-5 rounded-3xl bg-gradient-to-l from-[#0b2340] via-[#123a61] to-[#1768a6] p-6 text-white shadow-lg sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-sm font-extrabold text-cyan-200">MY CAR · SUPPORT CENTER</p><h1 className="mt-2 text-2xl font-black sm:text-3xl">{admin ? 'إدارة تذاكر الدعم' : 'كيف نقدر نساعدك؟'}</h1><p className="mt-2 max-w-2xl text-sm leading-7 text-blue-100">{admin ? 'تابع استفسارات المستخدمين، ورد على الرسائل، وحدّث حالة كل تذكرة.' : 'أرسل استفسارك أو بلّغ عن مشكلة، وتابع الردود وحالة طلب الدعم من مكان واحد.'}</p></div><div className="rounded-2xl border border-white/15 bg-white/10 p-4"><Ticket size={25} className="text-cyan-200"/><p className="mt-2 text-2xl font-black tabular-nums">{tickets.length.toLocaleString('ar-EG')}</p><p className="text-xs text-blue-100">{admin ? 'إجمالي التذاكر' : 'تذاكرك'}</p></div></div>
       </section>
+      {!admin && supportPhone?.trim() && <section className="mt-4 flex flex-col gap-3 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5"><div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700"><Phone size={20}/></span><div><h2 className="font-black text-slate-900">التواصل المباشر مع الدعم الفني</h2><p className="mt-1 text-xs leading-6 text-slate-500">رقم الدعم متاح هنا داخل مركز الدعم الفني فقط.</p></div></div><a href={'tel:' + supportPhone.replace(/[^\d+]/g, '')} dir="ltr" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-black text-white transition hover:bg-blue-800"><Phone size={16} className="ml-2"/> {supportPhone}</a></section>}
       {error && <div role="alert" className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"><AlertCircle size={17} className="mt-0.5 shrink-0"/>{error}</div>}
       {admin && publicRequests.length > 0 && <section className="mt-5 rounded-2xl border border-amber-200 bg-white p-4 shadow-sm"><div className="mb-3 flex items-center justify-between"><h2 className="font-black text-[#102b47]">طلبات مراجعة الحسابات دون تسجيل دخول</h2><span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-900">{publicRequests.length}</span></div><div className="space-y-3">{publicRequests.map(request=><article key={request.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-black text-slate-900">{request.subject} · {request.request_code}</h3><p className="mt-1 text-xs text-slate-500">{dateLabel(request.created_at)} · {request.contact_name}</p></div><select aria-label="حالة طلب المراجعة" value={request.status} onChange={e=>void updatePublicRequestStatus(request.id,e.target.value)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold"><option value="open">مفتوح</option><option value="in_progress">قيد المعالجة</option><option value="resolved">تمت المراجعة</option><option value="closed">مغلق</option></select></div><div className="mt-3 grid gap-1 text-sm text-slate-700 sm:grid-cols-2"><p>بريد التواصل: <a className="font-bold text-blue-700" href={`mailto:${request.contact_email}`}>{request.contact_email}</a></p><p>بريد الحساب: <b dir="ltr">{request.account_email}</b></p>{request.phone&&<p>الهاتف: <b dir="ltr">{request.phone}</b></p>}</div><p className="mt-3 whitespace-pre-wrap rounded-lg bg-white p-3 text-sm leading-7 text-slate-700">{request.message}</p></article>)}</div></section>}
       <section className="mt-5 grid gap-4 lg:grid-cols-[minmax(280px,.8fr)_minmax(0,1.5fr)]">
