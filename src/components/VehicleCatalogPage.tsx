@@ -305,7 +305,7 @@ export default function VehicleCatalogPage({ hideHeader = false }: { hideHeader?
 
 
   return <main dir="rtl" aria-busy={loading} className="mc-catalog-main min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_48%,#f8fafc_100%)] text-slate-900">
-    {orgType === 'individual_owner' && <section aria-label="تنبيه وضع مشاهدة الكتالوج" role="note" className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 sm:pt-5">
+    {orgType === 'individual_owner' && <section aria-label="تنبيه وضع مشاهدة الكتالوج" role="note" className="w-full pt-3 sm:pt-4">
       <div className="relative isolate overflow-hidden rounded-2xl border border-sky-200/80 bg-gradient-to-l from-[#edf8ff] via-white to-[#f1fbff] p-4 shadow-[0_8px_24px_rgba(15,75,125,.07)] sm:rounded-3xl sm:p-5">
         <div aria-hidden="true" className="pointer-events-none absolute -left-8 -top-12 -z-10 h-36 w-36 rounded-full border-[18px] border-sky-100/70"/>
         <div className="relative flex items-start gap-3.5 sm:gap-4">
