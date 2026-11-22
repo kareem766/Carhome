@@ -305,7 +305,30 @@ export default function VehicleCatalogPage({ hideHeader = false }: { hideHeader?
 
 
   return <main dir="rtl" aria-busy={loading} className="mc-catalog-main min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_48%,#f8fafc_100%)] text-slate-900">
-    {orgType === 'individual_owner' && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6"><div className="flex items-start gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-cyan-950"><span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-cyan-800"><Eye size={18}/></span><div><strong className="block text-sm font-extrabold">كتالوج السيارات — وضع المشاهدة فقط</strong><p className="mt-1 text-xs leading-6 text-cyan-900">يمكنك تصفح السيارات ومقارنة الأسعار والمواصفات ومشاهدة طريقة ظهور السيارات أمام الشركات. لا يمكنك تقديم عروض أو بدء محادثات من هذا الكتالوج بحساب المالك.</p></div></div></div>}
+    {orgType === 'individual_owner' && <section aria-label="تنبيه وضع مشاهدة الكتالوج" role="note" className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 sm:pt-5">
+      <div className="relative isolate overflow-hidden rounded-2xl border border-sky-200/80 bg-gradient-to-l from-[#edf8ff] via-white to-[#f1fbff] p-4 shadow-[0_8px_24px_rgba(15,75,125,.07)] sm:rounded-3xl sm:p-5">
+        <div aria-hidden="true" className="pointer-events-none absolute -left-8 -top-12 -z-10 h-36 w-36 rounded-full border-[18px] border-sky-100/70"/>
+        <div className="relative flex items-start gap-3.5 sm:gap-4">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#0d5a91] to-[#123d70] text-white shadow-lg shadow-sky-900/15 sm:h-12 sm:w-12">
+            <Eye size={21} strokeWidth={2.2}/>
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="mb-1.5 flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-black tracking-wide text-sky-800 sm:text-[11px]">مساحة مالك السيارة</span>
+              <span className="h-1 w-1 rounded-full bg-sky-400" aria-hidden="true"/>
+              <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-white/80 px-2 py-0.5 text-[10px] font-extrabold text-sky-800 sm:text-[11px]"><Eye size={12}/> مشاهدة فقط</span>
+            </div>
+            <h2 className="text-sm font-black leading-6 text-[#102e4d] sm:text-base">استكشف كتالوج السيارات وتعرّف على طريقة عرض سيارتك</h2>
+            <p className="mt-1.5 max-w-4xl text-xs leading-6 text-slate-600 sm:text-sm sm:leading-7">يمكنك تصفح السيارات المعتمدة ومقارنة الأسعار والمواصفات ومشاهدة كيف تظهر السيارات أمام الشركات. هذا القسم للاستكشاف فقط؛ إرسال العروض وبدء المحادثات غير متاحين من حساب مالك السيارة.</p>
+          </div>
+        </div>
+        <div className="relative mt-3 flex flex-wrap items-center gap-2 border-t border-sky-100 pt-3 sm:mt-4">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/85 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 sm:text-xs"><Search size={13} className="text-sky-700"/> تصفح ومقارنة</span>
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/85 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 sm:text-xs"><ShieldCheck size={13} className="text-sky-700"/> بيانات الملاك محمية</span>
+          <a href="/workspace/owner/vehicles" className="mr-auto inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 text-xs font-extrabold text-blue-800 transition hover:bg-white/80 hover:text-blue-950">العودة إلى سياراتي <ArrowLeft size={14}/></a>
+        </div>
+      </div>
+    </section>}
     {!hideHeader && orgType !== 'individual_owner' && <>
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
