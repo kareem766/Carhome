@@ -848,7 +848,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
     }, 2600)
   }
 
-  if (loading || !user) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 text-slate-600">جارٍ تحميل مساحة العمل...</main>
+  if (loading || !user) return null;
 
   const reviewNoticeAlreadySeen = localStorage.getItem('mycar_review_notice_seen_' + user.id) === '1'
   const reviewStatusNotice = organization?.approval_status === 'pending_review' && !reviewNoticeAlreadySeen ? (
