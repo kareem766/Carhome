@@ -1020,6 +1020,14 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
       </>}
       {reviewStatusNotice}
       {!isAccountPage && !isVehicleForm && !isRequestForm && isWorkspaceHome && (role === 'owner' || role === 'supplier') && <div className="mb-5"><PromotionalCarousel role={role === 'owner' ? 'individual_owner' : 'fleet_supplier'} /></div>}
+      {isWorkspaceHome && (role === 'owner' || role === 'supplier') && <a
+        href="/workspace/provider-employee-requests"
+        aria-label="استكشف طلبات الموظفين"
+        className="group relative mb-6 block w-full overflow-hidden rounded-[1.65rem] border border-sky-200/30 bg-[#06264a] shadow-[0_18px_48px_rgba(8,47,86,.24)] transition duration-300 hover:-translate-y-1 hover:border-cyan-200/60 hover:shadow-[0_24px_58px_rgba(8,47,86,.34)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-300/50"
+      >
+        <img src="/employee-requests-banner.jpg" alt="استكشف طلبات الموظفين — اكتشف احتياجات الموظفين وقدّم عروضك المناسبة مباشرة" className="block h-auto w-full aspect-[8/3] object-cover transition duration-500 group-hover:scale-[1.012]" loading="eager" decoding="async" />
+        <span aria-hidden="true" className="mc-employee-requests-banner-tint pointer-events-none absolute inset-0" />
+      </a>}
       <div className="mc-workspace-page">
     {isAccountPage ? <AccountProfilePage role={role} /> : <>{dashboard}{feedback}</>}
     {isAccountPage ? null : isVehicleForm ? vehicleForm : isRequestForm ? requestForm : role === 'company' ? <>{!isWorkspaceHome && !isCompanyVehicles && !isRequestList ? <section className="mc-company-dark-card mt-6 rounded-3xl bg-slate-950 p-7 text-white"><h2 className="text-2xl font-extrabold">إدارة احتياجات تأجير السيارات</h2><p className="mt-3 text-sm leading-7 text-slate-300">أنشئ طلبات التأجير، وتابع الطلبات والعروض، واستعرض السيارات المعتمدة.</p><div className="mt-5 flex flex-wrap gap-3"><a className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-white px-5 font-extrabold text-slate-950" href="/workspace/company/requests/new"><Plus size={18}/> إنشاء طلب</a><a className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/30 px-5 font-bold text-white" href="/workspace/company/requests"><ClipboardList size={18}/> طلباتي</a><a className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/30 px-5 font-bold text-white" href="/workspace/catalog"><CarFront size={18}/> السيارات المتاحة</a></div></section> : <div className="mt-6 flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-extrabold">{isCompanyVehicles ? 'السيارات المعتمدة المتاحة' : 'طلبات التأجير'}</h2>{isRequestList && <a className={primaryClass} href="/workspace/company/requests/new"><Plus size={17}/> طلب جديد</a>}</div>}
