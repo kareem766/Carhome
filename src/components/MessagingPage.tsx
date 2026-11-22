@@ -21,6 +21,7 @@ export default function MessagingPage() {
   const [searchTerm,setSearchTerm] = useState('')
 
   async function loadConversations() {
+    try {
     if (!supabase) { window.location.replace('/?login=1'); return }
     const { data: auth } = await supabase.auth.getUser()
     if (!auth.user) { window.location.replace('/?login=1'); return }
@@ -38,11 +39,19 @@ export default function MessagingPage() {
       if (rows.length === 0) setMessages([])
     }
     setLoading(false)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'تعذر تحميل المحادثات. تحقق من اتصالك ثم حاول مرة أخرى.')
+      setLoading(false)
+    }
   }
   async function loadMessages(conversationId: string) {
+    try {
     if (!supabase || !conversationId) { setMessages([]); return }
     const { data, error: messageError } = await supabase.from('messages').select('id,sender_id,sender_organization_id,body,created_at').eq('conversation_id',conversationId).order('created_at',{ascending:true})
-    if (messageError) setError(messageError.message); else setMessages((data || []) as Message[])
+    if (messageError) setError('تعذر تحميل رسائل المحادثة. حاول تحديث الصفحة.'); else setMessages((data || []) as Message[])
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'تعذر تحميل رسائل المحادثة.')
+    }
   }
   useEffect(() => { void loadConversations() }, [])
   useEffect(() => { if (activeId) void loadMessages(activeId); else setMessages([]) }, [activeId])
@@ -69,23 +78,41 @@ export default function MessagingPage() {
   }, [activeId])
 
   async function refreshMessages() {
+    if (refreshing) return
     setRefreshing(true)
     setError('')
-    await loadConversations()
-    if (activeId) await loadMessages(activeId)
-    setRefreshing(false)
+    try {
+      await loadConversations()
+      if (activeId) await loadMessages(activeId)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'تعذر تحديث المحادثات الآن.')
+    } finally {
+      setRefreshing(false)
+    }
   }
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!supabase || !userId || !organizationId || !activeId || !body.trim()) return
+    if (!supabase || !userId || !organizationId || !activeId || !body.trim() || sending) return
+    const conversationId = activeId
+    const messageBody = body.trim()
     setSending(true); setError(''); setNotice('')
-    const { error: sendError } = await supabase.from('messages').insert({ conversation_id:activeId, sender_organization_id:organizationId, sender_id:userId, body:body.trim() })
-    setSending(false)
-    if (sendError) { setError(sendError.message); return }
-    setBody('')
-    await loadMessages(activeId)
-    setNotice('تم إرسال الرسالة.')
+    try {
+      const { error: sendError } = await supabase.from('messages').insert({
+        conversation_id:conversationId,
+        sender_organization_id:organizationId,
+        sender_id:userId,
+        body:messageBody
+      })
+      if (sendError) throw new Error('تعذر إرسال الرسالة. تحقق من اتصالك وحالة المحادثة ثم حاول مرة أخرى.')
+      setBody('')
+      await loadMessages(conversationId)
+      setNotice('تم إرسال الرسالة.')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'تعذر إرسال الرسالة الآن. حاول مرة أخرى.')
+    } finally {
+      setSending(false)
+    }
   }
   const active = conversations.find(c=>c.id===activeId)
   const filteredConversations = conversations.filter(c => `${c.vehicles ? `${c.vehicles.make} ${c.vehicles.model}` : c.rental_requests?.title || ''} ${c.company?.name || ''} ${c.provider?.name || ''}`.toLocaleLowerCase('ar').includes(searchTerm.trim().toLocaleLowerCase('ar')))
