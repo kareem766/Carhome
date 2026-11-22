@@ -72,6 +72,7 @@ Deno.serve(async(req:Request)=>{
     if((memberCount||0)>=teamLimit)return send({error:"وصلت شركتك إلى الحد الأقصى لأعضاء الفريق في باقتك الحالية. يمكنك ترقية الباقة لإضافة أعضاء جدد."},403);
    }
   }
+  stage="create_company_member.lookup_user";
   const {data:existingUsers,error:listError}=await db.auth.admin.listUsers({page:1,perPage:1000});
   if(listError)return send({error:"تعذر التحقق من البريد الإلكتروني."},500);
   const existingUser=(existingUsers?.users||[]).find((u:any)=>String(u.email||"").toLowerCase()===email);
@@ -86,8 +87,10 @@ Deno.serve(async(req:Request)=>{
    if((currentMemberships||[]).some((m:any)=>m.organization_id===membership.organization_id))
     return send({error:"هذا الموظف موجود بالفعل ضمن فريق شركتك."},409);
    const existingUserId=existingUser.id;
+   stage="create_company_member.profile";
    const {error:profileError}=await db.from("profiles").upsert({id:existingUserId,display_name:displayName,contact_email:email,locale:"ar"},{onConflict:"id"});
    if(profileError)return send({error:"تعذر تحديث الملف الشخصي للموظف: "+profileError.message},500);
+   stage="create_company_member.membership";
    const {error:membershipInsertError}=await db.from("organization_memberships").insert({organization_id:membership.organization_id,user_id:existingUserId,role});
    if(membershipInsertError)return send({error:"تعذر إعادة ربط الموظف بالشركة: "+membershipInsertError.message},500);
    const {error:metadataError}=await db.auth.admin.updateUserById(existingUserId,{user_metadata:{...(existingUser.user_metadata||{}),display_name:displayName,organization_type:"company",organization_name:org.name,company_member_role:role}});
@@ -97,6 +100,7 @@ Deno.serve(async(req:Request)=>{
    }
    return send({success:true,employee:{user_id:existingUserId,email,display_name:displayName,role},temporary_password:null,reused_existing_account:true,message:"تمت إعادة الموظف إلى فريق الشركة. يمكنه تسجيل الدخول بكلمة مروره الحالية؛ وإذا نسيها يستخدم خيار نسيت كلمة المرور."},200);
   }
+  stage="create_company_member.auth_user";
   const temporaryPassword=randomPassword();
   const {data:created,error:createError}=await db.auth.admin.createUser({
    email,password:temporaryPassword,email_confirm:true,
@@ -110,11 +114,14 @@ Deno.serve(async(req:Request)=>{
   }
   const newUserId=created.user.id;
   const rollback=async()=>{await db.from("organization_memberships").delete().eq("organization_id",membership.organization_id).eq("user_id",newUserId);await db.from("profiles").delete().eq("id",newUserId);await db.from("admin_managed_account_passwords").delete().eq("user_id",newUserId);await db.auth.admin.deleteUser(newUserId);};
+  stage="create_company_member.profile";
   const {error:profileError}=await db.from("profiles").upsert({id:newUserId,display_name:displayName,contact_email:email,locale:"ar"},{onConflict:"id"});
   if(profileError){await rollback();return send({error:"تعذر إنشاء الملف الشخصي للموظف: "+profileError.message},500);}
+  stage="create_company_member.temporary_password_record";
   const salt=crypto.getRandomValues(new Uint8Array(16));
   const {error:passwordError}=await db.from("admin_managed_account_passwords").upsert({user_id:newUserId,temporary_password_hash:await hashPassword(temporaryPassword,salt),password_salt:enc(salt)},{onConflict:"user_id"});
   if(passwordError){await rollback();return send({error:"تعذر إعداد تغيير كلمة المرور الإلزامي: "+passwordError.message},500);}
+  stage="create_company_member.membership";
   const {error:memberInsertError}=await db.from("organization_memberships").insert({organization_id:membership.organization_id,user_id:newUserId,role});
   if(memberInsertError){await rollback();return send({error:"تعذر ربط الموظف بالشركة: "+memberInsertError.message},500);}
   return send({success:true,employee:{user_id:newUserId,email,display_name:displayName,role},temporary_password:temporaryPassword,message:"تم إنشاء حساب الموظف وربطه بالشركة. اعرض كلمة المرور المؤقتة للمالك مرة واحدة فقط."},201);
@@ -131,7 +138,7 @@ Deno.serve(async(req:Request)=>{
 
  if(body.action==="create"){
   stage="create.validate";
-  const email=String(body.email||"").normalize("NFKC").replace(/[\u200B-\u200D\uFEFF\u00A0]/g,"").replace(/\s+/g,"").trim().toLowerCase();
+  const email=String(body.email||"").normalize("NFKC").replace(/[\u200B-\u200D\uFEFF\u00A0]/g,"").trim().toLowerCase();
   const displayName=String(body.display_name||"").trim();
   const requestedOrgName=String(body.organization_name||"").trim();
   const role=String(body.organization_type||"company");
