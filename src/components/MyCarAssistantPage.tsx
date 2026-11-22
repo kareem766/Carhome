@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 
 type Message = { role: 'user' | 'assistant'; content: string }
 
-export default function MyCarAssistantPage() {
+export default function MyCarAssistantPage({ homeHref }: { homeHref: string }) {
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: 'أهلًا بيك في مساعد My Car عربيتي. أقدر أشرح لك وظائف المنصة وأساعدك تفهم بيانات مساحة عملك حسب صلاحيات حسابك.' }
   ])
@@ -50,7 +50,7 @@ export default function MyCarAssistantPage() {
     <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl flex-col overflow-hidden rounded-3xl border border-blue-400/30 !bg-[#10243d] !text-slate-100 shadow-2xl shadow-blue-950/40">
       <header className="flex items-center justify-between border-b border-white/10 bg-gradient-to-l from-[#08294f] via-[#10518a] to-[#1479ad] p-5 sm:p-6">
         <div className="flex items-center gap-3"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-400 text-slate-950"><Bot size={26}/></span><div><h1 className="text-xl font-black">مساعد My Car عربيتي</h1><p className="mt-1 text-xs text-blue-200">مدعوم بتقنية Google Gemini</p></div></div>
-        <a href="/workspace" className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-sm font-bold hover:bg-white/10"><ArrowRight size={16}/> مساحة العمل</a>
+        <a href={homeHref} aria-label="العودة إلى الصفحة الرئيسية لحسابك" className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-sm font-bold hover:bg-white/10"><ArrowRight size={16}/> الصفحة الرئيسية</a>
       </header>
       <section aria-live="polite" className="flex-1 space-y-4 overflow-y-auto !bg-[#10243d] p-4 sm:p-6">
         <div className="mb-4 rounded-2xl border border-amber-300/20 bg-amber-300/5 p-3 text-xs leading-6 text-amber-100"><Sparkles size={15} className="ml-1 inline"/> المساعد يجيب عن أسئلة المنصة ويقرأ الملخصات المسموح بها لحسابك. تنفيذ التعديلات والإجراءات سيُضاف بعد استكمال بوابة الصلاحيات واختبارها.</div>
