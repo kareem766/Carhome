@@ -434,28 +434,83 @@ export default function App() {
   useEffect(() => {
     if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
-    // Render the page shell immediately; photography must never block access to homepage content.
-    setHomeImagesReady(true)
-    const loadImage = (sources: string[]) => new Promise<string>((resolve) => {
-      let index = 0
-      const tryNext = () => {
-        const source = sources[index++]
-        if (!source) {
-          resolve('')
+    let completed = false
+    const fallbackSource = '/carhome-icon.svg'
+    const claimedSources = new Set<string>()
+    const resolvedUrls = HOME_CAR_IMAGES.map(() => fallbackSource)
+
+    const loadCandidate = (source: string, loadTimeoutMs = 2200, decodeTimeoutMs = 900) => new Promise<boolean>((resolve) => {
+      const image = new Image()
+      let settled = false
+      let loadTimer: number | undefined
+      let decodeTimer: number | undefined
+      const finish = (loaded: boolean) => {
+        if (settled) return
+        settled = true
+        if (loadTimer !== undefined) window.clearTimeout(loadTimer)
+        if (decodeTimer !== undefined) window.clearTimeout(decodeTimer)
+        resolve(loaded)
+      }
+      loadTimer = window.setTimeout(() => finish(false), loadTimeoutMs)
+      image.onerror = () => finish(false)
+      image.onload = () => {
+        if (settled) return
+        if (loadTimer !== undefined) window.clearTimeout(loadTimer)
+        if (typeof image.decode !== 'function') {
+          finish(true)
           return
         }
-        const image = new Image()
-        image.onload = () => { void image.decode().catch(() => undefined).then(() => resolve(source)) }
-        image.onerror = tryNext
-        image.src = source
+        decodeTimer = window.setTimeout(() => finish(true), decodeTimeoutMs)
+        void image.decode().then(() => finish(true)).catch(() => finish(false))
       }
-      tryNext()
+      image.src = source
     })
-    void loadImage([HOME_BANNER_IMAGE]).catch((error) => console.error('Homepage banner image could not be preloaded:', error))
-    void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
-      if (active) setHomeImageUrls(urls)
+
+    // Start the local fallback immediately so a failed remote photo never leaves a broken card.
+    const fallbackReady = loadCandidate(fallbackSource, 1200, 500)
+    const loadUniqueImage = async (sources: string[], cardIndex: number) => {
+      for (const source of sources) {
+        if (claimedSources.has(source)) continue
+        claimedSources.add(source)
+        if (await loadCandidate(source)) {
+          resolvedUrls[cardIndex] = source
+          return source
+        }
+        claimedSources.delete(source)
+      }
+      await fallbackReady
+      resolvedUrls[cardIndex] = fallbackSource
+      return fallbackSource
+    }
+
+    // Preload the existing homepage banner without making it a gate for the vehicle cards.
+    void loadCandidate(HOME_BANNER_IMAGE, 2500, 900)
+    const deadline = window.setTimeout(() => {
+      if (!active || completed) return
+      completed = true
+      setHomeImageUrls([...resolvedUrls])
+      setHomeImagesReady(true)
+    }, 9500)
+
+    void Promise.all(HOME_CAR_IMAGES.map((sources, index) => loadUniqueImage(sources, index))).then((urls) => {
+      if (!active || completed) return
+      completed = true
+      window.clearTimeout(deadline)
+      setHomeImageUrls(urls)
+      setHomeImagesReady(true)
+    }).catch((error) => {
+      console.error('Homepage vehicle photos could not all be preloaded:', error)
+      if (!active || completed) return
+      completed = true
+      window.clearTimeout(deadline)
+      setHomeImageUrls([...resolvedUrls])
+      setHomeImagesReady(true)
     })
-    return () => { active = false }
+
+    return () => {
+      active = false
+      window.clearTimeout(deadline)
+    }
   }, [])
 
   const path = window.location.pathname
@@ -650,7 +705,11 @@ export default function App() {
             {HOME_CAR_IMAGES.map((_, index) => {
               const src = homeImageUrls[index]
               return <a key={index} href={authUser ? '/workspace/catalog' : '/register/company'} aria-label={`استكشف ${['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]}`} className={`mc-home-vehicle-card group relative isolate block h-32 overflow-hidden rounded-2xl border bg-[#102b47] shadow-[0_18px_45px_rgba(0,0,0,.24)] sm:h-52 lg:h-64 ${index === 1 ? 'mc-home-vehicle-card-featured' : ''}`}>
-                {src && <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" fetchPriority="low" width="1200" height="800" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(event) => { event.currentTarget.style.display = 'none' }}/>}
+                {src && <img src={src} alt="" aria-hidden="true" loading="eager" decoding="async" fetchPriority="high" width="1200" height="800" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(event) => {
+                  const image = event.currentTarget
+                  if (!image.src.endsWith('/carhome-icon.svg')) image.src = '/carhome-icon.svg'
+                  else image.style.display = 'none'
+                }}/>}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#06172a]/95 via-[#06172a]/15 to-transparent"/>
                 {index === 1 && <span className="mc-home-popular-badge"><Star size={15} fill="currentColor"/> الأكثر طلبًا</span>}
                 <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 px-2 pb-3 text-right text-[11px] font-black text-white sm:px-4 sm:pb-4 sm:text-base"><span>{['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]}</span><span className="mc-home-card-arrow"><ArrowLeft size={17}/></span></div>
