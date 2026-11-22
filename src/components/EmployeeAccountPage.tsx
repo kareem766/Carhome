@@ -3,7 +3,6 @@ import { BadgeCheck, CircleUserRound, Save, ShieldCheck } from 'lucide-react'
 import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
 import EmployeePageLoading from './EmployeePageLoading'
 import { supabase } from '../lib/supabase'
-import AssistantFloatingLauncher from './AssistantFloatingLauncher'
 
 const field = 'mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
 
