@@ -518,7 +518,7 @@ export default function App() {
       }
       check()
     })
-    const images = Array.from(document.querySelectorAll('.mc-home-vehicle-card img'))
+    const images = Array.from(document.querySelectorAll<HTMLImageElement>('.mc-home-vehicle-card img'))
     void Promise.all(images.map(waitForRenderedImage)).then(() => {
       if (active) setHomeImagesReady(true)
     })
