@@ -80,6 +80,7 @@ export default function EmployeeRegistrationPage() {
       if(signupError)throw signupError
       if(data.user?.identities?.length===0)throw new Error('هذا البريد مسجل بالفعل. سجّل الدخول أو استخدم استعادة كلمة السر.')
       if(data.session){clearFormDraft(draftKey);window.location.replace('/auth/callback');return}
+      clearFormDraft(draftKey)
       setSent(true)
     }catch(err){setError(err instanceof Error?err.message:'تعذر إنشاء الحساب. حاول مرة أخرى.')}finally{setBusy(false)}
   }
