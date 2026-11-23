@@ -69,5 +69,7 @@ export function restoreFormValues(form: HTMLFormElement, values: Record<string, 
     } else {
       element.value = String(value)
     }
+    element.dispatchEvent(new Event('input', { bubbles: true }))
+    element.dispatchEvent(new Event('change', { bubbles: true }))
   }
 }
