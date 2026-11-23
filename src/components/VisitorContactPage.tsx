@@ -44,7 +44,7 @@ export default function VisitorContactPage({ supportPhone = null }: Props) {
             <p className="mt-2 max-w-3xl text-sm leading-8 text-blue-100">نحرص على التعامل مع كل استفسار باهتمام. عند تسجيل الدخول، يمكنك إرسال طلبك ومتابعة حالته والردود من داخل حسابك، وتظل تفاصيل تذاكرك متاحة لك ولفريق الدعم المختص فقط.</p>
             <div className="mt-5 flex flex-wrap gap-3">
               <a href="/register" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#ffad0a] px-5 py-2.5 text-sm font-black text-[#142b43] transition hover:bg-[#ffc044]"><UserRoundPlus size={17}/> إنشاء حساب</a>
-              <a href="/support" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/15"><Headset size={17}/> لدي حساب بالفعل</a>
+              <a href="/?login=1" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/15"><Headset size={17}/> لدي حساب بالفعل</a>
             </div>
           </div>
         </div>
