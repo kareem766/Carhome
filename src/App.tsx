@@ -481,7 +481,6 @@ export default function App() {
       })
 
       setHomeImageUrls(urls)
-      setHomeImagesReady(true)
     }
 
     void preload(HOME_BANNER_IMAGE)
@@ -489,11 +488,42 @@ export default function App() {
       console.error('Homepage vehicle images could not be prepared:', error)
       if (!active) return
       setHomeImageUrls(HOME_CAR_IMAGES.map(() => fallbackSource))
-      setHomeImagesReady(true)
     })
 
     return () => { active = false }
   }, [])
+
+  // Wait for the actual gallery <img> elements, not only detached preloaders,
+  // so the homepage never becomes visible while its cards are still blank.
+  useEffect(() => {
+    if (!pathIsHome(window.location.pathname) || homeImageUrls.length !== HOME_CAR_IMAGES.length) return
+    let active = true
+    const waitForRenderedImage = (image: HTMLImageElement) => new Promise<void>((resolve) => {
+      const startedAt = Date.now()
+      const check = () => {
+        if (image.complete && image.naturalWidth > 0) {
+          const decode = typeof image.decode === 'function' ? image.decode().catch(() => undefined) : Promise.resolve()
+          let decodeTimer: number | undefined
+          void Promise.race([
+            decode,
+            new Promise<void>((done) => { decodeTimer = window.setTimeout(done, 1500) })
+          ]).then(() => {
+            if (decodeTimer !== undefined) window.clearTimeout(decodeTimer)
+            resolve()
+          })
+          return
+        }
+        if (Date.now() - startedAt >= 5000) { resolve(); return }
+        window.setTimeout(check, 50)
+      }
+      check()
+    })
+    const images = Array.from(document.querySelectorAll('.mc-home-vehicle-card img'))
+    void Promise.all(images.map(waitForRenderedImage)).then(() => {
+      if (active) setHomeImagesReady(true)
+    })
+    return () => { active = false }
+  }, [homeImageUrls])
 
   const path = window.location.pathname
   useEffect(() => {
@@ -553,8 +583,7 @@ export default function App() {
   }
   // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
   if (pathIsHome(window.location.pathname) && !authLoaded) return <PlatformLoading />
-  // Keep the public homepage behind the branded loader until every hero vehicle visual has decoded.
-  if (pathIsHome(window.location.pathname) && !homeImagesReady) return <PlatformLoading />
+
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (authUser && employeeAccountError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5"><section className="w-full max-w-xl rounded-3xl border border-amber-200 bg-white p-8 text-center shadow-xl"><ShieldCheck className="mx-auto mb-4 text-amber-500" size={42}/><h1 className="text-xl font-black text-slate-900">تعذر التحقق من حساب الموظف</h1><p className="mt-3 leading-8 text-slate-600">{employeeAccountError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-blue-700 px-6 py-3 font-black text-white">إعادة المحاولة</button><button type="button" onClick={()=>{void supabase?.auth.signOut().then(()=>window.location.replace('/?login=1'))}} className="mr-2 mt-6 rounded-xl border border-slate-200 px-6 py-3 font-bold text-slate-700">تسجيل الخروج</button></section></main>
   if (authUser && adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات لوحة التحكم</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
@@ -659,7 +688,9 @@ export default function App() {
   if (path === '/register/supplier') return <Suspense fallback={<PlatformLoading />}><RoleRegistrationPage role="fleet_supplier" onBack={() => { window.location.href = '/register' }} /></Suspense>
 
   return (
-    <main dir="rtl" className="min-h-screen overflow-hidden bg-[#061b36] text-slate-900">{authLoaded && !authUser && <PlatformEntryBanner/>}
+    <>
+    {pathIsHome(path) && !homeImagesReady && <PlatformLoading />}
+    <main dir="rtl" className="min-h-screen overflow-hidden bg-[#061b36] text-slate-900" style={pathIsHome(path) && !homeImagesReady ? { visibility: 'hidden' } : undefined}>{authLoaded && !authUser && <PlatformEntryBanner/>}
       {settings.announcement_text && <div className="px-4 py-2 text-center text-sm font-bold text-white" style={{backgroundColor:settings.primary_color}}>{settings.announcement_text}</div>}
       <section className="mc-home-hero-section relative isolate overflow-hidden bg-[#061b36] text-white">
         <div className="absolute inset-0 -z-20 bg-cover bg-center" style={{backgroundImage:"url(https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=2200&q=90)"}}/>
@@ -771,5 +802,6 @@ export default function App() {
       <footer className="bg-[#071b31] px-5 py-7 text-sm text-white/70 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div>© {new Date().getFullYear()} {settings.platform_name}. {settings.footer_text}</div><div className="flex flex-wrap items-center gap-4"><a href="/services" className="hover:text-[#ffad0a]">خدمات السيارات</a><a href="/privacy" className="hover:text-[#ffad0a]">سياسة الخصوصية</a><a href="/terms" className="hover:text-[#ffad0a]">شروط الاستخدام</a>{settings.support_email&&<a href={'mailto:'+settings.support_email}>{settings.support_email}</a>}</div></div></footer>
       {authOpen&&<Suspense fallback={<PlatformLoading pageName="صفحة تسجيل الدخول" />}><AuthPanel onClose={()=>setAuthOpen(false)} initialMode={authMode} initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/></Suspense>}
     </main>
+    </>
   )
 }
