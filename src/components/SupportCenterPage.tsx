@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { AlertCircle, ArrowRight, CheckCircle2, Headset, MessageSquare, Phone, Plus, RefreshCw, Send, ShieldCheck, Ticket } from 'lucide-react'
+import { AlertCircle, ArrowRight, CheckCircle2, Headset, Mail, MessageSquare, Phone, Plus, RefreshCw, Send, ShieldCheck, Ticket } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import AccountNotifications from './AccountNotifications'
@@ -19,7 +19,7 @@ type TicketRow = {
 }
 type TicketMessage = { id: string; ticket_id: string; sender_user_id: string; body: string; created_at: string }
 type PublicSupportRequest = { id: string; request_code: string; contact_name: string; contact_email: string; account_email: string; phone: string | null; subject: string; message: string; status: string; created_at: string }
-type Props = { admin?: boolean; supportPhone?: string | null }
+type Props = { admin?: boolean; supportPhone?: string | null; supportEmail?: string | null }
 
 const categories = [
   { value: 'general', label: 'استفسار عام' }, { value: 'account', label: 'الحساب والتسجيل' },
@@ -36,8 +36,11 @@ const statusLabel = (value: string) => statuses.find(x => x.value === value)?.la
 const categoryLabel = (value: string) => categories.find(x => x.value === value)?.label || value
 const dateLabel = (value: string) => new Date(value).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' })
 
-export default function SupportCenterPage({ admin = false, supportPhone = null }: Props) {
+export default function SupportCenterPage({ admin = false, supportPhone = null, supportEmail = null }: Props) {
   const [userId, setUserId] = useState('')
+  const [accountName, setAccountName] = useState('')
+  const [accountEmail, setAccountEmail] = useState('')
+  const [accountType, setAccountType] = useState('حساب مستخدم')
   const [authorized, setAuthorized] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -101,6 +104,10 @@ export default function SupportCenterPage({ admin = false, supportPhone = null }
       window.location.replace('/?login=1'); return
     }
     setUserId(user.id)
+    setAccountName(String(user.user_metadata?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || 'مستخدم My Car').trim())
+    setAccountEmail(user.email || '')
+    const accountTypes: Record<string, string> = { individual_owner: 'مالك سيارة', fleet_supplier: 'مورد أسطول', company: 'حساب شركة', company_employee: 'موظف تابع لشركة', employee: 'موظف مستقل' }
+    setAccountType(accountTypes[String(user.user_metadata?.organization_type || '')] || 'حساب مستخدم')
     if (!admin) {
       const { data: companyMembership } = await supabase.from('organization_memberships').select('organization_id,organizations!inner(organization_type)').eq('user_id', user.id).eq('organizations.organization_type', 'company').limit(1).maybeSingle()
       if (companyMembership?.organization_id) {
@@ -203,11 +210,13 @@ export default function SupportCenterPage({ admin = false, supportPhone = null }
         <div className="flex items-center gap-3"><PlatformBrand/><span className="hidden rounded-full bg-blue-50 px-3 py-2 text-xs font-extrabold text-blue-800 sm:inline-flex"><Headset size={15} className="ml-2"/> {admin ? 'إدارة الدعم الفني' : 'مركز الدعم الفني'}</span></div>
         <div className="flex items-center gap-2"><a href={admin ? '/workspace/admin' : '/workspace'} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-bold text-slate-700 hover:bg-slate-50"><ArrowRight size={16}/> العودة</a><AccountNotifications/></div>
       </header>
+      {!admin && <section className="relative mt-5 overflow-hidden rounded-3xl border border-blue-300/20 bg-gradient-to-l from-[#071a33] via-[#123e70] to-[#087fa8] p-5 text-white shadow-xl sm:p-6"><div className="pointer-events-none absolute -left-12 -top-16 h-48 w-48 rounded-full border-[22px] border-white/5"/><div className="relative flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-black tracking-wider text-cyan-200">MY CAR · ACCOUNT PROFILE</p><h2 className="mt-2 text-xl font-black sm:text-2xl">بيانات حسابك</h2><p className="mt-2 max-w-xl text-sm leading-7 text-blue-100">أهلًا بك في عربيتي. نستخدم بيانات حسابك لمساعدتك في متابعة طلبات الدعم والرد عليك بشكل أدق.</p></div><span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/15 bg-white/10 text-cyan-100"><ShieldCheck size={25}/></span></div><div className="relative mt-5 grid gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm sm:grid-cols-3"><div><p className="text-[11px] font-bold text-blue-200">اسم الحساب</p><p className="mt-1 break-words text-sm font-extrabold">{accountName}</p></div><div><p className="text-[11px] font-bold text-blue-200">البريد الإلكتروني</p><p dir="ltr" className="mt-1 break-all text-left text-sm font-extrabold">{accountEmail || 'غير متاح'}</p></div><div><p className="text-[11px] font-bold text-blue-200">نوع الحساب</p><p className="mt-1 text-sm font-extrabold">{accountType}</p></div></div><p className="relative mt-4 text-xs leading-6 text-blue-100">فريق دعم My Car معك — اكتب استفسارك وسنتابع معك من خلال تذكرة الدعم الخاصة بحسابك.</p></section>}
       <section className="mt-5 rounded-3xl bg-gradient-to-l from-[#0b2340] via-[#123a61] to-[#1768a6] p-6 text-white shadow-lg sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-sm font-extrabold text-cyan-200">MY CAR · SUPPORT CENTER</p><h1 className="mt-2 text-2xl font-black sm:text-3xl">{admin ? 'إدارة تذاكر الدعم' : 'كيف نقدر نساعدك؟'}</h1><p className="mt-2 max-w-2xl text-sm leading-7 text-blue-100">{admin ? 'تابع استفسارات المستخدمين، ورد على الرسائل، وحدّث حالة كل تذكرة.' : 'أرسل استفسارك أو بلّغ عن مشكلة، وتابع الردود وحالة طلب الدعم من مكان واحد.'}</p></div><div className="rounded-2xl border border-white/15 bg-white/10 p-4"><Ticket size={25} className="text-cyan-200"/><p className="mt-2 text-2xl font-black tabular-nums">{tickets.length.toLocaleString('ar-EG')}</p><p className="text-xs text-blue-100">{admin ? 'إجمالي التذاكر' : 'تذاكرك'}</p></div></div>
       </section>
       {!admin && supportPhone?.trim() && <section className="mt-4 flex flex-col gap-3 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5"><div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700"><Phone size={20}/></span><div><h2 className="font-black text-slate-900">التواصل المباشر مع الدعم الفني</h2><p className="mt-1 text-xs leading-6 text-slate-500">رقم الدعم متاح هنا داخل مركز الدعم الفني فقط.</p></div></div><a href={'tel:' + supportPhone.replace(/[^\d+]/g, '')} dir="ltr" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-black text-white transition hover:bg-blue-800"><Phone size={16} className="ml-2"/> {supportPhone}</a></section>}
       {error && <div role="alert" className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"><AlertCircle size={17} className="mt-0.5 shrink-0"/>{error}</div>}
+      {!admin && supportEmail?.trim() && <section className="mt-4 flex flex-col gap-3 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5"><div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700"><Mail size={20}/></span><div><h2 className="font-black text-slate-900">البريد الإلكتروني للدعم الفني</h2><p className="mt-1 text-xs leading-6 text-slate-500">يمكنك مراسلة فريق الدعم مباشرة من داخل مركز الدعم الفني.</p></div></div><a href={'mailto:' + supportEmail.trim()} dir="ltr" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-black text-white transition hover:bg-blue-800">{supportEmail.trim()}</a></section>}
       {admin && publicRequests.length > 0 && <section className="mt-5 rounded-2xl border border-amber-200 bg-white p-4 shadow-sm"><div className="mb-3 flex items-center justify-between"><h2 className="font-black text-[#102b47]">طلبات مراجعة الحسابات دون تسجيل دخول</h2><span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-900">{publicRequests.length}</span></div><div className="space-y-3">{publicRequests.map(request=><article key={request.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-black text-slate-900">{request.subject} · {request.request_code}</h3><p className="mt-1 text-xs text-slate-500">{dateLabel(request.created_at)} · {request.contact_name}</p></div><select aria-label="حالة طلب المراجعة" value={request.status} onChange={e=>void updatePublicRequestStatus(request.id,e.target.value)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold"><option value="open">مفتوح</option><option value="in_progress">قيد المعالجة</option><option value="resolved">تمت المراجعة</option><option value="closed">مغلق</option></select></div><div className="mt-3 grid gap-1 text-sm text-slate-700 sm:grid-cols-2"><p>بريد التواصل: <a className="font-bold text-blue-700" href={`mailto:${request.contact_email}`}>{request.contact_email}</a></p><p>بريد الحساب: <b dir="ltr">{request.account_email}</b></p>{request.phone&&<p>الهاتف: <b dir="ltr">{request.phone}</b></p>}</div><p className="mt-3 whitespace-pre-wrap rounded-lg bg-white p-3 text-sm leading-7 text-slate-700">{request.message}</p></article>)}</div></section>}
       <section className="mt-5 grid gap-4 lg:grid-cols-[minmax(280px,.8fr)_minmax(0,1.5fr)]">
         <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
