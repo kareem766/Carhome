@@ -1956,7 +1956,7 @@ main.min-h-screen :is(input, select, textarea):disabled {
 
   /* Do not push the title bar below the navigation. */
   .mc-company-workspace-main {
-    padding-top: 0 !important;
+    padding-top: 8px !important;
   }
   .mc-company-page-with-sidebar {
     padding-top: 0 !important;
