@@ -447,7 +447,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
         if (typeof values.has_gps === 'string') setGpsStatus(values.has_gps)
       }
     }
-  }, [loading, user?.id, organization?.id, paymentVehicle])
+  }, [loading, user?.id, organization?.id, paymentVehicle, offerRequest])
   const persistWorkspaceDraft = (event: FormEvent<HTMLFormElement>) => {
     const form = event.currentTarget
     const key = form.dataset.draftKey
