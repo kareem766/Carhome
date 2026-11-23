@@ -9,6 +9,7 @@ import EmployeeWorkspaceHeader from './components/EmployeeWorkspaceHeader'
 import CompanyPageSidebar from './components/CompanyPageSidebar'
 const MyCarAssistantPage = lazy(() => import('./components/MyCarAssistantPage'))
 const SupportCenterPage = lazy(() => import('./components/SupportCenterPage'))
+const VisitorContactPage = lazy(() => import('./components/VisitorContactPage'))
 const RoleRegistrationPage = lazy(() => import('./components/RoleRegistrationPage'))
 const RoleChooserPage = lazy(() => import('./components/RoleRegistrationPage').then(module => ({ default: module.RoleChooserPage })))
 const LegalPages = lazy(() => import('./components/LegalPages'))
@@ -544,6 +545,7 @@ export default function App() {
     return <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense>
   }
   if (path === '/workspace/supplier/insights') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><FleetSupplierInsightsPage /></Suspense></SupplierPageShell></> : <ServiceNotice settings={settings} title="تقارير الأسطول" message="هذه الصفحة متاحة لموردي الأساطيل المعتمدين بعد تسجيل الدخول." />
+  if (path === '/contact') return <Suspense fallback={<PlatformLoading />}><VisitorContactPage supportPhone={settings.support_phone} supportEmail={settings.support_email} /></Suspense>
   if (path === '/support') return authUser || new URLSearchParams(window.location.search).get('new_ticket') === '1' ? <>{authUser && (authUser.user_metadata?.organization_type === 'company' ? <CompanyPersistentBar/> : authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>)}<Suspense fallback={<PlatformLoading />}><SupportCenterPage supportPhone={settings.support_phone} supportEmail={settings.support_email} /></Suspense></> : <ServiceNotice settings={settings} title="سجّل الدخول لمركز الدعم" message="مركز الدعم الفني متاح للمستخدمين المسجلين لمتابعة تذاكرهم والردود." />
   if (path === '/workspace/admin/support') return authUser ? <><Suspense fallback={<PlatformLoading />}><SupportCenterPage admin /></Suspense></> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الدعم" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
   if (path === '/workspace/employee/messages') return authUser?.user_metadata?.organization_type === 'company_employee' ? <>{window.location.replace('/workspace/company')}<PlatformLoading /></> : <><Suspense fallback={<PlatformLoading />}><EmployeeRentalMessagesPage /></Suspense></>
@@ -725,7 +727,7 @@ export default function App() {
           </div>
         </section>
       </div></section>
-      <footer className="bg-[#071b31] px-5 py-7 text-sm text-white/70 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div>© {new Date().getFullYear()} {settings.platform_name}. {settings.footer_text}</div><div className="flex flex-wrap items-center gap-4"><a href="/support" className="inline-flex items-center gap-2 rounded-full border border-[#ffad0a]/50 bg-white/5 px-4 py-2 font-extrabold text-white transition hover:border-[#ffad0a] hover:bg-[#ffad0a]/10 hover:text-[#ffbf36]"><Headset size={16}/>تواصل معنا الآن</a><a href="/services" className="hover:text-[#ffad0a]">خدمات السيارات</a><a href="/privacy" className="hover:text-[#ffad0a]">سياسة الخصوصية</a><a href="/terms" className="hover:text-[#ffad0a]">شروط الاستخدام</a></div></div></footer>
+      <footer className="bg-[#071b31] px-5 py-7 text-sm text-white/70 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div>© {new Date().getFullYear()} {settings.platform_name}. {settings.footer_text}</div><div className="flex flex-wrap items-center gap-4"><a href="/contact" className="inline-flex items-center gap-2 rounded-full border border-[#ffad0a]/50 bg-white/5 px-4 py-2 font-extrabold text-white transition hover:border-[#ffad0a] hover:bg-[#ffad0a]/10 hover:text-[#ffbf36]"><Headset size={16}/>تواصل معنا الآن</a><a href="/services" className="hover:text-[#ffad0a]">خدمات السيارات</a><a href="/privacy" className="hover:text-[#ffad0a]">سياسة الخصوصية</a><a href="/terms" className="hover:text-[#ffad0a]">شروط الاستخدام</a></div></div></footer>
       {authOpen&&<Suspense fallback={<PlatformLoading pageName="صفحة تسجيل الدخول" />}><AuthPanel onClose={()=>setAuthOpen(false)} initialMode={authMode} initialNotice={new URLSearchParams(window.location.search).get('account-unavailable') === '1' ? 'تم إنهاء جلستك لأن الحساب لم يعد متاحًا على المنصة. يمكنك تسجيل الدخول بحساب آخر أو التواصل مع إدارة My Car.' : new URLSearchParams(window.location.search).get('session-ended') === '1' ? 'انتهت جلسة تسجيل الدخول. سجّل الدخول مرة أخرى للمتابعة.' : ''}/></Suspense>}
     </main>
   )
