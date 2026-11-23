@@ -2861,5 +2861,8 @@ main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
 .mc-platform-brand .mc-company-header-tagline { align-self:flex-start; margin:0; color:#61758e; font-size:.66rem; font-weight:800; line-height:1.35; white-space:nowrap; text-align:right; }
 @media (max-width:760px) {
   .mc-platform-brand-copy { gap:1px; }
-  .mc-platform-brand .mc-company-header-tagline { max-width: min(58vw, 250px); overflow:hidden; text-overflow:ellipsis; font-size:.53rem; }
+  .mc-platform-brand .mc-company-header-tagline {
+    width:100%; max-width:min(46vw, 320px); overflow:visible; text-overflow:clip;
+    white-space:normal; direction:rtl; text-align:right; font-size:.52rem; line-height:1.4;
+  }
 }
