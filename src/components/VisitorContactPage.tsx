@@ -1,4 +1,4 @@
-import { ArrowLeft, Headset, Phone, ShieldCheck, UserRoundPlus, LogIn, MessageCircle, Mail } from 'lucide-react'
+import { ArrowLeft, Headset, Phone, ShieldCheck, UserRoundPlus, LogIn, MessageCircle } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 
 type Props = { supportPhone?: string | null; supportEmail?: string | null }
