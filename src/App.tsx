@@ -158,7 +158,7 @@ function CompanyPersistentBar({ employeeView = false }: { employeeView?: boolean
     <header className="mc-platform-topbar">
       <a href="/workspace/company" className="mc-platform-brand">
         <img src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png" alt="شعار My Car عربيتي" />
-        <span><strong><span dir="ltr">My Car</span> <b>عربيتي</b></strong><small>منصة إدارة وتأجير السيارات</small></span>
+        <span><strong><span dir="ltr">My Car</span> <b>عربيتي</b></strong><small>إدارة أسطول شركتك واحتياجات التنقل… في مكان واحد</small></span>
       </a>
       <div className="mc-platform-header-actions">
         <button type="button" aria-label="تحديث الصفحة" title="تحديث الصفحة" onClick={() => window.location.reload()}><RefreshCw size={18}/><span>تحديث الصفحة</span></button>

@@ -176,7 +176,7 @@ export default function CompanyDashboardPage({ employeeView = false }: { employe
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mc-company-dashboard-content mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
         <PromotionalCarousel role={employeeView ? 'company_employee' : 'company'} />
         <section className="mc-company-dark-hero relative isolate overflow-hidden rounded-[28px] bg-gradient-to-l from-[#071d38] via-[#103d6b] to-[#087eae] p-5 text-white shadow-[0_22px_55px_-28px_rgba(5,36,75,.55)] sm:p-8">
           <div aria-hidden="true" className="pointer-events-none absolute -left-12 -top-16 -z-10 h-64 w-64 rounded-full border-[30px] border-white/5" />
