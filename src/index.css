@@ -2833,3 +2833,11 @@ main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
 .mc-company-workspace-main > .mc-workspace-content {
   padding-top: 8px !important;
 }
+
+/* Company rental requests: remove the duplicate offset below the persistent navigation. */
+.mc-company-workspace-main .mc-workspace-page.mc-company-rental-requests-page {
+  padding-top: 8px !important;
+}
+.mc-company-workspace-main .mc-workspace-page.mc-company-rental-requests-page > :first-child {
+  margin-top: 0 !important;
+}
