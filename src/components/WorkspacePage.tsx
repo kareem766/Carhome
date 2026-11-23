@@ -320,6 +320,14 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
       if (result.error) setError(result.error.message)
       else {
         const vehicleRows = (result.data || []) as Vehicle[]
+        const requestedPaymentVehicleId = new URLSearchParams(window.location.search).get('paymentVehicle')
+        if (requestedPaymentVehicleId) {
+          const pendingPaymentVehicle = vehicleRows.find(vehicle => vehicle.id === requestedPaymentVehicleId && vehicle.review_status === 'pending_payment')
+          if (pendingPaymentVehicle) {
+            setPaymentStageVehicle(pendingPaymentVehicle)
+            setPaymentVehicle(pendingPaymentVehicle.id)
+          }
+        }
         // Clear previous card metrics before refreshing so an earlier result can never linger.
         if (role === 'owner') setVehicleEngagement({})
         if (path === '/workspace/owner/vehicles' || path === '/workspace/supplier/vehicles') {
@@ -440,7 +448,7 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
       }
     }
   }, [loading, user?.id, organization?.id, paymentVehicle])
-  const persistWorkspaceDraft = (event: React.FormEvent<HTMLFormElement>) => {
+  const persistWorkspaceDraft = (event: FormEvent<HTMLFormElement>) => {
     const form = event.currentTarget
     const key = form.dataset.draftKey
     if (key) writeFormDraft(key, captureFormValues(form))
@@ -875,7 +883,10 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
       if (proofPath) await supabase.storage.from('payment-proofs').remove([proofPath])
       setError(saveError.message.includes('Could not find the table') ? 'نموذج التحويل لم يُفعّل بعد. يلزم تطبيق Migration مراجعة التحويلات.' : saveError.message); return
     }
+    clearFormDraft(`workspace:${user.id}:${organization.id}:${path}:payment:${vehicle.id}`)
     setPaymentVehicle(null)
+    setPaymentStageVehicle(null)
+    window.history.replaceState({}, '', window.location.pathname)
     setPaymentSubmissions(current => ({ ...current, [vehicle.id]: 'pending' }))
     localStorage.removeItem('mycar_vehicle_payment_banner')
     setShowVehicleSuccess(true)
