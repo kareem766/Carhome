@@ -3,6 +3,7 @@ import { BadgeCheck, CircleUserRound, Save, ShieldCheck } from 'lucide-react'
 import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
 import EmployeePageLoading from './EmployeePageLoading'
 import { supabase } from '../lib/supabase'
+import { clearFormDraft, readFormDraft, writeFormDraft } from '../lib/formDrafts'
 
 const field = 'mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100'
 
@@ -20,6 +21,7 @@ export default function EmployeeAccountPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [draftUserId, setDraftUserId] = useState('')
 
   useEffect(() => {
     let active = true
@@ -42,14 +44,19 @@ export default function EmployeeAccountPage() {
         setEmploymentType(account.employment_type || 'independent')
         setStatus(account.account_status || 'unknown')
       }
-      setName(String(profile?.display_name || user.user_metadata?.display_name || user.user_metadata?.full_name || ''))
-      setPhone(String(profile?.phone || user.user_metadata?.phone || ''))
+      const saved = readFormDraft('employee-account:' + user.id)?.values || {}
+      setName(String(saved.name || profile?.display_name || user.user_metadata?.display_name || user.user_metadata?.full_name || ''))
+      setPhone(String(saved.phone || profile?.phone || user.user_metadata?.phone || ''))
       setEmail(user.email || profile?.contact_email || '')
       setLoading(false)
+      if (saved.name || saved.phone) setDraftUserId(user.id)
+      else setDraftUserId(user.id)
     }
     void load()
     return () => { active = false }
   }, [])
+
+  useEffect(() => { if (draftUserId && !loading) writeFormDraft('employee-account:' + draftUserId, { name, phone }) }, [draftUserId, loading, name, phone])
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -75,7 +82,7 @@ export default function EmployeeAccountPage() {
     })
     setSaving(false)
     if (updateError) setError('تم حفظ بيانات الملف الشخصي، لكن تعذر تحديث بيانات الجلسة: ' + updateError.message)
-    else setNotice('تم تحديث بيانات الملف الشخصي بنجاح.')
+    else { clearFormDraft('employee-account:' + draftUserId); setNotice('تم تحديث بيانات الملف الشخصي بنجاح.') }
   }
 
   const statusText = status === 'active' ? 'نشط' : status === 'pending' ? 'قيد المراجعة' : status === 'suspended' ? 'موقوف' : status === 'unknown' ? 'غير محدد' : status || 'غير محدد'
