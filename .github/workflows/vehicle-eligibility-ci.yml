@@ -1,0 +1,27 @@
+name: Vehicle eligibility regression checks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "supabase/migrations/*vehicle*eligibility*"
+      - "supabase/tests/vehicle_eligibility_policies.sql"
+      - "scripts/check-vehicle-eligibility-policies.mjs"
+      - "package.json"
+      - ".github/workflows/vehicle-eligibility-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  vehicle-eligibility:
+    name: Validate vehicle eligibility policy parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run test:vehicle-eligibility
+      - run: npm run build

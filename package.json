@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/generate-seo-pages.mjs",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:vehicle-eligibility": "node scripts/check-vehicle-eligibility-policies.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
