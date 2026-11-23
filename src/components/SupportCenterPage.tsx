@@ -38,6 +38,9 @@ const dateLabel = (value: string) => new Date(value).toLocaleString('ar-EG', { d
 
 export default function SupportCenterPage({ admin = false, supportPhone = null, supportEmail = null }: Props) {
   const [userId, setUserId] = useState('')
+  const [accountName, setAccountName] = useState('')
+  const [accountEmail, setAccountEmail] = useState('')
+  const [accountType, setAccountType] = useState('حساب مستخدم')
   const [authorized, setAuthorized] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -101,6 +104,10 @@ export default function SupportCenterPage({ admin = false, supportPhone = null, 
       window.location.replace('/?login=1'); return
     }
     setUserId(user.id)
+    setAccountName(String(user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.company_name || 'مستخدم My Car'))
+    setAccountEmail(user.email || '')
+    const accountTypes: Record<string, string> = { individual_owner: 'مالك سيارة', fleet_supplier: 'مورد أسطول', company: 'حساب شركة', company_employee: 'موظف تابع لشركة', employee: 'موظف مستقل' }
+    setAccountType(accountTypes[String(user.user_metadata?.organization_type || '')] || 'حساب مستخدم')
     if (!admin) {
       const { data: companyMembership } = await supabase.from('organization_memberships').select('organization_id,organizations!inner(organization_type)').eq('user_id', user.id).eq('organizations.organization_type', 'company').limit(1).maybeSingle()
       if (companyMembership?.organization_id) {
@@ -203,6 +210,7 @@ export default function SupportCenterPage({ admin = false, supportPhone = null, 
         <div className="flex items-center gap-3"><PlatformBrand/><span className="hidden rounded-full bg-blue-50 px-3 py-2 text-xs font-extrabold text-blue-800 sm:inline-flex"><Headset size={15} className="ml-2"/> {admin ? 'إدارة الدعم الفني' : 'مركز الدعم الفني'}</span></div>
         <div className="flex items-center gap-2"><a href={admin ? '/workspace/admin' : '/workspace'} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-bold text-slate-700 hover:bg-slate-50"><ArrowRight size={16}/> العودة</a><AccountNotifications/></div>
       </header>
+      {!admin && <section className="relative mt-5 overflow-hidden rounded-3xl border border-blue-300/20 bg-gradient-to-l from-[#071a33] via-[#123e70] to-[#087fa8] p-5 text-white shadow-xl sm:p-6"><div className="pointer-events-none absolute -left-12 -top-16 h-48 w-48 rounded-full border-[22px] border-white/5"/><div className="relative flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-black tracking-wider text-cyan-200">MY CAR · ACCOUNT PROFILE</p><h2 className="mt-2 text-xl font-black sm:text-2xl">بيانات حسابك</h2><p className="mt-2 max-w-xl text-sm leading-7 text-blue-100">أهلًا بك في عربيتي. نستخدم بيانات حسابك لمساعدتك في متابعة طلبات الدعم والرد عليك بشكل أدق.</p></div><span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/15 bg-white/10 text-cyan-100"><ShieldCheck size={25}/></span></div><div className="relative mt-5 grid gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm sm:grid-cols-3"><div><p className="text-[11px] font-bold text-blue-200">اسم الحساب</p><p className="mt-1 break-words text-sm font-extrabold">{accountName}</p></div><div><p className="text-[11px] font-bold text-blue-200">البريد الإلكتروني</p><p dir="ltr" className="mt-1 break-all text-left text-sm font-extrabold">{accountEmail || 'غير متاح'}</p></div><div><p className="text-[11px] font-bold text-blue-200">نوع الحساب</p><p className="mt-1 text-sm font-extrabold">{accountType}</p></div></div><p className="relative mt-4 text-xs leading-6 text-blue-100">فريق دعم My Car معك — اكتب استفسارك وسنتابع معك من خلال تذكرة الدعم الخاصة بحسابك.</p></section>}
       <section className="mt-5 rounded-3xl bg-gradient-to-l from-[#0b2340] via-[#123a61] to-[#1768a6] p-6 text-white shadow-lg sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-sm font-extrabold text-cyan-200">MY CAR · SUPPORT CENTER</p><h1 className="mt-2 text-2xl font-black sm:text-3xl">{admin ? 'إدارة تذاكر الدعم' : 'كيف نقدر نساعدك؟'}</h1><p className="mt-2 max-w-2xl text-sm leading-7 text-blue-100">{admin ? 'تابع استفسارات المستخدمين، ورد على الرسائل، وحدّث حالة كل تذكرة.' : 'أرسل استفسارك أو بلّغ عن مشكلة، وتابع الردود وحالة طلب الدعم من مكان واحد.'}</p></div><div className="rounded-2xl border border-white/15 bg-white/10 p-4"><Ticket size={25} className="text-cyan-200"/><p className="mt-2 text-2xl font-black tabular-nums">{tickets.length.toLocaleString('ar-EG')}</p><p className="text-xs text-blue-100">{admin ? 'إجمالي التذاكر' : 'تذاكرك'}</p></div></div>
       </section>
