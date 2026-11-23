@@ -2841,3 +2841,22 @@ main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
 .mc-company-workspace-main .mc-workspace-page.mc-company-rental-requests-page > :first-child {
   margin-top: 0 !important;
 }
+
+
+/* Shared company-style page navigation for fleet suppliers and independent employees. */
+.mc-platform-page-nav--supplier::before { content:"صفحات حساب مورد الأسطول"; }
+.mc-platform-page-nav--employee::before { content:"صفحات حساب الموظف"; }
+.mc-platform-page-nav--supplier,
+.mc-platform-page-nav--employee { width:100%; min-height:68px; }
+.mc-platform-page-nav--supplier a,
+.mc-platform-page-nav--employee a { display:inline-flex; min-height:46px; flex:0 0 auto; align-items:center; justify-content:center; border:1px solid #d7e3f0; border-radius:13px; padding:.58rem 1rem; background:rgba(255,255,255,.82); color:#405b78; font-size:.84rem; font-weight:900; white-space:nowrap; box-shadow:0 2px 7px rgba(16,43,71,.045); transition:background .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease; }
+.mc-platform-page-nav--supplier a:hover,
+.mc-platform-page-nav--employee a:hover { border-color:#a9c9ec; background:#fff; color:#164f8d; box-shadow:0 5px 13px rgba(22,79,141,.09); }
+.mc-platform-page-nav--supplier a.is-active,
+.mc-platform-page-nav--employee a.is-active { border-color:#8db8e8; background:linear-gradient(145deg,#dcecff 0%,#c9e1fb 100%); color:#103f78; box-shadow:inset 0 -3px 0 #f1a51e,0 5px 14px rgba(22,79,141,.12); }
+.mc-employee-nav-cta { display:inline-flex; min-height:46px; flex:0 0 auto; align-items:center; justify-content:center; gap:.4rem; border:1px solid #f3d29a; border-radius:13px; padding:.58rem 1rem; background:linear-gradient(145deg,#fff8e9,#fff); color:#8b5610; font-size:.84rem; font-weight:900; white-space:nowrap; }
+@media(max-width:760px) {
+ .mc-platform-page-nav--supplier,.mc-platform-page-nav--employee { min-height:64px; gap:.35rem; padding:.45rem .5rem; }
+ .mc-platform-page-nav--supplier::before,.mc-platform-page-nav--employee::before { min-height:30px; padding:.3rem .58rem; font-size:.65rem; }
+ .mc-platform-page-nav--supplier a,.mc-platform-page-nav--employee a,.mc-employee-nav-cta { min-height:43px; padding:.48rem .78rem; border-radius:12px; font-size:.77rem; }
+}
