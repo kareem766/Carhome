@@ -67,7 +67,7 @@ export default function PlatformLoading({ pageName, fadeOut = false }: PlatformL
           <img
             src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png"
             alt="My Car عربيتي"
-            className="relative z-10 max-h-20 w-44 object-contain animate-[brand-fade_1.9s_ease-in-out_infinite]"
+            className="relative z-10 max-h-20 w-44 object-contain animate-[brand-breathe_2.4s_ease-in-out_infinite]"
           />
         </div>
         <p className="mt-3 text-base font-extrabold leading-7 text-slate-800">
@@ -79,8 +79,8 @@ export default function PlatformLoading({ pageName, fadeOut = false }: PlatformL
         </div>
       </div>
       <style>{`
-        @keyframes brand-fade {
-          0%, 100% { opacity: .42; transform: translateY(3px) scale(.985); }
+        @keyframes brand-breathe {
+          0%, 100% { opacity: 1; transform: translateY(0) scale(.995); }
           50% { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes mc-platform-loader-fade { from { opacity: 1; visibility: visible; } to { opacity: 0; visibility: hidden; } }
@@ -89,7 +89,7 @@ export default function PlatformLoading({ pageName, fadeOut = false }: PlatformL
           100% { transform: translateX(-150%); }
         }
         @media (prefers-reduced-motion: reduce) {
-          .animate-\[brand-fade_1\.9s_ease-in-out_infinite\],
+          .animate-\[brand-breathe_1\.9s_ease-in-out_infinite\],
           .animate-\[loading-glide_1\.35s_ease-in-out_infinite\] { animation: none !important; }
         }
       `}</style>
