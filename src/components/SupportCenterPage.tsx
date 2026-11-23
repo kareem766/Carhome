@@ -104,7 +104,7 @@ export default function SupportCenterPage({ admin = false, supportPhone = null, 
       window.location.replace('/?login=1'); return
     }
     setUserId(user.id)
-    setAccountName(String(user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.company_name || 'مستخدم My Car'))
+    setAccountName(String(user.user_metadata?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || 'مستخدم My Car').trim())
     setAccountEmail(user.email || '')
     const accountTypes: Record<string, string> = { individual_owner: 'مالك سيارة', fleet_supplier: 'مورد أسطول', company: 'حساب شركة', company_employee: 'موظف تابع لشركة', employee: 'موظف مستقل' }
     setAccountType(accountTypes[String(user.user_metadata?.organization_type || '')] || 'حساب مستخدم')
