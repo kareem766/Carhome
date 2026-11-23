@@ -19,21 +19,33 @@ create table if not exists public.platform_homepage_banners (
 create index if not exists platform_homepage_banners_enabled_order_idx
   on public.platform_homepage_banners (enabled, display_order, created_at desc);
 alter table public.platform_homepage_banners enable row level security;
+drop policy if exists "enabled homepage banners visible to signed-in accounts" on public.platform_homepage_banners;
 drop policy if exists "homepage banners visible to matching signed-in accounts" on public.platform_homepage_banners;
 create policy "homepage banners visible to matching signed-in accounts"
   on public.platform_homepage_banners for select to authenticated
   using (
     enabled = true
     and (
-      audience_roles && array[
-        coalesce(auth.jwt()->'user_metadata'->>'organization_type','')
-      ]::text[]
+      exists (
+        select 1 from public.organizations o
+        where o.created_by = (select auth.uid())
+          and o.approval_status = 'approved'
+          and o.organization_type::text = any(platform_homepage_banners.audience_roles)
+      )
       or (
-        audience_roles @> array['company_employee']::text[]
+        platform_homepage_banners.audience_roles @> array['employee']::text[]
         and exists (
-          select 1
-          from public.employee_accounts ea
-          where ea.user_id = auth.uid()
+          select 1 from public.employee_accounts ea
+          where ea.user_id = (select auth.uid())
+            and ea.employment_type = 'independent'
+            and ea.account_status = 'active'
+        )
+      )
+      or (
+        platform_homepage_banners.audience_roles @> array['company_employee']::text[]
+        and exists (
+          select 1 from public.employee_accounts ea
+          where ea.user_id = (select auth.uid())
             and ea.employment_type = 'company_member'
             and ea.account_status = 'active'
         )
@@ -43,5 +55,7 @@ create policy "homepage banners visible to matching signed-in accounts"
 drop policy if exists "platform admins manage homepage banners" on public.platform_homepage_banners;
 create policy "platform admins manage homepage banners"
   on public.platform_homepage_banners for all to authenticated
-  using (exists (select 1 from public.platform_admins pa where pa.user_id = auth.uid()))
-  with check (exists (select 1 from public.platform_admins pa where pa.user_id = auth.uid()));
+  using (exists (select 1 from public.platform_admins pa where pa.user_id = (select auth.uid())))
+  with check (exists (select 1 from public.platform_admins pa where pa.user_id = (select auth.uid())));
+revoke all on public.platform_homepage_banners from public, anon;
+grant select, insert, update, delete on public.platform_homepage_banners to authenticated;
