@@ -2012,7 +2012,7 @@ main.min-h-screen :is(input, select, textarea):disabled {
 }
 .mc-platform-topbar {
   display: flex;
-  min-height: 66px;
+  min-height: 68px;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -2027,7 +2027,7 @@ main.min-h-screen :is(input, select, textarea):disabled {
 }
 .mc-platform-brand strong { display:block; color:#102b49; font-size:1.05rem; font-weight:950; line-height:1.35; white-space:nowrap; }
 .mc-platform-brand strong b { color:#e99a13; }
-.mc-platform-brand small { display:block; margin-top:1px; color:#718198; font-size:.66rem; font-weight:750; }
+.mc-platform-brand small { display:block; margin-top:2px; color:#61758e; font-size:.68rem; font-weight:800; line-height:1.45; white-space:nowrap; }
 .mc-platform-header-actions { display:flex; flex:0 0 auto; align-items:center; justify-content:flex-start; gap:.5rem; }
 .mc-platform-header-actions > button,
 .mc-platform-header-actions > a {
@@ -2041,23 +2041,34 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-platform-header-actions > div { display:flex; align-items:center; gap:.45rem; }
 .mc-platform-header-actions > div > button { border-radius:12px !important; }
 .mc-platform-page-nav {
-  display:flex; min-height:50px; align-items:center; gap:.35rem; overflow-x:auto;
-  padding:.35rem clamp(.65rem,2.2vw,1.8rem); border-bottom:1px solid #dce6f1;
-  background:#fff; scrollbar-width:none; -webkit-overflow-scrolling:touch;
+  display:flex; min-height:68px; align-items:center; gap:.5rem; overflow-x:auto;
+  padding:.55rem clamp(.65rem,2.2vw,1.8rem); border-bottom:1px solid #cbdced;
+  border-top:1px solid #f1f6fc;
+  background:linear-gradient(180deg,#f4f8fd 0%,#eaf1f9 100%);
+  scrollbar-width:none; -webkit-overflow-scrolling:touch;
+}
+.mc-platform-page-nav::before {
+  content:"صفحات حساب الشركة";
+  display:inline-flex; flex:0 0 auto; align-items:center; justify-content:center;
+  min-height:34px; margin-inline-end:.2rem; padding:.35rem .75rem;
+  border:1px solid #d2e0ef; border-radius:999px;
+  background:#fff; color:#385675; font-size:.72rem; font-weight:950;
+  box-shadow:0 2px 7px rgba(16,43,71,.05);
 }
 .mc-platform-page-nav::-webkit-scrollbar { display:none; }
 .mc-platform-page-nav a {
-  display:inline-flex; min-height:38px; flex:0 0 auto; align-items:center; justify-content:center;
-  border:1px solid transparent; border-radius:10px; padding:.42rem .82rem;
-  color:#53677f; font-size:.76rem; font-weight:850; white-space:nowrap;
-  transition:background .16s ease,color .16s ease,border-color .16s ease;
+  display:inline-flex; min-height:46px; flex:0 0 auto; align-items:center; justify-content:center;
+  border:1px solid #d7e3f0; border-radius:13px; padding:.58rem 1rem;
+  background:rgba(255,255,255,.82); color:#405b78; font-size:.84rem; font-weight:900; white-space:nowrap;
+  box-shadow:0 2px 7px rgba(16,43,71,.045);
+  transition:background .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease;
 }
-.mc-platform-page-nav a:hover { background:#f1f6fc; color:#164f8d; }
+.mc-platform-page-nav a:hover { border-color:#a9c9ec; background:#fff; color:#164f8d; box-shadow:0 5px 13px rgba(22,79,141,.09); }
 .mc-platform-page-nav a.is-active {
-  border-color:#c7dcf4; background:linear-gradient(180deg,#edf5ff,#e4f0ff);
-  color:#124f91; box-shadow:inset 0 -2px 0 #f1a51e;
+  border-color:#8db8e8; background:linear-gradient(145deg,#dcecff 0%,#c9e1fb 100%);
+  color:#103f78; box-shadow:inset 0 -3px 0 #f1a51e,0 5px 14px rgba(22,79,141,.12);
 }
-body:has(.mc-company-shared-sidebar) { padding-top:116px !important; }
+body:has(.mc-company-shared-sidebar) { padding-top:136px !important; }
 body:has(.mc-company-shared-sidebar) .mc-workspace-topbar,
 body:has(.mc-company-shared-sidebar) .mc-company-shared-sidebar,
 body:has(.mc-company-shared-sidebar) .mc-workspace-sidebar,
@@ -2073,20 +2084,21 @@ body:has(.mc-company-shared-sidebar) .mc-workspace-main { margin-top:0 !importan
 body:has(.mc-company-shared-sidebar) .mc-supplier-page-content,
 body:has(.mc-company-shared-sidebar) .mc-workspace-content { min-width:0; }
 @media (max-width:760px) {
-  .mc-platform-topbar { min-height:62px; gap:.45rem; padding:.45rem .65rem; }
-  .mc-platform-brand { gap:.45rem; }
+  .mc-platform-topbar { min-height:68px; gap:.35rem; padding:.45rem .55rem; }
+  .mc-platform-brand { gap:.4rem; }
   .mc-platform-brand img { width:38px; height:38px; flex-basis:38px; }
   .mc-platform-brand strong { font-size:.88rem; }
-  .mc-platform-brand small { display:none; }
-  .mc-platform-header-actions { gap:.3rem; }
+  .mc-platform-brand small { display:block; max-width: min(58vw, 250px); overflow:hidden; text-overflow:ellipsis; font-size:.56rem; line-height:1.45; }
+  .mc-platform-header-actions { gap:.25rem; }
   .mc-platform-header-actions > button,
-  .mc-platform-header-actions > a { width:40px; min-width:40px; min-height:40px; padding:.4rem; border-radius:11px; }
+  .mc-platform-header-actions > a { width:38px; min-width:38px; min-height:38px; padding:.35rem; border-radius:10px; }
   .mc-platform-header-actions > button span,
   .mc-platform-header-actions > a span { display:none; }
-  .mc-platform-header-actions > div { gap:.25rem; }
-  .mc-platform-page-nav { min-height:48px; gap:.25rem; padding:.3rem .5rem; }
-  .mc-platform-page-nav a { min-height:36px; padding:.35rem .68rem; font-size:.71rem; }
-  body:has(.mc-company-shared-sidebar) { padding-top:110px !important; }
+  .mc-platform-header-actions > div { gap:.2rem; }
+  .mc-platform-page-nav { min-height:64px; gap:.35rem; padding:.45rem .5rem; }
+  .mc-platform-page-nav::before { min-height:30px; padding:.3rem .58rem; font-size:.65rem; }
+  .mc-platform-page-nav a { min-height:43px; padding:.48rem .78rem; border-radius:12px; font-size:.77rem; }
+  body:has(.mc-company-shared-sidebar) { padding-top:132px !important; }
 }
 
 /* Readability improvements are scoped to the redesigned company workspace only. */
