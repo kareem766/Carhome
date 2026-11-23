@@ -4,55 +4,64 @@ import PlatformBrand from './PlatformBrand'
 import AdminPageNavigation from './AdminPageNavigation'
 import { supabase } from '../lib/supabase'
 
-type Role='individual_owner'|'fleet_supplier'|'employee'
+type Role='individual_owner'|'fleet_supplier'|'employee'|'company'|'company_employee'
 type Slide={id:string;title:string;image_url:string;click_url:string|null;audience_roles:Role[];enabled:boolean;display_order:number;starts_at:string|null;ends_at:string|null}
-const roles:{value:Role;label:string}[]=[{value:'individual_owner',label:'مالك السيارة'},{value:'fleet_supplier',label:'مورد الأسطول'},{value:'employee',label:'الموظف'}]
+const roles:{value:Role;label:string}[]=[{value:'individual_owner',label:'مالك السيارة'},{value:'fleet_supplier',label:'مورد الأسطول'},{value:'company',label:'الشركة'},{value:'company_employee',label:'موظف الشركة'},{value:'employee',label:'الموظف المستقل'}]
 
 type Destination={value:string;label:string;roles:Role[]}
 const destinations:Destination[]=[
  // صفحات عامة ومشتركة
- {value:'/',label:'الصفحة الرئيسية للمنصة',roles:['individual_owner','fleet_supplier','employee']},
- {value:'/services',label:'خدمات السيارات',roles:['individual_owner','fleet_supplier','employee']},
- {value:'/assistant',label:'مساعد My Car',roles:['individual_owner','fleet_supplier','employee']},
- {value:'/support',label:'مركز الدعم',roles:['individual_owner','fleet_supplier','employee']},
- {value:'/privacy',label:'سياسة الخصوصية',roles:['individual_owner','fleet_supplier','employee']},
- {value:'/terms',label:'الشروط والأحكام',roles:['individual_owner','fleet_supplier','employee']},
- {value:'/workspace/notifications',label:'إعدادات الإشعارات',roles:['individual_owner','fleet_supplier','employee']},
+ {value:'/',label:'الصفحة الرئيسية للمنصة',roles:['individual_owner','fleet_supplier','employee','company','company_employee']},
+ {value:'/services',label:'خدمات السيارات',roles:['individual_owner','fleet_supplier','employee','company','company_employee']},
+ {value:'/assistant',label:'مساعد My Car',roles:['individual_owner','fleet_supplier','employee','company','company_employee']},
+ {value:'/support',label:'مركز الدعم',roles:['individual_owner','fleet_supplier','employee','company','company_employee']},
+ {value:'/workspace/notifications',label:'إعدادات الإشعارات',roles:['individual_owner','fleet_supplier','employee','company','company_employee']},
+ {value:'/workspace/catalog',label:'كتالوج السيارات',roles:['individual_owner','fleet_supplier','employee','company','company_employee']},
 
- // صفحات مالك السيارة
+ // مالك السيارة: إدارة السيارات وتسجيل سيارة جديدة
  {value:'/workspace/owner/vehicles',label:'مالك السيارة · سياراتي',roles:['individual_owner']},
+ {value:'/workspace/owner/vehicles/new',label:'مالك السيارة · تسجيل سيارة جديدة',roles:['individual_owner']},
  {value:'/workspace/owner/offers',label:'مالك السيارة · عروضي',roles:['individual_owner']},
  {value:'/workspace/owner/requests',label:'مالك السيارة · طلبات الشركات',roles:['individual_owner']},
  {value:'/workspace/owner/employee-requests',label:'مالك السيارة · طلبات الموظفين',roles:['individual_owner']},
  {value:'/workspace/provider/managed-sourcing',label:'مالك السيارة · تفويضات البحث',roles:['individual_owner']},
- {value:'/workspace/catalog',label:'مالك السيارة · كتالوج السيارات',roles:['individual_owner']},
  {value:'/workspace/advertising-plans',label:'مالك السيارة · باقات الإعلانات',roles:['individual_owner']},
 
- // صفحات مورد الأسطول
+ // مورد الأسطول
  {value:'/workspace/supplier/vehicles',label:'مورد الأسطول · أسطولي',roles:['fleet_supplier']},
- {value:'/workspace/supplier/vehicles/new',label:'مورد الأسطول · إضافة سيارة',roles:['fleet_supplier']},
+ {value:'/workspace/supplier/vehicles/new',label:'مورد الأسطول · تسجيل سيارة جديدة',roles:['fleet_supplier']},
  {value:'/workspace/supplier/requests',label:'مورد الأسطول · طلبات الشركات',roles:['fleet_supplier']},
  {value:'/workspace/supplier/offers',label:'مورد الأسطول · عروضي',roles:['fleet_supplier']},
  {value:'/workspace/provider-employee-requests',label:'مورد الأسطول · طلبات الموظفين',roles:['fleet_supplier']},
  {value:'/workspace/provider/managed-sourcing',label:'مورد الأسطول · تفويضات البحث',roles:['fleet_supplier']},
  {value:'/workspace/supplier/insights',label:'مورد الأسطول · تقارير الأسطول',roles:['fleet_supplier']},
  {value:'/workspace/supplier/account',label:'مورد الأسطول · الحساب',roles:['fleet_supplier']},
- {value:'/workspace/catalog',label:'مورد الأسطول · كتالوج السيارات',roles:['fleet_supplier']},
  {value:'/workspace/advertising-plans',label:'مورد الأسطول · الإعلانات',roles:['fleet_supplier']},
  {value:'/messages',label:'مورد الأسطول · المحادثات',roles:['fleet_supplier']},
 
- // صفحات الموظف المستقل
- {value:'/workspace/employee',label:'الموظف · الرئيسية',roles:['employee']},
+ // الشركة وموظف الشركة
+ {value:'/workspace/company',label:'الشركة · الرئيسية',roles:['company','company_employee']},
+ {value:'/workspace/company/requests',label:'الشركة · طلبات التأجير',roles:['company','company_employee']},
+ {value:'/workspace/company/requests/new',label:'الشركة · إنشاء طلب تأجير جديد',roles:['company','company_employee']},
+ {value:'/workspace/company/managed-sourcing',label:'الشركة · تفويض My Car للبحث',roles:['company']},
+ {value:'/workspace/company/subscriptions',label:'الشركة · الاشتراكات والباقات',roles:['company']},
+ {value:'/workspace/company/insights',label:'الشركة · التقارير والمؤشرات',roles:['company']},
+ {value:'/workspace/company/team',label:'الشركة · فريق العمل',roles:['company']},
+ {value:'/workspace/company/alerts',label:'الشركة · التنبيهات الذكية',roles:['company']},
+ {value:'/messages',label:'الشركة · المحادثات',roles:['company','company_employee']},
+
+ // الموظف المستقل
+ {value:'/workspace/employee',label:'الموظف المستقل · الرئيسية',roles:['employee']},
  {value:'/workspace/employee#new-request',label:'الموظف المستقل · إنشاء طلب سيارة جديدة',roles:['employee']},
- {value:'/workspace/employee/requests',label:'الموظف · طلباتي والعروض',roles:['employee']},
- {value:'/workspace/employee/messages',label:'الموظف · المراسلات',roles:['employee']},
- {value:'/workspace/employee/account',label:'الموظف · بيانات الحساب',roles:['employee']},
+ {value:'/workspace/employee/requests',label:'الموظف المستقل · طلباتي والعروض',roles:['employee']},
+ {value:'/workspace/employee/messages',label:'الموظف المستقل · المراسلات',roles:['employee']},
+ {value:'/workspace/employee/account',label:'الموظف المستقل · بيانات الحساب',roles:['employee']},
 ]
 export default function AdminPromotionalSlidesPage(){
  const [authorized,setAuthorized]=useState(false),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false)
  const [slides,setSlides]=useState<Slide[]>([]),[editing,setEditing]=useState<Slide|null>(null)
  const [title,setTitle]=useState(''),[imageUrl,setImageUrl]=useState(''),[imageFile,setImageFile]=useState<File|null>(null),[clickUrl,setClickUrl]=useState('')
- const [audiences,setAudiences]=useState<Role[]>(['individual_owner','fleet_supplier','employee']),[order,setOrder]=useState('0'),[startsAt,setStartsAt]=useState(''),[endsAt,setEndsAt]=useState('')
+ const [audiences,setAudiences]=useState<Role[]>(['individual_owner','fleet_supplier','employee','company','company_employee']),[order,setOrder]=useState('0'),[startsAt,setStartsAt]=useState(''),[endsAt,setEndsAt]=useState('')
  const [error,setError]=useState(''),[notice,setNotice]=useState('')
  async function load(){if(!supabase){window.location.replace('/?login=1');return}setLoading(true);const {data:{user}}=await supabase.auth.getUser();if(!user){window.location.replace('/?login=1');return}const {data:admin,error:adminError}=await supabase.from('platform_admins').select('user_id').eq('user_id',user.id).maybeSingle();if(adminError||!admin){setAuthorized(false);setLoading(false);return}setAuthorized(true);const {data,error}=await supabase.from('platform_promo_slides').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false});if(error)setError(error.message);else setSlides((data||[]) as Slide[]);setLoading(false)}
  useEffect(()=>{void load()},[])
