@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import AccountNotifications from './AccountNotifications'
 import CompanyPageSidebar from './CompanyPageSidebar'
 import PlatformBrand from './PlatformBrand'
+import PromotionalCarousel from './PromotionalCarousel'
 
 type OfferRow = { id: string; status: string; monthly_price_egp: number; yearly_price_egp: number | null; vehicle_count: number; organizations?: { id: string; name: string } | { id: string; name: string }[] | null }
 type RequestRow = { id: string; title: string; details: string | null; vehicle_type: string; quantity: number; duration_type: string; duration_months: number; governorate: string; with_driver: boolean; status: string; created_at: string; rental_offers?: OfferRow[] | null }
@@ -176,6 +177,7 @@ export default function CompanyDashboardPage({ employeeView = false }: { employe
       </header>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+        <PromotionalCarousel role={employeeView ? 'company_employee' : 'company'} />
         <section className="mc-company-dark-hero relative isolate overflow-hidden rounded-[28px] bg-gradient-to-l from-[#071d38] via-[#103d6b] to-[#087eae] p-5 text-white shadow-[0_22px_55px_-28px_rgba(5,36,75,.55)] sm:p-8">
           <div aria-hidden="true" className="pointer-events-none absolute -left-12 -top-16 -z-10 h-64 w-64 rounded-full border-[30px] border-white/5" />
           <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 right-1/3 -z-10 h-64 w-64 rounded-full bg-cyan-300/10 blur-3xl" />
