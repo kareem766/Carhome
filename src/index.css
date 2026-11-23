@@ -2028,7 +2028,9 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-platform-brand strong { display:block; color:#102b49; font-size:1.05rem; font-weight:950; line-height:1.35; white-space:nowrap; }
 .mc-platform-brand strong b { color:#e99a13; }
 .mc-platform-brand small { display:block; margin-top:2px; color:#61758e; font-size:.68rem; font-weight:800; line-height:1.45; white-space:nowrap; }
-.mc-platform-header-actions { display:flex; flex:0 0 auto; align-items:center; justify-content:flex-start; gap:.5rem; }
+.mc-platform-header-actions { display:flex; flex:0 0 auto; flex-direction:column; align-items:center; justify-content:center; gap:.12rem; }
+.mc-platform-header-icons { display:flex; align-items:center; justify-content:flex-start; gap:.5rem; }
+.mc-company-header-tagline { display:block; color:#61758e; font-size:.66rem; font-weight:800; line-height:1.35; white-space:nowrap; }
 .mc-platform-header-actions > button,
 .mc-platform-header-actions > a {
   display:inline-flex; min-height:42px; align-items:center; justify-content:center; gap:.45rem;
@@ -2089,7 +2091,9 @@ body:has(.mc-company-shared-sidebar) .mc-workspace-content { min-width:0; }
   .mc-platform-brand img { width:38px; height:38px; flex-basis:38px; }
   .mc-platform-brand strong { font-size:.88rem; }
   .mc-platform-brand small { display:block; max-width: min(58vw, 250px); overflow:hidden; text-overflow:ellipsis; font-size:.56rem; line-height:1.45; }
-  .mc-platform-header-actions { gap:.25rem; }
+  .mc-platform-header-actions { gap:.08rem; }
+  .mc-platform-header-icons { gap:.25rem; }
+  .mc-company-header-tagline { max-width:58vw; overflow:hidden; text-overflow:ellipsis; font-size:.53rem; }
   .mc-platform-header-actions > button,
   .mc-platform-header-actions > a { width:38px; min-width:38px; min-height:38px; padding:.35rem; border-radius:10px; }
   .mc-platform-header-actions > button span,
