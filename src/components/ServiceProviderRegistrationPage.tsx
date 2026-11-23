@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowRight, BadgeCheck, Building2, CheckCircle2, ChevronDown, FileCheck2, Phone, ShieldCheck, Wrench } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 import { supabase } from '../lib/supabase'
+import { clearFormDraft, readFormDraft, writeFormDraft } from '../lib/formDrafts'
 
 const categories = [
   { value: 'maintenance', label: 'مراكز الصيانة والخدمة' },
@@ -18,11 +19,13 @@ const inputClass = 'mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-w
 const initial = { provider_name:'', category:'maintenance', governorate:'الإسكندرية', address:'', contact_name:'', phone:'', email:'', website_url:'', official_source_url:'', description:'' }
 
 export default function ServiceProviderRegistrationPage() {
-  const [form,setForm] = useState(initial)
+  const draftKey = 'service-provider-registration'
+  const [form,setForm] = useState(() => ({ ...initial, ...(readFormDraft(draftKey)?.values || {}) } as typeof initial))
   const [submitting,setSubmitting] = useState(false)
   const [submitted,setSubmitted] = useState(false)
   const [error,setError] = useState('')
   const change = (key: keyof typeof initial, value: string) => setForm(current=>({...current,[key]:value}))
+  useEffect(() => { writeFormDraft(draftKey, form) }, [form])
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
@@ -40,6 +43,7 @@ export default function ServiceProviderRegistrationPage() {
         status: 'pending_review'
       })
       if (insertError) throw insertError
+      clearFormDraft(draftKey)
       setSubmitted(true)
     } catch (err) {
       console.error('Service provider submission failed',err)
