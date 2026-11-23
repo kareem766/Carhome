@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
 import EmployeeWorkspaceHeader from './EmployeeWorkspaceHeader'
 import EmployeePageLoading from './EmployeePageLoading'
+import { clearFormDraft, readFormDraft, writeFormDraft } from '../lib/formDrafts'
 
 type Offer = { id: string; request_id: string; status: string; monthly_price_egp: number; created_by: string | null }
 type Message = { id: string; offer_id: string; sender_user_id: string; body: string; created_at: string }
@@ -22,6 +23,7 @@ export default function EmployeeRentalMessagesPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [draftLoaded, setDraftLoaded] = useState(false)
 
   async function load() {
     if (!supabase) { window.location.replace('/?login=1'); return }
@@ -86,6 +88,19 @@ export default function EmployeeRentalMessagesPage() {
   }
 
   useEffect(() => { void load() }, [offerId])
+  useEffect(() => {
+    if (!userId || !offerId || draftLoaded) return
+    const key = 'employee-chat:' + userId + ':' + offerId
+    const saved = readFormDraft(key)?.values.body
+    if (typeof saved === 'string') setBody(saved)
+    setDraftLoaded(true)
+  }, [userId, offerId, draftLoaded])
+  useEffect(() => {
+    if (!userId || !offerId || !draftLoaded) return
+    const key = 'employee-chat:' + userId + ':' + offerId
+    if (body.trim()) writeFormDraft(key, { body })
+    else clearFormDraft(key)
+  }, [userId, offerId, draftLoaded, body])
 
   // Subscribe only to the selected offer so employee/provider chats update immediately.
   useEffect(() => {
@@ -133,6 +148,7 @@ export default function EmployeeRentalMessagesPage() {
     setSending(false)
     if (sendError) { setError('تعذر إرسال الرسالة: ' + sendError.message); return }
     setBody('')
+    clearFormDraft('employee-chat:' + userId + ':' + offer.id)
     await load()
     setNotice('تم إرسال رسالتك بنجاح.')
   }
