@@ -63,11 +63,15 @@ export function restoreFormValues(form: HTMLFormElement, values: Record<string, 
     if (!name || !(name in values) || NEVER_SAVE.has(name.toLowerCase()) || element.type === 'file' || element.type === 'password' || element.type === 'hidden') continue
     const value = values[name]
     if (element instanceof HTMLInputElement && element.type === 'radio') {
-      element.checked = String(value) === element.value
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'checked')?.set
+      setter?.call(element, String(value) === element.value)
     } else if (element instanceof HTMLInputElement && element.type === 'checkbox') {
-      element.checked = value === true || value === 'on'
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'checked')?.set
+      setter?.call(element, value === true || value === 'on')
     } else {
-      element.value = String(value)
+      const prototype = element instanceof HTMLInputElement ? HTMLInputElement.prototype : element instanceof HTMLSelectElement ? HTMLSelectElement.prototype : HTMLTextAreaElement.prototype
+      const setter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set
+      setter?.call(element, String(value))
     }
     element.dispatchEvent(new Event('input', { bubbles: true }))
     element.dispatchEvent(new Event('change', { bubbles: true }))
