@@ -11,13 +11,12 @@ const policies = [
 ];
 
 for (const [name, table] of policies) {
-  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = sql.match(new RegExp('CREATE\\s+POLICY\\s+"' + escapedName + '"[\\s\\S]*?ON\\s+public\\.' + table + '[\\s\\S]*?;', 'i'));
-  assert.ok(match, `Missing policy definition: ${table} / ${name}`);
+  const match = sql.match(new RegExp('CREATE\\s+POLICY\\s+"' + name + '"[\\s\\S]*?ON\\s+public\\.' + table + '[\\s\\S]*?;', 'i'));
+  assert.ok(match, 'Missing policy definition: ' + table + ' / ' + name);
   const definition = match[0];
-  assert.match(definition, /registration_expires_at\\s+IS\\s+NOT\\s+NULL/i, `Policy must require registration expiry: ${name}`);
-  assert.match(definition, /registration_expires_at\\s*>\\s*now\\(\\)/i, `Policy must require unexpired registration: ${name}`);
-  assert.doesNotMatch(definition, /registration_expires_at\\s+IS\\s+NULL(?!\\s*AND)/i, `Policy must not allow missing registration expiry: ${name}`);
+  assert.match(definition, /registration_expires_at\\s+IS\\s+NOT\\s+NULL/i, 'Policy must require registration expiry: ' + name);
+  assert.match(definition, /registration_expires_at\\s*>\\s*now\\(\\)/i, 'Policy must require unexpired registration: ' + name);
+  assert.doesNotMatch(definition, /registration_expires_at\\s+IS\\s+NULL/i, 'Policy must not allow missing registration expiry: ' + name);
 }
 
 console.log('Vehicle eligibility regression checks passed for all 3 RLS policies.');
