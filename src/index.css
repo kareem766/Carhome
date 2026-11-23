@@ -2851,3 +2851,15 @@ main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
 .mc-platform-header-actions { align-items: flex-end; }
 .mc-platform-header-icons { align-self: flex-end; }
 .mc-company-header-tagline { align-self: flex-end; text-align: right; }
+
+
+/* Keep the company tagline neatly grouped beneath the platform name and logo. */
+.mc-platform-header-actions { align-items: center; }
+.mc-platform-header-icons { align-self: auto; }
+.mc-platform-brand { align-items: center; }
+.mc-platform-brand-copy { display:flex; min-width:0; flex-direction:column; align-items:flex-start; gap:2px; }
+.mc-platform-brand .mc-company-header-tagline { align-self:flex-start; margin:0; color:#61758e; font-size:.66rem; font-weight:800; line-height:1.35; white-space:nowrap; text-align:right; }
+@media (max-width:760px) {
+  .mc-platform-brand-copy { gap:1px; }
+  .mc-platform-brand .mc-company-header-tagline { max-width: min(58vw, 250px); overflow:hidden; text-overflow:ellipsis; font-size:.53rem; }
+}
