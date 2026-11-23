@@ -2031,15 +2031,15 @@ main.min-h-screen :is(input, select, textarea):disabled {
 .mc-platform-header-actions { display:flex; flex:0 0 auto; flex-direction:column; align-items:center; justify-content:center; gap:.12rem; }
 .mc-platform-header-icons { display:flex; align-items:center; justify-content:flex-start; gap:.5rem; }
 .mc-company-header-tagline { display:block; color:#61758e; font-size:.66rem; font-weight:800; line-height:1.35; white-space:nowrap; }
-.mc-platform-header-actions > button,
-.mc-platform-header-actions > a {
+.mc-platform-header-icons > button,
+.mc-platform-header-icons > a {
   display:inline-flex; min-height:42px; align-items:center; justify-content:center; gap:.45rem;
   border:1px solid #dce6f0; border-radius:12px; background:#fff; padding:.45rem .8rem;
   color:#24415f; font-size:.76rem; font-weight:850; white-space:nowrap;
   transition:background .16s ease,border-color .16s ease,transform .16s ease;
 }
-.mc-platform-header-actions > button:hover,
-.mc-platform-header-actions > a:hover { border-color:#a9c9ec; background:#f0f6ff; color:#15549a; }
+.mc-platform-header-icons > button:hover,
+.mc-platform-header-icons > a:hover { border-color:#a9c9ec; background:#f0f6ff; color:#15549a; }
 .mc-platform-header-actions > div { display:flex; align-items:center; gap:.45rem; }
 .mc-platform-header-actions > div > button { border-radius:12px !important; }
 .mc-platform-page-nav {
@@ -2094,10 +2094,10 @@ body:has(.mc-company-shared-sidebar) .mc-workspace-content { min-width:0; }
   .mc-platform-header-actions { gap:.08rem; }
   .mc-platform-header-icons { gap:.25rem; }
   .mc-company-header-tagline { max-width:58vw; overflow:hidden; text-overflow:ellipsis; font-size:.53rem; }
-  .mc-platform-header-actions > button,
-  .mc-platform-header-actions > a { width:38px; min-width:38px; min-height:38px; padding:.35rem; border-radius:10px; }
-  .mc-platform-header-actions > button span,
-  .mc-platform-header-actions > a span { display:none; }
+  .mc-platform-header-icons > button,
+  .mc-platform-header-icons > a { width:38px; min-width:38px; min-height:38px; padding:.35rem; border-radius:10px; }
+  .mc-platform-header-icons > button span,
+  .mc-platform-header-icons > a span { display:none; }
   .mc-platform-header-actions > div { gap:.2rem; }
   .mc-platform-page-nav { min-height:64px; gap:.35rem; padding:.45rem .5rem; }
   .mc-platform-page-nav::before { min-height:30px; padding:.3rem .58rem; font-size:.65rem; }
