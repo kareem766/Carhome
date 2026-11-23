@@ -2772,3 +2772,41 @@ body:has(.mc-company-shared-sidebar) .mc-company-page-with-sidebar .mc-company-d
   .mc-owner-main-links{scroll-behavior:auto}
   .mc-owner-main-link,.mc-owner-main-link svg{transition:none}
 }
+
+
+/* Unified premium blue surfaces — backgrounds only; preserve foreground text and icon colors. */
+:root {
+  --mc-premium-blue-card: linear-gradient(115deg, #071629 0%, #102f59 38%, #174f91 72%, #087fa8 100%);
+}
+.mc-dashboard-hero,
+.mc-company-dark-card,
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="from-[#0b2545]"],
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="from-blue-"][class*="to-"],
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="via-blue-"][class*="to-blue-"],
+main :is(section, article, div)[class*="rounded-"][class*="shadow"][class*="bg-blue-"],
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="from-sky-"][class*="to-"],
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="from-cyan-"][class*="to-"],
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="from-indigo-"][class*="to-"],
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="via-sky-"][class*="to-sky-"],
+main :is(section, article, div)[class*="rounded-"][class*="p-"][class*="via-cyan-"][class*="to-cyan-"] {
+  background-color: #102f59 !important;
+  background-image: var(--mc-premium-blue-card) !important;
+  border-color: rgba(147, 197, 253, .22) !important;
+  box-shadow: 0 18px 45px rgba(3, 18, 43, .24);
+}
+/* Do not recolor buttons, links, or compact action/status controls. */
+main :is(button, a, [role="button"])[class*="bg-blue-"],
+main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
+  background-image: revert-layer;
+}
+/* Dedicated blue treatment for the employee-requests shortcut; text/icon colors stay unchanged. */
+.mc-employee-requests-shortcut {
+  background: linear-gradient(115deg, #eaf3ff 0%, #dcecff 48%, #d4f0fb 100%);
+  border-color: #9fc7f2 !important;
+  box-shadow: 0 8px 22px rgba(16, 65, 119, .10), inset 0 1px 0 rgba(255,255,255,.85);
+}
+.mc-employee-requests-shortcut:hover {
+  background: linear-gradient(115deg, #dfedff 0%, #cfe3fb 48%, #c8eaf8 100%);
+  border-color: #78afe8 !important;
+  box-shadow: 0 14px 30px rgba(16, 65, 119, .16);
+}
