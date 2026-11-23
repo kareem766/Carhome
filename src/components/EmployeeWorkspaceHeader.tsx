@@ -24,9 +24,9 @@ export default function EmployeeWorkspaceHeader({active='home'}:{active?:ActiveP
      <AccountNotifications/>
     </div>
    </div>
-   <nav aria-label="التنقل داخل مساحة الموظف المستقل" className="flex w-full items-center gap-1.5 overflow-x-auto overscroll-x-contain rounded-2xl border border-slate-200/80 bg-slate-50/90 p-1.5 [scrollbar-width:thin] lg:order-2 lg:w-auto lg:flex-1 lg:justify-center">
-    {links.map(({key,href,label,icon:Icon})=><a key={key} href={href} aria-current={active===key?'page':undefined} className={'inline-flex min-h-10 shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl px-3 text-xs font-extrabold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:min-h-11 sm:gap-2 sm:px-4 sm:text-sm '+(active===key?'bg-gradient-to-l from-[#123456] to-[#1c5684] text-white shadow-md shadow-blue-950/15':'text-slate-600 hover:bg-white hover:text-blue-800 hover:shadow-sm')}><Icon size={16}/>{label}</a>)}
-    {active==='home'&&<a href="#new-request" className="inline-flex min-h-10 shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl border border-orange-200 bg-gradient-to-l from-orange-50 to-amber-50 px-3 text-xs font-extrabold text-orange-800 transition hover:border-orange-300 hover:from-orange-100 hover:to-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 sm:min-h-11 sm:gap-2 sm:px-4 sm:text-sm"><CarFront size={16}/> طلب سيارة</a>}
+   <nav aria-label="التنقل داخل مساحة الموظف المستقل" className="mc-platform-page-nav mc-platform-page-nav--employee">
+    {links.map(({key,href,label,icon:Icon})=><a key={key} href={href} aria-current={active===key?'page':undefined} className={active===key?'is-active':''}><Icon size={16}/>{label}</a>)}
+    {active==='home'&&<a href="#new-request" className="mc-employee-nav-cta"><CarFront size={16}/> طلب سيارة</a>}
    </nav>
   </div>
  </header>
