@@ -158,7 +158,7 @@ function CompanyPersistentBar({ employeeView = false }: { employeeView?: boolean
     <header className="mc-platform-topbar">
       <a href="/workspace/company" className="mc-platform-brand">
         <img src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png" alt="شعار My Car عربيتي" />
-        <span><strong><span dir="ltr">My Car</span> <b>عربيتي</b></strong></span>
+        <span className="mc-platform-brand-copy"><strong><span dir="ltr">My Car</span> <b>عربيتي</b></strong><small className="mc-company-header-tagline">إدارة أسطول شركتك واحتياجات التنقل… في مكان واحد</small></span>
       </a>
       <div className="mc-platform-header-actions">
         <div className="mc-platform-header-icons">
@@ -166,7 +166,6 @@ function CompanyPersistentBar({ employeeView = false }: { employeeView?: boolean
           <a href="/messages" aria-label="المراسلات" title="المراسلات"><MessageCircle size={18}/><span>المراسلات</span></a>
           <AccountNotifications/>
         </div>
-        <small className="mc-company-header-tagline">إدارة أسطول شركتك واحتياجات التنقل… في مكان واحد</small>
       </div>
     </header>
     <nav className="mc-platform-page-nav" aria-label="التنقل بين صفحات حساب الشركة">
