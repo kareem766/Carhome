@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
-type PromoRole = 'individual_owner' | 'fleet_supplier' | 'employee'
+type PromoRole = 'individual_owner' | 'fleet_supplier' | 'employee' | 'company' | 'company_employee'
 type Slide = { id:string; title:string; image_url:string; click_url:string|null; display_order:number }
 export default function PromotionalCarousel({ role }: { role: PromoRole }) {
  const [slides,setSlides]=useState<Slide[]>([])
