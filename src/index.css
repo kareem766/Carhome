@@ -2845,3 +2845,9 @@ main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
 .mc-company-workspace-main .mc-workspace-page.mc-company-rental-requests-page > :first-child {
   margin-top: 0 !important;
 }
+
+
+/* Company header tagline: align the supporting line to the right edge under the action icons. */
+.mc-platform-header-actions { align-items: flex-end; }
+.mc-platform-header-icons { align-self: flex-end; }
+.mc-company-header-tagline { align-self: flex-end; text-align: right; }
