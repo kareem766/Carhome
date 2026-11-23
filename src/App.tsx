@@ -74,17 +74,18 @@ const defaults: PlatformSettings = {
 function pathIsHome(path: string) { return path === '/' || path === '' }
 const HOME_CAR_IMAGES = [
   [
-    'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg',
-    'https://corporate.autovermietung-arndt.de/fileadmin/corporate-page/img/arndt_corporate23.jpg',
-    'https://phoenixrentalcars.com/phoenix-car-rental-vehicle-lineup.webp'
-  ],
-  [
-    'https://bmkltsly13vb.compat.objectstorage.ap-mumbai-1.oraclecloud.com/cdn.ft.lk/assets/uploads/image_e2653488f5.jpg',
+    'https://phoenixrentalcars.com/phoenix-car-rental-vehicle-lineup.webp',
     'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg',
     'https://corporate.autovermietung-arndt.de/fileadmin/corporate-page/img/arndt_corporate23.jpg'
   ],
   [
+    'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg',
+    'https://bmkltsly13vb.compat.objectstorage.ap-mumbai-1.oraclecloud.com/cdn.ft.lk/assets/uploads/image_e2653488f5.jpg',
+    'https://corporate.autovermietung-arndt.de/fileadmin/corporate-page/img/arndt_corporate23.jpg'
+  ],
+  [
     'https://ireland.apollo.olxcdn.com/v1/files/bjh0fmv4qbah1-PT/image',
+    'https://corporate.autovermietung-arndt.de/fileadmin/corporate-page/img/arndt_corporate23.jpg',
     'https://phoenixrentalcars.com/phoenix-car-rental-vehicle-lineup.webp',
     'https://www.mannfleetpartners.com/serviceimages/PHOTO-2026-05-28-11-53-44.jpg'
   ]
@@ -437,27 +438,60 @@ export default function App() {
   useEffect(() => {
     if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
-    // Render the page shell immediately; photography must never block access to homepage content.
-    setHomeImagesReady(true)
-    const loadImage = (sources: string[]) => new Promise<string>((resolve) => {
-      let index = 0
-      const tryNext = () => {
-        const source = sources[index++]
-        if (!source) {
-          resolve('')
-          return
-        }
-        const image = new Image()
-        image.onload = () => { void image.decode().catch(() => undefined).then(() => resolve(source)) }
-        image.onerror = tryNext
-        image.src = source
+    const fallbackSource = '/carhome-icon.svg'
+    const uniqueSources = Array.from(new Set(HOME_CAR_IMAGES.flat()))
+
+    const preload = (source: string, timeoutMs = 4500) => new Promise<boolean>((resolve) => {
+      const image = new Image()
+      let settled = false
+      let loadTimer: number | undefined
+      let decodeTimer: number | undefined
+      const finish = (loaded: boolean) => {
+        if (settled) return
+        settled = true
+        if (loadTimer !== undefined) window.clearTimeout(loadTimer)
+        if (decodeTimer !== undefined) window.clearTimeout(decodeTimer)
+        resolve(loaded)
       }
-      tryNext()
+      loadTimer = window.setTimeout(() => finish(false), timeoutMs)
+      image.onerror = () => finish(false)
+      image.onload = () => {
+        if (typeof image.decode !== 'function') { finish(true); return }
+        decodeTimer = window.setTimeout(() => finish(true), 1500)
+        void image.decode().then(() => finish(true)).catch(() => finish(true))
+      }
+      image.src = source
     })
-    void loadImage([HOME_BANNER_IMAGE]).catch((error) => console.error('Homepage banner image could not be preloaded:', error))
-    void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
-      if (active) setHomeImageUrls(urls)
+
+    const prepareHomeImages = async () => {
+      const results = await Promise.all(uniqueSources.map(async (source) => ({
+        source,
+        loaded: await preload(source)
+      })))
+      await preload(fallbackSource, 1500)
+      if (!active) return
+
+      const availableSources = new Set(results.filter((item) => item.loaded).map((item) => item.source))
+      const usedSources = new Set<string>()
+      const urls = HOME_CAR_IMAGES.map((sources) => {
+        const uniqueSource = sources.find((source) => availableSources.has(source) && !usedSources.has(source))
+        if (!uniqueSource) return fallbackSource
+        usedSources.add(uniqueSource)
+        return uniqueSource
+      })
+
+      setHomeImageUrls(urls)
+      setHomeImagesReady(true)
+    }
+
+    void preload(HOME_BANNER_IMAGE)
+    void prepareHomeImages().catch((error) => {
+      console.error('Homepage vehicle images could not be prepared:', error)
+      if (!active) return
+      setHomeImageUrls(HOME_CAR_IMAGES.map(() => fallbackSource))
+      setHomeImagesReady(true)
     })
+
     return () => { active = false }
   }, [])
 
@@ -654,7 +688,16 @@ export default function App() {
             {HOME_CAR_IMAGES.map((_, index) => {
               const src = homeImageUrls[index]
               return <a key={index} href={authUser ? '/workspace/catalog' : '/register/company'} aria-label={`استكشف ${['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]}`} className={`mc-home-vehicle-card group relative isolate block h-32 overflow-hidden rounded-2xl border bg-[#102b47] shadow-[0_18px_45px_rgba(0,0,0,.24)] sm:h-52 lg:h-64 ${index === 1 ? 'mc-home-vehicle-card-featured' : ''}`}>
-                {src && <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" fetchPriority="low" width="1200" height="800" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(event) => { event.currentTarget.style.display = 'none' }}/>}
+                {src && <img src={src} alt="" aria-hidden="true" loading="eager" decoding="async" fetchPriority="high" width="1200" height="800" className={`absolute inset-0 h-full w-full ${src === '/carhome-icon.svg' ? 'object-contain p-7' : 'object-cover'} transition-transform duration-700 group-hover:scale-105`} onError={(event) => {
+                  const image = event.currentTarget
+                  if (image.getAttribute('src') !== '/carhome-icon.svg') {
+                    image.src = '/carhome-icon.svg'
+                    image.classList.remove('object-cover')
+                    image.classList.add('object-contain', 'p-7')
+                  } else {
+                    image.style.display = 'none'
+                  }
+                }}/>}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#06172a]/95 via-[#06172a]/15 to-transparent"/>
                 {index === 1 && <span className="mc-home-popular-badge"><Star size={15} fill="currentColor"/> الأكثر طلبًا</span>}
                 <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 px-2 pb-3 text-right text-[11px] font-black text-white sm:px-4 sm:pb-4 sm:text-base"><span>{['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]}</span><span className="mc-home-card-arrow"><ArrowLeft size={17}/></span></div>
