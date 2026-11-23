@@ -33,9 +33,9 @@ export default function PromotionalCarousel({ role }: { role: PromoRole }) {
  const move=(direction:number)=>setActive(index=>(index+direction+slides.length)%slides.length)
  const validLink=(value:string|null)=>{if(!value)return null;try{const url=new URL(value,window.location.origin);return ['http:','https:'].includes(url.protocol)?value:null}catch{return value.startsWith('/')?value:null}}
  const link=validLink(current.click_url)
- const image=<img src={current.image_url} alt={current.title||'عرض جديد على My Car'} className="block h-full w-full object-contain p-1 sm:p-2" draggable={false}/>
+ const image=<><img src={current.image_url} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-45 blur-2xl" draggable={false}/><img src={current.image_url} alt={current.title||'عرض جديد على My Car'} className="relative z-[1] block h-full w-full object-contain" draggable={false}/></>
  return <section dir="rtl" aria-label="العروض الجديدة على My Car" className="group relative mx-auto w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-[0_12px_35px_rgba(15,35,65,.12)] sm:rounded-3xl" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)} onFocus={()=>setPaused(true)} onBlur={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))setPaused(false)}} onTouchStart={event=>setTouchStart(event.touches[0]?.clientX??null)} onTouchEnd={event=>{if(touchStart===null)return;const delta=event.changedTouches[0].clientX-touchStart;if(Math.abs(delta)>45)move(delta>0?-1:1);setTouchStart(null)}}>
-  <div className="relative h-[132px] w-full overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 sm:h-[190px] lg:h-[240px]">
+  <div className="relative h-[132px] w-full overflow-hidden rounded-2xl bg-slate-950 sm:h-[190px] sm:rounded-3xl lg:h-[240px]">
    {link?<a href={link} aria-label={current.title?'افتح العرض: '+current.title:'افتح العرض'} className="absolute inset-0 block focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-cyan-300">{image}</a>:image}
    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-slate-950/10"/>
    {slides.length>1&&<>
