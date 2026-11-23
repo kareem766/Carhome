@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, UserRound, ShieldCheck, Sparkles, CarFront, BadgeCheck, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { isValidEmailAddress, normalizeEmailAddress } from '../lib/email'
 import PlatformBrand from './PlatformBrand'
+import { clearFormDraft, readFormDraft, writeFormDraft } from '../lib/formDrafts'
 
 function normalizePhone(value: string) {
   return value
@@ -11,15 +12,18 @@ function normalizePhone(value: string) {
 }
 
 export default function EmployeeRegistrationPage() {
-  const [name,setName]=useState('')
-  const [phone,setPhone]=useState('')
-  const [email,setEmail]=useState('')
+  const draftKey = 'registration:employee'
+  const savedDraft = readFormDraft(draftKey)?.values || {}
+  const [name,setName]=useState(String(savedDraft.name || ''))
+  const [phone,setPhone]=useState(String(savedDraft.phone || ''))
+  const [email,setEmail]=useState(String(savedDraft.email || ''))
   const [password,setPassword]=useState('')
-  const [accepted,setAccepted]=useState(false)
+  const [accepted,setAccepted]=useState(savedDraft.accepted === true)
   const [busy,setBusy]=useState(false)
   const [error,setError]=useState('')
   const [sent,setSent]=useState(false)
   const [showPassword,setShowPassword]=useState(false)
+  useEffect(() => { writeFormDraft(draftKey, { name, phone, email, accepted }) }, [name, phone, email, accepted])
 
   async function continueWithGoogle(){
     setError('')
@@ -75,7 +79,8 @@ export default function EmployeeRegistrationPage() {
       const {data,error:signupError}=await supabase.auth.signUp({email:cleanEmail,password,options:{emailRedirectTo:`${window.location.origin}/auth/callback`,data:{display_name:cleanName,organization_type:'employee',employment_type:'independent',phone:phoneDigits,email_contact:cleanEmail,legal_acceptance:{terms_version:'2026-11-06',privacy_version:'2026-11-06',accepted_at:new Date().toISOString()}}}})
       if(signupError)throw signupError
       if(data.user?.identities?.length===0)throw new Error('هذا البريد مسجل بالفعل. سجّل الدخول أو استخدم استعادة كلمة السر.')
-      if(data.session){window.location.replace('/auth/callback');return}
+      if(data.session){clearFormDraft(draftKey);window.location.replace('/auth/callback');return}
+      clearFormDraft(draftKey)
       setSent(true)
     }catch(err){setError(err instanceof Error?err.message:'تعذر إنشاء الحساب. حاول مرة أخرى.')}finally{setBusy(false)}
   }

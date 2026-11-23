@@ -1,8 +1,9 @@
-import { useState, type FormEvent, type ChangeEvent } from 'react'
+import { useEffect, useState, type FormEvent, type ChangeEvent } from 'react'
 import { ArrowRight, Building2, CarFront, CheckCircle2, ChevronDown, ShieldCheck, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { isValidEmailAddress, normalizeEmailAddress } from '../lib/email'
 import PlatformBrand from './PlatformBrand'
+import { clearFormDraft, readFormDraft, writeFormDraft } from '../lib/formDrafts'
 
 type Role = 'individual_owner' | 'company' | 'fleet_supplier' | 'employee'
 type FieldKey = 'fullName' | 'authorizedName' | 'companyName' | 'phone' | 'email' | 'companyType' | 'governorate' | 'address' | 'password'
@@ -17,15 +18,16 @@ const roleInfo: Record<Role, { title: string; intro: string; marketing: string; 
 }
 
 export default function RoleRegistrationPage({ role, onBack }: { role: Role; onBack: () => void }) {
-  const [values, setValues] = useState<Record<FieldKey, string>>({ fullName: '', authorizedName: '', companyName: '', phone: '', email: '', companyType: '', governorate: '', address: '', password: '' })
+  const draftKey = 'registration:' + role
+  const [values, setValues] = useState<Record<FieldKey, string>>(() => ({ fullName: '', authorizedName: '', companyName: '', phone: '', email: '', companyType: '', governorate: '', address: '', password: '', ...(readFormDraft('registration:' + role)?.values || {}) } as Record<FieldKey, string>))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [confirmationSent, setConfirmationSent] = useState(false)
   const [companyLogo, setCompanyLogo] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState('')
-  const [fleetVehicleCount, setFleetVehicleCount] = useState('')
-  const [acceptedLegal, setAcceptedLegal] = useState(false)
+  const [fleetVehicleCount, setFleetVehicleCount] = useState(() => String(readFormDraft('registration:' + role)?.values.fleetVehicleCount || ''))
+  const [acceptedLegal, setAcceptedLegal] = useState(() => readFormDraft('registration:' + role)?.values.acceptedLegal === true)
   const [showGoogleConsentHint, setShowGoogleConsentHint] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const isCompany = role === 'company'
@@ -33,6 +35,10 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
   const info = roleInfo[role]
   const Icon = info.icon
   const update = (key: FieldKey, value: string) => setValues((current) => ({ ...current, [key]: value }))
+  useEffect(() => {
+    const { password: _password, ...safeValues } = values
+    writeFormDraft(draftKey, { ...safeValues, fleetVehicleCount, acceptedLegal })
+  }, [draftKey, values, fleetVehicleCount, acceptedLegal])
   function chooseLogo(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
@@ -132,6 +138,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
           })
           localStorage.setItem('carhome_pending_company_logo', dataUrl)
         }
+        clearFormDraft(draftKey)
         window.location.replace('/auth/callback')
         return
       } else {
@@ -144,6 +151,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
           })
           localStorage.setItem('carhome_pending_company_logo', dataUrl)
         }
+        clearFormDraft(draftKey)
         setConfirmationSent(true)
       }
     } catch (caught) {

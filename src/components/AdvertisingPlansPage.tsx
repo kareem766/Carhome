@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BadgeCheck, Check, CircleDollarSign, Clock3, LoaderCircle, Megaphone, ShieldCheck, Sparkles } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { clearFormDraft, readFormDraft, writeFormDraft } from '../lib/formDrafts'
 
 type Plan = { id:string; name:string; description:string; duration_days:number; price_egp:number; features:string[]; display_order:number; placement_type:'standard'|'premium' }
 type Vehicle = { id:string; make:string; model:string; model_year:number }
@@ -33,6 +34,7 @@ export default function AdvertisingPlansPage(){
   const [promotionMode,setPromotionMode]=useState<'new'|'pending-upgrade'|'queued'|'duplicate'|'invalid'>('new')
   const [previousPaymentCredit,setPreviousPaymentCredit]=useState(0)
   const [checkingPromotion,setCheckingPromotion]=useState(false)
+  const [draftReady,setDraftReady]=useState(false)
 
   useEffect(()=>{let active=true;async function load(){
     if(!supabase){if(active){setError('إعدادات قاعدة البيانات غير مكتملة.');setLoading(false)}return}
@@ -60,6 +62,9 @@ export default function AdvertisingPlansPage(){
     }
     if(active)setLoading(false)
   }void load();return()=>{active=false}},[])
+
+  useEffect(()=>{if(loading||!userId||!orgId||draftReady||!plans.length)return;const values=readFormDraft('advertising-payment:'+userId+':'+orgId+':'+(premiumOnly?'premium':'standard'))?.values;if(values){if(typeof values.planId==='string')setSelectedPlan(plans.find(plan=>plan.id===values.planId)||null);if(typeof values.vehicleId==='string')setVehicleId(values.vehicleId);if(typeof values.paymentMethod==='string')setPaymentMethod(values.paymentMethod);if(typeof values.paymentReference==='string')setPaymentReference(values.paymentReference);if(typeof values.paymentDate==='string')setPaymentDate(values.paymentDate);if(typeof values.couponCode==='string')setCouponCode(values.couponCode)}setDraftReady(true)},[loading,userId,orgId,plans,draftReady,premiumOnly])
+  useEffect(()=>{if(userId&&orgId&&draftReady)writeFormDraft('advertising-payment:'+userId+':'+orgId+':'+(premiumOnly?'premium':'standard'),{planId:selectedPlan?.id||'',vehicleId,paymentMethod,paymentReference,paymentDate,couponCode})},[userId,orgId,draftReady,premiumOnly,selectedPlan?.id,vehicleId,paymentMethod,paymentReference,paymentDate,couponCode])
 
   useEffect(()=>{let active=true;async function inspectExistingPromotion(){
     if(!supabase||!vehicleId||!selectedPlan){setPaymentDue(null);setPromotionMode('new');setPreviousPaymentCredit(0);setCheckingPromotion(false);return}
@@ -206,8 +211,10 @@ export default function AdvertisingPlansPage(){
     setNotice(upgradedExistingRequest
       ?'تم تحديث نفس طلب المراجعة إلى الباقة الأعلى. احتُسبت التحويلات السابقة المسجلة وخصمها من الإجمالي، ولن يعتمد الرصيد إلا بعد مراجعة الإدارة لجميع مراجع التحويل السابقة والحالية.'
       :promotionMode==='queued'?'تم تسجيل طلب الباقة التالية. بعد اعتماد التحويل ستبدأ مدتها تلقائيًا فور انتهاء الباقة الحالية.':'تم إرسال طلب الإعلان وبيانات التحويل بنجاح. طلبك الآن في قائمة مراجعة الدفع بلوحة الإدارة، ولن يظهر الإعلان قبل مراجعة التحويل واعتماده.')
-    setSelectedPlan(null);setVehicleId('');setPaymentReference('');setPaymentDate(new Date().toISOString().slice(0,10));setPaymentMethod('instapay');setCouponCode('');setCouponPreview(null)
+    clearFormDraft('advertising-payment:'+userId+':'+orgId+':'+(premiumOnly?'premium':'standard'));setDraftReady(false);setSelectedPlan(null);setVehicleId('');setPaymentReference('');setPaymentDate(new Date().toISOString().slice(0,10));setPaymentMethod('instapay');setCouponCode('');setCouponPreview(null)
   }
+
+<div className="mx-auto max-w-7xl px-4 pt-5 sm:px-6"><p className="rounded-xl border border-sky-100 bg-sky-50 px-4 py-3 text-xs font-semibold leading-6 text-sky-900">يتم حفظ اختيار السيارة والباقة وبيانات التحويل وكود الخصم تلقائيًا على هذا الجهاز. بعد إعادة التحميل قد تحتاج إلى إعادة التحقق من كود الخصم قبل الإرسال.</p></div>
 
   return <main dir="rtl" className="mc-advertising-plans-main min-h-screen bg-[radial-gradient(ellipse_at_top_right,rgba(191,219,254,.48),transparent_32%),linear-gradient(135deg,#f8fafc,#eef3f9)] text-slate-900">
     <section className="relative isolate overflow-hidden bg-[#071a31] text-white"><div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_12%_20%,rgba(37,99,235,.42),transparent_38%),radial-gradient(ellipse_at_88%_85%,rgba(245,158,11,.22),transparent_32%)]"/><div className="absolute -left-20 top-10 -z-10 h-64 w-64 rounded-full border border-white/10"/><div className="absolute -left-10 top-20 -z-10 h-44 w-44 rounded-full border border-white/10"/><div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-18"><span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-bold text-blue-100"><Sparkles size={15}/> {premiumOnly?'مساحة الظهور الإعلاني المميز':'حلول ظهور مرنة لسياراتك'}</span><h1 className="mt-5 max-w-3xl text-3xl font-black leading-[1.7] sm:text-5xl sm:leading-[1.55]">{premiumOnly?<>احجز <span className="text-amber-300">المساحة الإعلانية الأبرز</span></>:<>خلّي سيارتك <span className="text-amber-300">في مقدمة اهتمام الشركات</span></>}</h1><p className="mt-4 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">{premiumOnly?'اختر باقة الإعلان المميز لتظهر سيارتك في المساحة المخصصة أعلى كتالوج My Car، بعد مراجعة الطلب واعتماد التحويل.':'اختار باقة ظهور إعلاني تناسب ميزانيتك، وميّز سيارتك داخل كتالوج My Car بعد مراجعة الطلب واعتماده.'}</p><div className="mt-7 grid max-w-3xl gap-3 sm:grid-cols-3"><div className="rounded-2xl border border-white/10 bg-white/5 p-4"><Megaphone className="text-blue-300"/><p className="mt-3 font-extrabold">ظهور أوضح</p><p className="mt-1 text-xs leading-6 text-slate-300">تمييز السيارات المروّج لها داخل الكتالوج.</p></div><div className="rounded-2xl border border-white/10 bg-white/5 p-4"><Clock3 className="text-blue-300"/><p className="mt-3 font-extrabold">مدة محددة</p><p className="mt-1 text-xs leading-6 text-slate-300">اختيار مدة تناسب احتياجك.</p></div><div className="rounded-2xl border border-white/10 bg-white/5 p-4"><ShieldCheck className="text-blue-300"/><p className="mt-3 font-extrabold">مراجعة إدارية</p><p className="mt-1 text-xs leading-6 text-slate-300">التفعيل بعد اعتماد الطلب والتحقق من الدفع.</p></div></div></div></section>
