@@ -26,7 +26,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
   const [confirmationSent, setConfirmationSent] = useState(false)
   const [companyLogo, setCompanyLogo] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState('')
-  const [fleetVehicleCount, setFleetVehicleCount] = useState('')
+  const [fleetVehicleCount, setFleetVehicleCount] = useState(() => String(readFormDraft('registration:' + role)?.values.fleetVehicleCount || ''))
   const [acceptedLegal, setAcceptedLegal] = useState(() => readFormDraft('registration:' + role)?.values.acceptedLegal === true)
   const [showGoogleConsentHint, setShowGoogleConsentHint] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
