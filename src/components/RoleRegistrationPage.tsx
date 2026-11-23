@@ -151,6 +151,7 @@ export default function RoleRegistrationPage({ role, onBack }: { role: Role; onB
           })
           localStorage.setItem('carhome_pending_company_logo', dataUrl)
         }
+        clearFormDraft(draftKey)
         setConfirmationSent(true)
       }
     } catch (caught) {
