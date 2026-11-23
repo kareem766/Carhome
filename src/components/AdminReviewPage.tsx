@@ -121,9 +121,33 @@ export default function AdminReviewPage({ initialSection }: { initialSection?: s
   }
   useEffect(() => { void load() }, [])
   useEffect(() => {
-    if (!initialSection || loading) return
-    const target = document.getElementById(initialSection)
-    if (target) window.setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120)
+    if (loading) return
+
+    let scrollTimer: number | undefined
+    const revealAndScrollToRequestedSection = () => {
+      const hashSection = decodeURIComponent(window.location.hash.replace(/^#/, '')).trim()
+      const sectionId = hashSection || initialSection
+      if (!sectionId || !sectionId.startsWith('admin-')) return
+
+      const target = document.getElementById(sectionId)
+      if (!target) return
+
+      // Some legacy admin review sections are intentionally hidden until opened.
+      // Notification deep links must reveal the requested section before scrolling.
+      target.classList.remove('hidden')
+      target.style.scrollMarginTop = '7rem'
+      if (scrollTimer !== undefined) window.clearTimeout(scrollTimer)
+      scrollTimer = window.setTimeout(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 120)
+    }
+
+    revealAndScrollToRequestedSection()
+    window.addEventListener('hashchange', revealAndScrollToRequestedSection)
+    return () => {
+      window.removeEventListener('hashchange', revealAndScrollToRequestedSection)
+      if (scrollTimer !== undefined) window.clearTimeout(scrollTimer)
+    }
   }, [initialSection, loading])
   function startProfileEdit(row: ProfileRow) {
     setEditingProfileId(row.id)
