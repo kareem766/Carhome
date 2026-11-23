@@ -2823,7 +2823,13 @@ main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
   box-shadow: 0 14px 30px rgba(16, 65, 119, .16);
 }
 
-/* Company dashboard promotional rail spacing fix: the fixed account bars already reserve the top offset. */
+/* Company account pages: keep content close to the persistent platform navigation. */
+.mc-company-page-with-sidebar > .mx-auto,
+.mc-company-page-with-sidebar > div:has(> section:first-child),
 .mc-company-page-with-sidebar > .mc-company-dashboard-content {
-  padding-top: 0 !important;
+  padding-top: 8px !important;
+}
+/* Workspace-based company routes use their own content wrapper. */
+.mc-company-workspace-main > .mc-workspace-content {
+  padding-top: 8px !important;
 }
