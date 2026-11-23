@@ -2810,3 +2810,8 @@ main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
   border-color: #78afe8 !important;
   box-shadow: 0 14px 30px rgba(16, 65, 119, .16);
 }
+
+/* Company dashboard promotional rail spacing fix: the fixed account bars already reserve the top offset. */
+.mc-company-page-with-sidebar > .mc-company-dashboard-content {
+  padding-top: 0 !important;
+}
