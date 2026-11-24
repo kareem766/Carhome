@@ -45,12 +45,20 @@ Deno.serve(async (req: Request) => {
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { data, error } = await admin.from("payment_gateways")
-    .select("provider_code,display_name,is_enabled,supported_payment_methods,priority,environment")
-    .eq("is_enabled", true)
-    .order("priority", { ascending: true });
+  const [{ data, error }, { data: platformSettings, error: settingsError }] = await Promise.all([
+    admin.from("payment_gateways")
+      .select("provider_code,display_name,is_enabled,supported_payment_methods,priority,environment")
+      .eq("is_enabled", true)
+      .order("priority", { ascending: true }),
+    admin.from("payment_platform_settings")
+      .select("online_payments_enabled,enabled_service_types")
+      .eq("id", 1).single(),
+  ]);
 
-  if (error) return respond({ error: "gateway_configuration_unavailable" }, 503);
+  if (error || settingsError) return respond({ error: "gateway_configuration_unavailable" }, 503);
+  if (!platformSettings?.online_payments_enabled) {
+    return respond({ enabled_providers: [], online_payments_enabled: false, enabled_service_types: [] });
+  }
   const paymobReady = Boolean(
     Deno.env.get("PAYMOB_SECRET_KEY") &&
     Deno.env.get("PAYMOB_PUBLIC_KEY") &&
@@ -61,6 +69,8 @@ Deno.serve(async (req: Request) => {
     gateway.provider_code === "paymob" && paymobReady
   );
   return respond({
+    online_payments_enabled: true,
+    enabled_service_types: platformSettings.enabled_service_types ?? [],
     enabled_providers: readyProviders.map((gateway) => ({
       provider_code: gateway.provider_code,
       display_name: gateway.display_name,
