@@ -17,6 +17,8 @@ on:
       - "supabase/functions/_shared/payment-webhook.ts"
       - "supabase/functions/_shared/payment-webhook.test.ts"
       - "supabase/functions/payments-webhook/**"
+      - "supabase/functions/payment-gateway-status/**"
+      - "supabase/config.toml"
       - "supabase/functions/create-payment-intent/**"
       - "supabase/functions/_shared/payment-intent.ts"
       - "supabase/functions/_shared/payment-intent.test.ts"
@@ -62,7 +64,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Type-check payment webhook endpoint
-        run: deno check --node-modules-dir=auto supabase/functions/payments-webhook/index.ts supabase/functions/create-payment-intent/index.ts
+        run: deno check --node-modules-dir=auto supabase/functions/payments-webhook/index.ts supabase/functions/create-payment-intent/index.ts supabase/functions/payment-gateway-status/index.ts
       - name: Run payment signature and webhook normalization tests
         run: deno test supabase/functions/_shared/payment-signatures.test.ts supabase/functions/_shared/payment-webhook.test.ts supabase/functions/_shared/payment-intent.test.ts
       - name: Set up Node.js
