@@ -166,7 +166,7 @@ revoke all on public.payments from anon, authenticated;
 revoke all on public.payment_attempts from anon, authenticated;
 revoke all on public.payment_webhook_events from anon, authenticated;
 
-grant select on public.payment_gateways to authenticated;
+grant select, insert, update, delete on public.payment_gateways to authenticated;
 grant select on public.payments to authenticated;
 grant select on public.payment_attempts to authenticated;
 grant select on public.payment_webhook_events to authenticated;
