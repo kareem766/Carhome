@@ -3,6 +3,7 @@ name: Payment webhook tests
 on:
   pull_request:
     paths:
+      - "package.json"
       - "src/App.tsx"
       - "src/components/PaymentMethodChoice.tsx"
       - "src/components/PaymentResultPage.tsx"
@@ -29,6 +30,7 @@ on:
     branches:
       - "feat/unified-payment-center"
     paths:
+      - "package.json"
       - "src/App.tsx"
       - "src/components/PaymentMethodChoice.tsx"
       - "src/components/PaymentResultPage.tsx"
