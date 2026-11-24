@@ -154,6 +154,9 @@ export default function AdvertisingPlansPage(){
         setSending(false);setError('الطلب السابق ليس في حالة انتظار التحقق من الدفع. لن نعدّل الرصيد تلقائيًا؛ تواصل مع الإدارة لمراجعة حالته.');return
       }
       if(pendingRequest.advertising_plan_id===selectedPlan.id){
+        if(String(pendingRequest.payment_reference||'').trim()){
+          setSending(false);setError('تم إرسال بيانات الدفع لهذا الطلب بالفعل، وهو بانتظار مراجعة الإدارة.');return
+        }
         const existingDue=Number(pendingRequest.payment_due_egp??pendingRequest.final_amount_egp??0)
         if(checkoutMethod==='online'){
           try{await createMyCarCheckout({purpose:selectedPlan.placement_type==='premium'?'featured_advertising':'advertising',entityId:pendingRequest.id})}
