@@ -8,7 +8,8 @@ type Settings = { id: number; online_payments_enabled: boolean; enabled_service_
 const services = [
   ['vehicle_registration', 'تسجيل وتجديد السيارات'],
   ['company_subscription', 'اشتراكات الشركات'],
-  ['advertising', 'الإعلانات العادية والمميزة'],
+  ['advertising', 'الإعلانات العادية'],
+  ['featured_advertising', 'الإعلانات المميزة'],
   ['managed_sourcing_request', 'طلبات البحث المستقل'],
   ['managed_sourcing_subscription', 'اشتراكات تفويض البحث'],
 ] as const
