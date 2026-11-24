@@ -63,3 +63,19 @@ A preview is informational only. The payment-creation endpoint must revalidate t
 - Confirm whether the platform wants Paymob as primary and Fawry as fallback, or administrator-selectable routing.
 - Define the service-specific activation routines and whether each provider-paid service still enters the existing admin review queue.
 - Confirm refund, partial refund, chargeback, invoice/receipt, and reconciliation policies.
+
+
+## Existing database-trigger findings (verified against the connected project)
+
+The current production database already applies pricing and discount logic through INSERT triggers on `vehicle_payment_submissions`, `company_subscriptions`, `vehicle_promotions`, and `managed_sourcing_subscriptions`. The `apply_discount_code_to_payment()` trigger re-reads authoritative plan/settings prices, validates the coupon, calculates the discount, and creates a pending `discount_code_redemptions` row. Do not duplicate this calculation in browser code or bypass the trigger when creating the legacy service record.
+
+Other existing lifecycle behavior that the gateway integration must preserve:
+
+- Vehicle registration: approving the payment submission invokes `apply_vehicle_registration_payment()`, which marks the vehicle payment verified and extends the paid-through date. This is distinct from the vehicle's own review status; gateway confirmation must not approve the vehicle listing itself.
+- Company subscription: the 30-day/yearly term trigger refuses `status = active` unless payment status is `verified` or `waived`. Gateway settlement may verify the payment, but activation still follows the existing subscription approval rule.
+- Managed sourcing per-request fees: the existing admin verification routine requires an awaiting-payment request, company approval, payment reference, submission timestamp, and transfer date. A gateway path must adapt this deliberately rather than pretending a gateway transaction is a bank transfer.
+- Managed sourcing subscriptions: the current admin activation routine expects a pending-review subscription with payment status `submitted`. The gateway path needs a reviewed, explicit gateway-payment state or a carefully designed compatibility update; do not auto-activate the package from the webhook.
+- Advertising: plan terms are snapshotted by a database trigger at insert time, and a separate admin approval controls the promotion lifecycle. Keep those snapshots and review gates intact.
+- The discount-redemption synchronization triggers confirm or cancel coupon redemptions based on the legacy service row's payment/review status. Gateway settlement must move the correct service row through the supported states so coupon usage is neither lost nor counted twice.
+
+These findings mean the gateway webhook must not directly toggle generic service statuses. It should call one tested, idempotent service-specific settlement routine per service, and keep any existing manual-review gate intact.
