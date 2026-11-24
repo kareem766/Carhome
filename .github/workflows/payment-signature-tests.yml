@@ -65,3 +65,12 @@ jobs:
         run: deno check --node-modules-dir=auto supabase/functions/payments-webhook/index.ts supabase/functions/create-payment-intent/index.ts
       - name: Run payment signature and webhook normalization tests
         run: deno test supabase/functions/_shared/payment-signatures.test.ts supabase/functions/_shared/payment-webhook.test.ts supabase/functions/_shared/payment-intent.test.ts
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Build My Car frontend
+        run: npm run build
