@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.0";
+import { normalizeEgyptianPhone } from "../_shared/payment-intent.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": Deno.env.get("MYCAR_ALLOWED_ORIGIN") ?? "*",
@@ -22,13 +23,6 @@ type RequestBody = {
 
 function validUuid(value: unknown): value is string {
   return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-}
-
-function normalizeEgyptianPhone(value: string): string | null {
-  const digits = value.replace(/\D/g, "");
-  if (/^01[0125]\d{8}$/.test(digits)) return "+2" + digits;
-  if (/^201[0125]\d{8}$/.test(digits)) return "+" + digits;
-  return null;
 }
 
 function buildCheckoutUrl(publicKey: string, clientSecret: string): string {
@@ -214,15 +208,13 @@ Deno.serve(async (req: Request) => {
     return json({ error: "provider_invalid_response" }, 502);
   }
 
-  const checkoutUrl = new URL("https://accept.paymob.com/unifiedcheckout/");
-  checkoutUrl.searchParams.set("publicKey", publicKey);
-  checkoutUrl.searchParams.set("clientSecret", clientSecret);
+  const checkoutUrl = buildCheckoutUrl(publicKey, clientSecret);
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
   const { data: finalized, error: finalizeError } = await admin.rpc("finalize_mycar_payment_attempt", {
     p_attempt_id: prepared.attempt_id,
     p_provider_code: "paymob",
     p_provider_reference: String(orderId),
-    p_checkout_url: checkoutUrl.toString(),
+    p_checkout_url: checkoutUrl,
     p_expires_at: expiresAt,
   });
   if (finalizeError || !finalized?.ok) {
