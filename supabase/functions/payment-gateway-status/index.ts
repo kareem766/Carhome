@@ -55,9 +55,6 @@ Deno.serve(async (req: Request) => {
   ]);
 
   if (error || settingsError) return respond({ error: "gateway_configuration_unavailable" }, 503);
-  if (!platformSettings?.online_payments_enabled) {
-    return respond({ enabled_providers: [], online_payments_enabled: false, enabled_service_types: [] });
-  }
   const paymobReady = Boolean(
     Deno.env.get("PAYMOB_SECRET_KEY") &&
     Deno.env.get("PAYMOB_PUBLIC_KEY") &&
@@ -67,10 +64,12 @@ Deno.serve(async (req: Request) => {
   const readyProviders = (data ?? []).filter((gateway) =>
     gateway.provider_code === "paymob" && paymobReady
   );
-  const enabledProviders = readyProviders.filter((gateway) => gateway.is_enabled);
+  const enabledProviders = platformSettings?.online_payments_enabled
+    ? readyProviders.filter((gateway) => gateway.is_enabled)
+    : [];
   return respond({
-    online_payments_enabled: true,
-    enabled_service_types: platformSettings.enabled_service_types ?? [],
+    online_payments_enabled: Boolean(platformSettings?.online_payments_enabled),
+    enabled_service_types: platformSettings?.enabled_service_types ?? [],
     ready_providers: readyProviders.map((gateway) => gateway.provider_code),
     enabled_providers: enabledProviders.map((gateway) => ({
       provider_code: gateway.provider_code,
