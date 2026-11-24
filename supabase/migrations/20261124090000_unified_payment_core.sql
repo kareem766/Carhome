@@ -179,3 +179,32 @@ comment on table public.payment_attempts is
   'Provider-specific checkout attempts; retries never create duplicate service entitlements.';
 comment on table public.payment_webhook_events is
   'Webhook idempotency ledger. Stores a digest and processing metadata, not raw cardholder payloads.';
+
+
+-- Admin controls for the online-payment master switch and per-service availability.
+create table if not exists public.payment_platform_settings (
+  id integer primary key check (id = 1),
+  online_payments_enabled boolean not null default false,
+  enabled_service_types text[] not null default array[
+    'vehicle_registration',
+    'company_subscription',
+    'advertising',
+    'featured_advertising',
+    'managed_sourcing_request',
+    'managed_sourcing_subscription'
+  ]::text[],
+  updated_at timestamptz not null default now()
+);
+insert into public.payment_platform_settings (id, online_payments_enabled)
+values (1, false)
+on conflict (id) do nothing;
+alter table public.payment_platform_settings enable row level security;
+drop policy if exists "Platform admins can manage payment platform settings" on public.payment_platform_settings;
+create policy "Platform admins can manage payment platform settings"
+  on public.payment_platform_settings for all to authenticated
+  using ((select public.support_is_platform_admin()))
+  with check ((select public.support_is_platform_admin()));
+revoke all on public.payment_platform_settings from anon, authenticated;
+grant select, update on public.payment_platform_settings to authenticated;
+comment on table public.payment_platform_settings is
+  'Admin-only master switch and per-service availability for online payments. Manual transfers are not controlled by this table.';
