@@ -92,10 +92,17 @@ Deno.serve(async (req: Request) => {
     return respond({ error: "fawry_checkout_requires_confirmed_merchant_product", message: "Fawry checkout adapter is intentionally held until the contracted FawryPay product and API version are confirmed." }, 501);
   }
 
-  const { data: gateway, error: gatewayError } = await admin.from("payment_gateways")
-    .select("is_enabled,environment,public_settings")
-    .eq("provider_code", "paymob").maybeSingle();
-  if (gatewayError) return respond({ error: "gateway_configuration_unavailable" }, 503);
+  const [{ data: gateway, error: gatewayError }, { data: platformSettings, error: settingsError }] = await Promise.all([
+    admin.from("payment_gateways")
+      .select("is_enabled,environment,public_settings")
+      .eq("provider_code", "paymob").maybeSingle(),
+    admin.from("payment_platform_settings")
+      .select("online_payments_enabled,enabled_service_types")
+      .eq("id", 1).single(),
+  ]);
+  if (gatewayError || settingsError) return respond({ error: "gateway_configuration_unavailable" }, 503);
+  if (!platformSettings?.online_payments_enabled) return respond({ error: "online_payments_disabled" }, 503);
+  if (!(platformSettings.enabled_service_types ?? []).includes(body.purpose ?? "")) return respond({ error: "service_online_payment_disabled" }, 503);
   if (!gateway?.is_enabled) return respond({ error: "gateway_disabled" }, 503);
 
   const { data: profile } = await admin.from("profiles")
