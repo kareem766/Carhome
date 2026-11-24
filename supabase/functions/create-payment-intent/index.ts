@@ -2,14 +2,23 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.0";
 import { normalizeEgyptianPhone } from "../_shared/payment-intent.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": Deno.env.get("MYCAR_ALLOWED_ORIGIN") ?? "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-idempotency-key",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Vary": "Origin",
+const corsHeadersFor = (req: Request) => {
+  const requestOrigin = req.headers.get("Origin") ?? "";
+  const configuredOrigin = Deno.env.get("MYCAR_ALLOWED_ORIGIN") ?? "*";
+  const allowedOrigins = new Set<string>();
+  for (const value of [Deno.env.get("MYCAR_APP_URL") ?? "", ...(Deno.env.get("MYCAR_ALLOWED_ORIGINS") ?? "").split(",")]) {
+    try { if (value.trim()) allowedOrigins.add(new URL(value.trim()).origin); } catch { /* invalid origins are not allowed */ }
+  }
+  const allowOrigin = configuredOrigin === "*" ? "*" : allowedOrigins.has(requestOrigin) ? requestOrigin : configuredOrigin;
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-idempotency-key",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
 };
-const json = (body: Record<string, unknown>, status = 200) => new Response(JSON.stringify(body), {
-  status, headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
+const json = (body: Record<string, unknown>, status = 200, headers: Record<string,string> = {}) => new Response(JSON.stringify(body), {
+  status, headers: { ...headers, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
 });
 
 type RequestBody = {
@@ -34,8 +43,10 @@ function buildCheckoutUrl(publicKey: string, clientSecret: string): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = corsHeadersFor(req);
+  const respond = (body: Record<string, unknown>, status = 200) => json(body, status, corsHeaders);
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  if (req.method !== "POST") return respond({ error: "method_not_allowed" }, 405);
 
   const authHeader = req.headers.get("Authorization") ?? "";
   const token = authHeader.replace(/^Bearer\s+/i, "");
