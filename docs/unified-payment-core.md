@@ -54,3 +54,37 @@ Supabase changed the default behavior for newly created public tables: they are 
 - Discounts: existing `discount_code_redemptions` remains authoritative for eligibility/redemption.
 
 The first migration creates the ledger only. The second adds atomic webhook ingestion. Neither migration has been applied to production; no provider is enabled and no service entitlement is activated by the webhook.
+
+## Authenticated checkout intent API
+The staged `create-payment-intent` Edge Function is the authenticated entry point for starting a hosted checkout. It accepts only a service purpose, source entity UUID, provider code, idempotency key, and (for vehicle registration) period/coupon inputs. It never accepts an amount from the browser.
+
+Example request:
+```json
+{
+  "purpose": "company_subscription",
+  "entity_id": "SOURCE-ROW-UUID",
+  "provider": "paymob",
+  "idempotency_key": "client-generated-unique-operation-key"
+}
+```
+
+The server resolves the signed-in user from the Supabase JWT, verifies source-row ownership/membership inside a service-role-only SQL RPC, calculates the final amount from the authoritative service row/settings, and creates a canonical payment plus provider attempt. Paymob uses the Egypt Intention API and returns a hosted Unified Checkout URL. The API response contains only the checkout URL, payment/attempt IDs, amount, and currency; it never returns the Paymob secret key.
+
+Supported source records:
+- Vehicle registration: a vehicle in `pending_payment` with `payment_status=pending`; amount is calculated from `platform_settings` and the selected period. A coupon is validated and reserved in `discount_code_redemptions` by the server.
+- Company subscription: a pending `company_subscriptions` row with its server-calculated final amount.
+- Advertising: a pending `vehicle_promotions` row; the amount due respects the saved discount and previous-payment credit.
+- Managed sourcing request: an `awaiting_payment` request with a quoted fee.
+- Managed sourcing subscription: a pending-review subscription with a submitted/not-submitted payment state.
+
+The source service row is not marked paid or activated by intent creation. That happens only in the later service-specific settlement migration after a verified webhook.
+
+## Required Edge Function secrets
+- `PAYMOB_SECRET_KEY`
+- `PAYMOB_PUBLIC_KEY`
+- `PAYMOB_HMAC_SECRET`
+- `PAYMOB_INTEGRATION_IDS` (comma-separated numeric IDs)
+- `MYCAR_APP_URL` (the HTTPS app origin used for the customer return page)
+- Supabase-provided `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`
+
+Fawry checkout creation deliberately returns a not-implemented response until the merchant confirms the exact contracted FawryPay checkout product/API version. Fawry notification verification is already staged separately; notification verification alone is not a complete checkout integration.
