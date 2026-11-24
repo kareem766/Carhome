@@ -194,6 +194,7 @@ begin
     end if;
     select * into v_attempt from public.payment_attempts a
     where a.payment_id=v_existing.id and a.provider_code=p_provider_code
+      and a.status in ('created','pending')
       and a.checkout_url is not null and (a.expires_at is null or a.expires_at > now())
     order by a.attempt_number desc limit 1;
     if found then
