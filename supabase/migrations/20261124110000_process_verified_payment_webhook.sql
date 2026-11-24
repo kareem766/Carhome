@@ -23,6 +23,8 @@ declare
   v_payment_status text;
   v_amount_due numeric(12,2);
   v_event_id uuid;
+  v_event_status text;
+  v_event_error text;
 begin
   if p_provider_code not in ('paymob', 'fawry')
      or p_provider_event_id is null or length(p_provider_event_id) < 1
@@ -69,15 +71,15 @@ begin
 
   if v_event_id is null then
     select e.processing_status, e.error_code
-      into v_payment_status, p_error_code
+      into v_event_status, v_event_error
     from public.payment_webhook_events e
     where e.provider_code = p_provider_code
       and e.provider_event_id = p_provider_event_id;
 
-    if v_payment_status = 'failed' then
+    if v_event_status = 'failed' then
       return jsonb_build_object(
         'accepted', false,
-        'reason', coalesce(p_error_code, 'event_processing_failed'),
+        'reason', coalesce(v_event_error, 'event_processing_failed'),
         'duplicate', true
       );
     end if;
