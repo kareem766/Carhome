@@ -16,10 +16,10 @@ Deno.test("Paymob callback maps only expected integration and EGP amount", () =>
 
 Deno.test("Fawry callback requires matching paid order and payment amounts", () => {
   const payload = {
-    fawryRefNumber: "F-1", merchantRefNumber: "MYCAR-1",
-    paymentAmount: "250.00", orderAmount: 250, orderStatus: "PAID",
+    requestId: "event-uuid-1", fawryRefNumber: "F-1", merchantRefNumber: "MYCAR-1",
+    paymentAmount: "252.00", orderAmount: 250, orderStatus: "PAID",
   };
   const event = normalizeFawryCallback(payload);
-  assert(event?.amount === 250 && event.providerReference === "MYCAR-1" && event.outcome === "succeeded", "Fawry event normalization failed");
+  assert(event?.amount === 250 && event.providerReference === "MYCAR-1" && event.providerEventId === "event-uuid-1" && event.outcome === "succeeded", "Fawry event normalization failed");
   assert(normalizeFawryCallback({ ...payload, paymentAmount: 249 }) === null, "Partial/mismatched amount must be rejected");
 });
