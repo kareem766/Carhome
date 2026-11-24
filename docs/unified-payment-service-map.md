@@ -79,3 +79,30 @@ Other existing lifecycle behavior that the gateway integration must preserve:
 - The discount-redemption synchronization triggers confirm or cancel coupon redemptions based on the legacy service row's payment/review status. Gateway settlement must move the correct service row through the supported states so coupon usage is neither lost nor counted twice.
 
 These findings mean the gateway webhook must not directly toggle generic service statuses. It should call one tested, idempotent service-specific settlement routine per service, and keep any existing manual-review gate intact.
+
+
+## Provider protocol research (official developer documentation reviewed 24 Nov 2026)
+
+### Paymob Accept — Intention API + Unified Checkout
+
+- Create each checkout from the backend with `POST https://accept.paymob.com/v1/intention/`.
+- The request uses `Authorization: Token <secret key>`; amount is in the provider's smallest currency unit (EGP cents), currency is `EGP`, and `payment_methods` must contain the merchant's configured integration IDs for the same test/live mode as the key.
+- Include a unique `special_reference`, the public HTTPS `notification_url`, and a customer-facing `redirection_url`. The response's `client_secret` is used with the merchant Public Key to launch hosted Unified Checkout. The secret key must never reach the browser.
+- The transaction-processed callback is a POST. Its HMAC is supplied on the callback URL; the documented standard transaction signature uses HMAC-SHA512 over 20 fields from `obj` in a strict order. The transaction ID `obj.id` is the deduplication key; `order.id` / the merchant reference is for correlation.
+- The browser response/redirect is display-only and must never change payment state.
+- The shared verifier added in this branch implements the documented standard transaction HMAC field order. It deliberately fails closed if any signed field is null/missing. Before enabling wallet or any other method, validate a real merchant callback sample because Paymob notes that some callback field shapes can vary by method and the documentation does not define null stringification for every case.
+
+### FawryPay — Server Notification V2 + status reconciliation
+
+- Fawry's V2 server-to-server notification is an HTTP POST to a callback URL configured during merchant onboarding; the merchant must provide separate development and production callback endpoints.
+- The callback includes `fawryRefNumber`, `merchantRefNumber`, `paymentAmount`, `orderAmount`, `orderStatus`, `paymentMethod`, optional `paymentRefrenceNumber`, and `messageSignature`.
+- The documented V2 signature is a SHA-256 digest of the exact concatenated values: Fawry reference + merchant reference + payment amount formatted to two decimals + order amount formatted to two decimals + order status + payment method + payment reference (empty when absent) + merchant secure key. This is a plain SHA-256 digest of that concatenated string, not HMAC-SHA256.
+- The status API supports server-side reconciliation using the merchant reference and a SHA-256 request signature.
+- Fawry also documents other checkout products and legacy callback versions. We will use V2 notifications and the contracted server/hosted checkout product only after Fawry confirms which product, methods, and production endpoints are enabled for this merchant. Do not mix V1's MD5 callback signature with V2.
+
+### Shared verifier code staged in this branch
+
+- `supabase/functions/_shared/payment-signatures.ts` contains the Paymob transaction HMAC-SHA512 verifier and FawryPay V2 SHA-256 signature verifier.
+- `supabase/functions/_shared/payment-signatures.test.ts` contains deterministic positive/negative test vectors with synthetic test secrets; they are not merchant credentials.
+- No webhook endpoint is deployed yet. The provider verifier is only one layer: a future webhook must also correlate a stored attempt, compare amount/currency/reference, deduplicate the event in a database transaction, and run the service-specific settlement routine exactly once.
+- Raw callback bodies must not be retained or logged in production; persist only a digest, provider event/reference IDs, and the minimum processing metadata.
