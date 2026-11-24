@@ -48,6 +48,7 @@ create table if not exists public.payments (
   currency text not null default 'EGP' check (currency = 'EGP'),
   original_amount numeric(12,2) not null check (original_amount >= 0),
   discount_amount numeric(12,2) not null default 0 check (discount_amount >= 0),
+  credit_amount numeric(12,2) not null default 0 check (credit_amount >= 0),
   amount_due numeric(12,2) not null check (amount_due >= 0),
   discount_code text,
   idempotency_key text not null,
@@ -62,7 +63,8 @@ create table if not exists public.payments (
   failure_message text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint payments_amount_consistency check (discount_amount <= original_amount),
+  constraint payments_amount_consistency check (discount_amount + credit_amount <= original_amount),
+  constraint payments_due_consistency check (amount_due = original_amount - discount_amount - credit_amount),
   constraint payments_refund_not_overpaid check (refunded_amount <= amount_due),
   constraint payments_idempotency_per_user unique (created_by, idempotency_key)
 );
