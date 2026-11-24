@@ -9,7 +9,7 @@ Ask Paymob to confirm that the account is approved for the Egypt Accept product 
 - Secret Key — server-side only.
 - Public Key — used only to construct the hosted checkout URL.
 - HMAC Secret — separate from the Secret Key; used only to verify transaction callbacks.
-- Integration ID for each enabled test payment method (card, wallet, etc.).
+- Integration ID for each enabled test payment method (card, wallet, etc.); configure the comma-separated list as `PAYMOB_INTEGRATION_IDS`.
 - Confirmation that the account is using the Intention API and that the configured integration IDs match the same test/live mode as the corresponding key.
 
 Backend protocol currently documented for this integration:
