@@ -79,12 +79,9 @@ export async function createMyCarCheckout(args: {
   if (error) {
     const response = (error as unknown as { context?: Response }).context
     if (response && typeof response.clone === 'function') {
-      try {
-        const body = await response.clone().json() as { error?: string; message?: string }
-        throw new Error(messages[String(body?.error || '')] || body?.message || error.message || 'تعذر بدء عملية الدفع الإلكتروني.')
-      } catch (detail) {
-        if (detail instanceof Error && detail.message !== error.message) throw detail
-      }
+      let body: { error?: string; message?: string } | null = null
+      try { body = await response.clone().json() as { error?: string; message?: string } } catch { /* use the SDK error below */ }
+      if (body) throw new Error(messages[String(body.error || '')] || body.message || error.message || 'تعذر بدء عملية الدفع الإلكتروني.')
     }
     throw new Error(error.message || 'تعذر بدء عملية الدفع الإلكتروني.')
   }
