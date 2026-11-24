@@ -2860,3 +2860,82 @@ main :is(button, a, [role="button"])[class*="bg-gradient-to-"] {
  .mc-platform-page-nav--supplier::before,.mc-platform-page-nav--employee::before { min-height:30px; padding:.3rem .58rem; font-size:.65rem; }
  .mc-platform-page-nav--supplier a,.mc-platform-page-nav--employee a,.mc-employee-nav-cta { min-height:43px; padding:.48rem .78rem; border-radius:12px; font-size:.77rem; }
 }
+
+
+/* Contrast repair: readable typography on every intentionally dark blue premium card. */
+main :is(section,article,div)[class*="rounded-"][class*="p-"]:is(
+  [class*="from-[#0"],[class*="from-blue-700"],[class*="from-blue-800"],[class*="from-blue-900"],
+  [class*="from-sky-700"],[class*="from-sky-800"],[class*="from-sky-900"],
+  [class*="from-indigo-700"],[class*="from-indigo-800"],[class*="from-indigo-900"],
+  [class*="from-slate-800"],[class*="from-slate-900"],
+  [class*="via-blue-700"],[class*="via-blue-800"],[class*="via-blue-900"],
+  [class*="via-sky-700"],[class*="via-sky-800"],[class*="via-sky-900"],
+  [class*="bg-blue-700"],[class*="bg-blue-800"],[class*="bg-blue-900"]
+) {
+  color: #f8fafc;
+  border-color: rgba(191,219,254,.28) !important;
+}
+main :is(section,article,div)[class*="rounded-"][class*="p-"]:is(
+  [class*="from-[#0"],[class*="from-blue-700"],[class*="from-blue-800"],[class*="from-blue-900"],
+  [class*="from-sky-700"],[class*="from-sky-800"],[class*="from-sky-900"],
+  [class*="from-indigo-700"],[class*="from-indigo-800"],[class*="from-indigo-900"],
+  [class*="from-slate-800"],[class*="from-slate-900"],
+  [class*="via-blue-700"],[class*="via-blue-800"],[class*="via-blue-900"],
+  [class*="via-sky-700"],[class*="via-sky-800"],[class*="via-sky-900"],
+  [class*="bg-blue-700"],[class*="bg-blue-800"],[class*="bg-blue-900"]
+) :is(h1,h2,h3,h4,h5,h6) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,.12);
+}
+main :is(section,article,div)[class*="rounded-"][class*="p-"]:is(
+  [class*="from-[#0"],[class*="from-blue-700"],[class*="from-blue-800"],[class*="from-blue-900"],
+  [class*="from-sky-700"],[class*="from-sky-800"],[class*="from-sky-900"],
+  [class*="from-indigo-700"],[class*="from-indigo-800"],[class*="from-indigo-900"],
+  [class*="from-slate-800"],[class*="from-slate-900"],
+  [class*="via-blue-700"],[class*="via-blue-800"],[class*="via-blue-900"],
+  [class*="via-sky-700"],[class*="via-sky-800"],[class*="via-sky-900"],
+  [class*="bg-blue-700"],[class*="bg-blue-800"],[class*="bg-blue-900"]
+) :is(p,li,dt,dd,label,small) {
+  color: #e2edfb !important;
+  -webkit-text-fill-color: #e2edfb !important;
+}
+main :is(section,article,div)[class*="rounded-"][class*="p-"]:is(
+  [class*="from-[#0"],[class*="from-blue-700"],[class*="from-blue-800"],[class*="from-blue-900"],
+  [class*="from-sky-700"],[class*="from-sky-800"],[class*="from-sky-900"],
+  [class*="from-indigo-700"],[class*="from-indigo-800"],[class*="from-indigo-900"],
+  [class*="from-slate-800"],[class*="from-slate-900"],
+  [class*="via-blue-700"],[class*="via-blue-800"],[class*="via-blue-900"],
+  [class*="via-sky-700"],[class*="via-sky-800"],[class*="via-sky-900"],
+  [class*="bg-blue-700"],[class*="bg-blue-800"],[class*="bg-blue-900"]
+) :is(.text-blue-100,.text-cyan-100,.text-cyan-200,.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400,.text-gray-500) {
+  color: #dbeafe !important;
+  -webkit-text-fill-color: #dbeafe !important;
+}
+
+/* Messaging hero has a dedicated contrast contract, including its translucent stat tile. */
+.mc-messaging-main .mc-messaging-hero :is(h1,h2,h3,h4,strong) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.mc-messaging-main .mc-messaging-hero :is(p,small,.text-blue-100,.text-emerald-100) {
+  color: #e2edfb !important;
+  -webkit-text-fill-color: #e2edfb !important;
+}
+.mc-messaging-main .mc-messaging-stat-card {
+  color: #ffffff !important;
+  border-color: rgba(255,255,255,.28) !important;
+  background: rgba(255,255,255,.14) !important;
+}
+.mc-messaging-main .mc-messaging-stat-card :is(p,span,strong) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.mc-messaging-main .mc-messaging-hero button {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+@media (max-width: 640px) {
+  .mc-messaging-main .mc-messaging-hero { gap: 1rem; }
+  .mc-messaging-main .mc-messaging-stat-card { min-width: 0; flex: 1 1 9rem; }
+}
