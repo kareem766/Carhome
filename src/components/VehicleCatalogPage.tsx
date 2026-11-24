@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CircleUserRound, ArrowLeft, Eye, BadgeCheck, Heart, Bot, CarFront, Check, ChevronDown, Filter, Menu, Megaphone, MessageCircle, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import PlatformBrand from './PlatformBrand'
+import PlatformLoading from './PlatformLoading'
 import AccountNotifications from './AccountNotifications'
 
 type Vehicle = {
@@ -304,18 +305,8 @@ export default function VehicleCatalogPage({ hideHeader = false, viewerOrganizat
   }
 
 
-  if (loading) {
-    return <main dir="rtl" aria-busy="true" className="grid min-h-screen place-items-center bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_55%,#f8fafc_100%)] px-4 text-slate-900">
-      <section role="status" aria-live="polite" className="flex w-full max-w-sm flex-col items-center rounded-3xl border border-slate-200 bg-white/95 px-7 py-9 text-center shadow-xl shadow-blue-950/5">
-        <div className="relative grid h-16 w-16 place-items-center rounded-2xl bg-blue-50">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-100 border-t-blue-700" />
-          <span className="absolute h-2.5 w-2.5 rounded-full bg-orange-500" />
-        </div>
-        <h1 className="mt-5 text-lg font-black text-slate-900">جارٍ تجهيز كتالوج السيارات</h1>
-        <p className="mt-2 text-sm leading-7 text-slate-500">نتحقق من نوع حسابك ونجهّز الصفحة والمحتوى المناسبين له. ستظهر الصفحة فور اكتمال التجهيز.</p>
-      </section>
-    </main>
-  }
+  // Keep the platform-wide branded loader visible until auth, membership, and organization type are resolved.
+  if (loading) return <PlatformLoading pageName="كتالوج السيارات" />
 
   return <main dir="rtl" aria-busy={loading} className="mc-catalog-main min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef4fb_48%,#f8fafc_100%)] text-slate-900">
     {orgType === 'individual_owner' && <section aria-label="تنبيه وضع مشاهدة الكتالوج" role="note" className="w-full pt-3 sm:pt-4">
