@@ -19,7 +19,7 @@ export function PaymentMethodChoice({ value, onChange, disabled = false, onlineD
         <span className="min-w-0">
           <span className="flex items-center gap-2 text-sm font-extrabold text-slate-900"><CreditCard size={17} className="text-blue-700"/> الدفع الإلكتروني</span>
           <span className="mt-1 block text-xs leading-6 text-slate-600">الدفع الآمن عبر بوابة My Car الموحدة. ستنتقل إلى صفحة الدفع لاستكمال العملية.</span>
-          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-800"><ShieldCheck size={12}/> يتاح بعد تفعيل البوابة</span>
+          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-800"><ShieldCheck size={12}/> عبر بوابة الدفع المتاحة</span>
         </span>
       </label>
       <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${value === 'manual' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-200'} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}>
@@ -41,6 +41,13 @@ export async function createMyCarCheckout(args: {
 }) {
   if (!supabase) throw new Error('إعدادات الاتصال غير مكتملة.')
   const idempotencyKey = `mycar:${args.purpose}:${args.entityId}`
+  const messages: Record<string, string> = {
+    gateway_disabled: 'الدفع الإلكتروني غير مفعّل حاليًا. يمكنك استخدام التحويل اليدوي.',
+    billing_phone_required: 'أضف رقم موبايل مصري صحيح في بيانات حسابك قبل الدفع الإلكتروني.',
+    billing_email_required: 'أضف بريدًا إلكترونيًا صحيحًا في بيانات حسابك قبل الدفع الإلكتروني.',
+    paymob_credentials_missing: 'بوابة الدفع لم تكتمل إعداداتها بعد. يمكنك استخدام التحويل اليدوي.',
+    fawry_checkout_requires_confirmed_merchant_product: 'الدفع عبر فوري غير متاح حتى تأكيد نوع الخدمة المتعاقد عليها.',
+  }
   const { data, error } = await supabase.functions.invoke('create-payment-intent', {
     body: {
       purpose: args.purpose,
@@ -51,15 +58,20 @@ export async function createMyCarCheckout(args: {
       ...(args.couponCode ? { coupon_code: args.couponCode } : {}),
     },
   })
-  if (error) throw new Error(error.message || 'تعذر بدء عملية الدفع الإلكتروني.')
-  if (!data?.checkout_url || typeof data.checkout_url !== 'string') {
-    const messages: Record<string, string> = {
-      gateway_disabled: 'الدفع الإلكتروني غير مفعّل حاليًا. يمكنك استخدام التحويل اليدوي.',
-      billing_phone_required: 'أضف رقم موبايل مصري صحيح في بيانات حسابك قبل الدفع الإلكتروني.',
-      billing_email_required: 'أضف بريدًا إلكترونيًا صحيحًا في بيانات حسابك قبل الدفع الإلكتروني.',
-      paymob_credentials_missing: 'بوابة الدفع لم تكتمل إعداداتها بعد. يمكنك استخدام التحويل اليدوي.',
-      fawry_checkout_requires_confirmed_merchant_product: 'الدفع عبر فوري غير متاح حتى تأكيد نوع الخدمة المتعاقد عليها.',
+  if (error) {
+    const response = (error as unknown as { context?: Response }).context
+    if (response && typeof response.clone === 'function') {
+      try {
+        const body = await response.clone().json() as { error?: string; message?: string }
+        throw new Error(messages[String(body?.error || '')] || body?.message || error.message || 'تعذر بدء عملية الدفع الإلكتروني.')
+      } catch (detail) {
+        if (detail instanceof Error && detail.message !== error.message) throw detail
+      }
     }
+    throw new Error(error.message || 'تعذر بدء عملية الدفع الإلكتروني.')
+  }
+  if (!data?.checkout_url || typeof data.checkout_url !== 'string') {
+    const unusedMessages: Record<string, string> = {
     throw new Error(messages[String(data?.error)] || data?.message || 'تعذر إنشاء رابط الدفع الإلكتروني.')
   }
   window.location.assign(data.checkout_url)
