@@ -19,6 +19,7 @@ type RequestBody = {
   idempotency_key?: string;
   period_months?: number;
   coupon_code?: string | null;
+  return_origin?: string;
 };
 
 function validUuid(value: unknown): value is string {
@@ -129,14 +130,33 @@ Deno.serve(async (req: Request) => {
   }
 
   const appUrl = Deno.env.get("MYCAR_APP_URL") ?? "";
-  let appOrigin: string;
+  const allowedOrigins = new Set<string>();
   try {
-    const parsed = new URL(appUrl);
-    if (parsed.protocol !== "https:") throw new Error("https_required");
-    appOrigin = parsed.origin;
+    const productionOrigin = new URL(appUrl);
+    if (productionOrigin.protocol !== "https:") throw new Error("https_required");
+    allowedOrigins.add(productionOrigin.origin);
+    for (const value of (Deno.env.get("MYCAR_ALLOWED_ORIGINS") ?? "").split(",")) {
+      const candidate = value.trim();
+      if (!candidate) continue;
+      const parsed = new URL(candidate);
+      if (parsed.protocol !== "https:") throw new Error("https_required");
+      allowedOrigins.add(parsed.origin);
+    }
   } catch {
     await admin.rpc("fail_mycar_payment_attempt", { p_attempt_id: prepared.attempt_id, p_error_code: "app_url_not_configured" });
     return json({ error: "app_url_not_configured" }, 503);
+  }
+
+  let appOrigin: string;
+  try {
+    const requestedOrigin = body.return_origin ? new URL(body.return_origin) : new URL(appUrl);
+    if (requestedOrigin.protocol !== "https:" || !allowedOrigins.has(requestedOrigin.origin)) {
+      throw new Error("return_origin_not_allowed");
+    }
+    appOrigin = requestedOrigin.origin;
+  } catch {
+    await admin.rpc("fail_mycar_payment_attempt", { p_attempt_id: prepared.attempt_id, p_error_code: "return_origin_not_allowed" });
+    return json({ error: "return_origin_not_allowed" }, 403);
   }
 
   const displayName = String(profile?.display_name ?? "My Car Customer").trim().split(/\s+/);
