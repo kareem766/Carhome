@@ -189,6 +189,9 @@ begin
     if v_existing.status='paid' then
       return jsonb_build_object('ok',false,'error','already_paid');
     end if;
+    if v_existing.status in ('cancelled','refunded','partially_refunded','review_required') then
+      return jsonb_build_object('ok',false,'error','payment_closed');
+    end if;
     select * into v_attempt from public.payment_attempts a
     where a.payment_id=v_existing.id and a.provider_code=p_provider_code
       and a.checkout_url is not null and (a.expires_at is null or a.expires_at > now())
@@ -316,7 +319,7 @@ begin
   update public.payments
   set provider_reference=p_provider_reference,checkout_url=p_checkout_url,
       status='pending',expires_at=p_expires_at,updated_at=now()
-  where id=v_payment_id and status in ('created','pending');
+  where id=v_payment_id and status in ('created','pending','failed','expired');
 
   return jsonb_build_object('ok',true,'payment_id',v_payment_id);
 end;
