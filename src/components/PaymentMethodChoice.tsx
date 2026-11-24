@@ -72,6 +72,7 @@ export async function createMyCarCheckout(args: {
       entity_id: args.entityId,
       provider: 'paymob',
       idempotency_key: idempotencyKey,
+      return_origin: window.location.origin,
       ...(args.periodMonths ? { period_months: args.periodMonths } : {}),
       ...(args.couponCode ? { coupon_code: args.couponCode } : {}),
     },
