@@ -42,7 +42,7 @@ export default function AdminPaymentGatewaysPage() {
     else setGateways((gatewayResult.data || []) as Gateway[])
     if (settingsResult.error) setError('تعذر تحميل إعدادات الدفع العامة. تأكد من تطبيق Migration مركز التحكم.')
     else setSettings(settingsResult.data as Settings)
-    if (!statusResult.error) setReadyProviders((statusResult.data?.enabled_providers || []).map((item: {provider_code:string})=>item.provider_code))
+    if (!statusResult.error) setReadyProviders((statusResult.data?.ready_providers || []))
     setLoading(false)
   },[])
   useEffect(()=>{ void load() },[load])
