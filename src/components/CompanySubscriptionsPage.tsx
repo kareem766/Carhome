@@ -109,6 +109,7 @@ export default function CompanySubscriptionsPage(){
    payment_reference:checkoutMethod==='manual'?clean:null,payment_transfer_date:checkoutMethod==='manual'?transferDate:null,payment_method:checkoutMethod==='manual'?method:null,payment_submitted_at:checkoutMethod==='manual'?new Date().toISOString():null,created_by:user?.id
   }).select('id').single()
   if(insertError||!createdSubscription?.id){setSaving(false);setError('تعذر إرسال طلب الاشتراك: '+(insertError?.message||'لم يتم إنشاء رقم الطلب.'));return}
+  if(Number(createdSubscription.final_amount_egp??0)<=0){const {error:zeroDueError}=await supabase.from('company_subscriptions').update({payment_status:'submitted',payment_reference:'لا يوجد مبلغ مستحق بعد الخصم',payment_transfer_date:new Date().toISOString().slice(0,10),payment_submitted_at:new Date().toISOString()}).eq('id',createdSubscription.id);setSaving(false);if(zeroDueError){setError(zeroDueError.message);return}setNotice('تم إرسال الاشتراك للمراجعة دون مبلغ مستحق بعد الخصم.');setCouponCode('');setCouponPreview(null);await load();return}
   if(checkoutMethod==='online'){
    try{await createMyCarCheckout({purpose:'company_subscription',entityId:createdSubscription.id,couponCode:couponPreview?.code||null})}
    catch(e){setSaving(false);setError(e instanceof Error?e.message:'تعذر بدء الدفع الإلكتروني. يمكنك اختيار التحويل اليدوي.');return}
