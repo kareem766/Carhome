@@ -23,6 +23,10 @@ on:
       - "supabase/functions/_shared/payment-webhook.ts"
       - "supabase/functions/_shared/payment-webhook.test.ts"
       - "supabase/functions/payments-webhook/**"
+      - "supabase/functions/create-payment-intent/**"
+      - "supabase/functions/_shared/payment-intent.ts"
+      - "supabase/functions/_shared/payment-intent.test.ts"
+      - "supabase/migrations/*payment_intent*.sql"
       - "supabase/migrations/*payment_webhook*.sql"
       - ".github/workflows/payment-signature-tests.yml"
 
