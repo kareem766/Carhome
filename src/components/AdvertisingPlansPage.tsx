@@ -145,7 +145,7 @@ export default function AdvertisingPlansPage(){
       original_amount_egp:couponPreview?.original_amount_egp??Number(selectedPlan.price_egp),
       discount_amount_egp:couponPreview?.discount_amount_egp??0,
       final_amount_egp:fullPlanAmount,
-      payment_status:'pending',
+      payment_status:paymentDueAmount>0?'pending':'submitted',
       updated_at:new Date().toISOString()
     }
 
@@ -223,7 +223,7 @@ export default function AdvertisingPlansPage(){
         previous_payment_credit_egp:0,
         payment_due_egp:paymentDueAmount,
         ...pricing,
-        payment_reference:checkoutMethod==='manual'?submittedPaymentReference:null
+        payment_reference:paymentDueAmount>0&&checkoutMethod==='online'?null:submittedPaymentReference
       }).select('id').single()
       requestError=insertError
       createdPromotionId=createdPromotion?.id||null
