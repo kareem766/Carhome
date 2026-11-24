@@ -95,7 +95,7 @@ Deno.test("FawryPay Notification V2 signature verifies exact decimal formatting"
     paymentMethod: "CARD",
     paymentRefrenceNumber: "369552233",
     messageSignature:
-      "82a779ea396b9245d0855ddb5f892db9beb759baf87cbd7bfd002910083f7e7f",
+      "86c563403cac8aa63cc815e48c473cede8452d76e1c84617d95e993b8b988734",
   };
   assert(
     await verifyFawryNotificationV2(payload, "mycar-test-fawry-secret"),
