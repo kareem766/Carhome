@@ -2084,17 +2084,39 @@ body:has(.mc-company-shared-sidebar) .mc-workspace-main { margin-top:0 !importan
 body:has(.mc-company-shared-sidebar) .mc-supplier-page-content,
 body:has(.mc-company-shared-sidebar) .mc-workspace-content { min-width:0; }
 @media (max-width:760px) {
-  .mc-platform-topbar { min-height:68px; gap:.35rem; padding:.45rem .55rem; }
-  .mc-platform-brand { gap:.4rem; }
-  .mc-platform-brand img { width:38px; height:38px; flex-basis:38px; }
-  .mc-platform-brand strong { font-size:.88rem; }
-  .mc-platform-brand small { display:block; max-width: min(58vw, 250px); overflow:hidden; text-overflow:ellipsis; font-size:.56rem; line-height:1.45; }
-  .mc-platform-header-actions { gap:.25rem; }
+  .mc-platform-topbar {
+    min-height:78px;
+    gap:.4rem;
+    padding:.5rem .55rem;
+    align-items:center;
+  }
+  .mc-platform-brand {
+    flex:1 1 0;
+    min-width:0;
+    gap:.4rem;
+    overflow:visible;
+  }
+  .mc-platform-brand img { width:36px; height:36px; flex:0 0 36px; }
+  .mc-platform-brand > span { display:block; flex:1 1 0; min-width:0; }
+  .mc-platform-brand strong { font-size:.88rem; line-height:1.25; }
+  .mc-platform-brand small {
+    display:block;
+    width:100%;
+    max-width:100%;
+    margin-top:3px;
+    overflow:visible;
+    text-overflow:clip;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    font-size:.56rem;
+    line-height:1.4;
+  }
+  .mc-platform-header-actions { flex:0 0 auto; gap:.22rem; }
   .mc-platform-header-actions > button,
-  .mc-platform-header-actions > a { width:38px; min-width:38px; min-height:38px; padding:.35rem; border-radius:10px; }
+  .mc-platform-header-actions > a { width:36px; min-width:36px; min-height:38px; padding:.3rem; border-radius:10px; }
   .mc-platform-header-actions > button span,
   .mc-platform-header-actions > a span { display:none; }
-  .mc-platform-header-actions > div { gap:.2rem; }
+  .mc-platform-header-actions > div { gap:.18rem; }
   .mc-platform-page-nav { min-height:64px; gap:.35rem; padding:.45rem .5rem; }
   .mc-platform-page-nav::before { min-height:30px; padding:.3rem .58rem; font-size:.65rem; }
   .mc-platform-page-nav a { min-height:43px; padding:.48rem .78rem; border-radius:12px; font-size:.77rem; }
