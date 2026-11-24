@@ -101,7 +101,7 @@ export default function CompanySubscriptionsPage(){
    coupon_code:couponPreview?.code||null,original_amount_egp:selectedPrice,discount_amount_egp:Number(couponPreview?.discount_amount_egp||0),final_amount_egp:Number(couponPreview?.final_amount_egp??selectedPrice),
    payment_reference:checkoutMethod==='manual'?clean:null,payment_transfer_date:checkoutMethod==='manual'?transferDate:null,payment_method:checkoutMethod==='manual'?method:null,payment_submitted_at:checkoutMethod==='manual'?new Date().toISOString():null,created_by:user?.id
   }).select('id').single()
-  if(insertError){setSaving(false);setError('تعذر إرسال طلب الاشتراك: '+insertError.message);return}
+  if(insertError||!createdSubscription?.id){setSaving(false);setError('تعذر إرسال طلب الاشتراك: '+(insertError?.message||'لم يتم إنشاء رقم الطلب.'));return}
   if(checkoutMethod==='online'){
    try{await createMyCarCheckout({purpose:'company_subscription',entityId:createdSubscription.id,couponCode:couponPreview?.code||null})}
    catch(e){setSaving(false);setError(e instanceof Error?e.message:'تعذر بدء الدفع الإلكتروني. يمكنك اختيار التحويل اليدوي.');return}
