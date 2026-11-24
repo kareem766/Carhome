@@ -138,6 +138,13 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   const selectedStatus=String(f.get('status'))
   const fee=f.get('fee')!==null&&String(f.get('fee')).trim()!==''?Number(f.get('fee')):null
   const requestUsesSubscription=r.payment_model==='subscription'
+  if(requestUsesSubscription&&selectedStatus==='searching'){
+   const {error:startError}=await supabase.rpc('managed_sourcing_admin_start_search',{p_request_id:r.id})
+   setSaving(false)
+   if(startError)setError(startError.message)
+   else{setNotice('تم اعتماد طلب البحث ضمن الاشتراك وبدأ فريق My Car التنفيذ.');await load()}
+   return
+  }
   const effectiveFee=requestUsesSubscription?null:fee
   const status=!requestUsesSubscription&&fee!==null&&fee>0&&['new','under_review','quote_ready'].includes(selectedStatus)?'awaiting_company_approval':selectedStatus
   const patch:Row={status,quoted_fee_egp:effectiveFee,updated_at:new Date().toISOString()}
