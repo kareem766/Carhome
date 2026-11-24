@@ -189,7 +189,7 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   const coupon=couponPreview?.packageId===p.id?couponPreview:null
   setSaving(true)
   const {data:createdSubscription,error:e1}=await supabase.from('managed_sourcing_subscriptions').insert({organization_id:org.id,created_by:user.id,package_id:p.id,monthly_price_egp:p.monthly_price_egp,requests_included:p.included_requests,payment_reference:checkoutMethod==='manual'?reference:'دفع إلكتروني - بانتظار إنشاء العملية',payment_transfer_date:checkoutMethod==='manual'?transferDate:null,coupon_code:coupon?.code||null,original_amount_egp:coupon?.original_amount_egp??p.monthly_price_egp,discount_amount_egp:coupon?.discount_amount_egp??0,final_amount_egp:coupon?.final_amount_egp??p.monthly_price_egp,payment_status:checkoutMethod==='online'?'not_submitted':'submitted',status:'pending_review',requests_used:0}).select('id').single()
-  if(e1){setSaving(false);setError(e1.message);return}
+  if(e1||!createdSubscription?.id){setSaving(false);setError(e1?.message||'تعذر إنشاء رقم طلب الاشتراك.');return}
   if(checkoutMethod==='online'){
    try{await createMyCarCheckout({purpose:'managed_sourcing_subscription',entityId:createdSubscription.id,couponCode:coupon?.code||null})}
    catch(checkoutError){setSaving(false);setError(checkoutError instanceof Error?checkoutError.message:'تعذر بدء الدفع الإلكتروني. يمكنك استخدام التحويل اليدوي.');return}
