@@ -6,6 +6,7 @@ import PlatformBrand from './PlatformBrand'
 type Payment = {
   id:string
   purpose:string
+  entity_id:string
   status:string
   amount_due:number
   currency:string
@@ -27,6 +28,7 @@ const labels:Record<string,{title:string;body:string;icon:typeof CheckCircle2;to
 export default function PaymentResultPage(){
   const paymentId=new URLSearchParams(window.location.search).get('payment_id')||''
   const [payment,setPayment]=useState<Payment|null>(null)
+  const [accountRole,setAccountRole]=useState('')
   const [loading,setLoading]=useState(true)
   const [error,setError]=useState('')
   const [refreshing,setRefreshing]=useState(false)
@@ -34,7 +36,8 @@ export default function PaymentResultPage(){
     if(!supabase||!paymentId){setError('رابط متابعة الدفع غير مكتمل.');setLoading(false);return}
     const {data:{user},error:authError}=await supabase.auth.getUser()
     if(authError||!user){window.location.replace('/?login=1&redirect='+encodeURIComponent(window.location.pathname+window.location.search));return}
-    const {data,error:queryError}=await supabase.from('payments').select('id,purpose,status,amount_due,currency,provider_reference,created_at,paid_at,updated_at').eq('id',paymentId).maybeSingle()
+    setAccountRole(String(user.user_metadata?.organization_type||''))
+    const {data,error:queryError}=await supabase.from('payments').select('id,purpose,entity_id,status,amount_due,currency,provider_reference,created_at,paid_at,updated_at').eq('id',paymentId).maybeSingle()
     if(queryError){setError('تعذر قراءة حالة الدفع. حدّث الصفحة بعد قليل أو تواصل مع الدعم.');setLoading(false);return}
     if(!data){setError('لم يتم العثور على عملية الدفع لهذا الحساب.');setLoading(false);return}
     setPayment(data as Payment);setError('');setLoading(false)
@@ -49,7 +52,7 @@ export default function PaymentResultPage(){
   const state=payment?labels[payment.status]||labels.pending:null
   const StateIcon=state?.icon||Clock3
   const amount=payment?new Intl.NumberFormat('ar-EG',{style:'currency',currency:payment.currency||'EGP',maximumFractionDigits:2}).format(Number(payment.amount_due)||0):''
-  const backHref=payment?.purpose==='company_subscription'?'/workspace/company/subscriptions':payment?.purpose==='managed_sourcing_request'||payment?.purpose==='managed_sourcing_subscription'?'/workspace/company/managed-sourcing':payment?.purpose==='advertising'||payment?.purpose==='featured_advertising'?'/workspace/advertising-plans':payment?.purpose==='vehicle_registration'?'/workspace/owner/vehicles':'/'
+  const backHref=payment?.purpose==='company_subscription'?'/workspace/company/subscriptions':payment?.purpose==='managed_sourcing_request'||payment?.purpose==='managed_sourcing_subscription'?'/workspace/company/managed-sourcing':payment?.purpose==='advertising'||payment?.purpose==='featured_advertising'?'/workspace/advertising-plans':payment?.purpose==='vehicle_registration'?(accountRole==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles')+'?paymentVehicle='+encodeURIComponent(payment.entity_id):'/'
   const tone=state?.tone||'blue'
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,.12),transparent_35%),linear-gradient(180deg,#f8fafc,#eef4fb)] px-4 py-8 text-slate-900">
     <section className="w-full max-w-2xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_25px_80px_-35px_rgba(15,40,90,.35)]">
