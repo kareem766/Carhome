@@ -197,7 +197,6 @@ export default function AdvertisingPlansPage(){
         advertising_plan_id:selectedPlan.id,
         created_by:userId,
         status:'pending_review',
-        payment_status:checkoutMethod==='online'&&paymentDueAmount>0?'pending':'submitted',
         previous_payment_credit_egp:0,
         payment_due_egp:paymentDueAmount,
         ...pricing,
