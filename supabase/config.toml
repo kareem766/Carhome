@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.create-payment-intent]
 verify_jwt = true
+
+[functions.payment-gateway-status]
+verify_jwt = true
