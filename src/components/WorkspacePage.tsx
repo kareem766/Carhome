@@ -855,8 +855,29 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
     const form = new FormData(event.currentTarget)
     const months = Number(form.get('period_months') || 1)
     if (checkoutMethod === 'online') {
+      const couponCode = String(form.get('coupon_code') || '').trim().toUpperCase()
+      if (couponCode && discountPreview?.code === couponCode && discountPreview.final <= 0) {
+        const zeroDuePayload = {
+          vehicle_id: vehicle.id, organization_id: organization.id, submitted_by: user.id,
+          amount_egp: role === 'supplier' ? registrationFees.supplierOnce : registrationFees.ownerMonthly * months,
+          period_months: role === 'supplier' ? 1 : months,
+          coupon_code: couponCode, transfer_method: 'online',
+          transfer_reference: 'لا يوجد مبلغ مستحق بعد الخصم', proof_path: null, review_status: 'pending'
+        }
+        const { error: zeroDueError } = await supabase.from('vehicle_payment_submissions').insert(zeroDuePayload)
+        setSaving(false)
+        if (zeroDueError) { setError(zeroDueError.message); return }
+        clearFormDraft(`workspace:${user.id}:${organization.id}:${path}:payment:${vehicle.id}`)
+        setPaymentVehicle(null); setPaymentStageVehicle(null); setCheckoutMethod('manual')
+        window.history.replaceState({}, '', window.location.pathname)
+        setPaymentSubmissions(current => ({ ...current, [vehicle.id]: 'pending' }))
+        localStorage.removeItem('mycar_vehicle_payment_banner')
+        setShowVehicleSuccess(true)
+        window.setTimeout(() => window.location.replace(role === 'supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'), 2600)
+        return
+      }
       try {
-        await createMyCarCheckout({ purpose: 'vehicle_registration', entityId: vehicle.id, periodMonths: role === 'supplier' ? 1 : months, couponCode: String(form.get('coupon_code') || '').trim().toUpperCase() || null })
+        await createMyCarCheckout({ purpose: 'vehicle_registration', entityId: vehicle.id, periodMonths: role === 'supplier' ? 1 : months, couponCode: couponCode || null })
       } catch (checkoutError) {
         setSaving(false)
         setError(checkoutError instanceof Error ? checkoutError.message : 'تعذر بدء الدفع الإلكتروني. يمكنك اختيار التحويل اليدوي.')
