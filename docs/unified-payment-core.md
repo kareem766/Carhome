@@ -19,7 +19,7 @@ Both are seeded disabled in `payment_gateways`. No credentials are stored in Pos
 The staged `payments-webhook` Edge Function accepts POST JSON only, limits the body to 64 KiB, verifies the provider signature before parsing the event into a canonical payment event, and calls the service-role-only `process_verified_payment_webhook` database function.
 
 - Paymob is selected by the presence of the `hmac` query parameter; HMAC-SHA512 and the configured integration ID are checked. Correlation uses `obj.order.id`; the transaction `obj.id` is the event ID.
-- Fawry Notification V2 uses `messageSignature` SHA-256 verification. Correlation uses `merchantRefNumber`; `fawryRefNumber` is the event ID. The callback's paid amount and order amount must agree.
+- Fawry Notification V2 uses `messageSignature` SHA-256 verification. Correlation uses `merchantRefNumber`; the callback `requestId` is the event ID so later status updates for the same order are not mistaken for duplicates. The canonical charge is compared with `orderAmount` (excluding Fawry fees); `paymentAmount` may be higher because it can include fees and must not be less than `orderAmount`.
 - The database function locks the payment attempt and canonical payment, validates provider, EGP amount and enabled gateway, deduplicates the provider event, and updates the attempt/payment ledger in one transaction.
 - The RPC is executable only by `service_role`; it is not a browser API.
 - The endpoint does not store raw callback payloads or card data, and does not activate a vehicle, subscription, or advertisement. Service-specific entitlement settlement and existing admin review gates remain a later integration step.
