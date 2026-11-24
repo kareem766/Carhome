@@ -1,16 +1,11 @@
-{
-  "functions": {
-    "mycar-ai-assistant": {
-      "verify_jwt": true
-    },
-    "notification-dispatch": {
-      "verify_jwt": false
-    },
-    "public-suspended-account-support": {
-      "verify_jwt": false
-    }
-  }
-}
+[functions.mycar-ai-assistant]
+verify_jwt = true
+
+[functions.notification-dispatch]
+verify_jwt = false
+
+[functions.public-suspended-account-support]
+verify_jwt = false
 
 [functions.payments-webhook]
 verify_jwt = false
