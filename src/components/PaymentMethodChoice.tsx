@@ -7,14 +7,15 @@ type PaymentMethodChoiceProps = {
   value: MyCarPaymentMethod
   onChange: (value: MyCarPaymentMethod) => void
   disabled?: boolean
+  onlineDisabled?: boolean
 }
 
-export function PaymentMethodChoice({ value, onChange, disabled = false }: PaymentMethodChoiceProps) {
+export function PaymentMethodChoice({ value, onChange, disabled = false, onlineDisabled = false }: PaymentMethodChoiceProps) {
   return <fieldset className="space-y-3">
     <legend className="text-sm font-extrabold text-slate-900">اختار طريقة الدفع</legend>
     <div className="grid gap-3 sm:grid-cols-2">
-      <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${value === 'online' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-200'} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}>
-        <input type="radio" name="mycar-payment-method" value="online" checked={value === 'online'} disabled={disabled} onChange={() => onChange('online')} className="mt-1 h-4 w-4 accent-blue-700"/>
+      <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${value === 'online' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-200'} ${disabled || onlineDisabled ? 'cursor-not-allowed opacity-60' : ''}`}>
+        <input type="radio" name="mycar-payment-method" value="online" checked={value === 'online'} disabled={disabled || onlineDisabled} onChange={() => onChange('online')} className="mt-1 h-4 w-4 accent-blue-700"/>
         <span className="min-w-0">
           <span className="flex items-center gap-2 text-sm font-extrabold text-slate-900"><CreditCard size={17} className="text-blue-700"/> الدفع الإلكتروني</span>
           <span className="mt-1 block text-xs leading-6 text-slate-600">الدفع الآمن عبر بوابة My Car الموحدة. ستنتقل إلى صفحة الدفع لاستكمال العملية.</span>
