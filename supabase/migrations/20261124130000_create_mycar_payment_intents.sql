@@ -204,6 +204,14 @@ begin
         'provider_reference',v_attempt.provider_reference
       );
     end if;
+    select * into v_attempt from public.payment_attempts a
+    where a.payment_id=v_existing.id and a.provider_code=p_provider_code
+      and a.status in ('created','pending') and a.checkout_url is null
+    order by a.attempt_number desc limit 1
+    for update;
+    if found then
+      return jsonb_build_object('ok',false,'error','payment_attempt_in_progress');
+    end if;
     v_payment_id := v_existing.id;
   else
     insert into public.payments(
