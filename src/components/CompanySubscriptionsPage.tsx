@@ -99,7 +99,7 @@ export default function CompanySubscriptionsPage(){
    organization_id:organizationId,plan_id:chosen.id,plan_name:chosen.name,billing_cycle:billingCycle,
    amount_egp:Number(couponPreview?.final_amount_egp??selectedPrice),status:'pending',payment_status:checkoutMethod==='online'?'pending':'submitted',
    coupon_code:couponPreview?.code||null,original_amount_egp:selectedPrice,discount_amount_egp:Number(couponPreview?.discount_amount_egp||0),final_amount_egp:Number(couponPreview?.final_amount_egp??selectedPrice),
-   payment_reference:checkoutMethod==='manual'?clean:null,payment_transfer_date:checkoutMethod==='manual'?transferDate:null,payment_method:checkoutMethod==='manual'?method:'online',payment_submitted_at:checkoutMethod==='manual'?new Date().toISOString():null,created_by:user?.id
+   payment_reference:checkoutMethod==='manual'?clean:null,payment_transfer_date:checkoutMethod==='manual'?transferDate:null,payment_method:checkoutMethod==='manual'?method:null,payment_submitted_at:checkoutMethod==='manual'?new Date().toISOString():null,created_by:user?.id
   }).select('id').single()
   if(insertError){setSaving(false);setError('تعذر إرسال طلب الاشتراك: '+insertError.message);return}
   if(checkoutMethod==='online'){
