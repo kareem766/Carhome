@@ -19,10 +19,11 @@ export function PaymentMethodChoice({ value, onChange, disabled = false, onlineD
     if (!supabase) return () => { active = false }
     void supabase.functions.invoke('payment-gateway-status').then(({ data, error }) => {
       if (!active || error) return
-      const providers = Array.isArray(data?.enabled_providers) ? data.enabled_providers as Array<{ display_name?: string }> : []
-      setOnlineEnabled(providers.length > 0)
-      setProviderLabel(providers.map(provider => provider.display_name).filter(Boolean).join(' / ') || 'سيتم إتاحته بعد تفعيل بوابة الدفع')
-      if (!providers.length && value === 'online') onChange('manual')
+      const providers = Array.isArray(data?.enabled_providers) ? data.enabled_providers as Array<{ provider_code?: string; display_name?: string }> : []
+      const paymob = providers.find(provider => provider.provider_code === 'paymob')
+      setOnlineEnabled(Boolean(paymob))
+      setProviderLabel(paymob?.display_name || 'سيتم إتاحته بعد تفعيل بوابة الدفع')
+      if (!paymob && value === 'online') onChange('manual')
     }).catch(() => { if (active) setOnlineEnabled(false) })
     return () => { active = false }
   }, [onChange, value])
