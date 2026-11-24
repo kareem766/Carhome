@@ -10,7 +10,7 @@ The unified payment center is an adapter layer over existing My Car service work
 Both are seeded disabled in `payment_gateways`. No credentials are stored in PostgreSQL. Provider secrets belong in Supabase Edge Function secrets only.
 
 ## Canonical records
-- `payments`: one logical charge for one service entitlement.
+- `payments`: one logical charge for one service entitlement, with explicit original amount, discount, previously paid credit, and final amount due.
 - `payment_attempts`: one row per provider checkout/retry.
 - `payment_webhook_events`: provider event idempotency and processing audit.
 - `payment_gateways`: safe, non-secret routing configuration.
@@ -22,6 +22,9 @@ Both are seeded disabled in `payment_gateways`. No credentials are stored in Pos
 4. Repeated callbacks are idempotent; unique provider event IDs and provider references prevent duplicate processing.
 5. Existing manual transfer flows and historical records remain available during rollout.
 6. No card number, CVV, API secret, HMAC secret, or raw webhook payload is stored in these tables.
+
+## Data API exposure
+Supabase changed the default behavior for newly created public tables: they are not automatically exposed through the Data API. Before any Edge Function uses the Supabase client/PostgREST to query these ledger tables, explicitly review and enable the required table exposure in the project's Data API settings. Keep browser roles restricted by the SQL grants and RLS policies; table exposure alone must never be treated as authorization. Alternatively, keep ledger tables private and access them through narrowly scoped database functions or a server-side database connection.
 
 ## Rollout sequence
 1. Apply and verify the schema migration in a controlled Supabase migration window.
