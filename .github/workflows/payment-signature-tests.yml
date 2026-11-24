@@ -8,6 +8,10 @@ on:
       - "supabase/functions/_shared/payment-webhook.ts"
       - "supabase/functions/_shared/payment-webhook.test.ts"
       - "supabase/functions/payments-webhook/**"
+      - "supabase/functions/create-payment-intent/**"
+      - "supabase/functions/_shared/payment-intent.ts"
+      - "supabase/functions/_shared/payment-intent.test.ts"
+      - "supabase/migrations/*payment_intent*.sql"
       - "supabase/migrations/*payment_webhook*.sql"
       - ".github/workflows/payment-signature-tests.yml"
   push:
@@ -36,6 +40,6 @@ jobs:
         with:
           deno-version: v2.x
       - name: Type-check payment webhook endpoint
-        run: deno check --node-modules-dir=auto supabase/functions/payments-webhook/index.ts
+        run: deno check --node-modules-dir=auto supabase/functions/payments-webhook/index.ts supabase/functions/create-payment-intent/index.ts
       - name: Run payment signature and webhook normalization tests
-        run: deno test supabase/functions/_shared/payment-signatures.test.ts supabase/functions/_shared/payment-webhook.test.ts
+        run: deno test supabase/functions/_shared/payment-signatures.test.ts supabase/functions/_shared/payment-webhook.test.ts supabase/functions/_shared/payment-intent.test.ts
