@@ -9,9 +9,9 @@ Deno.test("Paymob callback maps only expected integration and EGP amount", () =>
     id: 12345, amount_cents: 125050, currency: "EGP", integration_id: 9988,
     order: { id: 777 }, pending: false, success: true,
   }};
-  const event = normalizePaymobCallback(payload, "9988");
+  const event = normalizePaymobCallback(payload, ["9988", "9989"]);
   assert(event?.amount === 1250.5 && event.providerReference === "777" && event.outcome === "succeeded", "Paymob event normalization failed");
-  assert(normalizePaymobCallback(payload, "wrong") === null, "Unexpected integration must be rejected");
+  assert(normalizePaymobCallback(payload, ["wrong"]) === null, "Unexpected integration must be rejected");
 });
 
 Deno.test("Fawry callback requires matching paid order and payment amounts", () => {
