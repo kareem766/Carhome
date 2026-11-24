@@ -158,7 +158,7 @@ export default function AdvertisingPlansPage(){
           setSending(false);setError('تم إرسال بيانات الدفع لهذا الطلب بالفعل، وهو بانتظار مراجعة الإدارة.');return
         }
         const existingDue=Number(pendingRequest.payment_due_egp??pendingRequest.final_amount_egp??0)
-        if(checkoutMethod==='online'){
+        if(checkoutMethod==='online'&&existingDue>0){
           try{await createMyCarCheckout({purpose:selectedPlan.placement_type==='premium'?'featured_advertising':'advertising',entityId:pendingRequest.id})}
           catch(checkoutError){setError(checkoutError instanceof Error?checkoutError.message:'تعذر استكمال الدفع الإلكتروني.');setSending(false)}
           return
