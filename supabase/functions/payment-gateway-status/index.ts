@@ -48,7 +48,6 @@ Deno.serve(async (req: Request) => {
   const [{ data, error }, { data: platformSettings, error: settingsError }] = await Promise.all([
     admin.from("payment_gateways")
       .select("provider_code,display_name,is_enabled,supported_payment_methods,priority,environment")
-      .eq("is_enabled", true)
       .order("priority", { ascending: true }),
     admin.from("payment_platform_settings")
       .select("online_payments_enabled,enabled_service_types")
@@ -68,10 +67,12 @@ Deno.serve(async (req: Request) => {
   const readyProviders = (data ?? []).filter((gateway) =>
     gateway.provider_code === "paymob" && paymobReady
   );
+  const enabledProviders = readyProviders.filter((gateway) => gateway.is_enabled);
   return respond({
     online_payments_enabled: true,
     enabled_service_types: platformSettings.enabled_service_types ?? [],
-    enabled_providers: readyProviders.map((gateway) => ({
+    ready_providers: readyProviders.map((gateway) => gateway.provider_code),
+    enabled_providers: enabledProviders.map((gateway) => ({
       provider_code: gateway.provider_code,
       display_name: gateway.display_name,
       supported_payment_methods: gateway.supported_payment_methods ?? [],
