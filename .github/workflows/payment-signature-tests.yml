@@ -28,4 +28,4 @@ jobs:
         with:
           deno-version: v2.x
       - name: Run payment signature tests
-        run: deno test --no-check supabase/functions/_shared/payment-signatures.test.ts
+        run: deno test supabase/functions/_shared/payment-signatures.test.ts
