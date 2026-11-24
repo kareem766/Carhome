@@ -213,7 +213,7 @@ export default function AdvertisingPlansPage(){
       paymentDueAmount=fullPlanAmount
       if(checkoutMethod==='manual'&&paymentDueAmount>0&&!paymentReference.trim()){setSending(false);setError('أدخل رقم العملية بعد تحويل المبلغ المستحق.');return}
       if(checkoutMethod==='manual'&&paymentDueAmount>0&&!selectedPaymentNumber){setSending(false);setError('وسيلة الدفع المختارة غير متاحة حاليًا. اختر وسيلة دفع مفعّلة من إعدادات المنصة.');return}
-      submittedPaymentReference=checkoutMethod==='manual'?(paymentDueAmount>0?selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate:'لا يوجد مبلغ مستحق بعد الخصم'):''
+      submittedPaymentReference=paymentDueAmount>0?(checkoutMethod==='manual'?selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate:''):'لا يوجد مبلغ مستحق بعد الخصم'
       const {data:createdPromotion,error:insertError}=await supabase.from('vehicle_promotions').insert({
         vehicle_id:vehicleId,
         organization_id:orgId,
