@@ -23,7 +23,7 @@ function constantTimeEqualHex(actual: string, expected: string): boolean {
 }
 
 async function hmacHex(
-  algorithm: "SHA-256" | "SHA-512",
+  algorithm: "SHA-512",
   secret: string,
   message: string,
 ): Promise<string> {
@@ -158,6 +158,7 @@ export async function verifyFawryNotificationV2(
     secret,
   ].join("");
 
-  const computed = await hmacHex("SHA-256", secret, signedText);
+  const digest = await crypto.subtle.digest("SHA-256", encoder.encode(signedText));
+  const computed = bytesToHex(new Uint8Array(digest));
   return constantTimeEqualHex(computed, supplied);
 }
