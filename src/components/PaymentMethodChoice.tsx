@@ -39,7 +39,7 @@ export async function createMyCarCheckout(args: {
   couponCode?: string | null
 }) {
   if (!supabase) throw new Error('إعدادات الاتصال غير مكتملة.')
-  const idempotencyKey = `mycar:${args.purpose}:${args.entityId}:${crypto.randomUUID()}`
+  const idempotencyKey = `mycar:${args.purpose}:${args.entityId}`
   const { data, error } = await supabase.functions.invoke('create-payment-intent', {
     body: {
       purpose: args.purpose,
