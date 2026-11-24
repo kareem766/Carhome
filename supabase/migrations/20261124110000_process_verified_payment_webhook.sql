@@ -68,6 +68,19 @@ begin
   returning id into v_event_id;
 
   if v_event_id is null then
+    select e.processing_status, e.error_code
+      into v_payment_status, p_error_code
+    from public.payment_webhook_events e
+    where e.provider_code = p_provider_code
+      and e.provider_event_id = p_provider_event_id;
+
+    if v_payment_status = 'failed' then
+      return jsonb_build_object(
+        'accepted', false,
+        'reason', coalesce(p_error_code, 'event_processing_failed'),
+        'duplicate', true
+      );
+    end if;
     return jsonb_build_object('accepted', true, 'duplicate', true);
   end if;
 
