@@ -51,10 +51,10 @@ Deno.serve(async (req: Request) => {
   let event;
   if (provider === "paymob") {
     const secret = Deno.env.get("PAYMOB_HMAC_SECRET") ?? "";
-    const integrationId = Deno.env.get("PAYMOB_INTEGRATION_ID") ?? "";
-    if (!secret || !integrationId) return json({ error: "provider_not_configured" }, 503);
+    const integrationIds = (Deno.env.get("PAYMOB_INTEGRATION_IDS") ?? "").split(",").map((value) => value.trim()).filter(Boolean);
+    if (!secret || integrationIds.length === 0) return json({ error: "provider_not_configured" }, 503);
     if (!await verifyPaymobTransactionHmac(payload, paymobHmac, secret)) return json({ error: "invalid_signature" }, 401);
-    event = normalizePaymobCallback(payload, integrationId);
+    event = normalizePaymobCallback(payload, integrationIds);
   } else {
     const secret = Deno.env.get("FAWRY_NOTIFICATION_SECRET") ?? "";
     if (!secret) return json({ error: "provider_not_configured" }, 503);
