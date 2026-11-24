@@ -32,6 +32,10 @@ Obtain test-mode values for:
 
 Fawry's V2 callback endpoint must be registered during merchant onboarding; provide the test callback URL when Fawry requests it. Use the V2 `messageSignature` SHA-256 scheme and verify the payment amount and merchant reference against the stored attempt. Do not implement the legacy V1 MD5 notification path.
 
+## Checkout return URLs
+
+Configure `MYCAR_APP_URL` as the canonical HTTPS production origin. If preview testing is needed, set `MYCAR_ALLOWED_ORIGINS` to a comma-separated allowlist of exact HTTPS origins, including the stable Vercel branch-preview alias. The checkout helper sends the current browser origin; the server rejects any origin not on this allowlist. Do not use wildcard return origins.
+
 ## Secret handling
 
 Do not paste API keys, HMAC secrets, Secure Keys, or any payment credentials into ChatGPT, GitHub issues, source files, browser storage, or client-side environment variables.
