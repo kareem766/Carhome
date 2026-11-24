@@ -1,10 +1,14 @@
-name: Payment signature tests
+name: Payment webhook tests
 
 on:
   pull_request:
     paths:
       - "supabase/functions/_shared/payment-signatures.ts"
       - "supabase/functions/_shared/payment-signatures.test.ts"
+      - "supabase/functions/_shared/payment-webhook.ts"
+      - "supabase/functions/_shared/payment-webhook.test.ts"
+      - "supabase/functions/payments-webhook/**"
+      - "supabase/migrations/*payment_webhook*.sql"
       - ".github/workflows/payment-signature-tests.yml"
   push:
     branches:
@@ -12,13 +16,17 @@ on:
     paths:
       - "supabase/functions/_shared/payment-signatures.ts"
       - "supabase/functions/_shared/payment-signatures.test.ts"
+      - "supabase/functions/_shared/payment-webhook.ts"
+      - "supabase/functions/_shared/payment-webhook.test.ts"
+      - "supabase/functions/payments-webhook/**"
+      - "supabase/migrations/*payment_webhook*.sql"
       - ".github/workflows/payment-signature-tests.yml"
 
 permissions:
   contents: read
 
 jobs:
-  verify-payment-signatures:
+  verify-payment-webhooks:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -27,5 +35,5 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - name: Run payment signature tests
-        run: deno test supabase/functions/_shared/payment-signatures.test.ts
+      - name: Run payment signature and webhook normalization tests
+        run: deno test supabase/functions/_shared/payment-signatures.test.ts supabase/functions/_shared/payment-webhook.test.ts
