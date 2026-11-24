@@ -53,10 +53,17 @@ begin
         original_amount_egp,discount_amount_egp,final_amount_egp
       ) values (
         new.id,new.entity_id,v_organization_id,new.created_by,new.original_amount,v_period_months,
-        'online',v_reference,'pending',new.discount_code,
-        new.original_amount,new.discount_amount,new.amount_due
+        'online',v_reference,'pending',null,
+        new.original_amount,0,new.original_amount
       )
       on conflict (payment_id) where payment_id is not null do nothing;
+
+      update public.vehicle_payment_submissions
+      set amount_egp=new.original_amount,
+          original_amount_egp=new.original_amount,
+          discount_amount_egp=new.discount_amount,
+          final_amount_egp=new.amount_due
+      where payment_id=new.id;
 
     when 'company_subscription' then
       update public.company_subscriptions
@@ -123,3 +130,40 @@ execute function public.sync_paid_mycar_payment_to_service_review();
 
 comment on function public.sync_paid_mycar_payment_to_service_review() is
   'Moves provider-confirmed payments into existing admin review queues. It does not approve or activate the underlying service.';
+
+-- The vehicle-registration redemption is reserved against payments.id before
+-- the review row exists. Link its final confirmation/rejection to that payment_id.
+create or replace function public.sync_online_vehicle_payment_discount_redemption()
+returns trigger
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+begin
+  if new.payment_id is null or old.review_status is not distinct from new.review_status then
+    return new;
+  end if;
+
+  update public.discount_code_redemptions
+  set status = case
+        when new.review_status='approved' then 'confirmed'
+        when new.review_status='rejected' then 'cancelled'
+        else status
+      end,
+      confirmed_at = case when new.review_status='approved' then now() else confirmed_at end
+  where reference_id=new.payment_id
+    and service='vehicle_registration'
+    and status='pending';
+
+  return new;
+end;
+$$;
+
+revoke all on function public.sync_online_vehicle_payment_discount_redemption() from public,anon,authenticated;
+
+drop trigger if exists vehicle_payment_sync_online_discount_redemption on public.vehicle_payment_submissions;
+create trigger vehicle_payment_sync_online_discount_redemption
+after update of review_status on public.vehicle_payment_submissions
+for each row
+when (new.payment_id is not null and old.review_status is distinct from new.review_status)
+execute function public.sync_online_vehicle_payment_discount_redemption();
