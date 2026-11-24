@@ -13,7 +13,7 @@ type CouponPreview = { code:string; original_amount_egp:number; discount_amount_
 
 const money=(n:number,c='EGP')=>new Intl.NumberFormat('ar-EG',{style:'currency',currency:c,maximumFractionDigits:0}).format(Number(n)||0)
 const statusLabel:Record<string,string>={pending:'بانتظار مراجعة التحويل',active:'اشتراك نشط',expired:'منتهي',cancelled:'ملغي'}
-const paymentLabel:Record<string,string>={submitted:'الدفع مستلم وبانتظار مراجعة الإدارة',verified:'تم اعتماد الدفع',rejected:'التحويل مرفوض',pending:'لم يتم إرسال التحويل',waived:'معفى من الدفع'}
+const paymentLabel:Record<string,string>={submitted:'الدفع مستلم وبانتظار مراجعة الإدارة',verified:'تم اعتماد الدفع',rejected:'التحويل مرفوض',pending:'بانتظار تأكيد الدفع',waived:'معفى من الدفع'}
 
 export default function CompanySubscriptionsPage(){
  const [organizationId,setOrganizationId]=useState('')
