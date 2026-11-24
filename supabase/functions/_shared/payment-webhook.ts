@@ -43,24 +43,26 @@ export function normalizePaymobCallback(payload: Record<string, unknown>, expect
 }
 
 export function normalizeFawryCallback(payload: Record<string, unknown>): VerifiedProviderEvent | null {
-  const amount = finiteAmount(typeof payload.paymentAmount === "string" ? Number(payload.paymentAmount) : payload.paymentAmount);
+  const paymentAmount = finiteAmount(typeof payload.paymentAmount === "string" ? Number(payload.paymentAmount) : payload.paymentAmount);
   const orderAmount = finiteAmount(typeof payload.orderAmount === "string" ? Number(payload.orderAmount) : payload.orderAmount);
   const ref = payload.fawryRefNumber;
   const merchantRef = payload.merchantRefNumber;
+  const requestId = payload.requestId;
   const status = payload.orderStatus;
-  if (amount === null || orderAmount === null || amount !== orderAmount) return null;
+  if (paymentAmount === null || orderAmount === null || paymentAmount < orderAmount) return null;
   if ((typeof ref !== "string" && typeof ref !== "number") ||
       (typeof merchantRef !== "string" && typeof merchantRef !== "number") ||
+      typeof requestId !== "string" || requestId.length === 0 || requestId.length > 200 ||
       typeof status !== "string") return null;
   const normalizedStatus = status.toUpperCase();
   const outcome = normalizedStatus === "PAID" ? "succeeded"
-    : ["FAILED", "CANCELLED", "EXPIRED"].includes(normalizedStatus) ? "failed" : "pending";
+    : ["FAILED", "CANCELED", "CANCELLED", "EXPIRED"].includes(normalizedStatus) ? "failed" : "pending";
   return {
     providerCode: "fawry",
-    providerEventId: String(ref),
+    providerEventId: requestId,
     eventType: "PAYMENT_STATUS_" + normalizedStatus.slice(0, 40),
     providerReference: String(merchantRef),
-    amount,
+    amount: orderAmount,
     currency: "EGP",
     outcome,
     errorCode: outcome === "failed" ? normalizedStatus : null,
