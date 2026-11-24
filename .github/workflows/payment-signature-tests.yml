@@ -1,0 +1,31 @@
+name: Payment signature tests
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/_shared/payment-signatures.ts"
+      - "supabase/functions/_shared/payment-signatures.test.ts"
+      - ".github/workflows/payment-signature-tests.yml"
+  push:
+    branches:
+      - "feat/unified-payment-center"
+    paths:
+      - "supabase/functions/_shared/payment-signatures.ts"
+      - "supabase/functions/_shared/payment-signatures.test.ts"
+      - ".github/workflows/payment-signature-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-payment-signatures:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Run payment signature tests
+        run: deno test --no-check supabase/functions/_shared/payment-signatures.test.ts
