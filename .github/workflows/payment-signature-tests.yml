@@ -74,6 +74,6 @@ jobs:
         with:
           node-version: 22
       - name: Install frontend dependencies
-        run: npm install --no-package-lock
+        run: npm install --no-package-lock --legacy-peer-deps --no-audit --no-fund
       - name: Build My Car frontend
         run: npm run build
