@@ -14,7 +14,7 @@ function finiteAmount(value: unknown): number | null {
   return Math.round(value * 100) / 100;
 }
 
-export function normalizePaymobCallback(payload: Record<string, unknown>, expectedIntegrationId: string): VerifiedProviderEvent | null {
+export function normalizePaymobCallback(payload: Record<string, unknown>, expectedIntegrationIds: string[]): VerifiedProviderEvent | null {
   const raw = payload.obj;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const obj = raw as Record<string, unknown>;
@@ -25,7 +25,7 @@ export function normalizePaymobCallback(payload: Record<string, unknown>, expect
   const orderId = order && typeof order === "object" && !Array.isArray(order)
     ? (order as Record<string, unknown>).id : null;
   if (amount === null || (typeof orderId !== "string" && typeof orderId !== "number")) return null;
-  if (String(obj.integration_id) !== expectedIntegrationId || obj.currency !== "EGP") return null;
+  if (!expectedIntegrationIds.includes(String(obj.integration_id)) || obj.currency !== "EGP") return null;
   const eventId = obj.id;
   if (typeof eventId !== "string" && typeof eventId !== "number") return null;
   const pending = obj.pending === true;
