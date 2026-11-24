@@ -33,7 +33,7 @@ export default function AdvertisingPlansPage(){
   const [notice,setNotice]=useState('')
   const [noticePlanId,setNoticePlanId]=useState<string|null>(null)
   const [paymentDue,setPaymentDue]=useState<number|null>(null)
-  const [promotionMode,setPromotionMode]=useState<'new'|'pending-upgrade'|'queued'|'duplicate'|'invalid'>('new')
+  const [promotionMode,setPromotionMode]=useState<'new'|'pending-upgrade'|'pending-existing'|'queued'|'duplicate'|'invalid'>('new')
   const [previousPaymentCredit,setPreviousPaymentCredit]=useState(0)
   const [checkingPromotion,setCheckingPromotion]=useState(false)
   const [draftReady,setDraftReady]=useState(false)
@@ -80,11 +80,15 @@ export default function AdvertisingPlansPage(){
     if(pendingError){setPromotionMode('invalid');setPaymentDue(null);setCheckingPromotion(false);return}
     const total=Number(couponPreview?.final_amount_egp??selectedPlan.price_egp)
     if(pending){
+      const currentDue=Number(pending.payment_due_egp??pending.final_amount_egp??0)
+      const currentRef=String(pending.payment_reference||'').trim()
+      if(pending.advertising_plan_id===selectedPlan.id&&pending.payment_status==='pending'&&!currentRef){
+        setCouponCode('');setCouponPreview(null)
+        setPreviousPaymentCredit(0);setPaymentDue(currentDue);setPromotionMode('pending-existing');setCheckingPromotion(false);return
+      }
       if(Number(selectedPlan.display_order)<=Number(pending.plan_display_order_snapshot)){setPromotionMode('invalid');setPaymentDue(null);setPreviousPaymentCredit(0);setCheckingPromotion(false);return}
       const priorRef=String(pending.previous_payment_reference||'').trim()
       const priorAmount=Number(pending.previous_payment_amount_egp||0)
-      const currentDue=Number(pending.payment_due_egp??pending.final_amount_egp??0)
-      const currentRef=String(pending.payment_reference||'').trim()
       const hasCurrentTransfer=currentDue>0&&!!currentRef&&!currentRef.startsWith('لا يوجد فرق مستحق')
       const credit=(priorRef&&priorAmount>0?priorAmount:0)+(hasCurrentTransfer?currentDue:0)
       setPreviousPaymentCredit(credit);setPaymentDue(Math.max(0,total-credit));setPromotionMode('pending-upgrade');setCheckingPromotion(false);return
@@ -149,7 +153,23 @@ export default function AdvertisingPlansPage(){
       if(pendingRequest.payment_status!=='pending'){
         setSending(false);setError('الطلب السابق ليس في حالة انتظار التحقق من الدفع. لن نعدّل الرصيد تلقائيًا؛ تواصل مع الإدارة لمراجعة حالته.');return
       }
-      if(pendingRequest.advertising_plan_id===selectedPlan.id||Number(selectedPlan.display_order)<=Number(pendingRequest.plan_display_order_snapshot)){
+      if(pendingRequest.advertising_plan_id===selectedPlan.id){
+        const existingDue=Number(pendingRequest.payment_due_egp??pendingRequest.final_amount_egp??0)
+        if(checkoutMethod==='online'){
+          try{await createMyCarCheckout({purpose:selectedPlan.placement_type==='premium'?'featured_advertising':'advertising',entityId:pendingRequest.id})}
+          catch(checkoutError){setError(checkoutError instanceof Error?checkoutError.message:'تعذر استكمال الدفع الإلكتروني.');setSending(false)}
+          return
+        }
+        if(existingDue>0&&!paymentReference.trim()){setSending(false);showFieldError('payment_reference','أدخل رقم العملية بعد تحويل المبلغ المستحق.');return}
+        if(existingDue>0&&!selectedPaymentNumber){setSending(false);showFieldError('payment_method','وسيلة الدفع المختارة غير متاحة حاليًا.');return}
+        submittedPaymentReference=existingDue>0?selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate:'لا يوجد مبلغ مستحق بعد الخصم'
+        const {error:updatePendingError}=await supabase.from('vehicle_promotions').update({payment_status:'submitted',payment_reference:submittedPaymentReference,updated_at:new Date().toISOString()}).eq('id',pendingRequest.id).eq('status','pending_review')
+        setSending(false)
+        if(updatePendingError){setError(updatePendingError.message);return}
+        setNotice('تم إرسال بيانات التحويل للطلب الحالي، وهو الآن بانتظار مراجعة الإدارة.')
+        setNoticePlanId(selectedPlan.id);setPromotionMode('invalid');return
+      }
+      if(Number(selectedPlan.display_order)<=Number(pendingRequest.plan_display_order_snapshot)){
         setSending(false)
         setError(pendingRequest.advertising_plan_id===selectedPlan.id
           ?'لديك بالفعل طلب لهذه الباقة قيد المراجعة. لا يمكن تكرار الطلب قبل انتهاء مراجعته.'
@@ -188,8 +208,8 @@ export default function AdvertisingPlansPage(){
       upgradedExistingRequest=!requestError
     }else{
       paymentDueAmount=fullPlanAmount
-      if(paymentDueAmount>0&&!paymentReference.trim()){setSending(false);setError('أدخل رقم العملية بعد تحويل المبلغ المستحق.');return}
-      if(paymentDueAmount>0&&!selectedPaymentNumber){setSending(false);setError('وسيلة الدفع المختارة غير متاحة حاليًا. اختر وسيلة دفع مفعّلة من إعدادات المنصة.');return}
+      if(checkoutMethod==='manual'&&paymentDueAmount>0&&!paymentReference.trim()){setSending(false);setError('أدخل رقم العملية بعد تحويل المبلغ المستحق.');return}
+      if(checkoutMethod==='manual'&&paymentDueAmount>0&&!selectedPaymentNumber){setSending(false);setError('وسيلة الدفع المختارة غير متاحة حاليًا. اختر وسيلة دفع مفعّلة من إعدادات المنصة.');return}
       submittedPaymentReference=checkoutMethod==='manual'?(paymentDueAmount>0?selectedPaymentLabel+' — '+paymentReference.trim()+' — '+paymentDate:'لا يوجد مبلغ مستحق بعد الخصم'):''
       const {data:createdPromotion,error:insertError}=await supabase.from('vehicle_promotions').insert({
         vehicle_id:vehicleId,
