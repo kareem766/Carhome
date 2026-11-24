@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { CreditCard, Landmark, ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -11,15 +12,30 @@ type PaymentMethodChoiceProps = {
 }
 
 export function PaymentMethodChoice({ value, onChange, disabled = false, onlineDisabled = false }: PaymentMethodChoiceProps) {
+  const [onlineEnabled, setOnlineEnabled] = useState(false)
+  const [providerLabel, setProviderLabel] = useState('سيتم إتاحته بعد تفعيل بوابة الدفع')
+  useEffect(() => {
+    let active = true
+    if (!supabase) return () => { active = false }
+    void supabase.functions.invoke('payment-gateway-status').then(({ data, error }) => {
+      if (!active || error) return
+      const providers = Array.isArray(data?.enabled_providers) ? data.enabled_providers as Array<{ display_name?: string }> : []
+      setOnlineEnabled(providers.length > 0)
+      setProviderLabel(providers.map(provider => provider.display_name).filter(Boolean).join(' / ') || 'سيتم إتاحته بعد تفعيل بوابة الدفع')
+      if (!providers.length && value === 'online') onChange('manual')
+    }).catch(() => { if (active) setOnlineEnabled(false) })
+    return () => { active = false }
+  }, [onChange, value])
+  const isOnlineDisabled = disabled || onlineDisabled || !onlineEnabled
   return <fieldset className="space-y-3">
     <legend className="text-sm font-extrabold text-slate-900">اختار طريقة الدفع</legend>
     <div className="grid gap-3 sm:grid-cols-2">
-      <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${value === 'online' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-200'} ${disabled || onlineDisabled ? 'cursor-not-allowed opacity-60' : ''}`}>
-        <input type="radio" name="mycar-payment-method" value="online" checked={value === 'online'} disabled={disabled || onlineDisabled} onChange={() => onChange('online')} className="mt-1 h-4 w-4 accent-blue-700"/>
+      <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${value === 'online' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-200'} ${isOnlineDisabled ? 'cursor-not-allowed opacity-60' : ''}`}>
+        <input type="radio" name="mycar-payment-method" value="online" checked={value === 'online'} disabled={isOnlineDisabled} onChange={() => onChange('online')} className="mt-1 h-4 w-4 accent-blue-700"/>
         <span className="min-w-0">
           <span className="flex items-center gap-2 text-sm font-extrabold text-slate-900"><CreditCard size={17} className="text-blue-700"/> الدفع الإلكتروني</span>
           <span className="mt-1 block text-xs leading-6 text-slate-600">الدفع الآمن عبر بوابة My Car الموحدة. ستنتقل إلى صفحة الدفع لاستكمال العملية.</span>
-          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-800"><ShieldCheck size={12}/> عبر بوابة الدفع المتاحة</span>
+          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-800"><ShieldCheck size={12}/> {onlineEnabled ? `الدفع عبر: ${providerLabel}` : providerLabel}</span>
         </span>
       </label>
       <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${value === 'manual' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-200'} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}>
