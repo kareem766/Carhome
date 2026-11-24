@@ -71,8 +71,7 @@ export async function createMyCarCheckout(args: {
     throw new Error(error.message || 'تعذر بدء عملية الدفع الإلكتروني.')
   }
   if (!data?.checkout_url || typeof data.checkout_url !== 'string') {
-    const unusedMessages: Record<string, string> = {
-    throw new Error(messages[String(data?.error)] || data?.message || 'تعذر إنشاء رابط الدفع الإلكتروني.')
+        throw new Error(messages[String(data?.error)] || data?.message || 'تعذر إنشاء رابط الدفع الإلكتروني.')
   }
   window.location.assign(data.checkout_url)
 }
