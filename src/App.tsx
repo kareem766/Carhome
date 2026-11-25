@@ -438,26 +438,46 @@ export default function App() {
   useEffect(() => {
     if (!pathIsHome(window.location.pathname)) { setHomeImagesReady(true); return }
     let active = true
-    // Render the page shell immediately; photography must never block access to homepage content.
-    setHomeImagesReady(true)
-    const loadImage = (sources: string[]) => new Promise<string>((resolve) => {
-      let index = 0
-      const tryNext = () => {
-        const source = sources[index++]
-        if (!source) {
-          resolve('')
-          return
-        }
-        const image = new Image()
-        image.onload = () => { void image.decode().catch(() => undefined).then(() => resolve(source)) }
-        image.onerror = tryNext
-        image.src = source
+    const preloadImage = (source: string) => new Promise<boolean>((resolve) => {
+      let settled = false
+      let loadTimer = 0
+      let decodeTimer = 0
+      const finish = (loaded: boolean) => {
+        if (settled) return
+        settled = true
+        window.clearTimeout(loadTimer)
+        window.clearTimeout(decodeTimer)
+        resolve(loaded)
       }
-      tryNext()
+      const image = new Image()
+      loadTimer = window.setTimeout(() => finish(false), 4500)
+      image.onload = () => {
+        if (settled) return
+        const decode = typeof image.decode === 'function' ? image.decode().catch(() => undefined) : Promise.resolve()
+        decodeTimer = window.setTimeout(() => finish(true), 1500)
+        void decode.then(() => finish(true))
+      }
+      image.onerror = () => finish(false)
+      image.src = source
     })
-    void loadImage([HOME_BANNER_IMAGE]).catch((error) => console.error('Homepage banner image could not be preloaded:', error))
-    void Promise.all(HOME_CAR_IMAGES.map(loadImage)).then((urls) => {
-      if (active) setHomeImageUrls(urls)
+    // Preload the banner independently; the public page gate is driven by the three vehicle cards.
+    void preloadImage(HOME_BANNER_IMAGE)
+    // Load each unique candidate once, then assign a different successful photo to every card.
+    const candidateSources = [...new Set([...HOME_CAR_IMAGES.flat(), '/carhome-icon.svg'])]
+    void Promise.all(candidateSources.map(async source => [source, await preloadImage(source)] as const)).then(results => {
+      if (!active) return
+      const available = new Set(results.filter(([, loaded]) => loaded).map(([source]) => source))
+      const used = new Set<string>()
+      const urls = HOME_CAR_IMAGES.map(sources => {
+        const uniqueSource = sources.find(source => available.has(source) && !used.has(source))
+        if (uniqueSource) {
+          used.add(uniqueSource)
+          return uniqueSource
+        }
+        return '/carhome-icon.svg'
+      })
+      setHomeImageUrls(urls)
+      setHomeImagesReady(true)
     })
     return () => { active = false }
   }, [])
@@ -656,7 +676,7 @@ export default function App() {
             {HOME_CAR_IMAGES.map((_, index) => {
               const src = homeImageUrls[index]
               return <a key={index} href={authUser ? '/workspace/catalog' : '/register/company'} aria-label={`استكشف ${['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]}`} className={`mc-home-vehicle-card group relative isolate block h-32 overflow-hidden rounded-2xl border bg-[#102b47] shadow-[0_18px_45px_rgba(0,0,0,.24)] sm:h-52 lg:h-64 ${index === 1 ? 'mc-home-vehicle-card-featured' : ''}`}>
-                {src && <img src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" fetchPriority="low" width="1200" height="800" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" onError={(event) => { event.currentTarget.style.display = 'none' }}/>}
+                {src && <img src={src} alt="" aria-hidden="true" loading="eager" decoding="async" fetchPriority="high" width="1200" height="800" className={`absolute inset-0 h-full w-full ${src === '/carhome-icon.svg' ? 'object-contain p-7' : 'object-cover'} transition-transform duration-700 group-hover:scale-105`} onError={(event) => { const image = event.currentTarget; if (image.dataset.fallbackApplied === 'true') { image.style.display = 'none'; return } image.dataset.fallbackApplied = 'true'; image.src = '/carhome-icon.svg'; image.classList.remove('object-cover'); image.classList.add('object-contain', 'p-7') }}/>}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#06172a]/95 via-[#06172a]/15 to-transparent"/>
                 {index === 1 && <span className="mc-home-popular-badge"><Star size={15} fill="currentColor"/> الأكثر طلبًا</span>}
                 <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 px-2 pb-3 text-right text-[11px] font-black text-white sm:px-4 sm:pb-4 sm:text-base"><span>{['سيارات سيدان','سيارات SUV','سيارات نقل وخدمات'][index]}</span><span className="mc-home-card-arrow"><ArrowLeft size={17}/></span></div>
