@@ -198,6 +198,7 @@ export default function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [homeImageUrls, setHomeImageUrls] = useState<string[]>([])
   const [homeImagesReady, setHomeImagesReady] = useState(false)
+  const [homePreloadCount, setHomePreloadCount] = useState(0)
 
   const assistantHomeHref = isPlatformAdmin ? '/workspace/admin' : authUser?.user_metadata?.organization_type === 'company' || authUser?.user_metadata?.organization_type === 'company_employee' ? '/workspace/company' : authUser?.user_metadata?.organization_type === 'fleet_supplier' ? '/workspace/supplier/vehicles' : authUser?.user_metadata?.organization_type === 'employee' ? '/workspace/employee' : '/workspace/owner/vehicles'
 
@@ -477,10 +478,23 @@ export default function App() {
         return '/carhome-icon.svg'
       })
       setHomeImageUrls(urls)
-      setHomeImagesReady(true)
     })
     return () => { active = false }
   }, [])
+
+  // Keep the branded loader visible until the exact image elements used by the cards have loaded.
+  useEffect(() => {
+    if (homeImageUrls.length > 0 && homePreloadCount >= homeImageUrls.length) {
+      setHomeImagesReady(true)
+    }
+  }, [homeImageUrls.length, homePreloadCount])
+
+  // A bounded escape hatch protects visitors if a browser never dispatches an image event.
+  useEffect(() => {
+    if (!homeImageUrls.length || homeImagesReady) return
+    const timeout = window.setTimeout(() => setHomeImagesReady(true), 2500)
+    return () => window.clearTimeout(timeout)
+  }, [homeImageUrls, homeImagesReady])
 
   const path = window.location.pathname
   useEffect(() => {
@@ -541,7 +555,33 @@ export default function App() {
   // Resolve the persisted login state before showing homepage navigation, preventing auth-button flash.
   if (pathIsHome(window.location.pathname) && !authLoaded) return <PlatformLoading />
   // Keep the public homepage behind the branded loader until every hero vehicle visual has decoded.
-  if (pathIsHome(window.location.pathname) && !homeImagesReady) return <PlatformLoading />
+  if (pathIsHome(window.location.pathname) && !homeImagesReady) return (
+    <>
+      <PlatformLoading />
+      {homeImageUrls.length > 0 && <div aria-hidden="true" style={{ position: 'fixed', left: '-10000px', top: 0, width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
+        {homeImageUrls.map((src, index) => <img
+          key={index}
+          src={src}
+          alt=""
+          width="1"
+          height="1"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          onLoad={() => setHomePreloadCount(count => Math.min(homeImageUrls.length, count + 1))}
+          onError={(event) => {
+            const image = event.currentTarget
+            if (image.dataset.fallbackApplied === 'true') {
+              setHomePreloadCount(count => Math.min(homeImageUrls.length, count + 1))
+              return
+            }
+            image.dataset.fallbackApplied = 'true'
+            setHomeImageUrls(current => current.map((url, itemIndex) => itemIndex === index ? '/carhome-icon.svg' : url))
+          }}
+        />)}
+      </div>}
+    </>
+  )
   if (authUser?.app_metadata?.must_change_password === true && path !== '/first-login-password') return <Suspense fallback={<PlatformLoading />}><FirstLoginPasswordPage /></Suspense>
   if (authUser && employeeAccountError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-50 px-5"><section className="w-full max-w-xl rounded-3xl border border-amber-200 bg-white p-8 text-center shadow-xl"><ShieldCheck className="mx-auto mb-4 text-amber-500" size={42}/><h1 className="text-xl font-black text-slate-900">تعذر التحقق من حساب الموظف</h1><p className="mt-3 leading-8 text-slate-600">{employeeAccountError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-blue-700 px-6 py-3 font-black text-white">إعادة المحاولة</button><button type="button" onClick={()=>{void supabase?.auth.signOut().then(()=>window.location.replace('/?login=1'))}} className="mr-2 mt-6 rounded-xl border border-slate-200 px-6 py-3 font-bold text-slate-700">تسجيل الخروج</button></section></main>
   if (authUser && adminLookupError) return <main dir="rtl" className="grid min-h-screen place-items-center bg-slate-950 px-5 text-white"><section className="w-full max-w-xl rounded-3xl border border-amber-400/30 bg-slate-900 p-8 text-center shadow-2xl"><ShieldCheck className="mx-auto mb-4 text-amber-400" size={42}/><h1 className="text-xl font-black">تعذر التحقق من صلاحيات لوحة التحكم</h1><p className="mt-3 leading-8 text-slate-300">{adminLookupError}</p><button type="button" onClick={()=>window.location.reload()} className="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-black text-slate-950">إعادة المحاولة</button></section></main>
