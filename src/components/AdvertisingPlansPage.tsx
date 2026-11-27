@@ -270,6 +270,17 @@ export default function AdvertisingPlansPage(){
       {promotionMode==='queued'&&<p className="mt-2 text-xs font-bold leading-6 text-blue-800">هذه باقة تالية، وتبدأ مدتها بعد انتهاء الباقة الحالية.</p>}
       {couponPreview&&<p className="mt-2 text-xs font-bold text-emerald-700">تم تطبيق الخصم بقيمة {money(couponPreview.discount_amount_egp)} جنيه.</p>}
     </div>
+    <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4">
+      <label className="block text-sm font-extrabold text-slate-800">كود الخصم (إن وجد)
+        <div className="mt-2 flex gap-2">
+          <input value={couponCode} onChange={e=>{setCouponCode(e.target.value.toUpperCase());setCouponPreview(null);clearFieldError('coupon_code')}} placeholder="أدخل كود الخصم" className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 font-normal"/>
+          <button type="button" disabled={!couponCode.trim()||couponLoading} onClick={()=>void previewCoupon()} className="min-w-24 rounded-xl bg-[#102b47] px-4 text-sm font-extrabold text-white disabled:opacity-50">{couponLoading?'جارٍ التحقق...':'تطبيق'}</button>
+        </div>
+      </label>
+      {fieldError?.field==='coupon_code'&&<p role="alert" className="mt-2 text-xs font-bold text-rose-700">{fieldError.text}</p>}
+      {couponPreview&&<p className="mt-2 text-xs font-extrabold text-emerald-700">تم تطبيق كود {couponPreview.code} وتوفير {money(couponPreview.discount_amount_egp)} جنيه.</p>}
+      {promotionMode==='pending-upgrade'&&previousPaymentCredit>0&&<p className="mt-2 text-xs font-bold text-slate-600">قيمة التحويلات السابقة المسجلة: {money(previousPaymentCredit)} جنيه، وتخضع لمراجعة الإدارة.</p>}
+    </div>
     {checkoutMethod==='manual'?<>
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
         <p className="text-xs font-extrabold text-slate-600">بيانات التحويل المعتمدة</p>
