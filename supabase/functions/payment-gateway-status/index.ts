@@ -56,6 +56,7 @@ Deno.serve(async (req: Request) => {
 
   if (error || settingsError) return respond({ error: "gateway_configuration_unavailable" }, 503);
   const paymobReady = Boolean(
+    Deno.env.get("PAYMOB_MERCHANT_APPROVED") === "true" &&
     Deno.env.get("PAYMOB_SECRET_KEY") &&
     Deno.env.get("PAYMOB_PUBLIC_KEY") &&
     Deno.env.get("PAYMOB_HMAC_SECRET") &&
