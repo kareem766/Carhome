@@ -44,6 +44,7 @@ const PaymentInformationPage = lazy(() => import('./components/PaymentInformatio
 const AdminPaymentGatewaysPage = lazy(() => import('./components/AdminPaymentGatewaysPage'))
 const PaymentResultPage = lazy(() => import('./components/PaymentResultPage'))
 const PaymentCheckoutPage = lazy(() => import('./components/PaymentCheckoutPage'))
+const VehiclePaymentFlowPage = lazy(() => import('./components/VehiclePaymentFlowPage'))
 const AdminManagedAccountsPage = lazy(() => import('./components/AdminManagedAccountsPage'))
 const FirstLoginPasswordPage = lazy(() => import('./components/FirstLoginPasswordPage'))
 const AdminCommunicationsPage = lazy(() => import('./components/AdminCommunicationsPage'))
@@ -569,6 +570,7 @@ export default function App() {
   if (path === '/workspace/admin/managed-accounts') return <><Suspense fallback={<PlatformLoading />}><AdminManagedAccountsPage /></Suspense></>
   if (path === '/workspace/admin/payment-information') return <><Suspense fallback={<PlatformLoading />}><PaymentInformationPage /></Suspense></>
   if (path === '/workspace/admin/payment-gateways') return <><Suspense fallback={<PlatformLoading />}><AdminPaymentGatewaysPage /></Suspense></>
+  if (path === '/payment/checkout' && new URLSearchParams(window.location.search).get('purpose') === 'vehicle_registration' && new URLSearchParams(window.location.search).get('entity_id')) return <Suspense fallback={<PlatformLoading />}><VehiclePaymentFlowPage /></Suspense>
   if (path === '/payment/checkout') return <Suspense fallback={<PlatformLoading />}><PaymentCheckoutPage /></Suspense>
   if (path === '/payment/result') return <><Suspense fallback={<PlatformLoading />}><PaymentResultPage /></Suspense></>
   if (path === '/workspace/admin/subscription-plans') return <><Suspense fallback={<PlatformLoading />}><SubscriptionPlansPage /></Suspense></>
