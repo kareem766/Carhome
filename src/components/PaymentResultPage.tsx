@@ -55,7 +55,7 @@ export default function PaymentResultPage(){
     return()=>window.clearTimeout(timer)
   },[payment?.purpose,payment?.status,accountRole])
   async function refresh(){setRefreshing(true);await load();setRefreshing(false)}
-  const state=payment?labels[payment.status]||labels.pending:null
+  const state=payment?(payment.purpose==='vehicle_registration'&&payment.status==='paid'?{...labels.paid,title:'تم تأكيد دفع رسوم تسجيل سيارتك',body:'تم تأكيد الدفع الإلكتروني بنجاح. طلب تسجيل سيارتك الآن ضمن إجراءات مراجعة إدارة My Car، وسيتم تحويلك تلقائيًا إلى صفحة سياراتي.'}:labels[payment.status]||labels.pending):null
   const StateIcon=state?.icon||Clock3
   const amount=payment?new Intl.NumberFormat('ar-EG',{style:'currency',currency:payment.currency||'EGP',maximumFractionDigits:2}).format(Number(payment.amount_due)||0):''
   const backHref=payment?.purpose==='company_subscription'?'/workspace/company/subscriptions':payment?.purpose==='managed_sourcing_request'||payment?.purpose==='managed_sourcing_subscription'?'/workspace/company/managed-sourcing':payment?.purpose==='advertising'||payment?.purpose==='featured_advertising'?'/workspace/advertising-plans':payment?.purpose==='vehicle_registration'?(accountRole==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'):'/'
