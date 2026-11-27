@@ -113,6 +113,7 @@ Deno.serve(async (req: Request) => {
   const email = String(profile?.contact_email ?? authData.user.email ?? "").trim();
   if (!email || !email.includes("@")) return respond({ error: "billing_email_required" }, 422);
 
+  if (Deno.env.get("PAYMOB_MERCHANT_APPROVED") !== "true") return respond({ error: "merchant_not_approved" }, 403);
   const secretKey = Deno.env.get("PAYMOB_SECRET_KEY") ?? "";
   const publicKey = Deno.env.get("PAYMOB_PUBLIC_KEY") ?? "";
   const integrationIds = (Deno.env.get("PAYMOB_INTEGRATION_IDS") ?? "").split(",").map(v => v.trim()).filter(v => /^\d+$/.test(v));
