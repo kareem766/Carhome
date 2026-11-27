@@ -95,6 +95,8 @@ export default function CompanySubscriptionsPage(){
  }
  async function submit(e:FormEvent){
   e.preventDefault();if(!supabase||!organizationId||!chosen||saving)return
+  const formData=new FormData(document.querySelector('form[data-company-subscription-payment]') as HTMLFormElement)
+  const selectedTransferMethod=String(formData.get('payment_method')||method)
   const clean=reference.trim()
   if(checkoutMethod==='manual'&&(clean.length<3||clean.length>100)){showFieldError('payment_reference','أدخل رقم عملية تحويل صحيحًا.');return}
   if(checkoutMethod==='manual'&&!transferDate){showFieldError('transfer_date','حدد تاريخ التحويل.');return}
@@ -106,7 +108,7 @@ export default function CompanySubscriptionsPage(){
    organization_id:organizationId,plan_id:chosen.id,plan_name:chosen.name,billing_cycle:billingCycle,
    amount_egp:Number(couponPreview?.final_amount_egp??selectedPrice),status:'pending',payment_status:checkoutMethod==='online'?'pending':'submitted',
    coupon_code:couponPreview?.code||null,original_amount_egp:selectedPrice,discount_amount_egp:Number(couponPreview?.discount_amount_egp||0),final_amount_egp:Number(couponPreview?.final_amount_egp??selectedPrice),
-   payment_reference:checkoutMethod==='manual'?clean:null,payment_transfer_date:checkoutMethod==='manual'?transferDate:null,payment_method:checkoutMethod==='manual'?method:null,payment_submitted_at:checkoutMethod==='manual'?new Date().toISOString():null,created_by:user?.id
+   payment_reference:checkoutMethod==='manual'?clean:null,payment_transfer_date:checkoutMethod==='manual'?transferDate:null,payment_method:checkoutMethod==='manual'?selectedTransferMethod:null,payment_submitted_at:checkoutMethod==='manual'?new Date().toISOString():null,created_by:user?.id
   }).select('id,final_amount_egp,coupon_code').single()
   if(insertError||!createdSubscription?.id){setSaving(false);setError('تعذر إرسال طلب الاشتراك: '+(insertError?.message||'لم يتم إنشاء رقم الطلب.'));return}
   if(Number(createdSubscription.final_amount_egp??0)<=0){const {error:zeroDueError}=await supabase.from('company_subscriptions').update({payment_status:'submitted',payment_reference:'لا يوجد مبلغ مستحق بعد الخصم',payment_transfer_date:new Date().toISOString().slice(0,10),payment_submitted_at:new Date().toISOString()}).eq('id',createdSubscription.id);setSaving(false);if(zeroDueError){setError(zeroDueError.message);return}setNotice('تم إرسال الاشتراك للمراجعة دون مبلغ مستحق بعد الخصم.');setCouponCode('');setCouponPreview(null);await load();return}
