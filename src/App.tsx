@@ -47,6 +47,7 @@ const AdminCommunicationsPage = lazy(() => import('./components/AdminCommunicati
 const AdminPromotionalSlidesPage = lazy(() => import('./components/AdminPromotionalSlidesPage'))
 const AdminHomepageBannersPage = lazy(() => import('./components/AdminHomepageBannersPage'))
 const AdvertisingPlansPage = lazy(() => import('./components/AdvertisingPlansPage'))
+const PublicBusinessServicesPage = lazy(() => import('./components/PublicBusinessServicesPage'))
 const MessagingPage = lazy(() => import('./components/MessagingPage'))
 const AuthCallbackPage = lazy(() => import('./components/AuthCallbackPage'))
 const GoogleProfileCompletionPage = lazy(() => import('./components/GoogleProfileCompletionPage'))
@@ -359,6 +360,10 @@ export default function App() {
         title: 'My Car عربيتي | منصة تأجير السيارات للشركات في مصر',
         description: 'My Car عربيتي منصة مصرية تربط الشركات بملاك السيارات وموردي الأساطيل للبحث عن سيارات للإيجار الشهري والسنوي وطويل الأجل، مع كتالوج وطلبات وعروض ومراسلات منظمة.'
       },
+      '/business-services': {
+        title: 'الخدمات التجارية والباقات المدفوعة | My Car عربيتي',
+        description: 'تعرف على خدمات My Car عربيتي ومصادر إيراداتها: تسجيل السيارات، باقات الإعلان العادي والمميز، اشتراكات الشركات وخدمات البحث عن السيارات.'
+      },
       '/services': {
         title: 'خدمات السيارات والأساطيل في مصر | My Car عربيتي',
         description: 'اكتشف خدمات السيارات والأساطيل عبر My Car عربيتي، من الصيانة والتأمين وقطع الغيار إلى خدمات دعم وتشغيل الأساطيل ومقدمي الخدمات.'
@@ -545,6 +550,7 @@ export default function App() {
     return <Suspense fallback={<PlatformLoading />}><NotificationPreferencesPage /></Suspense>
   }
   if (path === '/workspace/supplier/insights') return authUser?.user_metadata?.organization_type === 'fleet_supplier' ? <><SupplierPageShell><Suspense fallback={<PlatformLoading />}><FleetSupplierInsightsPage /></Suspense></SupplierPageShell></> : <ServiceNotice settings={settings} title="تقارير الأسطول" message="هذه الصفحة متاحة لموردي الأساطيل المعتمدين بعد تسجيل الدخول." />
+  if (path === '/business-services') return <Suspense fallback={<PlatformLoading />}><PublicBusinessServicesPage /></Suspense>
   if (path === '/contact') return <Suspense fallback={<PlatformLoading />}><VisitorContactPage supportPhone={settings.support_phone} supportEmail={settings.support_email} /></Suspense>
   if (path === '/support') return authUser || new URLSearchParams(window.location.search).get('new_ticket') === '1' ? <>{authUser && (authUser.user_metadata?.organization_type === 'company' ? <CompanyPersistentBar/> : authUser.user_metadata?.organization_type === 'individual_owner' && <OwnerPersistentBar/>)}<Suspense fallback={<PlatformLoading />}><SupportCenterPage supportPhone={settings.support_phone} supportEmail={settings.support_email} /></Suspense></> : <ServiceNotice settings={settings} title="سجّل الدخول لمركز الدعم" message="مركز الدعم الفني متاح للمستخدمين المسجلين لمتابعة تذاكرهم والردود." />
   if (path === '/workspace/admin/support') return authUser ? <><Suspense fallback={<PlatformLoading />}><SupportCenterPage admin /></Suspense></> : <ServiceNotice settings={settings} title="سجّل الدخول لإدارة الدعم" message="هذه الصفحة مخصصة لفريق إدارة المنصة." />
