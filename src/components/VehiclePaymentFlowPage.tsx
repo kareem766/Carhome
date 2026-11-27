@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CheckCircle2, CreditCard, Landmark, LoaderCircle, ShieldCheck, Smartphone } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { createMyCarCheckout } from './PaymentMethodChoice'
@@ -73,10 +73,23 @@ export default function VehiclePaymentFlowPage() {
     setDiscount({code:String(data.code||code),original:Number(data.original_amount_egp||0),discount:Number(data.discount_amount_egp||0),final:Number(data.final_amount_egp||0)})
   }
 
-  async function submitManual(event:React.FormEvent<HTMLFormElement>) {
+  async function submitManual(event:FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if(!supabase||!vehicle||saving)return
     if(!reference.trim()||!transferDate){setError('أدخل رقم العملية وتاريخ التحويل.');return}
+    if(finalAmount<=0 && discount?.code===coupon.trim().toUpperCase()){
+      setSaving(true);setError('')
+      const {data:{user}}=await supabase.auth.getUser()
+      if(!user){setSaving(false);setError('انتهت جلسة الدخول. سجّل الدخول وحاول مرة أخرى.');return}
+      const {error:zeroError}=await supabase.from('vehicle_payment_submissions').insert({
+        vehicle_id:vehicle.id,organization_id:vehicle.organization_id,submitted_by:user.id,
+        amount_egp:amount,period_months:role==='supplier'?1:months,coupon_code:discount.code,
+        transfer_method:'online',transfer_reference:'لا يوجد مبلغ مستحق بعد الخصم',proof_path:null,review_status:'pending'
+      })
+      setSaving(false)
+      if(zeroError){setError(zeroError.message);return}
+      setSuccess(true);window.setTimeout(()=>window.location.replace(target),3200);return
+    }
     const paymentNumber=method==='instapay'?details.instapay_number:details.vodafone_cash_number
     if(!paymentNumber){setError('وسيلة التحويل المختارة غير متاحة حاليًا.');return}
     if(proof&&(!['image/jpeg','image/png','image/webp','application/pdf'].includes(proof.type)||proof.size>5*1024*1024)){setError('ملف الإثبات يجب أن يكون JPG أو PNG أو WEBP أو PDF وبحد أقصى 5 ميجابايت.');return}
