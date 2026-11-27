@@ -18,6 +18,8 @@ const loadingRoutes: Array<[string, string]> = [
   ['/workspace/company/team', 'فريق العمل'],
   ['/workspace/company/alerts', 'التنبيهات الذكية'],
   ['/workspace/company', 'مساحة الشركة'],
+  ['/workspace/owner/vehicles/new', 'نموذج تسجيل سيارة جديدة'],
+  ['/workspace/supplier/vehicles/new', 'نموذج تسجيل سيارة جديدة'],
   ['/workspace/owner/vehicles', 'سياراتي'],
   ['/workspace/owner/offers', 'عروضي'],
   ['/workspace/owner/requests', 'طلبات الشركات'],
