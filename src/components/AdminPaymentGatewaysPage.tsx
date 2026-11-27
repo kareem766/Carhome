@@ -5,6 +5,7 @@ import AdminPageNavigation from './AdminPageNavigation'
 
 type Gateway = { provider_code: 'paymob' | 'fawry'; display_name: string; is_enabled: boolean; environment: 'sandbox' | 'production'; is_default: boolean; supported_payment_methods: string[] }
 type Settings = { id: number; online_payments_enabled: boolean; enabled_service_types: string[] }
+type PaymentRow = { id:string; purpose:string; provider_code:string; status:string; currency:string; amount_due:number; created_at:string; paid_at:string|null; payment_attempts?:Array<{attempt_number:number;status:string;provider_reference:string|null;created_at:string}> }
 const services = [
   ['vehicle_registration', 'تسجيل وتجديد السيارات'],
   ['company_subscription', 'اشتراكات الشركات'],
@@ -24,6 +25,7 @@ export default function AdminPaymentGatewaysPage() {
   const [gateways,setGateways] = useState<Gateway[]>([])
   const [settings,setSettings] = useState<Settings | null>(null)
   const [readyProviders,setReadyProviders] = useState<string[]>([])
+  const [payments,setPayments] = useState<PaymentRow[]>([])
   const [error,setError] = useState('')
   const [notice,setNotice] = useState('')
   const load = useCallback(async () => {
@@ -34,16 +36,19 @@ export default function AdminPaymentGatewaysPage() {
     const {data:admin,error:adminError} = await supabase.from('platform_admins').select('user_id').eq('user_id',user.id).maybeSingle()
     if (adminError || !admin) { setError('هذه الصفحة متاحة لمسؤولي المنصة فقط.'); setAuthorized(false); setLoading(false); return }
     setAuthorized(true)
-    const [gatewayResult,settingsResult,statusResult] = await Promise.all([
+    const [gatewayResult,settingsResult,statusResult,paymentsResult] = await Promise.all([
       supabase.from('payment_gateways').select('provider_code,display_name,is_enabled,environment,is_default,supported_payment_methods').order('priority'),
       supabase.from('payment_platform_settings').select('id,online_payments_enabled,enabled_service_types').eq('id',1).single(),
-      supabase.functions.invoke('payment-gateway-status',{body:{}})
+      supabase.functions.invoke('payment-gateway-status',{body:{}}),
+      supabase.from('payments').select('id,purpose,provider_code,status,currency,amount_due,created_at,paid_at,payment_attempts(attempt_number,status,provider_reference,created_at)').order('created_at',{ascending:false}).limit(100)
     ])
     if (gatewayResult.error) setError('تعذر تحميل إعدادات البوابات: '+gatewayResult.error.message)
     else setGateways((gatewayResult.data || []) as Gateway[])
     if (settingsResult.error) setError('تعذر تحميل إعدادات الدفع العامة. تأكد من تطبيق Migration مركز التحكم.')
     else setSettings(settingsResult.data as Settings)
     if (!statusResult.error) setReadyProviders((statusResult.data?.ready_providers || []))
+    if (paymentsResult.error) setError('تعذر تحميل سجل معاملات الدفع: '+paymentsResult.error.message)
+    else setPayments((paymentsResult.data || []) as PaymentRow[])
     setLoading(false)
   },[])
   useEffect(()=>{ void load() },[load])
@@ -82,6 +87,10 @@ export default function AdminPaymentGatewaysPage() {
             <button disabled={saving||gateway.provider_code==='fawry'||(!gateway.is_enabled&&!readyProviders.includes(gateway.provider_code))} onClick={()=>void saveSettings({}, {...gateway,is_enabled:!gateway.is_enabled,is_default:false})} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-extrabold text-slate-700 hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"><Power size={16}/>{gateway.provider_code==='fawry'?'بانتظار استكمال التكامل':gateway.is_enabled?'إيقاف المفتاح':'تشغيل المفتاح'}</button>
             {gateway.provider_code==='paymob'&&!readyProviders.includes('paymob')&&<p className="mt-2 text-xs text-amber-700">لن يظهر Paymob للمستخدمين حتى تتوفر بيانات التاجر الصحيحة ويجتاز فحص الجاهزية.</p>}
           </article>)}
+        </section>
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black text-slate-900">سجل معاملات الدفع الإلكتروني</h2><p className="mt-1 text-xs leading-6 text-slate-500">آخر 100 عملية مسجلة في دفتر المدفوعات الموحد، مع آخر محاولات الدفع وحالاتها.</p></div><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-800">{payments.length} عملية</span></div>
+          {payments.length===0?<p className="mt-4 rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">لا توجد معاملات إلكترونية مسجلة حتى الآن.</p>:<div className="mt-4 space-y-3">{payments.map(payment=>{const attempt=payment.payment_attempts?.slice().sort((a,b)=>b.attempt_number-a.attempt_number)[0];const statusLabels:Record<string,string>={created:'تم الإنشاء',pending:'بانتظار التأكيد',paid:'تم الدفع',failed:'فشل الدفع',expired:'منتهي',cancelled:'ملغي',review_required:'يتطلب مراجعة',refunded:'مسترد',partially_refunded:'مسترد جزئيًا'};const purposeLabels:Record<string,string>={vehicle_registration:'تسجيل سيارة',company_subscription:'اشتراك شركة',advertising:'إعلان عادي',featured_advertising:'إعلان مميز',managed_sourcing_request:'رسوم طلب بحث',managed_sourcing_subscription:'اشتراك البحث'};return <article key={payment.id} className="rounded-xl border border-slate-200 p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-sm font-black text-slate-900">{purposeLabels[payment.purpose]||payment.purpose}</p><p className="mt-1 text-[11px] text-slate-500">رقم العملية: <b dir="ltr">{payment.id.slice(0,8).toUpperCase()}</b> · {payment.provider_code.toUpperCase()} · {new Date(payment.created_at).toLocaleString('ar-EG')}</p></div><span className={`rounded-full px-3 py-1 text-xs font-black ${payment.status==='paid'?'bg-emerald-100 text-emerald-800':payment.status==='failed'||payment.status==='expired'?'bg-rose-100 text-rose-800':'bg-amber-100 text-amber-800'}`}>{statusLabels[payment.status]||payment.status}</span></div><div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3"><b className="text-base tabular-nums text-slate-900">{new Intl.NumberFormat('ar-EG',{style:'currency',currency:payment.currency||'EGP',maximumFractionDigits:2}).format(Number(payment.amount_due)||0)}</b><span className="text-xs text-slate-500">{attempt?(`المحاولة ${attempt.attempt_number} · ${statusLabels[attempt.status]||attempt.status}`):'لم تُسجل محاولة بوابة بعد'}</span></div>{attempt?.provider_reference&&<p dir="ltr" className="mt-2 break-all text-[11px] text-slate-500">مرجع المزود: {attempt.provider_reference}</p>}{payment.paid_at&&<p className="mt-1 text-[11px] text-emerald-700">تاريخ التأكيد: {new Date(payment.paid_at).toLocaleString('ar-EG')}</p>}</article>})}</div>}
         </section>
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div className="flex items-center gap-2"><SlidersHorizontal size={20} className="text-[#174a82]"/><h2 className="text-lg font-black">التحكم في الخدمات</h2></div><p className="mt-2 text-sm leading-7 text-slate-600">يمكنك إتاحة أو إيقاف الدفع الإلكتروني لكل خدمة بشكل مستقل، دون التأثير على التحويل اليدوي أو حالة الطلبات القائمة.</p><div className="mt-4 grid gap-3 sm:grid-cols-2">{services.map(([key,label])=>{const active=Boolean(settings?.enabled_service_types.includes(key));return <label key={key} className="flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3"><span className="text-sm font-bold text-slate-700">{label}</span><input type="checkbox" checked={active} disabled={saving||!settings} onChange={event=>settings&&void saveSettings({enabled_service_types:event.target.checked?[...settings.enabled_service_types,key]:settings.enabled_service_types.filter(item=>item!==key)})} className="h-5 w-5 accent-blue-700"/></label>})}</div></section>
         <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-7 text-blue-950"><strong>قاعدة أمان:</strong> تأكيد الدفع لا يعتمد على رجوع المستخدم للمنصة. يظل تأكيد العملية من Webhook موثوق، ثم تمر الخدمة بمراجعة الإدارة المعتادة. لا يتم تخزين بيانات البطاقات أو CVV داخل My Car.</div>
