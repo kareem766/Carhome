@@ -36,6 +36,7 @@ const loadingRoutes: Array<[string, string]> = [
   ['/workspace/company/team', 'فريق العمل'],
   ['/workspace/company/alerts', 'التنبيهات الذكية'],
   ['/workspace/company', 'مساحة الشركة'],
+  ['/workspace/owner/vehicles/new', 'صفحة إضافة سيارة جديدة'],
   ['/workspace/owner/vehicles', 'سياراتي'],
   ['/workspace/owner/offers', 'عروضي'],
   ['/workspace/owner/requests', 'طلبات الشركات'],
@@ -43,6 +44,7 @@ const loadingRoutes: Array<[string, string]> = [
   ['/workspace/employee/messages', 'رسائل الموظف'],
   ['/workspace/employee/account', 'حسابي وبياناتي'],
   ['/workspace/employee', 'مساحة الموظف'],
+  ['/workspace/supplier/vehicles/new', 'صفحة إضافة سيارة جديدة'],
   ['/workspace/supplier/vehicles', 'سيارات الأسطول'],
   ['/workspace/provider-employee-requests', 'طلبات الموظفين'],
   ['/workspace/catalog', 'كتالوج السيارات'],
@@ -97,8 +99,8 @@ export default function PlatformLoading({ pageName, fadeOut = false }: PlatformL
             className="relative z-10 max-h-20 w-44 object-contain animate-[brand-breathe_2.4s_ease-in-out_infinite]"
           />
         </div>
-        <p className="mt-3 text-base font-extrabold leading-7 text-slate-800">
-          جاري تحميل <span className="text-[#079fbd]">{currentPage}</span>
+        <p style={{ color: '#123653' }} className="mt-3 text-base font-extrabold leading-7">
+          {currentPage === 'صفحة إضافة سيارة جديدة' ? <><span style={{ color: '#123653' }}>جاري فتح صفحة</span>{' '}<span style={{ color: '#0786b5' }}>إضافة سيارة جديدة</span></> : <>جاري تحميل <span style={{ color: '#0786b5' }}>{currentPage}</span></>}
         </p>
         <p className="mt-1 text-sm font-medium text-slate-500">لحظات ونكون معك</p>
         <div aria-hidden="true" className="mt-5 h-1 w-24 overflow-hidden rounded-full bg-slate-200">
