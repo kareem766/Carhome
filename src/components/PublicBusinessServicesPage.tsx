@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, BadgeCheck, Building2, CarFront, Check, Clock3, FileText, Megaphone, Network, Search, ShieldCheck, Sparkles, Truck } from 'lucide-react'
+import { ArrowLeft, Building2, CarFront, Check, Clock3, FileText, Megaphone, Network, Search, ShieldCheck, Sparkles, Truck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type AdPlan = { id:string; name:string; description:string; duration_days:number; price_egp:number; features:string[]; placement_type:'standard'|'premium' }
