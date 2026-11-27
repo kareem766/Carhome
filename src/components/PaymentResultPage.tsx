@@ -48,11 +48,17 @@ export default function PaymentResultPage(){
     const timer=window.setInterval(()=>{void load()},5000)
     return()=>window.clearInterval(timer)
   },[payment?.status,load])
+  useEffect(()=>{
+    if(payment?.purpose!=='vehicle_registration'||payment.status!=='paid')return
+    const destination=accountRole==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'
+    const timer=window.setTimeout(()=>window.location.replace(destination),2800)
+    return()=>window.clearTimeout(timer)
+  },[payment?.purpose,payment?.status,accountRole])
   async function refresh(){setRefreshing(true);await load();setRefreshing(false)}
   const state=payment?labels[payment.status]||labels.pending:null
   const StateIcon=state?.icon||Clock3
   const amount=payment?new Intl.NumberFormat('ar-EG',{style:'currency',currency:payment.currency||'EGP',maximumFractionDigits:2}).format(Number(payment.amount_due)||0):''
-  const backHref=payment?.purpose==='company_subscription'?'/workspace/company/subscriptions':payment?.purpose==='managed_sourcing_request'||payment?.purpose==='managed_sourcing_subscription'?'/workspace/company/managed-sourcing':payment?.purpose==='advertising'||payment?.purpose==='featured_advertising'?'/workspace/advertising-plans':payment?.purpose==='vehicle_registration'?(accountRole==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles')+'?paymentVehicle='+encodeURIComponent(payment.entity_id):'/'
+  const backHref=payment?.purpose==='company_subscription'?'/workspace/company/subscriptions':payment?.purpose==='managed_sourcing_request'||payment?.purpose==='managed_sourcing_subscription'?'/workspace/company/managed-sourcing':payment?.purpose==='advertising'||payment?.purpose==='featured_advertising'?'/workspace/advertising-plans':payment?.purpose==='vehicle_registration'?(accountRole==='fleet_supplier'?'/workspace/supplier/vehicles':'/workspace/owner/vehicles'):'/'
   const tone=state?.tone||'blue'
   return <main dir="rtl" className="grid min-h-screen place-items-center bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,.12),transparent_35%),linear-gradient(180deg,#f8fafc,#eef4fb)] px-4 py-8 text-slate-900">
     <section className="w-full max-w-2xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_25px_80px_-35px_rgba(15,40,90,.35)]">
