@@ -1,4 +1,4 @@
-import { ArrowLeft, Headset, Phone, ShieldCheck, UserRoundPlus, LogIn, MessageCircle, Mail } from 'lucide-react'
+import { ArrowLeft, Headset, Phone, ShieldCheck, UserRoundPlus, LogIn, MessageCircle, Mail, MapPin } from 'lucide-react'
 import PlatformBrand from './PlatformBrand'
 
 type Props = { supportPhone?: string | null; supportEmail?: string | null }
@@ -25,7 +25,7 @@ export default function VisitorContactPage({ supportPhone = null, supportEmail =
       </section>
     </div>
     <div className="mx-auto -mt-7 max-w-6xl px-4 pb-12 sm:px-7">
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(16,43,71,.09)] sm:p-7">
           <span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700"><Phone size={23}/></span>
           <h2 className="mt-4 text-xl font-black text-[#102b47]">اتصل بفريقنا</h2>
@@ -37,6 +37,12 @@ export default function VisitorContactPage({ supportPhone = null, supportEmail =
           <h2 className="mt-4 text-xl font-black text-[#102b47]">راسلنا عبر البريد الإلكتروني</h2>
           <p className="mt-2 min-h-14 text-sm leading-7 text-slate-600">للاستفسارات والتواصل العام، يمكنك مراسلة فريق My Car عربيتي مباشرة عبر البريد الإلكتروني.</p>
           <a href={emailHref} dir="ltr" className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#102b47] px-3 py-3 text-sm font-black text-white transition hover:bg-[#174a7b]"><Mail size={17}/><span className="break-all">{email}</span></a>
+        </article>
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(16,43,71,.09)] sm:p-7">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><MapPin size={23}/></span>
+          <h2 className="mt-4 text-xl font-black text-[#102b47]">موقعنا</h2>
+          <p className="mt-2 min-h-14 text-sm leading-7 text-slate-600">يسعدنا التواصل معك من مقر خدمات My Car عربيتي في:</p>
+          <p className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800"><MapPin size={17}/> الإسكندرية - مصر</p>
         </article>
         <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(16,43,71,.09)] sm:p-7">
           <span className="grid h-12 w-12 place-items-center rounded-2xl bg-cyan-50 text-cyan-700"><MessageCircle size={23}/></span>
