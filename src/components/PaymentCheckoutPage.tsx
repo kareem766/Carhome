@@ -54,7 +54,8 @@ export default function PaymentCheckoutPage() {
       if (!authData.user) { setUserReady(false); setLoading(false); return }
       setUserReady(true)
       if (detailsError) setError('تعذر تحميل بيانات وسائل التحويل المعتمدة.')
-      const details = Array.isArray(detailsData) ? detailsData[0] : detailsData
+      const paymentDetails = detailsData as unknown as { instapay_number?: string | null; vodafone_cash_number?: string | null } | Array<{ instapay_number?: string | null; vodafone_cash_number?: string | null }> | null
+      const details = Array.isArray(paymentDetails) ? paymentDetails[0] : paymentDetails
       const nextMethods = {
         instapay: String(details?.instapay_number || '').trim(),
         vodafone_cash: String(details?.vodafone_cash_number || '').trim(),
