@@ -12,9 +12,10 @@ type PaymentMethodChoiceProps = {
   onlineDisabled?: boolean
   manualMethod?: ManualMethod
   onManualMethodChange?: (method: ManualMethod) => void
+  availableManualMethods?: ManualMethod[]
 }
 
-export function PaymentMethodChoice({ value, onChange, disabled = false, onlineDisabled = false, manualMethod: controlledManualMethod, onManualMethodChange }: PaymentMethodChoiceProps) {
+export function PaymentMethodChoice({ value, onChange, disabled = false, onlineDisabled = false, manualMethod: controlledManualMethod, onManualMethodChange, availableManualMethods }: PaymentMethodChoiceProps) {
   const [internalManualMethod, setInternalManualMethod] = useState<ManualMethod>('instapay')
   const manualMethod = controlledManualMethod ?? internalManualMethod
   const [onlineEnabled, setOnlineEnabled] = useState(false)
@@ -35,7 +36,10 @@ export function PaymentMethodChoice({ value, onChange, disabled = false, onlineD
 
   const cardDisabled = disabled || onlineDisabled || !onlineEnabled
   const manualDisabled = disabled
+  const instapayDisabled = manualDisabled || (availableManualMethods !== undefined && !availableManualMethods.includes('instapay'))
+  const vodafoneDisabled = manualDisabled || (availableManualMethods !== undefined && !availableManualMethods.includes('vodafone_cash'))
   const chooseManual = (method: ManualMethod) => {
+    if (method === 'instapay' ? instapayDisabled : vodafoneDisabled) return
     setInternalManualMethod(method)
     onManualMethodChange?.(method)
     onChange('manual')
@@ -47,14 +51,14 @@ export function PaymentMethodChoice({ value, onChange, disabled = false, onlineD
     <legend className="text-sm font-black text-slate-900">اختر طريقة الدفع</legend>
     <p className="text-xs leading-6 text-slate-500">اختر الوسيلة المناسبة. التحويلات اليدوية تظل قيد المراجعة حتى التحقق من وصول المبلغ.</p>
     <div className="grid gap-3 sm:grid-cols-3">
-      <button type="button" disabled={manualDisabled} aria-pressed={value === 'manual' && manualMethod === 'instapay'} onClick={() => chooseManual('instapay')} className={cardClass(value === 'manual' && manualMethod === 'instapay', manualDisabled)}>
+      <button type="button" disabled={instapayDisabled} aria-pressed={value === 'manual' && manualMethod === 'instapay'} onClick={() => chooseManual('instapay')} className={cardClass(value === 'manual' && manualMethod === 'instapay', instapayDisabled)}>
         {value === 'manual' && manualMethod === 'instapay' && <CheckCircle2 size={18} className="absolute left-3 top-3 text-blue-700"/>}
         <span className="grid h-11 w-11 place-items-center rounded-xl bg-sky-100 text-sky-800"><Landmark size={22}/></span>
         <span className="mt-3 text-sm font-black text-slate-900">InstaPay</span>
         <span className="mt-1 text-xs leading-5 text-slate-500">تحويل فوري وإرسال بيانات العملية للمراجعة</span>
         <span className="mt-auto pt-3 text-[10px] font-extrabold text-sky-800">تحويل يدوي</span>
       </button>
-      <button type="button" disabled={manualDisabled} aria-pressed={value === 'manual' && manualMethod === 'vodafone_cash'} onClick={() => chooseManual('vodafone_cash')} className={cardClass(value === 'manual' && manualMethod === 'vodafone_cash', manualDisabled)}>
+      <button type="button" disabled={vodafoneDisabled} aria-pressed={value === 'manual' && manualMethod === 'vodafone_cash'} onClick={() => chooseManual('vodafone_cash')} className={cardClass(value === 'manual' && manualMethod === 'vodafone_cash', vodafoneDisabled)}>
         {value === 'manual' && manualMethod === 'vodafone_cash' && <CheckCircle2 size={18} className="absolute left-3 top-3 text-blue-700"/>}
         <span className="grid h-11 w-11 place-items-center rounded-xl bg-red-50 text-red-700"><Smartphone size={22}/></span>
         <span className="mt-3 text-sm font-black text-slate-900">Vodafone Cash</span>
@@ -69,6 +73,7 @@ export function PaymentMethodChoice({ value, onChange, disabled = false, onlineD
         <span className={`mt-auto pt-3 text-[10px] font-extrabold ${onlineEnabled ? 'text-emerald-700' : 'text-amber-700'}`}>{onlineEnabled ? providerLabel : 'غير متاحة حتى اعتماد وربط البوابة'}</span>
       </button>
     </div>
+    {availableManualMethods && availableManualMethods.length === 0 && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-bold leading-6 text-amber-800">التحويل اليدوي غير متاح حاليًا لعدم تسجيل بيانات وسائل الدفع. يمكنك استخدام الدفع الإلكتروني إذا كان مفعّلًا.</p>}
     <input type="hidden" name="transfer_method" value={manualMethod}/>
     <input type="hidden" name="payment_method" value={manualMethod === 'instapay' ? 'instapay' : 'vodafone'}/>
     <input type="hidden" name="advertising_payment_method" value={manualMethod}/>
