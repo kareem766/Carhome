@@ -4,6 +4,8 @@ type PlatformLoadingProps = {
 }
 
 const loadingRoutes: Array<[string, string]> = [
+  ['/payment/checkout', 'صفحة الدفع الآمن'],
+  ['/payment/result', 'نتيجة الدفع'],
   ['/workspace/admin/promotional-slides', 'إدارة العروض الترويجية'],
   ['/workspace/admin/automation-review', 'مركز المراجعة الذكية'],
   ['/workspace/admin/employee-requests', 'مراجعة طلبات الموظفين'],
