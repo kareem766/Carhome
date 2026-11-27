@@ -44,6 +44,7 @@ const loadingRoutes: Array<[string, string]> = [
   ['/workspace/employee/messages', 'رسائل الموظف'],
   ['/workspace/employee/account', 'حسابي وبياناتي'],
   ['/workspace/employee', 'مساحة الموظف'],
+  ['/workspace/supplier/vehicles/new', 'صفحة إضافة سيارة جديدة'],
   ['/workspace/supplier/vehicles', 'سيارات الأسطول'],
   ['/workspace/provider-employee-requests', 'طلبات الموظفين'],
   ['/workspace/catalog', 'كتالوج السيارات'],
