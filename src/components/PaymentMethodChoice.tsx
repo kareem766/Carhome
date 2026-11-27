@@ -1,25 +1,32 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, CreditCard, ShieldCheck } from 'lucide-react'
 export type MyCarPaymentMethod = 'manual' | 'online'
 
+type ManualMethod = 'instapay' | 'vodafone_cash'
 type Props = {
   value: MyCarPaymentMethod
   onChange: (value: MyCarPaymentMethod) => void
   purpose: string
   onlineDisabled?: boolean
-  manualMethod?: 'instapay' | 'vodafone_cash'
-  onManualMethodChange?: (method: 'instapay' | 'vodafone_cash') => void
-  availableManualMethods?: Array<'instapay' | 'vodafone_cash'>
+  manualMethod?: ManualMethod
+  onManualMethodChange?: (method: ManualMethod) => void
+  availableManualMethods?: ManualMethod[]
 }
 
-export function PaymentMethodChoice({ value, onChange, purpose, onlineDisabled = false, manualMethod = 'instapay', onManualMethodChange, availableManualMethods = [] }: Props) {
+export function PaymentMethodChoice({ value, onChange, purpose, onlineDisabled = false, manualMethod: controlledManualMethod, onManualMethodChange, availableManualMethods = [] }: Props) {
+  const [internalManualMethod, setInternalManualMethod] = useState<ManualMethod>('instapay')
+  const manualMethod = controlledManualMethod ?? internalManualMethod
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const selected = params.get('payment_method')
     const selectedManual = params.get('manual_method')
     if (selected === 'online') onChange('online')
     if (selected === 'manual') onChange('manual')
-    if (selectedManual === 'instapay' || selectedManual === 'vodafone_cash') onManualMethodChange?.(selectedManual)
+    if (selectedManual === 'instapay' || selectedManual === 'vodafone_cash') {
+      setInternalManualMethod(selectedManual)
+      onManualMethodChange?.(selectedManual)
+    }
     if (selected === 'online' || selected === 'manual' || selectedManual) {
       params.delete('payment_method')
       params.delete('manual_method')
@@ -50,5 +57,8 @@ export function PaymentMethodChoice({ value, onChange, purpose, onlineDisabled =
     </div>
     <p className="mt-3 flex items-start gap-2 text-xs leading-6 text-slate-600"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-blue-700"/> سيتم فتح صفحة دفع موحدة لاختيار InstaPay أو Vodafone Cash أو البطاقة البنكية. التحويل اليدوي يظل خاضعًا لمراجعة الإدارة.</p>
     {availableManualMethods.length === 0 && <p className="mt-2 text-xs font-bold text-amber-700">بيانات التحويل اليدوي غير متاحة حاليًا؛ يمكنك مراجعة الوسائل المتاحة في صفحة الدفع.</p>}
+    <input type="hidden" name="transfer_method" value={manualMethod}/>
+    <input type="hidden" name="payment_method" value={manualMethod === 'instapay' ? 'instapay' : 'vodafone'}/>
+    <input type="hidden" name="advertising_payment_method" value={manualMethod}/>
   </div>
 }
