@@ -103,6 +103,7 @@ export async function createMyCarCheckout(args: {
     billing_phone_required: 'أضف رقم موبايل مصري صحيح في بيانات حسابك قبل الدفع الإلكتروني.',
     billing_email_required: 'أضف بريدًا إلكترونيًا صحيحًا في بيانات حسابك قبل الدفع الإلكتروني.',
     paymob_credentials_missing: 'بوابة الدفع لم تكتمل إعداداتها بعد. يمكنك استخدام التحويل اليدوي.',
+    merchant_not_approved: 'بوابة الدفع غير متاحة قبل اعتماد نشاط المنصة من مزود الخدمة.',
     payment_attempt_in_progress: 'جارٍ تجهيز رابط الدفع بالفعل. انتظر لحظات ثم حدّث الصفحة لمتابعة الحالة.',
     fawry_checkout_requires_confirmed_merchant_product: 'الدفع عبر فوري غير متاح حتى تأكيد نوع الخدمة المتعاقد عليها.',
   }
