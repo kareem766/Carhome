@@ -62,3 +62,48 @@ export function PaymentMethodChoice({ value, onChange, purpose, onlineDisabled =
     <input type="hidden" name="advertising_payment_method" value={manualMethod}/>
   </div>
 }
+
+import { supabase } from '../lib/supabase'
+
+export async function createMyCarCheckout(args: {
+  purpose: string
+  entityId: string
+  periodMonths?: number
+  couponCode?: string | null
+}) {
+  if (!supabase) throw new Error('إعدادات الاتصال غير مكتملة.')
+  const idempotencyKey = `mycar:${args.purpose}:${args.entityId}`
+  const messages: Record<string, string> = {
+    gateway_disabled: 'الدفع الإلكتروني غير مفعّل حاليًا. يمكنك استخدام التحويل اليدوي.',
+    billing_phone_required: 'أضف رقم موبايل مصري صحيح في بيانات حسابك قبل الدفع الإلكتروني.',
+    billing_email_required: 'أضف بريدًا إلكترونيًا صحيحًا في بيانات حسابك قبل الدفع الإلكتروني.',
+    paymob_credentials_missing: 'بوابة الدفع لم تكتمل إعداداتها بعد. يمكنك استخدام التحويل اليدوي.',
+    merchant_not_approved: 'بوابة الدفع غير متاحة قبل اعتماد نشاط المنصة من مزود الخدمة.',
+    payment_attempt_in_progress: 'جارٍ تجهيز رابط الدفع بالفعل. انتظر لحظات ثم حدّث الصفحة لمتابعة الحالة.',
+    fawry_checkout_requires_confirmed_merchant_product: 'الدفع عبر فوري غير متاح حتى تأكيد نوع الخدمة المتعاقد عليها.',
+  }
+  const { data, error } = await supabase.functions.invoke('create-payment-intent', {
+    body: {
+      purpose: args.purpose,
+      entity_id: args.entityId,
+      provider: 'paymob',
+      idempotency_key: idempotencyKey,
+      return_origin: window.location.origin,
+      ...(args.periodMonths ? { period_months: args.periodMonths } : {}),
+      ...(args.couponCode ? { coupon_code: args.couponCode } : {}),
+    },
+  })
+  if (error) {
+    const response = (error as unknown as { context?: Response }).context
+    if (response && typeof response.clone === 'function') {
+      let body: { error?: string; message?: string } | null = null
+      try { body = await response.clone().json() as { error?: string; message?: string } } catch { /* use the SDK error below */ }
+      if (body) throw new Error(messages[String(body.error || '')] || body.message || error.message || 'تعذر بدء الدفع الإلكتروني.')
+    }
+    throw new Error(error.message || 'تعذر بدء الدفع الإلكتروني.')
+  }
+  if (!data?.checkout_url || typeof data.checkout_url !== 'string') {
+    throw new Error(messages[String(data?.error)] || data?.message || 'تعذر إنشاء رابط الدفع الإلكتروني.')
+  }
+  window.location.assign(data.checkout_url)
+}
