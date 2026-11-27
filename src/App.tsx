@@ -489,10 +489,14 @@ export default function App() {
     }
   }, [homeImageUrls.length, homePreloadCount])
 
-  // A bounded escape hatch protects visitors if a browser never dispatches an image event.
+  // If a rendered preload never settles, switch to the bundled local car image.
+  // Keep the branded loader visible until the local fallback elements themselves load.
   useEffect(() => {
-    if (!homeImageUrls.length || homeImagesReady) return
-    const timeout = window.setTimeout(() => setHomeImagesReady(true), 2500)
+    if (!homeImageUrls.length || homeImagesReady || homeImageUrls.every(url => url === '/carhome-icon.svg')) return
+    const timeout = window.setTimeout(() => {
+      setHomePreloadCount(0)
+      setHomeImageUrls(current => current.map(() => '/carhome-icon.svg'))
+    }, 2500)
     return () => window.clearTimeout(timeout)
   }, [homeImageUrls, homeImagesReady])
 
@@ -560,7 +564,7 @@ export default function App() {
       <PlatformLoading />
       {homeImageUrls.length > 0 && <div aria-hidden="true" style={{ position: 'fixed', left: '-10000px', top: 0, width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
         {homeImageUrls.map((src, index) => <img
-          key={index}
+          key={src + '-' + index}
           src={src}
           alt=""
           width="1"
@@ -572,7 +576,7 @@ export default function App() {
           onError={(event) => {
             const image = event.currentTarget
             if (image.dataset.fallbackApplied === 'true') {
-              setHomePreloadCount(count => Math.min(homeImageUrls.length, count + 1))
+              console.error('My Car: bundled homepage fallback image could not be loaded.')
               return
             }
             image.dataset.fallbackApplied = 'true'
