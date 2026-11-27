@@ -573,27 +573,17 @@ export default function WorkspacePage({ role, employeeView = false }: { role: Ro
         new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('تم حفظ بيانات السيارة ورفع الصور، لكن تأخر ربط الصور بالسجل. حدّث الصفحة قبل أي محاولة جديدة.')), 30000))
       ])
       if (imageInsert.error) throw new Error('تم حفظ بيانات السيارة، لكن تعذر ربط الصور بها: ' + imageInsert.error.message)
-      setNotice('')
-      setPaymentStageVehicle({
-        id: savedVehicleId,
-        make: payload.make,
-        model: payload.model,
-        model_year: payload.model_year,
-        license_expiry_date: payload.license_expiry_date,
-        vehicle_type: payload.vehicle_type,
-        governorate: payload.governorate,
-        monthly_price_egp: payload.monthly_price_egp,
-        review_status: 'pending_payment',
-        payment_status: 'pending'
-      })
-      setPaymentVehicle(savedVehicleId)
-      window.history.replaceState({}, '', window.location.pathname + '?paymentVehicle=' + encodeURIComponent(savedVehicleId))
       clearFormDraft(`workspace:${user.id}:${organization.id}:${path}:vehicle`)
       formElement.reset()
       photoPreviews.forEach(photo => URL.revokeObjectURL(photo.url))
       setPhotoPreviews([])
       setSelectedMake(''); setSelectedModel(''); setInferredType(''); setInferredSeats(5); setProfileConfidence('low')
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      const checkoutParams = new URLSearchParams({
+        purpose: 'vehicle_registration',
+        entity_id: savedVehicleId,
+        return_to: role === 'supplier' ? '/workspace/supplier/vehicles' : '/workspace/owner/vehicles'
+      })
+      window.location.assign('/payment/checkout?' + checkoutParams.toString())
       return
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'حدث خطأ غير متوقع أثناء حفظ السيارة.'
