@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ArrowLeft, CalendarDays, Check, CheckCircle2, ClipboardCheck, CreditCard, Landmark, LockKeyhole, LoaderCircle, ShieldCheck, Smartphone, Sparkles, UploadCloud, WalletCards } from 'lucide-react'
+import { CalendarDays, Check, CheckCircle2, ClipboardCheck, CreditCard, Landmark, LockKeyhole, LoaderCircle, ShieldCheck, Smartphone, Sparkles, UploadCloud, WalletCards } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { createMyCarCheckout } from './PaymentMethodChoice'
 
