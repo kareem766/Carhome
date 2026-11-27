@@ -36,6 +36,7 @@ const loadingRoutes: Array<[string, string]> = [
   ['/workspace/company/team', 'فريق العمل'],
   ['/workspace/company/alerts', 'التنبيهات الذكية'],
   ['/workspace/company', 'مساحة الشركة'],
+  ['/workspace/owner/vehicles/new', 'صفحة إضافة سيارة جديدة'],
   ['/workspace/owner/vehicles', 'سياراتي'],
   ['/workspace/owner/offers', 'عروضي'],
   ['/workspace/owner/requests', 'طلبات الشركات'],
@@ -98,7 +99,7 @@ export default function PlatformLoading({ pageName, fadeOut = false }: PlatformL
           />
         </div>
         <p className="mt-3 text-base font-extrabold leading-7 text-slate-800">
-          جاري تحميل <span className="text-[#079fbd]">{currentPage}</span>
+          {currentPage === 'صفحة إضافة سيارة جديدة' ? 'جاري فتح صفحة إضافة سيارة جديدة' : <>جاري تحميل <span className="text-[#079fbd]">{currentPage}</span></>}
         </p>
         <p className="mt-1 text-sm font-medium text-slate-500">لحظات ونكون معك</p>
         <div aria-hidden="true" className="mt-5 h-1 w-24 overflow-hidden rounded-full bg-slate-200">
