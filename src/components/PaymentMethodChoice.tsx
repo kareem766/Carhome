@@ -10,10 +10,13 @@ type PaymentMethodChoiceProps = {
   onChange: (value: MyCarPaymentMethod) => void
   disabled?: boolean
   onlineDisabled?: boolean
+  manualMethod?: ManualMethod
+  onManualMethodChange?: (method: ManualMethod) => void
 }
 
-export function PaymentMethodChoice({ value, onChange, disabled = false, onlineDisabled = false }: PaymentMethodChoiceProps) {
-  const [manualMethod, setManualMethod] = useState<ManualMethod>('instapay')
+export function PaymentMethodChoice({ value, onChange, disabled = false, onlineDisabled = false, manualMethod: controlledManualMethod, onManualMethodChange }: PaymentMethodChoiceProps) {
+  const [internalManualMethod, setInternalManualMethod] = useState<ManualMethod>('instapay')
+  const manualMethod = controlledManualMethod ?? internalManualMethod
   const [onlineEnabled, setOnlineEnabled] = useState(false)
   const [providerLabel, setProviderLabel] = useState('سيتم إتاحته بعد اعتماد بوابة الدفع')
   useEffect(() => {
@@ -33,7 +36,8 @@ export function PaymentMethodChoice({ value, onChange, disabled = false, onlineD
   const cardDisabled = disabled || onlineDisabled || !onlineEnabled
   const manualDisabled = disabled
   const chooseManual = (method: ManualMethod) => {
-    setManualMethod(method)
+    setInternalManualMethod(method)
+    onManualMethodChange?.(method)
     onChange('manual')
   }
   const cardClass = (selected: boolean, unavailable = false) =>
