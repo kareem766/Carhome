@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { ArrowLeft, CreditCard, ShieldCheck } from 'lucide-react'
-import type { MyCarPaymentMethod } from './PaymentMethodChoice'
+export type MyCarPaymentMethod = 'manual' | 'online'
 
 type Props = {
   value: MyCarPaymentMethod
