@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { CreditCard, Landmark, ShieldCheck } from 'lucide-react'
+import { CheckCircle2, CreditCard, Landmark, ShieldCheck, Smartphone } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 export type MyCarPaymentMethod = 'manual' | 'online'
+type ManualMethod = 'instapay' | 'vodafone_cash'
 
 type PaymentMethodChoiceProps = {
   value: MyCarPaymentMethod
@@ -12,8 +13,9 @@ type PaymentMethodChoiceProps = {
 }
 
 export function PaymentMethodChoice({ value, onChange, disabled = false, onlineDisabled = false }: PaymentMethodChoiceProps) {
+  const [manualMethod, setManualMethod] = useState<ManualMethod>('instapay')
   const [onlineEnabled, setOnlineEnabled] = useState(false)
-  const [providerLabel, setProviderLabel] = useState('سيتم إتاحته بعد تفعيل بوابة الدفع')
+  const [providerLabel, setProviderLabel] = useState('سيتم إتاحته بعد اعتماد بوابة الدفع')
   useEffect(() => {
     let active = true
     if (!supabase) return () => { active = false }
@@ -22,30 +24,53 @@ export function PaymentMethodChoice({ value, onChange, disabled = false, onlineD
       const providers = Array.isArray(data?.enabled_providers) ? data.enabled_providers as Array<{ provider_code?: string; display_name?: string }> : []
       const paymob = providers.find(provider => provider.provider_code === 'paymob')
       setOnlineEnabled(Boolean(paymob))
-      setProviderLabel(paymob?.display_name || 'سيتم إتاحته بعد تفعيل بوابة الدفع')
+      setProviderLabel(paymob?.display_name || 'غير متاح حاليًا')
       if (!paymob && value === 'online') onChange('manual')
     }).catch(() => { if (active) setOnlineEnabled(false) })
     return () => { active = false }
   }, [onChange, value])
-  const isOnlineDisabled = disabled || onlineDisabled || !onlineEnabled
-  return <fieldset className="space-y-3">
-    <legend className="text-sm font-extrabold text-slate-900">اختار طريقة الدفع</legend>
-    <div className="grid gap-3 sm:grid-cols-2">
-      <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${value === 'online' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-200'} ${isOnlineDisabled ? 'cursor-not-allowed opacity-60' : ''}`}>
-        <input type="radio" name="mycar-payment-method" value="online" checked={value === 'online'} disabled={isOnlineDisabled} onChange={() => onChange('online')} className="mt-1 h-4 w-4 accent-blue-700"/>
-        <span className="min-w-0">
-          <span className="flex items-center gap-2 text-sm font-extrabold text-slate-900"><CreditCard size={17} className="text-blue-700"/> الدفع الإلكتروني</span>
-          <span className="mt-1 block text-xs leading-6 text-slate-600">الدفع الآمن عبر بوابة My Car الموحدة. ستنتقل إلى صفحة الدفع لاستكمال العملية.</span>
-          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-800"><ShieldCheck size={12}/> {onlineEnabled ? `الدفع عبر: ${providerLabel}` : providerLabel}</span>
-        </span>
-      </label>
-      <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${value === 'manual' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-200'} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}>
-        <input type="radio" name="mycar-payment-method" value="manual" checked={value === 'manual'} disabled={disabled} onChange={() => onChange('manual')} className="mt-1 h-4 w-4 accent-blue-700"/>
-        <span className="min-w-0">
-          <span className="flex items-center gap-2 text-sm font-extrabold text-slate-900"><Landmark size={17} className="text-blue-700"/> التحويل اليدوي</span>
-          <span className="mt-1 block text-xs leading-6 text-slate-600">InstaPay أو Vodafone Cash مع إدخال رقم العملية لإرسالها للمراجعة.</span>
-        </span>
-      </label>
+
+  const cardDisabled = disabled || onlineDisabled || !onlineEnabled
+  const manualDisabled = disabled
+  const chooseManual = (method: ManualMethod) => {
+    setManualMethod(method)
+    onChange('manual')
+  }
+  const cardClass = (selected: boolean, unavailable = false) =>
+    `relative flex min-h-[142px] w-full flex-col items-start rounded-2xl border p-4 text-right transition duration-200 ${selected ? 'border-blue-600 bg-blue-50 shadow-[0_10px_28px_-18px_rgba(29,78,216,.65)] ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-md'} ${unavailable ? 'cursor-not-allowed opacity-55' : 'cursor-pointer'}`
+
+  return <fieldset className="space-y-4" disabled={disabled}>
+    <legend className="text-sm font-black text-slate-900">اختر طريقة الدفع</legend>
+    <p className="text-xs leading-6 text-slate-500">اختر الوسيلة المناسبة. التحويلات اليدوية تظل قيد المراجعة حتى التحقق من وصول المبلغ.</p>
+    <div className="grid gap-3 sm:grid-cols-3">
+      <button type="button" disabled={manualDisabled} aria-pressed={value === 'manual' && manualMethod === 'instapay'} onClick={() => chooseManual('instapay')} className={cardClass(value === 'manual' && manualMethod === 'instapay', manualDisabled)}>
+        {value === 'manual' && manualMethod === 'instapay' && <CheckCircle2 size={18} className="absolute left-3 top-3 text-blue-700"/>}
+        <span className="grid h-11 w-11 place-items-center rounded-xl bg-sky-100 text-sky-800"><Landmark size={22}/></span>
+        <span className="mt-3 text-sm font-black text-slate-900">InstaPay</span>
+        <span className="mt-1 text-xs leading-5 text-slate-500">تحويل فوري وإرسال بيانات العملية للمراجعة</span>
+        <span className="mt-auto pt-3 text-[10px] font-extrabold text-sky-800">تحويل يدوي</span>
+      </button>
+      <button type="button" disabled={manualDisabled} aria-pressed={value === 'manual' && manualMethod === 'vodafone_cash'} onClick={() => chooseManual('vodafone_cash')} className={cardClass(value === 'manual' && manualMethod === 'vodafone_cash', manualDisabled)}>
+        {value === 'manual' && manualMethod === 'vodafone_cash' && <CheckCircle2 size={18} className="absolute left-3 top-3 text-blue-700"/>}
+        <span className="grid h-11 w-11 place-items-center rounded-xl bg-red-50 text-red-700"><Smartphone size={22}/></span>
+        <span className="mt-3 text-sm font-black text-slate-900">Vodafone Cash</span>
+        <span className="mt-1 text-xs leading-5 text-slate-500">تحويل إلى محفظة المنصة وإرسال رقم العملية</span>
+        <span className="mt-auto pt-3 text-[10px] font-extrabold text-red-700">محفظة إلكترونية</span>
+      </button>
+      <button type="button" disabled={cardDisabled} aria-pressed={value === 'online'} onClick={() => onChange('online')} className={cardClass(value === 'online', cardDisabled)}>
+        {value === 'online' && <CheckCircle2 size={18} className="absolute left-3 top-3 text-blue-700"/>}
+        <span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-100 text-blue-800"><CreditCard size={22}/></span>
+        <span className="mt-3 text-sm font-black text-slate-900">بطاقة بنكية</span>
+        <span className="mt-1 text-xs leading-5 text-slate-500">الدفع عبر صفحة بوابة آمنة ثم العودة إلى عربيتي</span>
+        <span className={`mt-auto pt-3 text-[10px] font-extrabold ${onlineEnabled ? 'text-emerald-700' : 'text-amber-700'}`}>{onlineEnabled ? providerLabel : 'غير متاحة حتى اعتماد وربط البوابة'}</span>
+      </button>
+    </div>
+    <input type="hidden" name="transfer_method" value={manualMethod}/>
+    <input type="hidden" name="payment_method" value={manualMethod === 'instapay' ? 'instapay' : 'vodafone'}/>
+    <input type="hidden" name="advertising_payment_method" value={manualMethod}/>
+    <div className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-6 text-slate-600">
+      <ShieldCheck size={17} className="mt-0.5 shrink-0 text-blue-700"/>
+      <span>لا يتم تفعيل السيارة أو الاشتراك أو الإعلان بمجرد إرسال التحويل أو الرجوع من بوابة الدفع؛ يلزم التحقق من الدفع ثم مراجعة الإدارة.</span>
     </div>
   </fieldset>
 }
@@ -82,12 +107,12 @@ export async function createMyCarCheckout(args: {
     if (response && typeof response.clone === 'function') {
       let body: { error?: string; message?: string } | null = null
       try { body = await response.clone().json() as { error?: string; message?: string } } catch { /* use the SDK error below */ }
-      if (body) throw new Error(messages[String(body.error || '')] || body.message || error.message || 'تعذر بدء عملية الدفع الإلكتروني.')
+      if (body) throw new Error(messages[String(body.error || '')] || body.message || error.message || 'تعذر بدء الدفع الإلكتروني.')
     }
-    throw new Error(error.message || 'تعذر بدء عملية الدفع الإلكتروني.')
+    throw new Error(error.message || 'تعذر بدء الدفع الإلكتروني.')
   }
   if (!data?.checkout_url || typeof data.checkout_url !== 'string') {
-        throw new Error(messages[String(data?.error)] || data?.message || 'تعذر إنشاء رابط الدفع الإلكتروني.')
+    throw new Error(messages[String(data?.error)] || data?.message || 'تعذر إنشاء رابط الدفع الإلكتروني.')
   }
   window.location.assign(data.checkout_url)
 }
