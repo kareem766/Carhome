@@ -4,11 +4,31 @@ type PlatformLoadingProps = {
 }
 
 const loadingRoutes: Array<[string, string]> = [
+  ['/workspace/admin/managed-sourcing-center', 'مركز تفويضات البحث'],
+  ['/workspace/admin/managed-sourcing', 'إدارة تفويضات البحث'],
+  ['/workspace/admin/platform-settings', 'إعدادات المنصة'],
+  ['/workspace/admin/managed-accounts', 'إدارة الحسابات'],
+  ['/workspace/admin/payment-information', 'بيانات الدفع والتحويل'],
+  ['/workspace/admin/subscription-plans', 'خطط الاشتراكات'],
+  ['/workspace/admin/company-subscriptions', 'اشتراكات الشركات'],
+  ['/workspace/admin/discount-codes', 'أكواد الخصم'],
+  ['/workspace/admin/advertising-plans', 'إدارة باقات الإعلانات'],
+  ['/workspace/admin/communications', 'مركز الاتصالات'],
+  ['/workspace/admin/analytics', 'تحليلات المنصة'],
+  ['/workspace/admin/vehicle-reviews', 'مراجعة السيارات'],
+  ['/workspace/admin/support', 'طلبات الدعم'],
+  ['/workspace/supplier/employee-requests', 'طلبات الموظفين'],
+  ['/workspace/supplier/insights', 'تقارير الأسطول'],
+  ['/workspace/supplier/offers', 'عروضي'],
+  ['/workspace/supplier/requests', 'طلبات الشركات والموظفين'],
+  ['/workspace/provider/managed-sourcing', 'تفويضات البحث عن السيارات'],
+  ['/workspace/provider/employee-messages', 'رسائل الموظفين'],
+  ['/workspace/owner/employee-requests', 'طلبات الموظفين'],
+  ['/workspace/company/requests/new', 'طلب سيارة جديد'],
   ['/workspace/admin/promotional-slides', 'إدارة العروض الترويجية'],
   ['/workspace/admin/automation-review', 'مركز المراجعة الذكية'],
   ['/workspace/admin/employee-requests', 'مراجعة طلبات الموظفين'],
   ['/workspace/admin', 'لوحة تحكم الإدارة'],
-  ['/workspace/company/requests/new', 'طلب سيارة جديد'],
   ['/workspace/company/requests', 'طلبات التأجير'],
   ['/workspace/company/subscriptions', 'الاشتراكات والباقات'],
   ['/workspace/company/managed-sourcing', 'تفويض البحث عن السيارات'],
@@ -28,6 +48,13 @@ const loadingRoutes: Array<[string, string]> = [
   ['/workspace/catalog', 'كتالوج السيارات'],
   ['/workspace/advertising-plans', 'باقات الإعلانات'],
   ['/workspace/notifications', 'الإشعارات'],
+  ['/business-services', 'الخدمات التجارية والباقات'],
+  ['/services/provider/register', 'تسجيل مقدم خدمة'],
+  ['/contact', 'تواصل معنا'],
+  ['/register/employee', 'تسجيل الموظف المستقل'],
+  ['/register/owner', 'تسجيل مالك السيارة'],
+  ['/register/company', 'تسجيل الشركة'],
+  ['/register/supplier', 'تسجيل مورد الأسطول'],
   ['/workspace', 'مساحة العمل'],
   ['/assistant', 'مساعد My Car'],
   ['/services', 'خدمات السيارات'],
@@ -47,11 +74,11 @@ function resolvePageName(pathname: string) {
   const match = loadingRoutes.find(([route]) => pathname === route || pathname.startsWith(route + '/'))
   if (match) return match[1]
   if (pathname === '/' || pathname === '') return 'الصفحة الرئيسية'
-  return 'مساحة العمل'
+  return 'الصفحة المطلوبة'
 }
 
 export default function PlatformLoading({ pageName, fadeOut = false }: PlatformLoadingProps) {
-  const currentPage = pageName || (typeof window !== 'undefined' ? resolvePageName(window.location.pathname) : 'مساحة العمل')
+  const currentPage = pageName || (typeof window !== 'undefined' ? resolvePageName(window.location.pathname) : 'الصفحة المطلوبة')
 
   return (
     <div
@@ -59,7 +86,7 @@ export default function PlatformLoading({ pageName, fadeOut = false }: PlatformL
       className={`fixed inset-0 z-[9999] flex items-center justify-center bg-white/72 px-5 backdrop-blur-[5px] ${fadeOut ? "animate-[mc-platform-loader-fade_520ms_ease-out_forwards]" : ""}`}
       role="status"
       aria-live="polite"
-      aria-label={`جارٍ فتح ${currentPage}`}
+      aria-label={`جاري تحميل ${currentPage}`}
     >
       <div className="flex w-full max-w-xs flex-col items-center text-center">
         <div className="relative flex h-24 w-52 items-center justify-center">
@@ -71,7 +98,7 @@ export default function PlatformLoading({ pageName, fadeOut = false }: PlatformL
           />
         </div>
         <p className="mt-3 text-base font-extrabold leading-7 text-slate-800">
-          جارٍ فتح <span className="text-[#079fbd]">{currentPage}</span>
+          جاري تحميل <span className="text-[#079fbd]">{currentPage}</span>
         </p>
         <p className="mt-1 text-sm font-medium text-slate-500">لحظات ونكون معك</p>
         <div aria-hidden="true" className="mt-5 h-1 w-24 overflow-hidden rounded-full bg-slate-200">
