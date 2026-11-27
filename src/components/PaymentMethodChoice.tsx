@@ -21,6 +21,12 @@ export function PaymentMethodChoice({ value, onChange, disabled = false, onlineD
   const [onlineEnabled, setOnlineEnabled] = useState(false)
   const [providerLabel, setProviderLabel] = useState('سيتم إتاحته بعد اعتماد بوابة الدفع')
   useEffect(() => {
+    if (!availableManualMethods?.length || availableManualMethods.includes(manualMethod)) return
+    const next = availableManualMethods[0]
+    setInternalManualMethod(next)
+    onManualMethodChange?.(next)
+  }, [availableManualMethods?.join('|'), manualMethod, onManualMethodChange])
+  useEffect(() => {
     let active = true
     if (!supabase) return () => { active = false }
     void supabase.functions.invoke('payment-gateway-status').then(({ data, error }) => {
