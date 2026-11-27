@@ -106,11 +106,13 @@ export default function ManagedSourcingPage({admin=false}:{admin?:boolean}) {
   }
   const f=new FormData(e.currentTarget)
   const ref=String(f.get('reference')||'').trim()
+  const transferMethod=String(f.get('transfer_method')||'instapay')
+  const transferLabel=transferMethod==='vodafone_cash'?'Vodafone Cash':'InstaPay'
   const transferDate=String(f.get('transfer_date')||'').trim()
   if(!ref||!transferDate){setError('يرجى إدخال رقم العملية وتاريخ التحويل.');return}
   setSaving(true)
-  const {error:up}=await supabase.from('managed_sourcing_requests').update({payment_reference:ref,payment_transfer_date:transferDate,payment_submitted_at:new Date().toISOString()}).eq('id',r.id)
-  if(!up)await supabase.from('managed_sourcing_actions').insert({request_id:r.id,created_by:user.id,action_type:'submit_payment_reference',payment_reference:ref,message:'تم إرسال بيانات التحويل من الشركة — تاريخ التحويل: '+transferDate})
+  const {error:up}=await supabase.from('managed_sourcing_requests').update({payment_reference:transferLabel+' — '+ref,payment_transfer_date:transferDate,payment_submitted_at:new Date().toISOString()}).eq('id',r.id)
+  if(!up)await supabase.from('managed_sourcing_actions').insert({request_id:r.id,created_by:user.id,action_type:'submit_payment_reference',payment_reference:transferLabel+' — '+ref,message:'تم إرسال الدفع عبر '+transferLabel+' — تاريخ التحويل: '+transferDate})
   setSaving(false);if(up)setError(up.message);else{setNotice('تم إرسال بيانات التحويل، والطلب الآن بانتظار مراجعة الإدارة.');await load()}
  }
  async function startProviderConversation(offer:Row){
