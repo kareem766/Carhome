@@ -30,13 +30,13 @@ export default function PublicBusinessServicesPage(){
   const premium=plans.filter(p=>String(p.placement_type).toLowerCase()==='premium')
   const standard=plans.filter(p=>String(p.placement_type).toLowerCase()!=='premium')
   return <main dir="rtl" className="min-h-screen bg-[#f4f7fb] text-slate-900">
-    <header className="border-b border-white/10 bg-[#071a31] text-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
+    <header className="relative overflow-hidden border-b border-amber-300/20 bg-[radial-gradient(ellipse_at_12%_0%,rgba(245,158,11,.16),transparent_34%),radial-gradient(ellipse_at_88%_0%,rgba(59,130,246,.24),transparent_42%),linear-gradient(115deg,#061426_0%,#0b2340_52%,#102f50_100%)] text-white shadow-[0_12px_35px_rgba(2,12,27,.28)]">
+      <div className="relative z-10 mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
         <a href="/" className="flex items-center gap-3" aria-label="My Car عربيتي - الرئيسية">
-          <img src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png" alt="My Car عربيتي" className="h-12 w-12 rounded-xl bg-white object-contain p-1"/>
+          <img src="https://bxmfykzckjoecvpoqlag.supabase.co/storage/v1/object/public/platform-assets/branding/logo-1792916619080.png" alt="My Car عربيتي" className="h-12 w-12 rounded-xl border border-amber-300/30 bg-[#102b47] object-contain p-1.5 shadow-[0_0_22px_rgba(245,158,11,.12)]"/>
           <span><strong className="block text-lg font-black"><span dir="ltr">My Car</span> عربيتي</strong><small className="text-xs text-blue-100">منصة السيارات للشركات والأساطيل في مصر</small></span>
         </a>
-        <a href="/contact" className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10">تواصل معنا</a>
+        <a href="/contact" className="rounded-xl border border-amber-300/40 bg-white/[0.06] px-5 py-2.5 text-sm font-extrabold text-amber-100 shadow-lg shadow-black/10 backdrop-blur transition hover:border-amber-200 hover:bg-amber-300/10">تواصل معنا</a>
       </div>
       <div className="border-t border-white/10 bg-[radial-gradient(ellipse_at_80%_0%,rgba(37,99,235,.38),transparent_45%),linear-gradient(120deg,#071a31,#123c68)]">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1.15fr_.85fr] lg:py-20">
