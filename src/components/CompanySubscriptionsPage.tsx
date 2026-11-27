@@ -95,7 +95,7 @@ export default function CompanySubscriptionsPage(){
  }
  async function submit(e:FormEvent){
   e.preventDefault();if(!supabase||!organizationId||!chosen||saving)return
-  const formData=new FormData(document.querySelector('form[data-company-subscription-payment]') as HTMLFormElement)
+  const formData=new FormData(e.currentTarget)
   const selectedTransferMethod=String(formData.get('payment_method')||method)
   const clean=reference.trim()
   if(checkoutMethod==='manual'&&(clean.length<3||clean.length>100)){showFieldError('payment_reference','أدخل رقم عملية تحويل صحيحًا.');return}
